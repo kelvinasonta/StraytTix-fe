@@ -2,11 +2,9 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/auth';
 import { AuthLayout } from '../../components/layout/AuthLayout';
-import { Button } from '../../components/ui/Button';
 import { getApiErrorMessage, extractThrottleSeconds } from '../../api/client';
-import { CheckCircle, AlertTriangle, AlertCircle, RefreshCw, Clock, ArrowRight } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, AlertCircle, RefreshCw, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { tokenStorage } from '../../utils/storage';
 
 const VERIFY_THROTTLE_EXPIRY_KEY = 'eventsos_verify_throttle_expiry';
 
@@ -61,7 +59,6 @@ export const VerifyEmail: React.FC = () => {
     navigate('/dashboard', { replace: true });
   }, [navigate]);
 
-  // Restore throttle timer on mount if exists
   useEffect(() => {
     const expiryStr = sessionStorage.getItem(VERIFY_THROTTLE_EXPIRY_KEY);
     if (expiryStr) {
@@ -74,15 +71,8 @@ export const VerifyEmail: React.FC = () => {
         sessionStorage.removeItem(VERIFY_THROTTLE_EXPIRY_KEY);
       }
     }
-
-    return () => {
-      if (redirectTimeoutRef.current) {
-        clearTimeout(redirectTimeoutRef.current);
-      }
-    };
   }, []);
 
-  // Countdown tick
   useEffect(() => {
     if (throttleSeconds > 0) {
       timerRef.current = setInterval(() => {
@@ -103,41 +93,20 @@ export const VerifyEmail: React.FC = () => {
   }, [throttleSeconds]);
 
   const performVerification = useCallback(async () => {
-    if (!token) {
-      setStatus('invalid');
-      setErrorMessage('The email verification token is missing.');
-      return;
-    }
+    if (!token) return;
 
-    const expiryStr = sessionStorage.getItem(VERIFY_THROTTLE_EXPIRY_KEY);
-    if (expiryStr && parseInt(expiryStr, 10) > Date.now()) {
-      setThrottleSeconds(Math.ceil((parseInt(expiryStr, 10) - Date.now()) / 1000));
-      setStatus('throttled');
-      return;
-    }
+    setStatus('verifying');
+    setErrorMessage('');
 
     try {
-      setStatus('verifying');
-      const res = await authApi.verifyEmail(token);
-      sessionStorage.removeItem(VERIFY_THROTTLE_EXPIRY_KEY);
-
-      // If backend returned session credentials, update local token storage
-      if (res.data?.token) {
-        tokenStorage.setToken(res.data.token, true);
-      }
-      if (res.data?.user) {
-        tokenStorage.setUser(res.data.user, true);
-      }
-
+      await authApi.verifyEmail(token);
       setStatus('success');
-
       try {
         await refreshUser();
       } catch {
-        // ignore background refresh failure
+        // ignore
       }
 
-      // Automatically redirect to console
       redirectTimeoutRef.current = setTimeout(() => {
         handleContinue();
       }, 1200);
@@ -159,7 +128,6 @@ export const VerifyEmail: React.FC = () => {
         } catch {
           // ignore
         }
-        // Automatically redirect to console
         redirectTimeoutRef.current = setTimeout(() => {
           handleContinue();
         }, 1200);
@@ -179,7 +147,6 @@ export const VerifyEmail: React.FC = () => {
       return;
     }
 
-    // Prevent duplicate firing in React StrictMode (development double-mount)
     if (hasRequestedTokenRef.current === token) {
       return;
     }
@@ -214,120 +181,140 @@ export const VerifyEmail: React.FC = () => {
 
   return (
     <AuthLayout
-      title="Verify email"
-      subtitle="Securing your eventsOs identity."
+      title="Email verification"
+      subtitle="Securing your Eventa account identity"
     >
       <div className="space-y-6 text-center">
         {status === 'verifying' && (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <RefreshCw className="w-12 h-12 text-brand-accent animate-spin" />
-            <h3 className="text-base font-bold text-zinc-900">Verifying your email...</h3>
-            <p className="text-zinc-500 text-xs font-semibold max-w-xs leading-relaxed">
-              We are communicating with the authentication server. This will take just a moment.
+          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
+            <RefreshCw className="w-8 h-8 text-[#E31B23] animate-spin" />
+            <h3 className="text-base font-bold text-zinc-950">Verifying your token...</h3>
+            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
+              Communicating with the security verification cluster.
             </p>
           </div>
         )}
 
         {status === 'success' && (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <div className="p-3 bg-emerald-50 border border-emerald-250 text-emerald-600 rounded-full">
-              <CheckCircle className="w-10 h-10" />
+          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
+            <div className="w-12 h-12 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl flex items-center justify-center">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-900">Email verified successfully!</h3>
-            <p className="text-zinc-500 text-xs font-semibold max-w-xs leading-relaxed">
-              Redirecting you to the console...
+            <h3 className="text-base font-bold text-zinc-950">Email verified successfully</h3>
+            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
+              Your account is now activated. Redirecting you to your console...
             </p>
-            <Button onClick={handleContinue} className="mt-4 inline-flex items-center gap-2">
-              Continue to Console <ArrowRight className="w-4 h-4" />
-            </Button>
+            <button
+              type="button"
+              onClick={handleContinue}
+              className="mt-2 w-full py-3 px-4 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            >
+              <span>Continue to Console</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         )}
 
         {status === 'already-verified' && (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <div className="p-3 bg-blue-50 border border-blue-200 text-blue-600 rounded-full">
-              <CheckCircle className="w-10 h-10" />
+          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
+            <div className="w-12 h-12 bg-blue-50 border border-blue-200 text-blue-600 rounded-2xl flex items-center justify-center">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-900">Email already verified</h3>
-            <p className="text-zinc-500 text-xs font-semibold max-w-xs leading-relaxed">
-              Redirecting you to the console...
+            <h3 className="text-base font-bold text-zinc-950">Email already verified</h3>
+            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
+              Your email was already confirmed previously.
             </p>
-            <Button onClick={handleContinue} className="mt-4 inline-flex items-center gap-2">
-              Continue to Console <ArrowRight className="w-4 h-4" />
-            </Button>
+            <button
+              type="button"
+              onClick={handleContinue}
+              className="mt-2 w-full py-3 px-4 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            >
+              <span>Go to Console</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         )}
 
         {status === 'expired' && (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <div className="p-3 bg-amber-50 border border-amber-200 text-amber-600 rounded-full">
-              <AlertTriangle className="w-10 h-10" />
+          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
+            <div className="w-12 h-12 bg-amber-50 border border-amber-200 text-amber-600 rounded-2xl flex items-center justify-center">
+              <AlertTriangle className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-900">Verification link expired</h3>
-            <p className="text-zinc-500 text-xs font-semibold max-w-xs leading-relaxed">
-              The verification token has expired. For security, these links are only active for a limited time.
+            <h3 className="text-base font-bold text-zinc-950">Verification link expired</h3>
+            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
+              The verification token has expired. Security tokens are only active for a limited time.
             </p>
-            <Button onClick={handleResend} isLoading={resending} className="mt-4">
-              Request New Verification Email
-            </Button>
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending}
+              className="mt-2 w-full py-3 px-4 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-50"
+            >
+              {resending && <Loader2 className="w-4 h-4 animate-spin" />}
+              <span>Request New Verification Email</span>
+            </button>
           </div>
         )}
 
         {status === 'invalid' && (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-full">
-              <AlertCircle className="w-10 h-10" />
+          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
+            <div className="w-12 h-12 bg-red-50 border border-red-200 text-[#E31B23] rounded-2xl flex items-center justify-center">
+              <AlertCircle className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-900">Invalid link</h3>
-            <p className="text-zinc-500 text-xs font-semibold max-w-xs leading-relaxed">
+            <h3 className="text-base font-bold text-zinc-950">Invalid link</h3>
+            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
               {errorMessage || 'The verification link provided is invalid or malformed.'}
             </p>
-            <Link to="/login" className="text-xs font-bold text-brand-accent hover:underline mt-4">
-              Back to Sign In
+            <Link
+              to="/login"
+              className="mt-2 text-xs font-bold text-[#E31B23] hover:underline"
+            >
+              Return to Sign In
             </Link>
           </div>
         )}
 
         {status === 'throttled' && (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <div className="p-3 bg-amber-50 border border-amber-200 text-amber-600 rounded-full">
-              <Clock className="w-10 h-10" />
+          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
+            <div className="w-12 h-12 bg-amber-50 border border-amber-200 text-amber-600 rounded-2xl flex items-center justify-center">
+              <Clock className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-900">Too many attempts</h3>
-            <p className="text-zinc-500 text-xs font-semibold max-w-xs leading-relaxed">
+            <h3 className="text-base font-bold text-zinc-950">Rate limit active</h3>
+            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
               Please wait{' '}
-              <span className="font-semibold text-zinc-900 font-mono">
+              <span className="font-bold text-zinc-900 font-mono">
                 {formatTime(throttleSeconds)}
               </span>{' '}
-              before trying again.
+              before verifying again.
             </p>
-            <Button
-              onClick={performVerification}
-              disabled={throttleSeconds > 0}
-              className="mt-4"
+            <Link
+              to="/login"
+              className="mt-2 text-xs font-bold text-[#E31B23] hover:underline"
             >
-              {throttleSeconds > 0 ? `Try again in ${formatTime(throttleSeconds)}` : 'Try again'}
-            </Button>
-            <Link to="/login" className="text-xs font-bold text-brand-accent hover:underline mt-2">
               Back to Sign In
             </Link>
           </div>
         )}
 
         {status === 'error' && (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-full">
-              <AlertCircle className="w-10 h-10" />
+          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
+            <div className="w-12 h-12 bg-red-50 border border-red-200 text-[#E31B23] rounded-2xl flex items-center justify-center">
+              <AlertCircle className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-900">Verification failed</h3>
-            <p className="text-zinc-500 text-xs font-semibold max-w-xs leading-relaxed">
-              {errorMessage || 'An error occurred during verification.'}
+            <h3 className="text-base font-bold text-zinc-950">Verification failed</h3>
+            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
+              {errorMessage || 'An error occurred during token verification.'}
             </p>
-            <div className="flex flex-col gap-2 w-full mt-4">
-              <Button onClick={handleResend} isLoading={resending} variant="outline">
-                Resend verification email
-              </Button>
-              <Link to="/login" className="text-xs font-bold text-brand-accent hover:underline mt-2">
+            <div className="flex flex-col gap-2 w-full mt-2">
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resending}
+                className="w-full py-3 px-4 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              >
+                {resending ? 'Sending...' : 'Resend verification email'}
+              </button>
+              <Link to="/login" className="text-xs font-bold text-[#E31B23] hover:underline pt-1">
                 Back to Sign In
               </Link>
             </div>

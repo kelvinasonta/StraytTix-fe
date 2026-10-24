@@ -99,5 +99,27 @@ export const organizerApi = {
   async requestVerification(organizerUuid: string, payload: RequestVerificationPayload): Promise<ApiResponse<OrganizerVerification>> {
     const { data } = await apiClient.post<ApiResponse<OrganizerVerification>>(`/organizers/${organizerUuid}/verification`, payload);
     return data;
+  },
+
+  // Settlement Bank Accounts & Resolution
+  async getBanks(): Promise<ApiResponse<Array<{ name: string; code: string; slug?: string }>>> {
+    const { data } = await apiClient.get<ApiResponse<Array<{ name: string; code: string; slug?: string }>>>('/banks');
+    return data;
+  },
+
+  async resolveBankAccount(payload: { account_number: string; bank_code: string }): Promise<ApiResponse<{ account_number: string; account_name: string; bank_code: string }>> {
+    const { data } = await apiClient.post<ApiResponse<{ account_number: string; account_name: string; bank_code: string }>>('/banks/resolve', payload);
+    return data;
+  },
+
+  async getBankAccount(organizerUuid: string): Promise<ApiResponse<{ bank_name: string; bank_code: string; account_number: string; account_name: string; is_default: boolean } | null>> {
+    const { data } = await apiClient.get<ApiResponse<{ bank_name: string; bank_code: string; account_number: string; account_name: string; is_default: boolean } | null>>(`/organizers/${organizerUuid}/bank-account`);
+    return data;
+  },
+
+  async saveBankAccount(organizerUuid: string, payload: { bank_name: string; bank_code: string; account_number: string; account_name: string }): Promise<ApiResponse<{ bank_name: string; bank_code: string; account_number: string; account_name: string; is_default: boolean }>> {
+    const { data } = await apiClient.post<ApiResponse<{ bank_name: string; bank_code: string; account_number: string; account_name: string; is_default: boolean }>>(`/organizers/${organizerUuid}/bank-account`, payload);
+    return data;
   }
 };
+

@@ -59,7 +59,7 @@ import {
 } from 'lucide-react';
 
 /* ---------------- Types ---------------- */
-type SettingsTab = 'profile' | 'scanner' | 'station' | 'security' | 'sessions' | 'credits' | 'audit' | 'preferences' | 'notifications' | 'developer' | 'danger';
+type SettingsTab = 'profile' | 'scanner' | 'station' | 'security' | 'sessions' | 'audit' | 'preferences' | 'notifications' | 'developer' | 'danger';
 
 export interface StaffScanHistoryItem {
   id: string;
@@ -312,33 +312,6 @@ export const Settings: React.FC = () => {
     };
   }, [activeTab]);
 
-  /* ---------------- 3. CREDITS STATES ---------------- */
-  const [creditsBalance, setCreditsBalance] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem('eventsos_organizer_credits');
-      return saved ? Number(saved) : 0;
-    } catch {
-      return 0;
-    }
-  });
-  const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>(() => {
-    try {
-      const saved = localStorage.getItem('eventsos_organizer_credit_txs');
-      if (saved && (saved.includes('tx-1') || saved.includes('Growth Pack Top-Up'))) {
-        localStorage.removeItem('eventsos_organizer_credit_txs');
-        return [];
-      }
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
-  const [selectedPack, setSelectedPack] = useState<'starter' | 'growth' | 'power' | 'custom'>('growth');
-  const [customCreditsAmount, setCustomCreditsAmount] = useState('250');
-  const [isProcessingTopUp, setIsProcessingTopUp] = useState(false);
-  const [autoRefill, setAutoRefill] = useState(false);
-
   /* ---------------- 4. AUDIT LOGS STATES ---------------- */
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => {
     try {
@@ -404,14 +377,6 @@ export const Settings: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('eventsos_organizer_sessions', JSON.stringify(sessions));
   }, [sessions]);
-
-  useEffect(() => {
-    localStorage.setItem('eventsos_organizer_credits', creditsBalance.toString());
-  }, [creditsBalance]);
-
-  useEffect(() => {
-    localStorage.setItem('eventsos_organizer_credit_txs', JSON.stringify(creditTransactions));
-  }, [creditTransactions]);
 
   useEffect(() => {
     localStorage.setItem('eventsos_organizer_audit_logs', JSON.stringify(auditLogs));
@@ -594,77 +559,6 @@ export const Settings: React.FC = () => {
     });
   };
 
-  /* ---------------- App Credits Top-Up Handler ---------------- */
-  const handleCompleteTopUp = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsProcessingTopUp(true);
-
-    let creditsToAdd = 500;
-    let priceNgn = 22500;
-
-    if (selectedPack === 'starter') {
-      creditsToAdd = 100;
-      priceNgn = 5000;
-    } else if (selectedPack === 'power') {
-      creditsToAdd = 1500;
-      priceNgn = 60000;
-    } else if (selectedPack === 'custom') {
-      creditsToAdd = Math.max(50, Number(customCreditsAmount) || 50);
-      priceNgn = creditsToAdd * 50;
-    }
-
-    setTimeout(() => {
-      setIsProcessingTopUp(false);
-      const newTotal = creditsBalance + creditsToAdd;
-      setCreditsBalance(newTotal);
-
-      const newTx: CreditTransaction = {
-        id: `tx-${Date.now()}`,
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        description: `Credits Purchase (${creditsToAdd} Credits - ₦${priceNgn.toLocaleString()})`,
-        type: 'credit',
-        amount: creditsToAdd,
-        balanceAfter: newTotal,
-        reference: `PS_${Math.floor(100000 + Math.random() * 900000)}`
-      };
-
-      setCreditTransactions(prev => [newTx, ...prev]);
-      setIsTopUpModalOpen(false);
-      showNotification(`Successfully topped up ${creditsToAdd} Credits! New balance: ${newTotal} Credits.`, 'success');
-      appendAuditLog(
-        `App Credits Top-Up (+${creditsToAdd})`,
-        'credits',
-        `Purchased ${creditsToAdd} credits for ₦${priceNgn.toLocaleString()}.`
-      );
-    }, 1200);
-  };
-
-  /* ---------------- Use In-App Credit Feature Simulator ---------------- */
-  const handleSimulateFeatureUse = (featureName: string, cost: number) => {
-    if (creditsBalance < cost) {
-      showNotification(`Insufficient credits! You need ${cost} credits, but have ${creditsBalance}. Please top up.`, 'error');
-      setIsTopUpModalOpen(true);
-      return;
-    }
-
-    const newTotal = creditsBalance - cost;
-    setCreditsBalance(newTotal);
-
-    const newTx: CreditTransaction = {
-      id: `tx-${Date.now()}`,
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      description: `In-App Feature: ${featureName}`,
-      type: 'debit',
-      amount: cost,
-      balanceAfter: newTotal,
-      reference: `ACT_${Math.floor(100000 + Math.random() * 900000)}`
-    };
-
-    setCreditTransactions(prev => [newTx, ...prev]);
-    showNotification(`Activated "${featureName}" (-${cost} Credits). Remaining: ${newTotal} Credits.`, 'success');
-    appendAuditLog(`In-App Credit Debit (-${cost})`, 'credits', `Used ${cost} credits for ${featureName}.`);
-  };
-
   /* ---------------- Audit Log Export Handler ---------------- */
   const handleExportAuditLogs = () => {
     const csvContent =
@@ -768,7 +662,6 @@ export const Settings: React.FC = () => {
       exportedAt: new Date().toISOString(),
       organizer: organizer || { name: 'Your Organization' },
       user: { id: user?.id, email: user?.email, name: `${user?.firstName} ${user?.lastName}` },
-      credits: { balance: creditsBalance, transactions: creditTransactions },
       sessions: sessions,
       auditLogs: auditLogs
     };
@@ -835,11 +728,11 @@ export const Settings: React.FC = () => {
               <p className="text-zinc-500 text-xs font-medium mt-1">
                 {role === 'staff'
                   ? 'Configure gate terminal preferences, barcode scanner audio/vibration feedback, security credentials, and shift notifications.'
-                  : 'Configure account authentication, active login sessions, audit trails, and manage in-app utility credits.'}
+                  : 'Configure account authentication, active login sessions, security credentials, and audit trails.'}
               </p>
             </div>
 
-            {/* Quick Pill in Header */}
+            {/* Quick Actions in Header */}
             <div className="flex items-center gap-3 self-start sm:self-auto">
               {role === 'staff' ? (
                 <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-2xs">
@@ -857,33 +750,18 @@ export const Settings: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl px-4 py-2 flex items-center gap-3 shadow-2xs">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
-                    <Coins className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-black uppercase tracking-wider text-amber-800">
-                      App Credits
-                    </div>
-                    <div className="text-sm font-black text-zinc-950">
-                      {creditsBalance.toLocaleString()} <span className="text-[11px] font-bold text-zinc-500">Credits</span>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsTopUpModalOpen(true)}
-                    className="ml-1 p-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition-all shadow-xs cursor-pointer"
-                    title="Top-up credits"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
+                <div className="flex items-center gap-2.5">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-zinc-50 border border-zinc-200 text-zinc-700 shadow-2xs">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span>Workspace Active</span>
+                  </span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pt-6 no-scrollbar border-b border-zinc-100 -mb-5">
+          <div className="flex items-center gap-1.5 sm:gap-2 pt-6 overflow-x-auto no-scrollbar">
             {(role === 'staff'
               ? [
                   { id: 'profile', label: 'User Profile', icon: User },
@@ -898,7 +776,6 @@ export const Settings: React.FC = () => {
                   { id: 'profile', label: 'User Profile', icon: User },
                   { id: 'security', label: 'Security & Password', icon: KeyRound },
                   { id: 'sessions', label: 'Login Sessions', icon: Smartphone, count: sessions.length },
-                  { id: 'credits', label: 'App Credits & Add-ons', icon: Coins, highlight: true },
                   { id: 'audit', label: 'Audit Logs', icon: History },
                   { id: 'preferences', label: 'Preferences & Regional', icon: Globe },
                   { id: 'notifications', label: 'Notifications', icon: Bell },
@@ -912,23 +789,20 @@ export const Settings: React.FC = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as SettingsTab)}
-                  className={`flex items-center gap-2 px-3.5 py-2.5 rounded-t-xl text-xs font-bold transition-all border-b-2 whitespace-nowrap cursor-pointer ${
+                  className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
                     isActive
-                      ? 'border-[#E31B23] text-[#E31B23] bg-red-50/40 font-black'
-                      : 'border-transparent text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'
+                      ? 'bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950/10'
+                      : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100/80 bg-zinc-50/60'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#E31B23]' : 'text-zinc-500'}`} />
                   <span>{tab.label}</span>
                   {tab.count !== undefined && (
-                    <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
-                      isActive ? 'bg-[#E31B23] text-white' : 'bg-zinc-100 text-zinc-600'
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                      isActive ? 'bg-[#E31B23] text-white' : 'bg-zinc-200/80 text-zinc-700'
                     }`}>
                       {tab.count}
                     </span>
-                  )}
-                  {tab.highlight && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                   )}
                 </button>
               );
@@ -1863,238 +1737,6 @@ export const Settings: React.FC = () => {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 3: APP CREDITS & IN-APP STUFFS */}
-        {/* ========================================================================= */}
-        {activeTab === 'credits' && (
-          <div className="space-y-8 animate-fadeIn">
-            {/* Credits Hero Banner */}
-            <div className="bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
-              {/* Background Glow */}
-              <div className="absolute top-0 right-0 -mt-12 -mr-12 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute bottom-0 left-1/3 -mb-16 w-60 h-60 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
-
-              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="space-y-2">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-black uppercase tracking-wider border border-amber-500/30">
-                    <Sparkles className="w-3 h-3 text-amber-400" /> Eventa Organizer In-App Credits Wallet
-                  </div>
-                  <div className="text-3xl sm:text-4xl font-black tracking-tight flex items-baseline gap-2">
-                    {creditsBalance.toLocaleString()}
-                    <span className="text-sm sm:text-base font-semibold text-zinc-400">Credits Available</span>
-                  </div>
-                  <p className="text-xs text-zinc-400 font-medium max-w-lg leading-relaxed">
-                    Credits power high-conversion in-app utilities including attendee SMS/WhatsApp campaigns, AI event copywriting, discover spotlight boosts, and mobile door scanner passes.
-                  </p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <Button
-                    type="button"
-                    onClick={() => setIsTopUpModalOpen(true)}
-                    className="bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black shadow-lg shadow-amber-500/20 py-3"
-                  >
-                    <Plus className="w-4 h-4 mr-1.5" />
-                    Top-Up Credits
-                  </Button>
-                </div>
-              </div>
-
-              {/* Sub-strip with Auto-Refill */}
-              <div className="relative z-10 mt-6 pt-5 border-t border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2 text-zinc-300 font-medium">
-                  <Coins className="w-4 h-4 text-amber-400" />
-                  <span>Estimated Value: <strong>₦{(creditsBalance * 50).toLocaleString()}</strong></span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-zinc-400 text-[11px]">Auto-Refill when balance &lt; 50:</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAutoRefill(!autoRefill);
-                      showNotification(`Auto-refill ${!autoRefill ? 'activated' : 'disabled'}`, 'info');
-                    }}
-                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                      autoRefill ? 'bg-amber-500' : 'bg-zinc-700'
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out ${
-                        autoRefill ? 'translate-x-4' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* In-App Stuffs Catalog */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-black text-zinc-950 tracking-tight">What Credits Unlock</h3>
-                  <p className="text-xs text-zinc-500 font-medium">On-demand utilities available inside your organizer workspace.</p>
-                </div>
-                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-                  Instant Dispatch
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[
-                  {
-                    title: 'SMS & WhatsApp Attendee Broadcast',
-                    description: 'Instant SMS ticket confirmation or urgent schedule/gate changes dispatched directly to attendee mobile phones.',
-                    cost: 1,
-                    unit: 'credit / SMS',
-                    icon: MessageSquare,
-                    color: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-                    actionLabel: 'Dispatch Test SMS',
-                    actionCost: 1
-                  },
-                  {
-                    title: 'AI Event Copywriter & SEO Generator',
-                    description: 'Generate comprehensive, persuasive event descriptions, agenda schedules, and targeted marketing copy tailored to your category.',
-                    cost: 5,
-                    unit: 'credits / run',
-                    icon: Sparkles,
-                    color: 'text-purple-600 bg-purple-50 border-purple-100',
-                    actionLabel: 'Run AI Writer',
-                    actionCost: 5
-                  },
-                  {
-                    title: 'Featured Event Spotlight Boost',
-                    description: 'Pin your event to the top of public discovery feeds and category explore pages for 7 full days to amplify conversions.',
-                    cost: 50,
-                    unit: 'credits / 7 days',
-                    icon: Rocket,
-                    color: 'text-red-600 bg-red-50 border-red-100',
-                    actionLabel: 'Boost Event',
-                    actionCost: 50
-                  },
-                  {
-                    title: 'Dedicated QR Scanner Terminal Pass',
-                    description: 'Provision extra entrance gate scanning licenses for bouncers and usher mobile phones without granting dashboard access.',
-                    cost: 25,
-                    unit: 'credits / scanner',
-                    icon: QrCode,
-                    color: 'text-blue-600 bg-blue-50 border-blue-100',
-                    actionLabel: 'Provision Pass',
-                    actionCost: 25
-                  },
-                  {
-                    title: 'Custom White-Label Sender Domain',
-                    description: 'Send order confirmations, tickets, and receipts from your custom domain (e.g. tickets@yourcompany.com) instead of Eventa.',
-                    cost: 100,
-                    unit: 'credits / mo',
-                    icon: Mail,
-                    color: 'text-amber-600 bg-amber-50 border-amber-100',
-                    actionLabel: 'Subscribe Domain',
-                    actionCost: 100
-                  },
-                  {
-                    title: 'Offline Box Office POS Sync',
-                    description: 'Enable offline door ticket cash sales mode on tablets with automatic cloud ledger reconciliation upon reconnecting.',
-                    cost: 15,
-                    unit: 'credits / device',
-                    icon: Zap,
-                    color: 'text-teal-600 bg-teal-50 border-teal-100',
-                    actionLabel: 'Enable POS License',
-                    actionCost: 15
-                  }
-                ].map((item, idx) => {
-                  const Icon = item.icon;
-                  return (
-                    <div
-                      key={idx}
-                      className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-2xs hover:shadow-sm transition-all flex flex-col justify-between gap-4"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${item.color}`}>
-                            <Icon className="w-4 h-4" />
-                          </div>
-                          <span className="px-2 py-0.5 rounded-md text-[11px] font-black bg-zinc-100 text-zinc-800">
-                            {item.cost} {item.unit}
-                          </span>
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-zinc-950">{item.title}</h4>
-                          <p className="text-[11px] text-zinc-500 font-medium mt-1 leading-relaxed">{item.description}</p>
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t border-zinc-100">
-                        <button
-                          type="button"
-                          onClick={() => handleSimulateFeatureUse(item.title, item.actionCost)}
-                          className="w-full py-2 px-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 text-zinc-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                        >
-                          <span>{item.actionLabel}</span>
-                          <span className="text-[10px] text-zinc-400 font-semibold">({item.actionCost} credits)</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Credit Transaction Ledger */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
-                <div>
-                  <h3 className="text-base font-black text-zinc-950 tracking-tight">Credit Ledger & Transaction History</h3>
-                  <p className="text-xs text-zinc-500 font-medium">Record of all credit purchases, automated deductions, and feature usage.</p>
-                </div>
-                <span className="text-xs font-bold text-zinc-400 font-mono">
-                  {creditTransactions.length} records
-                </span>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-zinc-150 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-                      <th className="pb-3 font-semibold">Date</th>
-                      <th className="pb-3 font-semibold">Description</th>
-                      <th className="pb-3 font-semibold">Reference</th>
-                      <th className="pb-3 font-semibold text-right">Amount</th>
-                      <th className="pb-3 font-semibold text-right">Balance</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100">
-                    {creditTransactions.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="py-12 text-center text-zinc-500 font-medium">
-                          No credit transactions yet. Credit top-ups and usage records will appear here.
-                        </td>
-                      </tr>
-                    ) : (
-                      creditTransactions.map((tx) => (
-                        <tr key={tx.id} className="hover:bg-zinc-50/60 transition-colors">
-                          <td className="py-3.5 text-zinc-500 font-medium whitespace-nowrap">{tx.date}</td>
-                          <td className="py-3.5 text-zinc-900 font-bold">{tx.description}</td>
-                          <td className="py-3.5 font-mono text-[11px] text-zinc-400">{tx.reference}</td>
-                          <td className={`py-3.5 font-black text-right whitespace-nowrap ${
-                            tx.type === 'credit' ? 'text-emerald-600' : 'text-zinc-900'
-                          }`}>
-                            {tx.type === 'credit' ? `+${tx.amount}` : `-${tx.amount}`} Credits
-                          </td>
-                          <td className="py-3.5 font-bold text-zinc-700 text-right whitespace-nowrap">
-                            {tx.balanceAfter.toLocaleString()}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
         {/* TAB 4: AUDIT LOGS / STAFF SCAN HISTORY */}
         {/* ========================================================================= */}
         {activeTab === 'audit' && (
@@ -2767,137 +2409,6 @@ export const Settings: React.FC = () => {
             </div>
           </div>
         )}
-
-        {/* ========================================================================= */}
-        {/* MODAL: TOP-UP APP CREDITS */}
-        {/* ========================================================================= */}
-        <Modal
-          isOpen={isTopUpModalOpen}
-          onClose={() => setIsTopUpModalOpen(false)}
-          title="Top-Up App Credits"
-          size="lg"
-        >
-          <form onSubmit={handleCompleteTopUp} className="space-y-6">
-            <p className="text-xs text-zinc-600 font-medium leading-relaxed">
-              Credits are instantly issued to your organizer workspace. Select a curated growth pack or choose a custom amount.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-              {[
-                {
-                  id: 'starter',
-                  name: 'Starter Pack',
-                  credits: 100,
-                  price: '₦5,000',
-                  badge: null
-                },
-                {
-                  id: 'growth',
-                  name: 'Growth Pack',
-                  credits: 500,
-                  price: '₦22,500',
-                  badge: '10% Bonus'
-                },
-                {
-                  id: 'power',
-                  name: 'Pro Accelerator',
-                  credits: 1500,
-                  price: '₦60,000',
-                  badge: '20% Bonus'
-                }
-              ].map(pack => (
-                <div
-                  key={pack.id}
-                  onClick={() => setSelectedPack(pack.id as any)}
-                  className={`p-4 rounded-2xl border-2 transition-all cursor-pointer relative flex flex-col justify-between gap-3 ${
-                    selectedPack === pack.id
-                      ? 'border-[#E31B23] bg-red-50/20 shadow-xs'
-                      : 'border-zinc-200/80 hover:border-zinc-300 bg-white'
-                  }`}
-                >
-                  {pack.badge && (
-                    <span className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500 text-white shadow-2xs">
-                      {pack.badge}
-                    </span>
-                  )}
-                  <div>
-                    <h4 className="text-xs font-bold text-zinc-800">{pack.name}</h4>
-                    <div className="text-xl font-black text-zinc-950 mt-1">
-                      {pack.credits} <span className="text-xs font-semibold text-zinc-500">Credits</span>
-                    </div>
-                  </div>
-                  <div className="text-xs font-black text-[#E31B23] pt-2 border-t border-zinc-100">
-                    {pack.price}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Custom Amount Option */}
-            <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 space-y-3">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="pack"
-                  checked={selectedPack === 'custom'}
-                  onChange={() => setSelectedPack('custom')}
-                  className="w-4 h-4 text-[#E31B23] accent-[#E31B23]"
-                />
-                <span className="text-xs font-bold text-zinc-900">Custom Credits Amount (₦50 / credit)</span>
-              </label>
-
-              {selectedPack === 'custom' && (
-                <div className="flex items-center gap-3 pt-1">
-                  <div className="w-36">
-                    <Input
-                      label=""
-                      type="number"
-                      min="50"
-                      step="50"
-                      value={customCreditsAmount}
-                      onChange={(e) => setCustomCreditsAmount(e.target.value)}
-                      placeholder="e.g. 300"
-                    />
-                  </div>
-                  <span className="text-xs font-bold text-zinc-700">
-                    Total: ₦{((Number(customCreditsAmount) || 0) * 50).toLocaleString()}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Payment Method simulation */}
-            <div className="p-4 rounded-2xl bg-zinc-100/70 border border-zinc-200/70 flex items-center justify-between text-xs font-medium text-zinc-700">
-              <div className="flex items-center gap-2.5">
-                <CreditCard className="w-4 h-4 text-zinc-500" />
-                <span>Pay securely via <strong>Paystack / Flutterwave Gateway</strong></span>
-              </div>
-              <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                Instant Credit
-              </span>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-zinc-100">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsTopUpModalOpen(false)}
-                disabled={isProcessingTopUp}
-                className="text-xs"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                isLoading={isProcessingTopUp}
-                className="bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs"
-              >
-                <Plus className="w-3.5 h-3.5 mr-1" />
-                Pay & Top-Up Now
-              </Button>
-            </div>
-          </form>
-        </Modal>
 
         {/* ========================================================================= */}
         {/* MODAL: 2FA SETUP MODAL */}

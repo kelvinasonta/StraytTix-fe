@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Logo } from '../ui/Logo';
 import { ArrowRight, Check } from 'lucide-react';
+import { useSettings } from '../../context/SettingsContext';
 
 export const Footer: React.FC = () => {
+  const { settings } = useSettings();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
@@ -14,6 +16,8 @@ export const Footer: React.FC = () => {
       setEmail('');
     }
   };
+
+  const sitename = settings?.sitename || 'Eventra';
 
   return (
     <footer className="bg-white border-t border-[#E5E7EB] pt-16 pb-12 px-6">
@@ -46,6 +50,7 @@ export const Footer: React.FC = () => {
             <li><Link to="/discover" className="hover:text-[#E31B23] transition-colors">Discover Events</Link></li>
             <li><Link to="/how-it-works" className="hover:text-[#E31B23] transition-colors">How Tix Works</Link></li>
             <li><Link to="/pricing" className="hover:text-[#E31B23] transition-colors">Pricing & Fees</Link></li>
+            <li><Link to="/download" className="hover:text-[#E31B23] transition-colors">Download Mobile App</Link></li>
             <li><Link to="/blog" className="hover:text-[#E31B23] transition-colors">Blog & Guides</Link></li>
             <li><Link to="/api-docs" className="hover:text-[#E31B23] transition-colors flex items-center gap-1.5"><span>Developer API</span><span className="text-[10px] bg-red-50 text-[#E31B23] font-bold px-1.5 py-0.5 rounded">v1</span></Link></li>
           </ul>
@@ -96,7 +101,7 @@ export const Footer: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-400 gap-4">
-        <span>&copy; {new Date().getFullYear()} eventsOs Technologies Inc. All rights reserved.</span>
+        <span>&copy; {new Date().getFullYear()} {sitename} Technologies Inc. All rights reserved.</span>
         <div className="flex flex-wrap items-center gap-5 text-xs">
           <Link to="/how-it-works" className="hover:text-zinc-600">How It Works</Link>
           <Link to="/pricing" className="hover:text-zinc-600">Pricing</Link>

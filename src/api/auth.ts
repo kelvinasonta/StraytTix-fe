@@ -152,7 +152,7 @@ export const authApi = {
     return data;
   },
 
-  async updateProfile(payload: { first_name: string; last_name: string; phone?: string; timezone?: string }): Promise<ApiResponse<User>> {
+  async updateProfile(payload: { first_name?: string; last_name?: string; phone?: string; timezone?: string; avatar?: string }): Promise<ApiResponse<User>> {
     const body = {
       ...payload,
       timezone: payload.timezone ? normalizeTimezone(payload.timezone) : undefined,

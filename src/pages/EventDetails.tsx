@@ -47,7 +47,7 @@ import { formatCurrency, formatEventDateTime } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { CheckoutModal } from '../components/checkout/CheckoutModal';
-import { isEventFavorited, toggleFavoriteEvent } from '../utils/favorites';
+import { isEventFavorited, toggleFavoriteEvent, FAVORITES_UPDATED_EVENT } from '../utils/favorites';
 import { favoritesApi } from '../api/favorites';
 import HeroHeader from '../components/events/HeroHeader';
 import {
@@ -113,6 +113,27 @@ export const EventDetails: React.FC = () => {
     } else {
       setFavorited(false);
     }
+  }, [event?.id, isAuthenticated, user?.id]);
+
+  // Hydrate favorites from backend if user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      favoritesApi.getFavoriteIds().catch(() => {});
+    }
+  }, [isAuthenticated, user?.id]);
+
+  useEffect(() => {
+    const handleFavoritesUpdated = () => {
+      if (event?.id && isAuthenticated && user?.id) {
+        setFavorited(isEventFavorited(event.id, user.id));
+      } else {
+        setFavorited(false);
+      }
+    };
+    window.addEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesUpdated);
+    return () => {
+      window.removeEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesUpdated);
+    };
   }, [event?.id, isAuthenticated, user?.id]);
 
   const handleToggleFavorite = async () => {
@@ -298,6 +319,7 @@ export const EventDetails: React.FC = () => {
       return;
     }
 
+    let ticketsToCheckout = selectedTickets;
     if (getSelectedCount() === 0) {
       if (tickets.length === 0) {
         showNotification('No tickets available for this event.', 'warning');
@@ -305,9 +327,18 @@ export const EventDetails: React.FC = () => {
       }
       // Auto-select 1 ticket of first tier
       const firstTicketId = tickets[0].id!;
-      setSelectedTickets({ [firstTicketId]: 1 });
+      ticketsToCheckout = { [firstTicketId]: 1 };
+      setSelectedTickets(ticketsToCheckout);
     }
-    setCheckoutOpen(true);
+    
+    if (event) {
+      navigate(`/events/${event.slug || event.id}/checkout`, {
+        state: {
+          event,
+          selectedTickets: ticketsToCheckout,
+        },
+      });
+    }
   };
 
   const handleCopyLink = () => {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { NotificationProvider } from './context/NotificationContext';
+import { SettingsProvider } from './context/SettingsContext';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { GuestRoute } from './routes/GuestRoute';
@@ -21,6 +22,7 @@ import { Report } from './pages/Report';
 import { EventDetails } from './pages/EventDetails';
 import { EventTickets } from './pages/EventTickets';
 import { OrganizerProfile } from './pages/OrganizerProfile';
+import { DownloadApp } from './pages/DownloadApp';
 
 // Auth pages
 import { Login } from './pages/auth/Login';
@@ -51,6 +53,7 @@ import { TeamMembers as OrganizerTeamMembers } from './pages/organizer/TeamMembe
 import { EventManage as OrganizerEventManage } from './pages/organizer/EventManage';
 
 import { PaymentCallback } from './pages/checkout/PaymentCallback';
+import { CheckoutPage } from './pages/checkout/CheckoutPage';
 import { NotFound } from './pages/NotFound';
 import { ScrollToTop } from './components/layout/ScrollToTop';
 
@@ -62,8 +65,9 @@ const OrganizerEditRedirect: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <NotificationProvider>
-      <AuthProvider>
-        <BrowserRouter>
+      <SettingsProvider>
+        <AuthProvider>
+          <BrowserRouter>
           <ScrollToTop />
           <Routes>
             {/* Public Pages */}
@@ -78,9 +82,14 @@ export const App: React.FC = () => {
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/api-docs" element={<ApiDocs />} />
             <Route path="/docs" element={<ApiDocs />} />
+            <Route path="/download" element={<DownloadApp />} />
+            <Route path="/app" element={<DownloadApp />} />
             <Route path="/report" element={<Report />} />
             <Route path="/events/:slug" element={<EventDetails />} />
             <Route path="/events/:slug/tickets" element={<EventTickets />} />
+            <Route path="/events/:slug/checkout" element={<CheckoutPage />} />
+            <Route path="/checkout/:slug" element={<CheckoutPage />} />
+            <Route path="/checkout/callback" element={<PaymentCallback />} />
             <Route path="/events/:slug/embed" element={<EventDetails />} />
             <Route path="/embed/events/:slug" element={<EventDetails />} />
             <Route path="/organizers/:slug" element={<OrganizerProfile />} />
@@ -291,7 +300,8 @@ export const App: React.FC = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </AuthProvider>
+        </AuthProvider>
+      </SettingsProvider>
     </NotificationProvider>
   );
 };

@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authApi } from '../../api/auth';
 import { AuthLayout } from '../../components/layout/AuthLayout';
-import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
-import { Mail, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Mail, ArrowLeft, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import { getApiErrorMessage } from '../../api/client';
 
 export const ForgotPassword: React.FC = () => {
@@ -12,7 +10,6 @@ export const ForgotPassword: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [emailBlurred, setEmailBlurred] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,12 +31,11 @@ export const ForgotPassword: React.FC = () => {
       await authApi.forgotPassword(email);
       setIsSubmitted(true);
     } catch (err: any) {
-      // If it's a 429 Rate Limit error, display the countdown/error to the user
       if (err.response?.status === 429) {
         const errorMsg = getApiErrorMessage(err);
         setFormError(errorMsg);
       } else {
-        // Security fallback: Prevent account enumeration for non-429 errors
+        // Security fallback: Prevent account enumeration
         setIsSubmitted(true);
       }
     } finally {
@@ -47,34 +43,27 @@ export const ForgotPassword: React.FC = () => {
     }
   };
 
-  const getEmailError = () => {
-    if (!emailBlurred) return undefined;
-    if (!email) return 'Email is required.';
-    if (!/\S+@\S+\.\S+/.test(email)) return 'Please enter a valid email address.';
-    return undefined;
-  };
-
   if (isSubmitted) {
     return (
       <AuthLayout
-        title="Check your email"
-        subtitle="Password reset instructions are on the way."
+        title="Check your inbox"
+        subtitle="Password reset instructions are on the way"
       >
-        <div className="space-y-6 text-center">
-          <div className="flex flex-col items-center gap-4 py-6">
-            <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-full animate-bounce">
-              <Mail className="w-10 h-10" />
+        <div className="space-y-6">
+          <div className="p-6 bg-zinc-50 border border-zinc-200 rounded-2xl text-center space-y-3">
+            <div className="w-12 h-12 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto">
+              <Mail className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-900">Reset instructions sent</h3>
-            <p className="text-zinc-500 text-xs font-semibold max-w-sm leading-relaxed">
-              If an account exists for <strong className="text-zinc-950">{email}</strong>, we've sent password reset instructions.
+            <h3 className="text-base font-bold text-zinc-950">Instructions dispatched</h3>
+            <p className="text-xs text-zinc-600 leading-relaxed font-normal">
+              If an account exists for <strong className="text-zinc-950 font-semibold">{email}</strong>, we have sent a secure password reset link. Please check your spam folder if it doesn't appear in 2 minutes.
             </p>
           </div>
 
-          <div className="border-t border-zinc-150 pt-4 mt-6">
+          <div className="pt-2">
             <Link
               to="/login"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-accent hover:underline"
+              className="w-full py-3 px-4 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
             >
               <ArrowLeft className="w-4 h-4" /> Return to Sign In
             </Link>
@@ -86,40 +75,48 @@ export const ForgotPassword: React.FC = () => {
 
   return (
     <AuthLayout
-      title="Forgot password"
-      subtitle="Enter your email address and we'll send you recovery instructions."
+      title="Reset your password"
+      subtitle="Enter the email associated with your account and we will send you a reset link"
     >
-      <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {formError && (
-          <div className="p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl text-xs flex items-center gap-2.5" role="alert">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600" />
+          <div className="p-3.5 bg-red-50 border border-red-200 text-red-900 rounded-xl text-xs flex items-start gap-2.5" role="alert">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#E31B23]" />
             <span className="font-semibold">{formError}</span>
           </div>
         )}
 
-        <Input
-          label="Email Address"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onBlur={() => setEmailBlurred(true)}
-          error={getEmailError()}
-          placeholder="name@example.com"
-          required
-          disabled={isLoading}
-          autoComplete="email"
-        />
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold text-zinc-800">
+            Email address
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="name@example.com"
+            required
+            autoComplete="email"
+            disabled={isLoading}
+            className="w-full px-4 py-3 bg-white border border-zinc-200 hover:border-zinc-300 rounded-xl text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all font-medium"
+          />
+        </div>
 
-        <Button type="submit" isLoading={isLoading}>
-          Send Reset Instructions
-        </Button>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full py-3.5 px-5 bg-zinc-950 hover:bg-zinc-800 text-white text-sm font-bold rounded-xl transition-all shadow-xs hover:shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
+        >
+          {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+          <span>{isLoading ? 'Sending reset link...' : 'Send reset link'}</span>
+        </button>
 
         <div className="text-center pt-2">
           <Link
             to="/login"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-accent hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-950 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to Sign In
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to sign in
           </Link>
         </div>
       </form>

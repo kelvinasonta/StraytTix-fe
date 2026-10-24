@@ -691,3 +691,14 @@ export interface FavoriteToggleResponse {
   eventId?: string;
 }
 
+export interface AppSettings {
+  sitename: string;
+  site_tagline?: string | null;
+  favicon?: string | null;
+  logo?: string | null;
+  maintenance_message?: string | null;
+  support_email?: string | null;
+  timezone?: string | null;
+  currency_id?: string | number | null;
+}
+

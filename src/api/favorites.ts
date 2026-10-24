@@ -14,20 +14,20 @@ export interface GetFavoritesParams {
 }
 
 /**
- * Helper to update the client-side memory cache for favorites.
+ * Helper to update the client-side local cache for favorites.
  */
-const updateLocalFavoriteCache = (eventId: string, shouldFavorite: boolean, _userId?: string) => {
-  const current = isEventFavorited(eventId);
+const updateLocalFavoriteCache = (eventId: string, shouldFavorite: boolean, userId?: string) => {
+  const current = isEventFavorited(eventId, userId);
   if (shouldFavorite !== current) {
-    toggleFavoriteEvent(eventId);
+    toggleFavoriteEvent(eventId, userId);
   }
 };
 
 /**
  * Helper to replace local favorites ID cache with server-verified IDs.
  */
-const setLocalFavoriteCache = (eventIds: string[], _userId?: string) => {
-  setFavoriteEventIds(Array.from(new Set(eventIds)));
+const setLocalFavoriteCache = (eventIds: string[], userId?: string) => {
+  setFavoriteEventIds(Array.from(new Set(eventIds)), userId);
 };
 
 /**

@@ -5,7 +5,7 @@ import type { Event } from '../../types/api';
 import { formatCurrency, formatDate } from '../../utils/format';
 import { useNotification } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
-import { isEventFavorited, toggleFavoriteEvent } from '../../utils/favorites';
+import { isEventFavorited, toggleFavoriteEvent, FAVORITES_UPDATED_EVENT } from '../../utils/favorites';
 import { favoritesApi } from '../../api/favorites';
 import { getApiErrorMessage } from '../../api/client';
 
@@ -47,6 +47,23 @@ export const EventCard: React.FC<EventCardProps> = ({
     }
   }, [isFavorited, isAuthenticated, user?.id, event.id]);
 
+  // Synchronize when any other component toggles favorites in storage
+  useEffect(() => {
+    if (typeof isFavorited === 'boolean') return;
+    const handleFavoritesUpdated = () => {
+      if (isAuthenticated && user?.id) {
+        setFav(isEventFavorited(event.id, user.id));
+      } else {
+        setFav(false);
+      }
+    };
+
+    window.addEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesUpdated);
+    return () => {
+      window.removeEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesUpdated);
+    };
+  }, [isFavorited, isAuthenticated, user?.id, event.id]);
+
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -68,8 +85,6 @@ export const EventCard: React.FC<EventCardProps> = ({
         await favoritesApi.removeFavorite(event.id);
       }
 
-      toggleFavoriteEvent(event.id, user?.id);
-
       if (onFavoriteToggle) {
         onFavoriteToggle(event.id, nextFav);
       }
@@ -81,6 +96,7 @@ export const EventCard: React.FC<EventCardProps> = ({
     } catch (err: any) {
       // Revert optimistic state and notify user with real API error message
       setFav(prevFav);
+      toggleFavoriteEvent(event.id, user?.id);
       showNotification(
         getApiErrorMessage(err) || 'Failed to update favorites: Error reaching API.',
         'error'

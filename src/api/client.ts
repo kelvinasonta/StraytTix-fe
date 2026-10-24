@@ -25,7 +25,12 @@ const isPublicAuthRoute = (url?: string): boolean => {
     '/auth/invitations/accept',
     '/invitations/accept',
     '/auth/invitations/verify',
-    '/invitations/verify'
+    '/invitations/verify',
+    '/explore/events',
+    '/events',
+    '/payments/verify',
+    '/orders',
+    '/app/settings'
   ];
   return publicRoutes.some((route) => url.includes(route));
 };
@@ -82,11 +87,22 @@ apiClient.interceptors.response.use(
           }
         } catch (refreshErr) {
           tokenStorage.clearAll();
-          if (
-            !window.location.pathname.startsWith('/login') &&
-            !window.location.pathname.startsWith('/verify-email') &&
-            !window.location.pathname.startsWith('/invitations')
-          ) {
+          // Never force redirect to login if the user is in public guest flows (checkout, event discovery, etc.)
+          const pathname = window.location.pathname;
+          const isGuestFlow =
+            pathname.startsWith('/login') ||
+            pathname.startsWith('/register') ||
+            pathname.startsWith('/forgot-password') ||
+            pathname.startsWith('/reset-password') ||
+            pathname.startsWith('/verify-email') ||
+            pathname.startsWith('/invitations') ||
+            pathname.startsWith('/checkout') ||
+            pathname.includes('/checkout') ||
+            pathname.startsWith('/events') ||
+            pathname.startsWith('/discover') ||
+            pathname === '/';
+
+          if (!isGuestFlow) {
             window.location.href = `/login?expired=true`;
           }
           return Promise.reject(refreshErr);

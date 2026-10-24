@@ -4,6 +4,8 @@ import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import EventCard from '../components/ui/EventCard';
 import { eventApi, normalizeBackendEvent } from '../api/events';
+import { favoritesApi } from '../api/favorites';
+import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../api/client';
 import type { Event } from '../types/api';
 import { 
@@ -17,7 +19,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  X
 } from 'lucide-react';
 
 export const Discover: React.FC = () => {
@@ -39,6 +42,15 @@ export const Discover: React.FC = () => {
   const [priceRange, setPriceRange] = useState('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+
+  const { isAuthenticated, user } = useAuth();
+
+  // Hydrate favorites from backend if user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      favoritesApi.getFavoriteIds().catch(() => {});
+    }
+  }, [isAuthenticated, user?.id]);
 
   const [paginationMeta, setPaginationMeta] = useState<{
     current_page: number;
@@ -270,9 +282,126 @@ export const Discover: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
           
           {/* ========================================================================= */}
-          {/* LEFT FILTERS SIDEBAR (Desktop) */}
+          {/* MOBILE FILTER MODAL / SLIDE-OVER DRAWER */}
           {/* ========================================================================= */}
-          <aside className={`md:block md:col-span-3 bg-white p-6 rounded-3xl border border-[#E5E7EB] shadow-xs space-y-6 sticky top-24 ${mobileFilterOpen ? 'block' : 'hidden'}`}>
+          {mobileFilterOpen && (
+            <div className="fixed inset-0 z-50 md:hidden flex justify-end">
+              {/* Dark backdrop */}
+              <div 
+                className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+                onClick={() => setMobileFilterOpen(false)}
+              />
+
+              {/* Sliding Filter Panel */}
+              <div className="relative w-full max-w-xs bg-white h-full shadow-2xl p-6 overflow-y-auto space-y-6 flex flex-col justify-between z-10">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between pb-4 border-b border-zinc-150">
+                    <span className="text-base font-black text-zinc-950 flex items-center gap-2">
+                      <SlidersHorizontal className="w-4 h-4 text-[#E31B23]" />
+                      Filter Events
+                    </span>
+                    <button
+                      onClick={() => setMobileFilterOpen(false)}
+                      className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-600 hover:bg-zinc-200 cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Category Filter */}
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-zinc-900 uppercase tracking-wider block">
+                      Category
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => setCategory(cat)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                            category === cat
+                              ? 'bg-[#E31B23] text-white shadow-xs'
+                              : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Price Filter */}
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-zinc-900 uppercase tracking-wider block">
+                      Price
+                    </label>
+                    <div className="space-y-2">
+                      {priceOptions.map((opt) => (
+                        <label
+                          key={opt.value}
+                          className="flex items-center gap-2.5 text-sm font-semibold text-zinc-700 hover:text-zinc-950 cursor-pointer py-0.5"
+                        >
+                          <input
+                            type="radio"
+                            name="mobilePrice"
+                            checked={priceRange === opt.value}
+                            onChange={() => setPriceRange(opt.value)}
+                            className="accent-[#E31B23] w-4 h-4"
+                          />
+                          <span>{opt.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Format Filter */}
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-zinc-900 uppercase tracking-wider block">
+                      Event Format
+                    </label>
+                    <div className="grid grid-cols-3 gap-1.5 bg-zinc-100 p-1.5 rounded-2xl">
+                      {(['All', 'physical', 'virtual'] as const).map((fmt) => (
+                        <button
+                          key={fmt}
+                          onClick={() => setFormatFilter(fmt)}
+                          className={`py-2 text-xs font-bold rounded-xl capitalize transition-all cursor-pointer ${
+                            formatFilter === fmt
+                              ? 'bg-white text-zinc-950 shadow-xs'
+                              : 'text-zinc-500 hover:text-zinc-900'
+                          }`}
+                        >
+                          {fmt === 'physical' ? 'In-Person' : fmt === 'virtual' ? 'Virtual' : 'All'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-zinc-150 space-y-2">
+                  <button
+                    onClick={() => setMobileFilterOpen(false)}
+                    className="w-full py-3 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-xl transition-all shadow-xs cursor-pointer text-center"
+                  >
+                    View {paginationMeta.total} {paginationMeta.total === 1 ? 'Event' : 'Events'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleResetFilters();
+                      setMobileFilterOpen(false);
+                    }}
+                    className="w-full py-2 text-xs font-bold text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" /> Reset Filters
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* DESKTOP FILTERS SIDEBAR */}
+          {/* ========================================================================= */}
+          <aside className="hidden md:block md:col-span-3 bg-white p-6 rounded-3xl border border-[#E5E7EB] shadow-xs space-y-6 sticky top-24">
             <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
               <span className="text-sm font-bold text-zinc-900 flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-[#E31B23]" />
@@ -321,7 +450,7 @@ export const Discover: React.FC = () => {
                   >
                     <input
                       type="radio"
-                      name="price"
+                      name="desktopPrice"
                       checked={priceRange === opt.value}
                       onChange={() => setPriceRange(opt.value)}
                       className="accent-[#E31B23] w-4 h-4"
@@ -358,7 +487,7 @@ export const Discover: React.FC = () => {
           {/* ========================================================================= */}
           {/* RIGHT EVENT RESULTS AREA */}
           {/* ========================================================================= */}
-          <section className="md:col-span-9 space-y-6">
+          <section className="col-span-1 md:col-span-9 space-y-6">
             {/* Top Toolbar (Count + View Mode Switcher) */}
             <div className="flex items-center justify-between bg-white px-6 py-3.5 rounded-2xl border border-[#E5E7EB] shadow-xs">
               <p className="text-sm font-bold text-zinc-800">

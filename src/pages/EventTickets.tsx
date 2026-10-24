@@ -24,7 +24,6 @@ import type { Event, TicketType } from '../types/api';
 import { formatCurrency, formatEventDateTime } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { CheckoutModal } from '../components/checkout/CheckoutModal';
 
 export const EventTickets: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -38,7 +37,6 @@ export const EventTickets: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [selectedTickets, setSelectedTickets] = useState<Record<string, number>>({});
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -139,7 +137,13 @@ export const EventTickets: React.FC = () => {
       showNotification('Please select at least 1 ticket to proceed.', 'warning');
       return;
     }
-    setCheckoutOpen(true);
+    if (!event) return;
+    navigate(`/events/${event.slug || event.id}/checkout`, {
+      state: {
+        event,
+        selectedTickets,
+      },
+    });
   };
 
   if (isLoading) {
@@ -404,16 +408,6 @@ export const EventTickets: React.FC = () => {
       </main>
 
       <Footer />
-
-      {/* Checkout Modal */}
-      {event && (
-        <CheckoutModal
-          isOpen={checkoutOpen}
-          onClose={() => setCheckoutOpen(false)}
-          event={event}
-          selectedTickets={selectedTickets}
-        />
-      )}
     </div>
   );
 };

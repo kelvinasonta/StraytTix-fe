@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import type { User, Organizer, AuthPayload } from '../types/api';
 import { tokenStorage } from '../utils/storage';
 import { authApi } from '../api/auth';
+import { favoritesApi } from '../api/favorites';
 import { getApiErrorMessage } from '../api/client';
 import { useNotification } from './NotificationContext';
 
@@ -75,6 +76,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (res.data.organizer) {
           setActiveOrganizer(res.data.organizer);
         }
+
+        // Hydrate favorites from backend in background to keep heart symbols synced across reloads
+        favoritesApi.getFavoriteIds().catch(() => {});
       }
     } catch (err: any) {
       const responseData = err.response?.data;
@@ -163,7 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         showNotification('Registration successful. Please verify your email.', 'success');
-        await refreshUser();
+        setIsLoading(false);
       }
     } catch (err) {
       setIsLoading(false);

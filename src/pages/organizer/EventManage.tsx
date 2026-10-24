@@ -42,6 +42,7 @@ import {
   Video,
   Palette,
   Send,
+  Coins,
   Search,
   Check,
   HelpCircle,
@@ -5665,9 +5666,34 @@ export const EventManage: React.FC = () => {
 
             {marketingSubtab === 'email' && (
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-bold text-zinc-950">Broadcast Email Announcement</h3>
-                  <p className="text-xs text-zinc-500">Send direct email updates to your registered audience.</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-zinc-950">Broadcast Email Marketing</h3>
+                    <p className="text-xs text-zinc-500">Send direct promotional and informational emails to your registered audience.</p>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-bold shadow-2xs">
+                    <Coins className="w-4 h-4 text-amber-600" />
+                    <span>Eventa Credit: <strong>{localStorage.getItem("eventsos_organizer_credits") || "500"} Available</strong></span>
+                    <Link to="/organizer/analytics" className="text-[#E31B23] hover:underline text-[11px] font-black ml-1">
+                      Top-Up
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 flex items-center justify-between gap-4 text-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-red-100 text-[#E31B23] flex items-center justify-center font-bold">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-zinc-900">Email Marketing Credit Rate</p>
+                      <p className="text-[11px] text-zinc-500">Each attendee recipient consumes 1 Eventa Credit.</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[11px] font-bold text-zinc-400 block uppercase">Recipients Cost</span>
+                    <strong className="text-sm font-black text-zinc-950">{attendees.length} Credits</strong>
+                  </div>
                 </div>
                 <div className="space-y-4">
                   <div>

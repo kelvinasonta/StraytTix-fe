@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   CheckCircle2, 
@@ -54,6 +54,39 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [appliedPromo, setAppliedPromo] = useState<any | null>(null);
   const [promoError, setPromoError] = useState('');
   const [answers, setAnswers] = useState<Record<string, string>>({});
+
+  // 15-minute order reservation countdown timer
+  const [timeLeft, setTimeLeft] = useState<number>(15 * 60);
+
+  // Reset timer and step when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setTimeLeft(15 * 60);
+      setStep(1);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || step === 4) return;
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          showNotification('Ticket reservation hold expired. Please reselect your passes.', 'warning');
+          onClose();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isOpen, step, onClose, showNotification]);
+
+  const formatTimer = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
 
   if (!isOpen) return null;
 
@@ -215,6 +248,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <h3 className="text-sm font-bold text-zinc-950">
               {step === 4 ? "Booking Confirmed" : "Secure Checkout"}
             </h3>
+            {step < 4 && (
+              <span className="ml-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                <span>Reserved: {formatTimer(timeLeft)}</span>
+              </span>
+            )}
           </div>
 
           <button

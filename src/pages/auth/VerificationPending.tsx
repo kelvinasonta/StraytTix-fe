@@ -3,10 +3,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../api/auth';
 import { AuthLayout } from '../../components/layout/AuthLayout';
-import { Button } from '../../components/ui/Button';
 import { getApiErrorMessage, extractThrottleSeconds } from '../../api/client';
 import { useNotification } from '../../context/NotificationContext';
-import { Mail, Clock, ArrowLeft, Send } from 'lucide-react';
+import { Mail, Clock, ArrowLeft, Send, Loader2, AlertCircle } from 'lucide-react';
 
 const COUNTDOWN_EXPIRY_KEY = 'eventsos_resend_countdown_expiry';
 const RESEND_INTERVAL = 15 * 60; // 15 minutes in seconds
@@ -22,7 +21,6 @@ export const VerificationPending: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const timerRef = useRef<any>(null);
-
   const isResentQuery = new URLSearchParams(location.search).get('resent') === 'true';
 
   useEffect(() => {
@@ -66,7 +64,7 @@ export const VerificationPending: React.FC = () => {
       const expiryTime = Date.now() + RESEND_INTERVAL * 1000;
       localStorage.setItem(COUNTDOWN_EXPIRY_KEY, expiryTime.toString());
       setSecondsLeft(RESEND_INTERVAL);
-      showNotification('Verification email has been resent.', 'success');
+      showNotification('Verification email sent.', 'success');
       setResending(false);
     } catch (err: any) {
       const throttledSec = extractThrottleSeconds(err);
@@ -90,64 +88,84 @@ export const VerificationPending: React.FC = () => {
 
   return (
     <AuthLayout
-      title="Check your inbox"
-      subtitle="Before accessing the eventsOs suite, please verify your email address."
+      title="Verify your email"
+      subtitle="Confirm your email address to access your tickets and dashboard"
     >
       <div className="space-y-6">
-        <div className="flex flex-col items-center gap-4 py-4 text-center">
-          <div className="p-4 bg-red-50 border border-red-200 text-brand-accent rounded-full animate-pulse">
-            <Mail className="w-8 h-8" />
+        
+        {/* Email verification card */}
+        <div className="p-6 bg-zinc-50 border border-zinc-200 rounded-2xl text-center space-y-3">
+          <div className="w-12 h-12 bg-zinc-100 text-zinc-900 border border-zinc-200 rounded-2xl flex items-center justify-center mx-auto">
+            <Mail className="w-6 h-6 text-[#E31B23]" />
           </div>
-          <p className="text-zinc-600 text-xs font-semibold max-w-sm">
-            We sent a verification link to{' '}
-            <strong className="text-zinc-950 text-sm block mt-1 break-all bg-zinc-50 px-3 py-1.5 rounded-lg border border-zinc-200">
+
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-zinc-950">Verification link sent</h3>
+            <p className="text-xs text-zinc-600 leading-relaxed font-normal">
+              We dispatched an activation link to:
+            </p>
+            <div className="font-mono text-xs font-bold text-zinc-900 bg-white py-2 px-3 rounded-xl border border-zinc-200 inline-block max-w-full truncate">
               {user?.email || 'your registered email'}
-            </strong>
-          </p>
-          <p className="text-zinc-400 text-[10px] leading-relaxed max-w-xs mt-2">
-            Please check your spam or junk folder if you don't receive the email within a couple of minutes.
+            </div>
+          </div>
+
+          <p className="text-[11px] text-zinc-400 leading-relaxed">
+            Please click the link in your inbox to verify your account. Be sure to check your spam folder.
           </p>
         </div>
 
         {isResentQuery && !errorMsg && secondsLeft === 0 && (
-          <div className="p-3 bg-emerald-50 border border-emerald-250 text-emerald-600 rounded-xl text-xs flex items-center gap-2">
-            <Send className="w-4 h-4 flex-shrink-0" />
-            <span>A new verification email has been sent successfully.</span>
+          <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs flex items-center gap-2">
+            <Send className="w-4 h-4 shrink-0 text-emerald-600" />
+            <span>A new verification email has been dispatched.</span>
           </div>
         )}
 
         {errorMsg && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs flex items-start gap-2" role="alert">
-            <Clock className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <span>{errorMsg}</span>
+          <div className="p-3.5 bg-red-50 border border-red-200 text-red-900 rounded-xl text-xs flex items-start gap-2" role="alert">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#E31B23]" />
+            <span className="font-semibold">{errorMsg}</span>
           </div>
         )}
 
-        {secondsLeft > 0 ? (
-          <Button disabled variant="outline" className="w-full text-xs font-semibold py-2.5">
-            <Clock className="w-4 h-4 mr-2 text-zinc-400" />
-            Resend available in {formatTime(secondsLeft)}
-          </Button>
-        ) : (
-          <Button onClick={handleResend} isLoading={resending} variant="primary" className="w-full">
-            Resend Verification Email
-          </Button>
-        )}
+        {/* Resend Action */}
+        <div>
+          {secondsLeft > 0 ? (
+            <div className="w-full py-3 px-4 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 select-none">
+              <Clock className="w-4 h-4 text-zinc-400" />
+              <span>Resend available in <strong className="font-mono text-zinc-800 font-bold">{formatTime(secondsLeft)}</strong></span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending}
+              className="w-full py-3.5 px-5 bg-zinc-950 hover:bg-zinc-800 text-white text-sm font-bold rounded-xl transition-all shadow-xs hover:shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
+            >
+              {resending && <Loader2 className="w-4 h-4 animate-spin" />}
+              <span>{resending ? 'Sending email...' : 'Resend Verification Email'}</span>
+            </button>
+          )}
+        </div>
 
-        <div className="flex items-center justify-between border-t border-zinc-150 pt-4 mt-6">
+        {/* Footer controls */}
+        <div className="flex items-center justify-between pt-2 border-t border-zinc-100">
           <button
+            type="button"
             onClick={() => navigate('/login')}
-            className="inline-flex items-center gap-1.5 text-xs text-brand-accent hover:text-brand-accent-hover font-bold"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-950 cursor-pointer transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to Sign In
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Sign In
           </button>
           <button
+            type="button"
             onClick={logout}
-            className="text-xs text-zinc-500 hover:text-zinc-800 font-bold"
+            className="text-xs font-semibold text-zinc-500 hover:text-red-600 cursor-pointer transition-colors"
           >
             Sign Out
           </button>
         </div>
+
       </div>
     </AuthLayout>
   );

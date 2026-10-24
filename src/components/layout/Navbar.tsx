@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   Search,
@@ -15,6 +15,7 @@ import {
   Settings,
   Compass,
   Users,
+  ChevronRight,
   User as UserIcon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -30,8 +31,20 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   const { isAuthenticated, user, organizer, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      setIsScrolled(scrollY > 16);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const isDashboardView = isDashboard || hideNavLinks || location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/organizer');
 
@@ -52,6 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
     { to: '/pricing', label: 'Pricing' },
     { to: '/about', label: 'About us' },
     { to: '/blog', label: 'Blog' },
+    { to: '/download', label: 'Download' },
   ];
 
   // 2. Auth Nav Links (Shown to authenticated users)
@@ -98,21 +112,29 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
     : '/';
 
   return (
-    <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] transition-all">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <nav 
+      className={`sticky top-0 z-40 transition-all duration-300 ${
+        isScrolled
+          ? 'bg-white/80 backdrop-blur-xl border-b border-zinc-200/80 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] py-1'
+          : 'bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] py-0'
+      }`}
+    >
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between transition-all duration-300 ${
+        isScrolled ? 'h-14' : 'h-16'
+      }`}>
 
         {/* Brand Logo */}
         <Logo to={logoTarget} size="md" />
 
-        {/* Center Desktop Navigation: Different for Guest vs Auth */}
-        <div className="hidden md:flex items-center gap-7">
+        {/* Center Desktop Navigation: Different for Guest vs Auth (hidden below lg to prevent tablet wrap) */}
+        <div className="hidden lg:flex items-center gap-6 xl:gap-8">
           {currentNavLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               end={link.to === '/' || link.to === '/dashboard' || link.to === '/organizer'}
               className={({ isActive }) =>
-                `text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 ${isActive ? 'text-[#E31B23] font-bold' : 'text-zinc-600 hover:text-zinc-950'
+                `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${isActive ? 'text-[#E31B23] font-bold' : 'text-zinc-600 hover:text-zinc-950'
                 }`
               }
             >
@@ -122,7 +144,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
         </div>
 
         {/* Right Desktop Actions: Guest vs Auth */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-3 xl:gap-4 shrink-0">
           {/* Search Trigger */}
           <Link
             to="/discover"
@@ -331,29 +353,44 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
           )}
         </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden p-2 text-zinc-700 hover:text-zinc-950 focus:outline-none"
-        >
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* Mobile Menu Button (Visible on screens smaller than lg) */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <Link
+            to="/discover"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition-colors"
+            title="Search events"
+          >
+            <Search className="w-5 h-5" />
+          </Link>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="p-2 text-zinc-700 hover:text-zinc-950 rounded-xl hover:bg-zinc-100 focus:outline-none transition-colors"
+            aria-label="Toggle navigation menu"
+          >
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu Drawer: Guest vs Auth */}
       {isOpen && (
-        <div className="md:hidden bg-white border-b border-zinc-200 p-6 flex flex-col gap-4 shadow-xl">
+        <div className="lg:hidden bg-white border-b border-zinc-200 px-6 py-5 flex flex-col gap-4 shadow-xl max-h-[calc(100vh-4rem)] overflow-y-auto animate-in slide-in-from-top-2 duration-150">
           {/* Nav links */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             {currentNavLinks.map((link) => (
-              <Link
+              <NavLink
                 key={link.to}
                 to={link.to}
                 onClick={() => setIsOpen(false)}
-                className="text-sm font-bold text-zinc-800 hover:text-[#E31B23] py-1"
+                className={({ isActive }) => 
+                  `text-sm font-bold py-2.5 px-3 rounded-xl transition-colors flex items-center justify-between ${
+                    isActive ? 'bg-red-50 text-[#E31B23]' : 'text-zinc-800 hover:bg-zinc-50'
+                  }`
+                }
               >
-                {link.label}
-              </Link>
+                <span>{link.label}</span>
+                <ChevronRight className="w-4 h-4 text-zinc-400" />
+              </NavLink>
             ))}
           </div>
 
@@ -366,21 +403,21 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                 <Link
                   to="/organizer/events/create"
                   onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2.5 bg-[#E31B23] text-white font-bold rounded-xl text-xs shadow-xs"
+                  className="w-full text-center py-3 bg-[#E31B23] text-white font-bold rounded-xl text-xs shadow-xs"
                 >
                   + Create Event
                 </Link>
                 <Link
                   to="/organizer"
                   onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
+                  className="w-full text-center py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
                 >
                   Organizer Console
                 </Link>
                 <Link
                   to="/organizer/events"
                   onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
+                  className="w-full text-center py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
                 >
                   My Events
                 </Link>
@@ -388,7 +425,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                   <Link
                     to="/organizer/team"
                     onClick={() => setIsOpen(false)}
-                    className="w-full text-center py-2 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
+                    className="w-full text-center py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
                   >
                     Team Members
                   </Link>
@@ -398,7 +435,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                     setIsOpen(false);
                     handleLogout();
                   }}
-                  className="w-full text-center py-2 text-red-600 font-bold rounded-xl text-xs bg-red-50 cursor-pointer"
+                  className="w-full text-center py-2.5 text-red-600 font-bold rounded-xl text-xs bg-red-50 cursor-pointer"
                 >
                   Sign Out
                 </button>
@@ -409,35 +446,35 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                 <Link
                   to="/discover"
                   onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2.5 bg-[#E31B23] text-white font-bold rounded-xl text-xs shadow-xs"
+                  className="w-full text-center py-3 bg-[#E31B23] text-white font-bold rounded-xl text-xs shadow-xs"
                 >
                   Discover Events
                 </Link>
                 <Link
                   to="/dashboard"
                   onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
+                  className="w-full text-center py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
                 >
                   Attendee Dashboard
                 </Link>
                 <Link
                   to="/dashboard/tickets"
                   onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
+                  className="w-full text-center py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
                 >
                   My Tickets
                 </Link>
                 <Link
                   to="/dashboard/favorites"
                   onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
+                  className="w-full text-center py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
                 >
                   Saved Experiences
                 </Link>
                 <Link
                   to="/dashboard/profile"
                   onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
+                  className="w-full text-center py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold rounded-xl text-xs"
                 >
                   Profile Settings
                 </Link>
@@ -446,7 +483,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                     setIsOpen(false);
                     handleLogout();
                   }}
-                  className="w-full text-center py-2 text-red-600 font-bold rounded-xl text-xs bg-red-50 cursor-pointer"
+                  className="w-full text-center py-2.5 text-red-600 font-bold rounded-xl text-xs bg-red-50 cursor-pointer"
                 >
                   Sign Out
                 </button>
@@ -457,14 +494,14 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               <Link
                 to="/login"
                 onClick={() => setIsOpen(false)}
-                className="w-full text-center py-2 text-zinc-800 border border-zinc-200 font-bold rounded-xl text-xs"
+                className="w-full text-center py-2.5 text-zinc-800 border border-zinc-200 font-bold rounded-xl text-xs"
               >
                 Log In
               </Link>
               <Link
                 to="/register"
                 onClick={() => setIsOpen(false)}
-                className="w-full text-center py-2.5 bg-[#E31B23] text-white font-bold rounded-xl text-xs shadow-xs"
+                className="w-full text-center py-3 bg-[#E31B23] text-white font-bold rounded-xl text-xs shadow-xs"
               >
                 Sign Up
               </Link>

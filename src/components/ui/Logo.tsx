@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar } from 'lucide-react';
+import { useSettings } from '../../context/SettingsContext';
 
 interface LogoProps {
   to?: string;
@@ -17,6 +18,10 @@ export const Logo: React.FC<LogoProps> = ({
   className = '',
   badgeOnly = false,
 }) => {
+  const { settings } = useSettings();
+  const displayName = settings?.sitename || 'Eventra';
+  const logoUrl = settings?.logo;
+
   const iconSizes = {
     sm: 'w-3.5 h-3.5',
     md: 'w-4 h-4',
@@ -37,12 +42,20 @@ export const Logo: React.FC<LogoProps> = ({
 
   const content = (
     <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
-      {/* Red Brand Icon Badge */}
-      <div
-        className={`${badgeSizes[size]} bg-[#E31B23] text-white flex items-center justify-center shadow-[0_2px_8px_rgba(227,27,35,0.25)] flex-shrink-0`}
-      >
-        <Calendar className={iconSizes[size]} strokeWidth={2.5} />
-      </div>
+      {logoUrl ? (
+        <img
+          src={logoUrl}
+          alt={displayName}
+          className={`${badgeSizes[size]} object-contain flex-shrink-0`}
+        />
+      ) : (
+        /* Red Brand Icon Badge */
+        <div
+          className={`${badgeSizes[size]} bg-[#E31B23] text-white flex items-center justify-center shadow-[0_2px_8px_rgba(227,27,35,0.25)] flex-shrink-0`}
+        >
+          <Calendar className={iconSizes[size]} strokeWidth={2.5} />
+        </div>
+      )}
 
       {!badgeOnly && (
         <span
@@ -50,7 +63,7 @@ export const Logo: React.FC<LogoProps> = ({
             variant === 'light' ? 'text-white' : 'text-[#111827]'
           }`}
         >
-          eventa
+          {displayName.toLowerCase()}
         </span>
       )}
     </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import OrganizerDashboardLayout from '../../components/layout/OrganizerDashboardLayout';
 import StatCard from '../../components/ui/StatCard';
+import Modal from '../../components/ui/Modal';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import { Input } from '../../components/ui/Input';
@@ -29,7 +30,7 @@ import {
   Lock,
   RefreshCw,
   TrendingUp,
-  Receipt
+  Receipt, Coins, Sparkles, MessageSquare, Rocket, QrCode, Mail, Zap, Plus
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
@@ -117,7 +118,7 @@ export const Analytics: React.FC = () => {
     return <Navigate to="/organizer" replace />;
   }
 
-  const [activeTab, setActiveTab] = useState<'wallet' | 'analytics' | 'events' | 'ledger'>('wallet');
+  const [activeTab, setActiveTab] = useState<'wallet' | 'analytics' | 'events' | 'ledger' | 'credits'>('wallet');
   const [timeframe, setTimeframe] = useState<'7d' | '30d' | '3m' | '6m' | '12m'>('30d');
   const [orders, setOrders] = useState<Order[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -169,6 +170,116 @@ export const Analytics: React.FC = () => {
     routingNumber: bankAccount?.routingNumber || ''
   });
   const [isSavingBank, setIsSavingBank] = useState(false);
+
+
+  // In-App Credits & Add-ons States
+  interface CreditTransaction {
+    id: string;
+    date: string;
+    description: string;
+    type: 'credit' | 'debit';
+    amount: number;
+    balanceAfter: number;
+    reference: string;
+  }
+
+  const [creditsBalance, setCreditsBalance] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('eventsos_organizer_credits');
+      return saved ? Number(saved) : 0;
+    } catch {
+      return 0;
+    }
+  });
+
+  const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>(() => {
+    try {
+      const saved = localStorage.getItem('eventsos_organizer_credit_txs');
+      if (saved && (saved.includes('tx-1') || saved.includes('Growth Pack Top-Up'))) {
+        localStorage.removeItem('eventsos_organizer_credit_txs');
+        return [];
+      }
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
+  const [selectedPack, setSelectedPack] = useState<'starter' | 'growth' | 'power' | 'custom'>('growth');
+  const [customCreditsAmount, setCustomCreditsAmount] = useState('250');
+  const [isProcessingTopUp, setIsProcessingTopUp] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('eventsos_organizer_credits', creditsBalance.toString());
+  }, [creditsBalance]);
+
+  useEffect(() => {
+    localStorage.setItem('eventsos_organizer_credit_txs', JSON.stringify(creditTransactions));
+  }, [creditTransactions]);
+
+  const handleCompleteTopUp = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessingTopUp(true);
+
+    let creditsToAdd = 500;
+    let priceNgn = 22500;
+
+    if (selectedPack === 'starter') {
+      creditsToAdd = 100;
+      priceNgn = 5000;
+    } else if (selectedPack === 'power') {
+      creditsToAdd = 1500;
+      priceNgn = 60000;
+    } else if (selectedPack === 'custom') {
+      creditsToAdd = Math.max(50, Number(customCreditsAmount) || 50);
+      priceNgn = creditsToAdd * 50;
+    }
+
+    setTimeout(() => {
+      setIsProcessingTopUp(false);
+      const newTotal = creditsBalance + creditsToAdd;
+      setCreditsBalance(newTotal);
+
+      const newTx: CreditTransaction = {
+        id: `tx-${Date.now()}`,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        description: `Credits Purchase (${creditsToAdd} Credits - ₦${priceNgn.toLocaleString()})`,
+        type: 'credit',
+        amount: creditsToAdd,
+        balanceAfter: newTotal,
+        reference: `PS_${Math.floor(100000 + Math.random() * 900000)}`
+      };
+
+      setCreditTransactions(prev => [newTx, ...prev]);
+      setIsTopUpModalOpen(false);
+      showNotification(`Successfully topped up ${creditsToAdd} Credits! New balance: ${newTotal} Credits.`, 'success');
+    }, 1200);
+  };
+
+  const handleSimulateFeatureUse = (featureName: string, cost: number) => {
+    if (creditsBalance < cost) {
+      showNotification(`Insufficient credits! You need ${cost} credits, but have ${creditsBalance}. Please top up.`, 'error');
+      setIsTopUpModalOpen(true);
+      return;
+    }
+
+    const newTotal = creditsBalance - cost;
+    setCreditsBalance(newTotal);
+
+    const newTx: CreditTransaction = {
+      id: `tx-${Date.now()}`,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      description: `In-App Feature: ${featureName}`,
+      type: 'debit',
+      amount: cost,
+      balanceAfter: newTotal,
+      reference: `ACT_${Math.floor(100000 + Math.random() * 900000)}`
+    };
+
+    setCreditTransactions(prev => [newTx, ...prev]);
+    showNotification(`Activated "${featureName}" (-${cost} Credits). Remaining: ${newTotal} Credits.`, 'success');
+  };
 
   // Search & Filter in Ledger
   const [ledgerSearch, setLedgerSearch] = useState('');
@@ -531,7 +642,8 @@ export const Analytics: React.FC = () => {
             { id: 'wallet', label: 'Wallet & Payouts', icon: <Wallet className="w-4 h-4" /> },
             { id: 'analytics', label: 'Sales & Velocity', icon: <BarChart3 className="w-4 h-4" /> },
             { id: 'events', label: 'Revenue by Event', icon: <Receipt className="w-4 h-4" /> },
-            { id: 'ledger', label: 'Transaction Ledger', icon: <FileText className="w-4 h-4" /> }
+            { id: 'ledger', label: 'Transaction Ledger', icon: <FileText className="w-4 h-4" /> },
+            { id: 'credits', label: 'Email Marketing & Credits', icon: <Coins className="w-4 h-4 text-amber-500" /> }
           ].map(tab => (
             <button
               key={tab.id}
@@ -1145,6 +1257,346 @@ export const Analytics: React.FC = () => {
             </div>
           </div>
         )}
+
+
+        {/* TAB 5: APP CREDITS & MARKETING UTILITIES */}
+        {activeTab === 'credits' && (
+          <div className="space-y-8 animate-fadeIn">
+            {/* Credits Hero Banner */}
+            <div className="bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 -mt-12 -mr-12 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-1/3 -mb-16 w-60 h-60 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-black uppercase tracking-wider border border-amber-500/30">
+                    <Sparkles className="w-3 h-3 text-amber-400" /> Eventa Email Marketing & Credits Wallet
+                  </div>
+                  <div className="flex items-baseline gap-3">
+                    <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+                      {creditsBalance.toLocaleString()}
+                    </h2>
+                    <span className="text-sm sm:text-base font-semibold text-zinc-400">Credits Available</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-zinc-300 max-w-xl font-medium leading-relaxed">
+                    Eventa Credits directly power email marketing broadcasts, newsletter campaigns, ticket reminders, and attendee promotional mail drops. 1 Credit sends 1 marketing email.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => setIsTopUpModalOpen(true)}
+                    className="bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs px-5 py-3 rounded-xl shadow-md inline-flex items-center justify-center gap-2 cursor-pointer transition-all"
+                  >
+                    <Plus className="w-4 h-4 stroke-[3]" />
+                    Top-Up Credits
+                  </Button>
+                </div>
+              </div>
+
+              <div className="relative z-10 mt-6 pt-5 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs text-zinc-400">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Estimated Value: <strong>₦{(creditsBalance * 50).toLocaleString()}</strong></span>
+                </div>
+                <div>1 Eventa Credit = ₦50.00 NGN flat rate</div>
+              </div>
+            </div>
+
+            {/* In-App Stuffs Catalog */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-black text-zinc-950 tracking-tight">Email Marketing & Outreach Packages</h3>
+                  <p className="text-xs text-zinc-500 font-medium">Dispatch targeted emails, announcements, and promotional newsletters to ticket holders.</p>
+                </div>
+                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+                  Instant Dispatch
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  {
+                    title: 'SMS & WhatsApp Attendee Broadcast',
+                    description: 'Instant SMS ticket confirmation or urgent schedule/gate changes dispatched directly to attendee mobile phones.',
+                    cost: 1,
+                    unit: 'credit / SMS',
+                    icon: MessageSquare,
+                    color: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+                    actionLabel: 'Dispatch Test SMS',
+                    actionCost: 1
+                  },
+                  {
+                    title: 'AI Event Copywriter & SEO Generator',
+                    description: 'Generate comprehensive, persuasive event descriptions, agenda schedules, and targeted marketing copy tailored to your category.',
+                    cost: 5,
+                    unit: 'credits / run',
+                    icon: Sparkles,
+                    color: 'text-purple-600 bg-purple-50 border-purple-100',
+                    actionLabel: 'Run AI Writer',
+                    actionCost: 5
+                  },
+                  {
+                    title: 'Featured Event Spotlight Boost',
+                    description: 'Pin your event to the top of public discovery feeds and category explore pages for 7 full days to amplify conversions.',
+                    cost: 50,
+                    unit: 'credits / 7 days',
+                    icon: Rocket,
+                    color: 'text-red-600 bg-red-50 border-red-100',
+                    actionLabel: 'Boost Event',
+                    actionCost: 50
+                  },
+                  {
+                    title: 'Dedicated QR Scanner Terminal Pass',
+                    description: 'Provision extra entrance gate scanning licenses for bouncers and usher mobile phones without granting dashboard access.',
+                    cost: 25,
+                    unit: 'credits / scanner',
+                    icon: QrCode,
+                    color: 'text-blue-600 bg-blue-50 border-blue-100',
+                    actionLabel: 'Provision Pass',
+                    actionCost: 25
+                  },
+                  {
+                    title: 'Custom White-Label Sender Domain',
+                    description: 'Send order confirmations, tickets, and receipts from your custom domain (e.g. tickets@yourcompany.com) instead of Eventa.',
+                    cost: 100,
+                    unit: 'credits / mo',
+                    icon: Mail,
+                    color: 'text-amber-600 bg-amber-50 border-amber-100',
+                    actionLabel: 'Subscribe Domain',
+                    actionCost: 100
+                  },
+                  {
+                    title: 'Offline Box Office POS Sync',
+                    description: 'Enable offline door ticket cash sales mode on tablets with automatic cloud ledger reconciliation upon reconnecting.',
+                    cost: 15,
+                    unit: 'credits / device',
+                    icon: Zap,
+                    color: 'text-teal-600 bg-teal-50 border-teal-100',
+                    actionLabel: 'Enable POS License',
+                    actionCost: 15
+                  }
+                ].map((item, idx) => {
+                  const Icon = item.icon;
+                  return (
+                    <div
+                      key={idx}
+                      className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-2xs hover:shadow-sm transition-all flex flex-col justify-between gap-4"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${item.color}`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <span className="px-2 py-0.5 rounded-md text-[11px] font-black bg-zinc-100 text-zinc-800">
+                            {item.cost} {item.unit}
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-zinc-950">{item.title}</h4>
+                          <p className="text-[11px] text-zinc-500 font-medium mt-1 leading-relaxed">{item.description}</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-zinc-100">
+                        <button
+                          type="button"
+                          onClick={() => handleSimulateFeatureUse(item.title, item.actionCost)}
+                          className="w-full py-2 px-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 text-zinc-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <span>{item.actionLabel}</span>
+                          <span className="text-[10px] text-zinc-400 font-semibold">({item.actionCost} credits)</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Credit Transaction Ledger */}
+            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                <div>
+                  <h3 className="text-base font-black text-zinc-950 tracking-tight">Credit Ledger & Transaction History</h3>
+                  <p className="text-xs text-zinc-500 font-medium">Record of all credit purchases, marketing deductions, and feature usage.</p>
+                </div>
+                <span className="text-xs font-bold text-zinc-400 font-mono">
+                  {creditTransactions.length} records
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-zinc-150 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+                      <th className="pb-3 font-semibold">Date</th>
+                      <th className="pb-3 font-semibold">Description</th>
+                      <th className="pb-3 font-semibold">Reference</th>
+                      <th className="pb-3 font-semibold text-right">Amount</th>
+                      <th className="pb-3 font-semibold text-right">Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {creditTransactions.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-12 text-center text-zinc-500 font-medium">
+                          No credit transactions yet. Credit top-ups and marketing usage records will appear here.
+                        </td>
+                      </tr>
+                    ) : (
+                      creditTransactions.map((tx) => (
+                        <tr key={tx.id} className="hover:bg-zinc-50/60 transition-colors">
+                          <td className="py-3.5 text-zinc-500 font-medium whitespace-nowrap">{tx.date}</td>
+                          <td className="py-3.5 text-zinc-900 font-bold">{tx.description}</td>
+                          <td className="py-3.5 font-mono text-[11px] text-zinc-400">{tx.reference}</td>
+                          <td className={`py-3.5 font-black text-right whitespace-nowrap ${
+                            tx.type === 'credit' ? 'text-emerald-600' : 'text-zinc-900'
+                          }`}>
+                            {tx.type === 'credit' ? `+${tx.amount}` : `-${tx.amount}`} Credits
+                          </td>
+                          <td className="py-3.5 font-bold text-zinc-700 text-right whitespace-nowrap">
+                            {tx.balanceAfter.toLocaleString()}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: TOP-UP APP CREDITS */}
+        <Modal
+          isOpen={isTopUpModalOpen}
+          onClose={() => setIsTopUpModalOpen(false)}
+          title="Top-Up Eventa Marketing Credits"
+          size="lg"
+        >
+          <form onSubmit={handleCompleteTopUp} className="space-y-6">
+            <p className="text-xs text-zinc-600 font-medium leading-relaxed">
+              Credits are instantly issued to your organizer workspace. Select a curated growth pack or choose a custom amount.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              {[
+                {
+                  id: 'starter',
+                  name: 'Starter Pack',
+                  credits: 100,
+                  price: '₦5,000',
+                  badge: null
+                },
+                {
+                  id: 'growth',
+                  name: 'Growth Pack',
+                  credits: 500,
+                  price: '₦22,500',
+                  badge: '10% Bonus'
+                },
+                {
+                  id: 'power',
+                  name: 'Pro Accelerator',
+                  credits: 1500,
+                  price: '₦60,000',
+                  badge: '20% Bonus'
+                }
+              ].map(pack => (
+                <div
+                  key={pack.id}
+                  onClick={() => setSelectedPack(pack.id as any)}
+                  className={`p-4 rounded-2xl border-2 transition-all cursor-pointer relative flex flex-col justify-between gap-3 ${
+                    selectedPack === pack.id
+                      ? 'border-[#E31B23] bg-red-50/20 shadow-xs'
+                      : 'border-zinc-200/80 hover:border-zinc-300 bg-white'
+                  }`}
+                >
+                  {pack.badge && (
+                    <span className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500 text-white shadow-2xs">
+                      {pack.badge}
+                    </span>
+                  )}
+                  <div>
+                    <h4 className="text-xs font-bold text-zinc-800">{pack.name}</h4>
+                    <div className="text-xl font-black text-zinc-950 mt-1">
+                      {pack.credits} <span className="text-xs font-semibold text-zinc-500">Credits</span>
+                    </div>
+                  </div>
+                  <div className="text-xs font-black text-[#E31B23] pt-2 border-t border-zinc-100">
+                    {pack.price}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Custom Amount Option */}
+            <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 space-y-3">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="pack"
+                  checked={selectedPack === 'custom'}
+                  onChange={() => setSelectedPack('custom')}
+                  className="w-4 h-4 text-[#E31B23] accent-[#E31B23]"
+                />
+                <span className="text-xs font-bold text-zinc-900">Custom Credits Amount (₦50 / credit)</span>
+              </label>
+
+              {selectedPack === 'custom' && (
+                <div className="flex items-center gap-3 pt-1">
+                  <div className="w-36">
+                    <Input
+                      label=""
+                      type="number"
+                      min="50"
+                      step="50"
+                      value={customCreditsAmount}
+                      onChange={(e) => setCustomCreditsAmount(e.target.value)}
+                      placeholder="e.g. 300"
+                    />
+                  </div>
+                  <span className="text-xs font-bold text-zinc-700">
+                    Total: ₦{((Number(customCreditsAmount) || 0) * 50).toLocaleString()}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 rounded-2xl bg-zinc-100/70 border border-zinc-200/70 flex items-center justify-between text-xs font-medium text-zinc-700">
+              <div className="flex items-center gap-2.5">
+                <CreditCard className="w-4 h-4 text-zinc-500" />
+                <span>Pay securely via <strong>Paystack / Flutterwave Gateway</strong></span>
+              </div>
+              <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                Instant Credit
+              </span>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-zinc-100">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsTopUpModalOpen(false)}
+                disabled={isProcessingTopUp}
+                className="text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                isLoading={isProcessingTopUp}
+                className="bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs"
+              >
+                <Plus className="w-3.5 h-3.5 mr-1" />
+                Pay & Top-Up Now
+              </Button>
+            </div>
+          </form>
+        </Modal>
 
       </div>
     </OrganizerDashboardLayout>

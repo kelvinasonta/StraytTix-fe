@@ -20,7 +20,8 @@ export const ApiDocs: React.FC = () => {
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState('overview');
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+  const rawBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  const apiBaseUrl = rawBase.endsWith('/api/v1') ? rawBase : `${rawBase.replace(/\/+$/, '')}/api/v1`;
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);

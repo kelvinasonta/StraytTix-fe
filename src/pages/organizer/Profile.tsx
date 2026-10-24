@@ -35,7 +35,7 @@ export const Profile: React.FC = () => {
   const { organizer, setActiveOrganizer } = useAuth();
   const { showNotification } = useNotification();
 
-  const [activeTab, setActiveTab] = useState<'brand' | 'contact' | 'payout' | 'verification'>('brand');
+  const [activeTab, setActiveTab] = useState<'brand' | 'contact' | 'verification'>('brand');
 
   // Brand Information States
   const [name, setName] = useState(organizer?.name || '');
@@ -56,13 +56,8 @@ export const Profile: React.FC = () => {
   const [instagram, setInstagram] = useState('');
   const [linkedin, setLinkedin] = useState('');
 
-  // Payout & Banking States
-  const [bankName, setBankName] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
-  const [accountName, setAccountName] = useState('');
-  const [payoutSchedule, setPayoutSchedule] = useState('instant_post_event');
-
   const [isLoading, setIsLoading] = useState(false);
+
 
   // =========================================================================
   // ORGANIZER VERIFICATION STATES (Backend Integration)
@@ -244,14 +239,6 @@ export const Profile: React.FC = () => {
     }, 500);
   };
 
-  const handleSavePayout = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      showNotification('Settlement bank account details updated securely!', 'success');
-    }, 600);
-  };
 
   // Handle Verification Request Submission
   const handleSubmitVerification = async (e: React.FormEvent) => {
@@ -307,31 +294,34 @@ export const Profile: React.FC = () => {
         {/* ========================================================================= */}
         {/* HEADER WITH PROFILE INFO & ACTION BUTTONS */}
         {/* ========================================================================= */}
+        {/* ========================================================================= */}
+        {/* HEADER WITH PROFILE INFO & ACTION BUTTONS */}
+        {/* ========================================================================= */}
         <div className="bg-white border border-[#E5E7EB] rounded-3xl overflow-hidden shadow-xs">
           {/* Cover Banner Display */}
-          <div className="relative h-40 sm:h-48 md:h-52 w-full bg-zinc-900 overflow-hidden">
+          <div className="relative h-44 sm:h-52 md:h-60 w-full bg-zinc-950 overflow-hidden">
             {bannerUrl && !bannerError ? (
               <img 
                 src={resolveImageUrl(bannerUrl)} 
                 alt={`${name} Cover`}
                 onError={() => setBannerError(true)}
-                className="w-full h-full object-cover transition-opacity duration-300" 
+                className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" 
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-950 flex items-center justify-center relative">
-                <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#E31B23_1px,transparent_1px)] [background-size:16px_16px]" />
-                <span className="text-xs font-bold uppercase tracking-widest text-zinc-500 relative z-10 flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" /> Organizer Brand Cover Banner
+              <div className="w-full h-full bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 flex items-center justify-center relative">
+                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#E31B23_1px,transparent_1px)] [background-size:20px_20px]" />
+                <span className="text-xs font-black uppercase tracking-widest text-zinc-400 relative z-10 flex items-center gap-2 bg-zinc-900/80 px-4 py-2 rounded-full border border-zinc-800 shadow-sm">
+                  <Sparkles className="w-4 h-4 text-[#E31B23]" /> Organizer Brand Cover Banner
                 </span>
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10 pointer-events-none" />
           </div>
 
-          <div className="p-6 md:p-8 -mt-12 sm:-mt-14 relative z-10">
+          <div className="p-6 md:p-8 -mt-14 sm:-mt-16 relative z-10">
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
               <div className="flex flex-col sm:flex-row sm:items-end gap-5">
-                <div className="w-24 h-24 rounded-2xl bg-zinc-950 text-white text-2xl font-black flex items-center justify-center shadow-xl flex-shrink-0 border-4 border-white overflow-hidden ring-1 ring-zinc-200">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-zinc-950 text-white text-3xl font-black flex items-center justify-center shadow-xl flex-shrink-0 border-4 border-white overflow-hidden ring-1 ring-zinc-200/80">
                   {logo && !logoError ? (
                     <img 
                       src={resolveImageUrl(logo)} 
@@ -343,145 +333,103 @@ export const Profile: React.FC = () => {
                     name?.[0] || 'A'
                   )}
                 </div>
-                <div className="space-y-1 sm:mb-1">
+                <div className="space-y-1.5 sm:mb-1">
                   <div className="flex flex-wrap items-center gap-2.5">
-                  <h1 className="text-2xl font-black text-zinc-950 tracking-tight">
-                    {name}
-                  </h1>
-                  {verificationStatus === 'verified' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                      <ShieldCheck className="w-4 h-4 text-blue-600" /> Verified Host
-                    </span>
-                  )}
-                  {verificationStatus === 'pending' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                      <Clock className="w-4 h-4 text-amber-600" /> Verification Pending
-                    </span>
-                  )}
-                  {verificationStatus === 'rejected' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                      <ShieldAlert className="w-4 h-4 text-rose-600" /> Verification Rejected
-                    </span>
-                  )}
-                  {verificationStatus === 'unverified' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-bold bg-zinc-100 text-zinc-600 border border-zinc-200">
-                      <Shield className="w-4 h-4 text-zinc-400" /> Unverified
-                    </span>
-                  )}
+                    <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+                      {name}
+                    </h1>
+                    {verificationStatus === 'verified' && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs">
+                        <ShieldCheck className="w-4 h-4 text-blue-600" /> Verified Host
+                      </span>
+                    )}
+                    {verificationStatus === 'pending' && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                        <Clock className="w-4 h-4 text-amber-600" /> Verification Pending
+                      </span>
+                    )}
+                    {verificationStatus === 'rejected' && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                        <ShieldAlert className="w-4 h-4 text-rose-600" /> Verification Rejected
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-medium text-zinc-500">
+                    <span className="font-mono text-zinc-800 font-bold bg-zinc-100 px-2 py-0.5 rounded-md">@{slug}</span>
+                    <span>•</span>
+                    <span>{type === 'organization' ? 'Company / Agency' : 'Independent Host'}</span>
+                    {website && (
+                      <>
+                        <span>•</span>
+                        <a 
+                          href={website} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="text-[#E31B23] hover:underline flex items-center gap-1 font-semibold"
+                        >
+                          {website.replace(/^https?:\/\//, '')}
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <p className="text-sm font-medium text-zinc-500 flex items-center gap-2">
-                  <span className="font-mono text-zinc-700 font-bold">@{slug}</span>
-                  <span>•</span>
-                  <span>{type === 'organization' ? 'Company / Agency' : 'Independent Host'}</span>
-                </p>
+              </div>
+
+              {/* ACTION BUTTONS: Preview Public Page */}
+              <div className="flex items-center gap-2.5 sm:self-end">
+                <Link
+                  to={`/organizers/${slug}`}
+                  target="_blank"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm"
+                >
+                  <span>View Public Page</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                </Link>
               </div>
             </div>
 
-            {/* ACTION BUTTONS: Verification & Public Page Preview */}
-            <div className="flex flex-wrap items-center gap-3">
-
-              {/* BUTTON 2: Organizer Verification */}
+            {/* Navigation Tabs */}
+            <div className="flex items-center gap-1.5 sm:gap-2 pt-6 mt-6 border-t border-zinc-100 overflow-x-auto no-scrollbar py-1">
               <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('verification');
-                  if (verificationStatus !== 'verified' && verificationStatus !== 'pending') {
-                    setIsVerificationModalOpen(true);
-                  }
-                }}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all shadow-xs cursor-pointer ${
-                  verificationStatus === 'verified'
-                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
-                    : verificationStatus === 'pending'
-                    ? 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
-                    : 'bg-[#E31B23] hover:bg-[#c9141b] text-white'
+                onClick={() => setActiveTab('brand')}
+                className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
+                  activeTab === 'brand'
+                    ? 'bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950/10'
+                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100/80 bg-zinc-50/60'
                 }`}
-                title="Organizer identity & business verification"
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span>
-                  {verificationStatus === 'verified'
-                    ? 'Verified Host'
-                    : verificationStatus === 'pending'
-                    ? 'In Review'
-                    : 'Request Verification'}
-                </span>
+                <Building2 className={`w-4 h-4 ${activeTab === 'brand' ? 'text-[#E31B23]' : 'text-zinc-500'}`} />
+                <span>Brand & Identity</span>
               </button>
 
-              {/* BUTTON 3: Preview Public Page */}
-              <Link
-                to={`/organizers/${slug}`}
-                target="_blank"
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200 rounded-xl text-sm font-bold transition-all shadow-xs"
+              <button
+                onClick={() => setActiveTab('contact')}
+                className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
+                  activeTab === 'contact'
+                    ? 'bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950/10'
+                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100/80 bg-zinc-50/60'
+                }`}
               >
-                <span>Public Page</span>
-                <ExternalLink className="w-4 h-4 text-zinc-500" />
-              </Link>
+                <Share2 className={`w-4 h-4 ${activeTab === 'contact' ? 'text-[#E31B23]' : 'text-zinc-500'}`} />
+                <span>Contact & Socials</span>
+              </button>
 
-              {/* BUTTON 4: Organization Settings */}
-              <Link
-                to="/organizer/settings"
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white rounded-xl text-sm font-bold transition-all shadow-xs"
+              <button
+                onClick={() => setActiveTab('verification')}
+                className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
+                  activeTab === 'verification'
+                    ? 'bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950/10'
+                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100/80 bg-zinc-50/60'
+                }`}
               >
-                <Settings className="w-4 h-4 text-[#E31B23]" />
-                <span>Organization Settings</span>
-              </Link>
+                <ShieldCheck className={`w-4 h-4 ${activeTab === 'verification' ? 'text-blue-400' : 'text-zinc-500'}`} />
+                <span>Host Verification</span>
+                {verificationStatus === 'verified' && (
+                  <span className="w-2 h-2 rounded-full bg-blue-500" />
+                )}
+              </button>
             </div>
-          </div>
-
-          {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 pt-8 mt-8 border-t border-zinc-100 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab('brand')}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
-                activeTab === 'brand'
-                  ? 'bg-[#E31B23] text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'
-              }`}
-            >
-              <Building2 className="w-4 h-4" /> Brand & Identity
-            </button>
-
-            <button
-              onClick={() => setActiveTab('contact')}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
-                activeTab === 'contact'
-                  ? 'bg-[#E31B23] text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'
-              }`}
-            >
-              <Share2 className="w-4 h-4" /> Contact & Socials
-            </button>
-
-            <button
-              onClick={() => setActiveTab('payout')}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
-                activeTab === 'payout'
-                  ? 'bg-[#E31B23] text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'
-              }`}
-            >
-              <Landmark className="w-4 h-4" /> Payout & Banking
-            </button>
-
-            <button
-              onClick={() => setActiveTab('verification')}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
-                activeTab === 'verification'
-                  ? 'bg-[#E31B23] text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4" /> Host Verification
-            </button>
-
-            <Link
-              to="/organizer/settings"
-              className="px-5 py-2.5 rounded-xl text-sm font-bold text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50 transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ml-auto"
-            >
-              <Settings className="w-4 h-4 text-zinc-400" /> Organization Settings &rarr;
-            </Link>
-          </div>
           </div>
         </div>
 
@@ -490,11 +438,18 @@ export const Profile: React.FC = () => {
         {/* ========================================================================= */}
         {activeTab === 'brand' && (
           <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-            <div className="border-b border-zinc-100 pb-4">
-              <h2 className="text-lg font-black text-zinc-950">Organization Branding</h2>
-              <p className="text-sm font-medium text-zinc-500 mt-0.5">
-                Configure your public agency profile, bio, and visual assets displayed on event listing pages.
-              </p>
+            <div className="border-b border-zinc-100 pb-5">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-zinc-950 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <Building2 className="w-5 h-5 text-[#E31B23]" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-zinc-950">Organization Branding</h2>
+                  <p className="text-xs sm:text-sm font-medium text-zinc-500 mt-0.5">
+                    Configure your public agency profile, bio, and visual assets displayed on event listing pages.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <form onSubmit={handleSaveBrand} className="space-y-6">
@@ -507,18 +462,18 @@ export const Profile: React.FC = () => {
                   required
                 />
                 <div>
-                  <label className="block text-sm font-bold text-zinc-900 mb-1.5">
+                  <label className="block text-xs font-bold text-zinc-900 mb-1.5">
                     Custom Slug / Handle
                   </label>
-                  <div className="flex items-center">
-                    <span className="px-3.5 py-3 bg-zinc-100 border border-r-0 border-zinc-200 rounded-l-xl text-xs font-mono font-bold text-zinc-500">
+                  <div className="flex items-center shadow-2xs rounded-xl overflow-hidden">
+                    <span className="px-3.5 py-3 bg-zinc-100 border border-r-0 border-zinc-200 text-xs font-mono font-bold text-zinc-500">
                       eventa.live/@
                     </span>
                     <input
                       type="text"
                       value={slug}
                       onChange={(e) => setSlug(e.target.value)}
-                      className="flex-1 px-4 py-3 bg-white border border-zinc-200 rounded-r-xl text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
+                      className="flex-1 px-4 py-3 bg-zinc-50/50 hover:bg-white focus:bg-white border border-zinc-200 text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23] transition-all"
                     />
                   </div>
                 </div>
@@ -526,7 +481,7 @@ export const Profile: React.FC = () => {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-bold text-zinc-900">
+                  <label className="block text-xs font-bold text-zinc-900">
                     Hosting Profile Type
                   </label>
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-500 bg-zinc-100 px-2.5 py-0.5 rounded-full border border-zinc-200">
@@ -534,7 +489,7 @@ export const Profile: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 flex items-start gap-3.5">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-zinc-50 to-zinc-100/50 border border-zinc-200/80 flex items-start gap-3.5">
                   <div className="w-10 h-10 rounded-xl bg-white border border-zinc-200 flex items-center justify-center flex-shrink-0 text-zinc-700 shadow-2xs">
                     {type === 'organization' ? <Building2 className="w-5 h-5 text-[#E31B23]" /> : <Sparkles className="w-5 h-5 text-[#E31B23]" />}
                   </div>
@@ -655,11 +610,11 @@ export const Profile: React.FC = () => {
                 />
               </div>
 
-              <div className="pt-4 flex justify-end">
+              <div className="pt-4 flex justify-end border-t border-zinc-100">
                 <Button 
                   type="submit" 
                   isLoading={isLoading}
-                  className="w-full sm:w-auto px-8 py-3 text-sm font-bold"
+                  className="w-full sm:w-auto px-8 py-3 text-sm font-bold shadow-sm"
                 >
                   Save Brand Profile
                 </Button>
@@ -673,11 +628,18 @@ export const Profile: React.FC = () => {
         {/* ========================================================================= */}
         {activeTab === 'contact' && (
           <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-            <div className="border-b border-zinc-100 pb-4">
-              <h2 className="text-lg font-black text-zinc-950">Public Contact & Social Links</h2>
-              <p className="text-sm font-medium text-zinc-500 mt-0.5">
-                Contact channels displayed so attendees can reach your support and customer service team.
-              </p>
+            <div className="border-b border-zinc-100 pb-5">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-zinc-950 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <Share2 className="w-5 h-5 text-[#E31B23]" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-zinc-950">Public Contact & Social Channels</h2>
+                  <p className="text-xs sm:text-sm font-medium text-zinc-500 mt-0.5">
+                    Contact channels displayed so attendees can reach your support and customer service team.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <form onSubmit={handleSaveContact} className="space-y-6">
@@ -708,7 +670,10 @@ export const Profile: React.FC = () => {
               />
 
               <div className="pt-2">
-                <h3 className="text-sm font-bold text-zinc-900 mb-3">Social Media Profiles</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400">Social Media Profiles</h3>
+                  <span className="text-[11px] font-medium text-zinc-500">Publicly visible on your events page</span>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <Input
                     label="X / Twitter"
@@ -731,64 +696,13 @@ export const Profile: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end">
+              <div className="pt-4 flex justify-end border-t border-zinc-100">
                 <Button 
                   type="submit" 
                   isLoading={isLoading}
-                  className="w-full sm:w-auto px-8 py-3 text-sm font-bold"
+                  className="w-full sm:w-auto px-8 py-3 text-sm font-bold shadow-sm"
                 >
                   Save Contact Information
-                </Button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 3: PAYOUT & BANKING */}
-        {/* ========================================================================= */}
-        {activeTab === 'payout' && (
-          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-            <div className="border-b border-zinc-100 pb-4">
-              <h2 className="text-lg font-black text-zinc-950">Settlement Bank Account</h2>
-              <p className="text-sm font-medium text-zinc-500 mt-0.5">
-                Ticket revenue will be disbursed directly into this corporate account after event check-ins.
-              </p>
-            </div>
-
-            <form onSubmit={handleSavePayout} className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <Input
-                  label="Commercial Bank Name"
-                  value={bankName}
-                  onChange={(e) => setBankName(e.target.value)}
-                  placeholder="e.g. Zenith Bank, Access Bank, GTBank"
-                  required
-                />
-                <Input
-                  label="Settlement Account Number (NUBAN)"
-                  value={accountNumber}
-                  onChange={(e) => setAccountNumber(e.target.value)}
-                  placeholder="10-digit NUBAN account number"
-                  required
-                />
-              </div>
-
-              <Input
-                label="Registered Business Account Name"
-                value={accountName}
-                onChange={(e) => setAccountName(e.target.value)}
-                placeholder="Exact legal name matching bank statement"
-                required
-              />
-
-              <div className="pt-4 flex justify-end">
-                <Button 
-                  type="submit" 
-                  isLoading={isLoading}
-                  className="w-full sm:w-auto px-8 py-3 text-sm font-bold"
-                >
-                  Save Banking Details
                 </Button>
               </div>
             </form>
@@ -800,18 +714,23 @@ export const Profile: React.FC = () => {
         {/* ========================================================================= */}
         {activeTab === 'verification' && (
           <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
-              <div>
-                <h2 className="text-lg font-black text-zinc-950">Organizer Trust & Verification</h2>
-                <p className="text-sm font-medium text-zinc-500 mt-0.5">
-                  Verified organizers receive the blue Verified Badge, elevated search rankings, and instant payout capabilities.
-                </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-5">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-zinc-950 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <ShieldCheck className="w-5 h-5 text-blue-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-zinc-950">Organizer Trust & Verification</h2>
+                  <p className="text-xs sm:text-sm font-medium text-zinc-500 mt-0.5">
+                    Verified organizers receive the blue Verified Badge, elevated search rankings, and instant payout capabilities.
+                  </p>
+                </div>
               </div>
               {verificationStatus !== 'pending' && (
                 <button
                   type="button"
                   onClick={() => setIsVerificationModalOpen(true)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#E31B23] hover:bg-[#c9141b] text-white rounded-xl text-sm font-bold transition-all shadow-xs cursor-pointer flex-shrink-0"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#E31B23] hover:bg-[#c9141b] text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm cursor-pointer flex-shrink-0 self-start sm:self-auto"
                 >
                   <ShieldCheck className="w-4 h-4" />
                   <span>{verificationStatus === 'verified' ? 'Update Documents / Re-verify' : 'Submit Verification Request'}</span>
@@ -821,9 +740,9 @@ export const Profile: React.FC = () => {
 
             {/* STATUS 1: VERIFIED */}
             {verificationStatus === 'verified' && (
-              <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="p-6 bg-gradient-to-r from-emerald-50 to-emerald-50/30 border border-emerald-200 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-emerald-600 text-white rounded-xl flex-shrink-0">
+                  <div className="p-3 bg-emerald-600 text-white rounded-xl flex-shrink-0 shadow-sm">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <div className="space-y-1">
@@ -833,7 +752,7 @@ export const Profile: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <span className="px-3 py-1 bg-emerald-200/60 text-emerald-900 rounded-full text-xs font-black uppercase tracking-wider flex-shrink-0">
+                <span className="px-3.5 py-1 bg-emerald-200/70 text-emerald-950 rounded-full text-xs font-black uppercase tracking-wider flex-shrink-0 border border-emerald-300">
                   Active Verified Badge
                 </span>
               </div>
@@ -842,7 +761,7 @@ export const Profile: React.FC = () => {
             {/* STATUS 2: PENDING REVIEW */}
             {verificationStatus === 'pending' && (
               <div className="p-6 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-4">
-                <div className="p-3 bg-amber-500 text-white rounded-xl flex-shrink-0 animate-pulse">
+                <div className="p-3 bg-amber-500 text-white rounded-xl flex-shrink-0 animate-pulse shadow-sm">
                   <Clock className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
@@ -858,7 +777,7 @@ export const Profile: React.FC = () => {
             {verificationStatus === 'rejected' && (
               <div className="p-6 bg-rose-50 border border-rose-200 rounded-2xl flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-rose-600 text-white rounded-xl flex-shrink-0">
+                  <div className="p-3 bg-rose-600 text-white rounded-xl flex-shrink-0 shadow-sm">
                     <ShieldAlert className="w-6 h-6" />
                   </div>
                   <div className="space-y-1">
@@ -871,7 +790,7 @@ export const Profile: React.FC = () => {
                 </div>
                 <Button
                   onClick={() => setIsVerificationModalOpen(true)}
-                  className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold"
+                  className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm"
                 >
                   Resubmit Application
                 </Button>
@@ -880,9 +799,9 @@ export const Profile: React.FC = () => {
 
             {/* STATUS 4: UNVERIFIED */}
             {verificationStatus === 'unverified' && (
-              <div className="p-6 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="p-6 bg-gradient-to-br from-zinc-50 to-zinc-100/50 border border-zinc-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-zinc-900 text-white rounded-xl flex-shrink-0">
+                  <div className="p-3 bg-zinc-900 text-white rounded-xl flex-shrink-0 shadow-sm">
                     <Shield className="w-6 h-6 text-[#E31B23]" />
                   </div>
                   <div className="space-y-1">
@@ -894,7 +813,7 @@ export const Profile: React.FC = () => {
                 </div>
                 <Button
                   onClick={() => setIsVerificationModalOpen(true)}
-                  className="bg-[#E31B23] hover:bg-[#c9141b] text-white text-xs font-bold flex-shrink-0"
+                  className="bg-[#E31B23] hover:bg-[#c9141b] text-white text-xs font-bold flex-shrink-0 shadow-sm"
                 >
                   Start Verification
                 </Button>
@@ -903,28 +822,28 @@ export const Profile: React.FC = () => {
 
             {/* Verification Credentials Card Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-2xl space-y-1">
-                <span className="text-xs text-zinc-400 font-bold uppercase">Business Reg.</span>
+              <div className="p-5 bg-zinc-50/70 border border-zinc-200/80 rounded-2xl space-y-1.5 shadow-2xs">
+                <span className="text-[11px] text-zinc-400 font-black uppercase tracking-wider">Business Reg.</span>
                 <p className="text-sm font-black text-zinc-950">{verifRegNumber || 'Not Provided'}</p>
-                <span className={`text-[10px] font-bold ${verificationStatus === 'verified' ? 'text-emerald-600' : 'text-zinc-500'}`}>
+                <span className={`text-[11px] font-bold ${verificationStatus === 'verified' ? 'text-emerald-600' : 'text-zinc-500'}`}>
                   {verificationStatus === 'verified' ? 'Approved & Validated' : 'Pending Submission'}
                 </span>
               </div>
 
-              <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-2xl space-y-1">
-                <span className="text-xs text-zinc-400 font-bold uppercase">Bank Settlement</span>
-                <p className="text-sm font-black text-zinc-950">{bankName ? `${bankName} ••••${accountNumber.slice(-4)}` : 'Not Linked'}</p>
-                <span className={`text-[10px] font-bold ${accountNumber ? 'text-emerald-600' : 'text-zinc-500'}`}>
-                  {accountNumber ? 'Connected' : 'No Account Connected'}
+              <div className="p-5 bg-zinc-50/70 border border-zinc-200/80 rounded-2xl space-y-1.5 shadow-2xs">
+                <span className="text-[11px] text-zinc-400 font-black uppercase tracking-wider">Corporate Contact</span>
+                <p className="text-sm font-black text-zinc-950 truncate">{email || phone || "Direct Contact"}</p>
+                <span className={`text-[11px] font-bold ${email ? "text-emerald-600" : "text-zinc-500"}`}>
+                  {email ? "Official Contact Linked" : "No Contact Provided"}
                 </span>
               </div>
 
-              <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-2xl space-y-1">
-                <span className="text-xs text-zinc-400 font-bold uppercase">Trust Status</span>
+              <div className="p-5 bg-zinc-50/70 border border-zinc-200/80 rounded-2xl space-y-1.5 shadow-2xs">
+                <span className="text-[11px] text-zinc-400 font-black uppercase tracking-wider">Trust Status</span>
                 <p className="text-sm font-black text-zinc-950">
                   {verificationStatus === 'verified' ? 'Verified Host' : verificationStatus === 'pending' ? 'Review In Progress' : 'Unverified'}
                 </p>
-                <span className={`text-[10px] font-bold ${verificationStatus === 'verified' ? 'text-emerald-600' : 'text-zinc-500'}`}>
+                <span className={`text-[11px] font-bold ${verificationStatus === 'verified' ? 'text-emerald-600' : 'text-zinc-500'}`}>
                   {verificationStatus === 'verified' ? 'Tier 1 Trusted Partner' : 'Standard Account'}
                 </span>
               </div>
@@ -932,23 +851,23 @@ export const Profile: React.FC = () => {
 
             {/* Verification Checklist Requirements */}
             <div className="pt-4 border-t border-zinc-100">
-              <h3 className="text-sm font-bold text-zinc-900 mb-3">Verification Compliance Checklist</h3>
+              <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-3">Verification Compliance Checklist</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-xl border border-zinc-200/80">
+                <div className="flex items-center gap-2.5 p-3.5 bg-zinc-50/80 rounded-xl border border-zinc-200/80">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="font-medium text-zinc-700">Corporate CAC Certificate of Incorporation</span>
+                  <span className="font-semibold text-zinc-800">Corporate CAC Certificate of Incorporation</span>
                 </div>
-                <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-xl border border-zinc-200/80">
+                <div className="flex items-center gap-2.5 p-3.5 bg-zinc-50/80 rounded-xl border border-zinc-200/80">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="font-medium text-zinc-700">Director / Principal Government Photo ID</span>
+                  <span className="font-semibold text-zinc-800">Director / Principal Government Photo ID</span>
                 </div>
-                <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-xl border border-zinc-200/80">
+                <div className="flex items-center gap-2.5 p-3.5 bg-zinc-50/80 rounded-xl border border-zinc-200/80">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="font-medium text-zinc-700">Proof of Commercial Headquarters / Utility Bill</span>
+                  <span className="font-semibold text-zinc-800">Proof of Commercial Headquarters / Utility Bill</span>
                 </div>
-                <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-xl border border-zinc-200/80">
+                <div className="flex items-center gap-2.5 p-3.5 bg-zinc-50/80 rounded-xl border border-zinc-200/80">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="font-medium text-zinc-700">Authenticated Business Settlement Account</span>
+                  <span className="font-semibold text-zinc-800">Authenticated Business Settlement Account</span>
                 </div>
               </div>
             </div>

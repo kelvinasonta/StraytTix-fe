@@ -26,8 +26,6 @@ import {
   Check,
   FileText,
   Clock,
-  ShieldCheck,
-  Eye,
   Compass,
   CheckCircle2,
   Copy,
@@ -535,11 +533,34 @@ export const CreateEvent: React.FC = () => {
   const [createdEventId, setCreatedEventId] = useState<string | null>(id || null);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedSlug, setCopiedSlug] = useState(false);
+  const formTopRef = useRef<HTMLDivElement>(null);
+
+  // When step changes, instantly reset scroll to the very top so it feels like a fresh page
+  useEffect(() => {
+    // 1. Immediate instant reset
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // 2. Fallback check for any scrollable parent container in dashboard layout
+    const mainScrollParent = document.querySelector('main') || document.documentElement;
+    if (mainScrollParent) {
+      mainScrollParent.scrollTop = 0;
+    }
+
+    // 3. Smooth anchor onto the stepper / header
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (formTopRef.current) {
+        formTopRef.current.scrollIntoView({ behavior: 'auto', block: 'start' });
+      }
+    });
+  }, [step]);
 
   // Form states
   // Step 1: Basic Info & Branding
-  const [title, setTitle] = useState('Global Tech Summit 2026');
-  const [description, setDescription] = useState('Annual flagship conference covering cloud architectures, AI, and distributed systems.');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
 
 
   // Step 2: Location
@@ -572,44 +593,16 @@ export const CreateEvent: React.FC = () => {
   const [scheduleType, setScheduleType] = useState<'single' | 'recurring'>('single');
   const [scheduleTimezone, setScheduleTimezone] = useState('Africa/Lagos');
   const [eventFrequency, setEventFrequency] = useState('weekly');
-  const [startDate, setStartDate] = useState('2026-10-15');
+  const [startDate, setStartDate] = useState('');
   const [startTime, setStartTime] = useState('09:00');
-  const [endDate, setEndDate] = useState('2026-10-15');
+  const [endDate, setEndDate] = useState('');
   const [endTime, setEndTime] = useState('17:00');
   const [recurringEndType, setRecurringEndType] = useState('after_occurrences');
   const [recurringOccurrences, setRecurringOccurrences] = useState<number>(4);
 
-  const [schedules, setSchedules] = useState<ScheduleSession[]>([
-    {
-      day: 'Day 1',
-      title: 'Keynote & Architecture Overview',
-      description: 'Opening keynote and state of modern backend systems.',
-      startTime: '09:00',
-      endTime: '11:00'
-    },
-    {
-      day: 'Day 1',
-      title: 'Breakout Technical Sessions',
-      description: 'Deep-dives into database optimizations.',
-      startTime: '11:30',
-      endTime: '13:30'
-    }
-  ]);
+  const [schedules, setSchedules] = useState<ScheduleSession[]>([]);
 
-  const [lineup, setLineup] = useState<LineupMember[]>([
-    {
-      name: 'Alex Mercer',
-      role: 'Lead Architect',
-      bio: 'Distinguished systems engineer specializing in high-throughput engines.',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
-      links: [
-        {
-          platform: 'github',
-          url: 'https://github.com/alexmercer'
-        }
-      ]
-    }
-  ]);
+  const [lineup, setLineup] = useState<LineupMember[]>([]);
 
   const [openAvatarPickerIdx, setOpenAvatarPickerIdx] = useState<number | null>(null);
   const [showUrlInputIdx, setShowUrlInputIdx] = useState<number | null>(null);
@@ -633,8 +626,8 @@ export const CreateEvent: React.FC = () => {
 
   // Event status message state
   const [statusMessageType, setStatusMessageType] = useState<'none' | 'pre_sale' | 'post_sales'>('none');
-  const [preSaleMessage, setPreSaleMessage] = useState('Tickets will go on sale soon. Join the waitlist to be notified when sales begin!');
-  const [postSaleMessage, setPostSaleMessage] = useState('Ticket sales have ended. Thank you for your interest and support!');
+  const [preSaleMessage, setPreSaleMessage] = useState('');
+  const [postSaleMessage, setPostSaleMessage] = useState('');
 
 
 
@@ -849,13 +842,13 @@ export const CreateEvent: React.FC = () => {
   // Step 5: Appearance & Branding
 
   const [eventFormat, setEventFormat] = useState('Conference');
-  const [eventCategories, setEventCategories] = useState<string[]>(['Technology', 'Cloud', 'AI']);
+  const [eventCategories, setEventCategories] = useState<string[]>([]);
   const [customCategoryInput, setCustomCategoryInput] = useState('');
-  const category = useMemo(() => eventCategories[0] || 'Technology', [eventCategories]);
+  const category = useMemo(() => eventCategories[0] || 'General', [eventCategories]);
   const [visibility, setVisibility] = useState<'public' | 'private'>('public');
-  const [isFeatured, setIsFeatured] = useState<boolean>(true);
+  const [isFeatured, setIsFeatured] = useState<boolean>(false);
 
-  const [imageUrl, setImageUrl] = useState('https://images.unsplash.com/photo-1540575467063-178a50c2df87');
+  const [imageUrl, setImageUrl] = useState('');
   const [bannerStyle, setBannerStyle] = useState<HeroBannerStyle>('cinematic');
   const [coverMode, setCoverMode] = useState<'upload' | 'preset' | 'url'>('preset');
   const [coverFileName, setCoverFileName] = useState<string>('');
@@ -1309,38 +1302,54 @@ export const CreateEvent: React.FC = () => {
 
   return (
     <OrganizerDashboardLayout>
-      <div className="space-y-8 w-full max-w-7xl mx-auto pb-16">
+      <div className="space-y-8 w-full max-w-6xl mx-auto pb-16">
 
         {/* ========================================================================= */}
         {/* 1. STUDIO HEADER */}
         {/* ========================================================================= */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200/80 pb-6">
-          <div className="space-y-1.5">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 tracking-tight">
-              Create New Event
-            </h1>
-            <p className="text-zinc-500 text-xs sm:text-sm font-medium">
-              Configure ticketing tiers, dates, venue access, and launch your experience across the marketplace.
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-zinc-400">
+              <Link to="/organizer/events" className="hover:text-zinc-900 transition-colors flex items-center gap-1">
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Events</span>
+              </Link>
+              <span>/</span>
+              <span className="text-zinc-700">{isEditing ? 'Edit Event' : 'Create Event'}</span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+                {isEditing ? 'Edit Event Studio' : 'Create New Event'}
+              </h1>
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-zinc-100 text-zinc-600 border border-zinc-200/80">
+                Step {step} of 5
+              </span>
+            </div>
+
+            <p className="text-zinc-500 text-xs sm:text-sm font-medium max-w-2xl leading-relaxed">
+              Define the event schedule, pin venue directions, customize attendee branding, and prepare your ticketing launch.
             </p>
           </div>
 
           {/* Quick Header Actions */}
-          <div className="flex items-center gap-2.5 self-start md:self-auto">
+          <div className="flex items-center gap-2.5 self-start md:self-center">
             <button
               onClick={() => handlePublish('Draft')}
               disabled={isLoading}
-              className="px-4 py-2.5 rounded-xl border border-zinc-300 hover:bg-zinc-100 text-zinc-700 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+              className="px-4 py-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 text-zinc-800 text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
             >
-              Save Draft
+              <FileText className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Save Draft</span>
             </button>
 
             {perms.canPublishEvents && (
               <button
                 onClick={() => handlePublish('Published')}
                 disabled={isLoading}
-                className="px-5 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-black shadow-sm hover:shadow transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
               >
-                {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Rocket className="w-3.5 h-3.5" />}
                 <span>{isEditing ? 'Update & Publish' : 'Publish Live'}</span>
               </button>
             )}
@@ -1350,8 +1359,8 @@ export const CreateEvent: React.FC = () => {
         {/* ========================================================================= */}
         {/* 2. PROGRESS PIPELINE / STEPPER BAR */}
         {/* ========================================================================= */}
-        <div className="bg-white border border-zinc-200/80 rounded-2xl p-3 shadow-xs overflow-x-auto scrollbar-none">
-          <div className="flex items-center min-w-[700px] justify-between gap-2">
+        <div ref={formTopRef} className="scroll-mt-6 bg-white border border-zinc-200/80 rounded-2xl p-2.5 shadow-xs overflow-x-auto scrollbar-none">
+          <div className="flex items-center min-w-[700px] justify-between gap-1.5">
             {STEPS.map((s, idx) => {
               const Icon = s.icon;
               const isDone = step > s.id;
@@ -1362,34 +1371,38 @@ export const CreateEvent: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleStepClick(s.id)}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-left ${isCurrent
-                      ? 'bg-zinc-950 text-white shadow-xs cursor-default'
+                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-left flex-1 ${isCurrent
+                      ? 'bg-zinc-950 text-white shadow-sm cursor-default ring-1 ring-zinc-950'
                       : isDone
-                        ? 'bg-red-50 text-[#E31B23] hover:bg-red-100 cursor-pointer'
+                        ? 'bg-zinc-50 hover:bg-zinc-100/90 text-zinc-900 border border-zinc-200/70 cursor-pointer'
                         : isStepAccessible(s.id)
-                          ? 'text-zinc-600 hover:bg-zinc-50 cursor-pointer'
-                          : 'text-zinc-400 opacity-50 cursor-not-allowed'
+                          ? 'text-zinc-600 hover:bg-zinc-50 border border-transparent cursor-pointer'
+                          : 'text-zinc-400 opacity-45 cursor-not-allowed border border-transparent'
                       }`}
                   >
-                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0 ${isCurrent
-                      ? 'bg-[#E31B23] text-white'
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0 transition-colors ${isCurrent
+                      ? 'bg-[#E31B23] text-white shadow-xs'
                       : isDone
-                        ? 'bg-[#E31B23] text-white'
+                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                         : 'bg-zinc-100 text-zinc-400'
                       }`}>
-                      {isDone ? <Check className="w-4 h-4 stroke-[3]" /> : <Icon className="w-4 h-4" />}
+                      {isDone ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Icon className="w-3.5 h-3.5" />}
                     </div>
                     <div className="min-w-0 pr-1">
-                      <span className="text-xs font-black block leading-none">{s.label}</span>
-                      <span className={`text-[10px] font-medium block mt-0.5 truncate ${isCurrent ? 'text-zinc-400' : 'text-zinc-400'
-                        }`}>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] font-black uppercase tracking-wider ${isCurrent ? 'text-zinc-400' : isDone ? 'text-emerald-600' : 'text-zinc-400'}`}>
+                          0{s.id}
+                        </span>
+                        <span className="text-xs font-black block leading-none truncate">{s.label}</span>
+                      </div>
+                      <span className={`text-[11px] font-medium block mt-1 truncate ${isCurrent ? 'text-zinc-300' : 'text-zinc-500'}`}>
                         {s.subtitle}
                       </span>
                     </div>
                   </button>
 
                   {idx < STEPS.length - 1 && (
-                    <ChevronRight className="w-4 h-4 text-zinc-300 flex-shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-zinc-300 flex-shrink-0 mx-0.5" />
                   )}
                 </React.Fragment>
               );
@@ -1398,49 +1411,57 @@ export const CreateEvent: React.FC = () => {
         </div>
 
         {/* ========================================================================= */}
-        {/* 3. MAIN SPLIT STUDIO: LEFT FORM & RIGHT LIVE PREVIEW */}
+        {/* 3. STEPPER FORM PANELS */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="max-w-5xl mx-auto w-full space-y-6">
 
-          {/* ================= LEFT COLUMN: STEPPER FORM PANELS (7 cols) ================= */}
-          <div className="lg:col-span-7 xl:col-span-7 space-y-6">
-
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div
+            key={step}
+            className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-9 md:p-10 shadow-xs space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-200"
+          >
 
               {/* STEP 1: ESSENTIALS */}
               {step === 1 && (
-                <div className="space-y-6 animate-in fade-in duration-200">
+                <div className="space-y-7">
                   <div className="border-b border-zinc-100 pb-4">
-                    <h3 className="text-lg font-black text-zinc-950 tracking-tight">
-                      Event Details
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#E31B23]">Phase 01</span>
+                    <h3 className="text-xl font-black text-zinc-950 tracking-tight mt-0.5">
+                      Event Essentials & Details
                     </h3>
+                    <p className="text-xs text-zinc-500 mt-1 font-medium">
+                      Provide the core identity, discovery keywords, format, and description for your event.
+                    </p>
                   </div>
 
                   {/* Name */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-zinc-800">Event Name *</label>
-                      <span className="text-[11px] text-zinc-400 font-mono">{title.length}/100</span>
+                      <label className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
+                        <span>Event Name</span>
+                        <span className="text-[#E31B23] font-bold">*</span>
+                      </label>
+                      <span className="text-[11px] text-zinc-400 font-mono font-medium">{title.length}/100</span>
                     </div>
                     <input
                       type="text"
                       maxLength={100}
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      placeholder="e.g. Global Tech Summit 2026"
-                      className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-sm font-bold text-zinc-950 placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white transition-all shadow-2xs"
+                      placeholder="e.g. Lagos Tech Fest 2026, Afro Nation, AI DevCon..."
+                      className="w-full px-4 py-3 bg-zinc-50/80 hover:bg-zinc-50 border border-zinc-200 focus:border-[#E31B23] focus:bg-white rounded-2xl text-sm font-bold text-zinc-950 placeholder-zinc-400 outline-none transition-all shadow-2xs focus:ring-3 focus:ring-red-500/10"
                       required
                     />
                   </div>
 
                   {/* Event Format Selector */}
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
                         <Layers className="w-3.5 h-3.5 text-[#E31B23]" />
-                        <span>Event Format *</span>
+                        <span>Event Format</span>
+                        <span className="text-[#E31B23] font-bold">*</span>
                       </label>
-                      <span className="text-[11px] font-semibold text-zinc-400">Selected: {eventFormat}</span>
+                      <span className="text-[11px] font-semibold text-zinc-500">Selected: <strong className="text-zinc-900">{eventFormat}</strong></span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                       {EVENT_FORMATS.map((fmt) => {
@@ -2516,25 +2537,28 @@ export const CreateEvent: React.FC = () => {
 
               {/* STEP 5: APPEARANCE & BRANDING */}
               {step === 5 && (
-                <div className="space-y-6 animate-in fade-in duration-200">
+                <div className="space-y-7 animate-in fade-in duration-200">
                   <div className="border-b border-zinc-100 pb-4">
-                    <h3 className="text-lg font-black text-zinc-950 tracking-tight">
-                      Appearance & Branding
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#E31B23]">Phase 05</span>
+                    <h3 className="text-xl font-black text-zinc-950 tracking-tight mt-0.5">
+                      Appearance, Flyer & Status
                     </h3>
-                    <p className="text-xs text-zinc-500 mt-0.5">
-                      Customise your event flyer, banner, and public presentation.
+                    <p className="text-xs text-zinc-500 mt-1 font-medium">
+                      Upload your high-res event flyer, select presentation theme, and configure pre/post sale messaging.
                     </p>
                   </div>
 
                   {/* Pre-Ticketing Creation Notice Banner */}
-                  <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3 shadow-2xs">
-                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                    <div className="space-y-0.5">
+                  <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/90 flex items-start gap-3 shadow-2xs">
+                    <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 flex-shrink-0 mt-0.5">
+                      <Ticket className="w-4 h-4" />
+                    </div>
+                    <div className="space-y-1">
                       <h5 className="text-xs font-black text-amber-950 uppercase tracking-wide">
-                        Automatic Event Draft Creation
+                        Ticketing & Inventory Workflow
                       </h5>
-                      <p className="text-xs text-amber-900 font-medium leading-relaxed">
-                        When you proceed to Step 6, your event details and branding will be saved as a <span className="font-bold">Draft</span> on the server so that your ticket tiers can be attached directly to this live event ID.
+                      <p className="text-xs text-amber-900/90 font-medium leading-relaxed">
+                        When you save or publish your event, you will seamlessly land in the <strong>Event Command Hub</strong> where you can configure ticket tiers, VIP pricing, attendee checkout questions, and promo codes.
                       </p>
                     </div>
                   </div>
@@ -3075,18 +3099,20 @@ export const CreateEvent: React.FC = () => {
               )}
 
               {/* Stepper Navigation Buttons */}
-              <div className="flex justify-between items-center border-t border-zinc-100 pt-5">
+              <div className="flex justify-between items-center border-t border-zinc-100 pt-6 mt-2">
                 {step > 1 ? (
                   <button
                     type="button"
                     onClick={() => setStep(prev => prev - 1)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50 transition-all cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 transition-all cursor-pointer shadow-2xs active:scale-[0.99]"
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft className="w-3.5 h-3.5 text-zinc-500" />
                     <span>Back</span>
                   </button>
                 ) : (
-                  <div />
+                  <div className="text-[11px] font-semibold text-zinc-400">
+                    Step 1 of 5
+                  </div>
                 )}
 
                 {step < 5 ? (
@@ -3094,20 +3120,20 @@ export const CreateEvent: React.FC = () => {
                     {step === 1 && !isStep1Complete && (
                       <span className="text-[11px] font-semibold text-amber-600 flex items-center gap-1.5 animate-pulse">
                         <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>Fill name & story to proceed</span>
+                        <span>Name & description required</span>
                       </span>
                     )}
                     <button
                       type="button"
                       onClick={handleProceedNext}
                       disabled={isLoading || (step === 1 && !isStep1Complete)}
-                      className={`inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl shadow-xs transition-all ${step === 1 && !isStep1Complete
-                        ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed border border-zinc-200 shadow-none'
-                        : 'bg-zinc-950 hover:bg-zinc-800 text-white cursor-pointer active:scale-98'
+                      className={`inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl transition-all ${step === 1 && !isStep1Complete
+                        ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed border border-zinc-200 shadow-none'
+                        : 'bg-zinc-950 hover:bg-zinc-800 text-white cursor-pointer shadow-sm hover:shadow active:scale-[0.99]'
                         }`}
                     >
-                      <span>Proceed to {STEPS[step]?.label || 'Next'}</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <span>Continue to {STEPS[step]?.label || 'Next'}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ) : (
@@ -3116,188 +3142,6 @@ export const CreateEvent: React.FC = () => {
               </div>
 
             </div>
-          </div>
-
-          {/* ================= RIGHT COLUMN: INTERACTIVE REAL-TIME PREVIEW (5 cols) ================= */}
-          <div className="lg:col-span-5 xl:col-span-5 space-y-6 sticky top-24">
-
-            {/* Preview Box Card */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-5 sm:p-6 shadow-xl space-y-5">
-
-              {/* Preview Header Tabs */}
-              <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-[#E31B23]" />
-                  <span className="text-xs font-black text-zinc-950 uppercase tracking-wide">Live Preview</span>
-                </div>
-
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-zinc-100 text-zinc-600">
-                  Marketplace Card
-                </span>
-              </div>
-
-              {/* MARKETPLACE CARD PREVIEW */}
-              <div className="border border-zinc-200 rounded-2xl overflow-hidden shadow-xs bg-white transition-all">
-                {/* Hero Cover */}
-                <div className="relative h-44 w-full bg-zinc-900 overflow-hidden">
-                  <img
-                    src={imageUrl || PRESET_COVERS[0].url}
-                    alt="Event cover"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/95 text-zinc-950 shadow-xs">
-                      {eventFormat || category}
-                    </span>
-                    {isFeatured && (
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#E31B23] text-white flex items-center gap-1 shadow-xs">
-                        <Sparkles className="w-3 h-3 fill-white" />
-                        <span>Spotlight</span>
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="absolute bottom-2.5 right-2.5">
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-black/60 text-white backdrop-blur-md">
-                      {locationType === 'online' ? 'Virtual or Online Event' : 'Venue'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Content snippet */}
-                <div className="p-4 space-y-3">
-                  <div>
-                    <div className="flex items-center justify-between gap-1 flex-wrap">
-                      <span className="text-[11px] font-black text-[#E31B23] uppercase tracking-wide">
-                        {startDate ? formatEventDateTime(startDate, startTime) : 'Date To Be Announced'}
-                      </span>
-                      {scheduleType === 'recurring' && (
-                        <span className="text-[10px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-md">
-                          Recurring {eventFrequency}
-                        </span>
-                      )}
-                    </div>
-                    <h4 className="text-base font-black text-zinc-950 line-clamp-1 mt-0.5">
-                      {title || 'Your Event Title Will Appear Here'}
-                    </h4>
-
-                    {/* Category tag chips in preview */}
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {eventCategories.slice(0, 3).map((cat) => (
-                        <span key={cat} className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 text-zinc-700 rounded-md">
-                          #{cat}
-                        </span>
-                      ))}
-                      {eventCategories.length > 3 && (
-                        <span className="text-[10px] font-medium text-zinc-400 self-center">
-                          +{eventCategories.length - 3} more
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-xs text-zinc-500 flex items-center gap-1 mt-2">
-                      {locationType === 'physical' ? (
-                        <>
-                          <MapPin className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
-                          <span className="truncate">
-                            {[venue, streetAddress, city].filter(Boolean).join(', ') || 'Venue Address, City'}
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <Video className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
-                          <span className="truncate">Virtual or Online Event</span>
-                        </>
-                      )}
-                      {locationType === 'physical' && latitude && longitude && (
-                        <span className="text-[9px] font-black uppercase text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 ml-auto flex-shrink-0">
-                          GPS Pin
-                        </span>
-                      )}
-                    </p>
-
-                    {/* Agenda & Speaker summary counters in preview */}
-                    {(schedules.length > 0 || lineup.length > 0) && (
-                      <div className="flex items-center gap-3 pt-2 text-[11px] font-bold text-zinc-500">
-                        {schedules.length > 0 && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-zinc-400" />
-                            <span>{schedules.length} Session{schedules.length > 1 ? 's' : ''}</span>
-                          </span>
-                        )}
-                        {lineup.length > 0 && (
-                          <span className="flex items-center gap-1">
-                            <Users className="w-3 h-3 text-zinc-400" />
-                            <span>{lineup.length} Speaker{lineup.length > 1 ? 's' : ''}</span>
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="pt-2.5 border-t border-zinc-100 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[11px] font-bold text-zinc-500">
-                        {isFeatured ? 'Spotlight Marketplace' : 'Standard Marketplace'}
-                      </span>
-                    </div>
-
-                    <span className="px-3 py-1.5 rounded-xl bg-zinc-950 text-white text-[11px] font-bold">
-                      Live Preview &rarr;
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Event Command Hub Handoff Telemetry */}
-              <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3 text-xs">
-                <div className="flex items-center justify-between font-bold text-zinc-950 border-b border-zinc-200/80 pb-2">
-                  <span className="text-[11px] uppercase tracking-wider text-zinc-500">Event Snapshot</span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] bg-red-100 text-[#E31B23]">
-                    Step {step} of 5
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5 text-[11px]">
-                  <div className="text-zinc-600">
-                    <span className="text-zinc-400 block text-[10px] uppercase font-bold">Format</span>
-                    <span className="font-bold text-zinc-900">{eventFormat}</span>
-                  </div>
-                  <div className="text-zinc-600">
-                    <span className="text-zinc-400 block text-[10px] uppercase font-bold">Country</span>
-                    <span className="font-bold text-zinc-900">{country}</span>
-                  </div>
-                  <div className="text-zinc-600">
-                    <span className="text-zinc-400 block text-[10px] uppercase font-bold">Schedule Type</span>
-                    <span className="font-bold text-zinc-900 capitalize">{scheduleType}</span>
-                  </div>
-                  <div className="text-zinc-600">
-                    <span className="text-zinc-400 block text-[10px] uppercase font-bold">Readiness</span>
-                    <span className="font-black text-emerald-600">{readinessPercentage}%</span>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-white border border-zinc-200/90 text-[11px] text-zinc-600 flex items-start gap-2.5 shadow-2xs">
-                  <Ticket className="w-4 h-4 text-[#E31B23] flex-shrink-0 mt-0.5" />
-                  <p className="leading-relaxed">
-                    Ticket tiers, quantities, attendee registration questions, and refund rules are configured directly in your <strong>Event Command Hub</strong> after saving.
-                  </p>
-                </div>
-              </div>
-
-              {/* Security Seal */}
-              <div className="text-center">
-                <span className="text-[11px] font-bold text-zinc-400 inline-flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>256-Bit SSL Encrypted Marketplace</span>
-                </span>
-              </div>
-
-            </div>
-
-          </div>
-
         </div>
 
       </div>

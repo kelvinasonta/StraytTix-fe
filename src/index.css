@@ -1,7 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
   --color-brand-bg: #f8f9fb;
   --color-brand-surface: #ffffff;
   --color-brand-surface-light: #f3f4f6;
@@ -18,17 +20,26 @@ body,
 #root {
   background-color: var(--color-brand-bg);
   color: var(--color-brand-text);
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   min-height: 100svh;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, h4, .font-display {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -0.02em;
+/* Headings font styling across every page */
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: var(--font-sans);
+  letter-spacing: -0.025em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+/* Monospace code, metadata, tags */
+code, kbd, samp, pre, .font-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum', 'zero';
 }
 
 /* Custom scrollbars matching premium light theme */
