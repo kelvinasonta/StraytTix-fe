@@ -1,0 +1,27 @@
+name: Guard Main PRs
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  block-direct-prs-to-main:
+    name: Restrict PRs into main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate that PR source branch is staging
+        run: |
+          TARGET="${{ github.base_ref }}"
+          SOURCE="${{ github.head_ref }}"
+
+          echo "Target branch: $TARGET"
+          echo "Source branch: $SOURCE"
+
+          if [ "$SOURCE" != "staging" ]; then
+            echo "::error title=PR Rejected::Pull Requests into 'main' are forbidden! You must submit your Pull Request to 'staging'."
+            echo "❌ Pull Requests to 'main' can ONLY come from 'staging'."
+            exit 1
+          fi
+
+          echo "✅ PR is coming from 'staging'. Allowed."
