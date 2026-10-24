@@ -13,7 +13,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   currency_id: null,
 };
 
-const SETTINGS_STORAGE_KEY = 'eventsos_app_settings';
+const SETTINGS_STORAGE_KEY = 'strayttix_app_settings';
 
 interface SettingsContextType {
   settings: AppSettings;
@@ -46,7 +46,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (appSettings.sitename) {
       const currentTitle = document.title;
       // If title includes separator or contains generic name, update
-      if (!currentTitle || currentTitle.includes('Eventa') || currentTitle.includes('Eventra') || currentTitle.includes('EventsOS')) {
+      if (!currentTitle || currentTitle.includes('Eventa') || currentTitle.includes('Eventra') || currentTitle.includes('StraytTix')) {
         document.title = appSettings.site_tagline
           ? `${appSettings.sitename} — ${appSettings.site_tagline}`
           : `${appSettings.sitename} — Discover Amazing Events & Ticketing Platform`;

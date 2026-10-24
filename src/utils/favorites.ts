@@ -1,7 +1,7 @@
-export const FAVORITES_UPDATED_EVENT = 'eventsos_favorites_updated';
+export const FAVORITES_UPDATED_EVENT = 'strayttix_favorites_updated';
 
 export const getFavoritesStorageKey = (userId?: string): string => {
-  return userId ? `eventsos_favorites_${userId}` : 'eventsos_favorites_guest';
+  return userId ? `strayttix_favorites_${userId}` : 'strayttix_favorites_guest';
 };
 
 const notifyFavoritesChanged = (userId?: string) => {

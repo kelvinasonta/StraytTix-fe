@@ -1,6 +1,6 @@
-const TOKEN_KEY = 'eventsos_auth_token';
-const USER_KEY = 'eventsos_auth_user';
-const REMEMBER_KEY = 'eventsos_auth_remember';
+const TOKEN_KEY = 'strayttix_auth_token';
+const USER_KEY = 'strayttix_auth_user';
+const REMEMBER_KEY = 'strayttix_auth_remember';
 
 export const tokenStorage = {
   getToken(): string | null {
@@ -61,21 +61,21 @@ export const tokenStorage = {
   },
 
   getActiveOrganizerUuid(): string | null {
-    return localStorage.getItem('eventsos_active_organizer_uuid') || sessionStorage.getItem('eventsos_active_organizer_uuid');
+    return localStorage.getItem('strayttix_active_organizer_uuid') || sessionStorage.getItem('strayttix_active_organizer_uuid');
   },
 
   setActiveOrganizerUuid(uuid: string, remember: boolean): void {
     if (remember) {
-      localStorage.setItem('eventsos_active_organizer_uuid', uuid);
-      sessionStorage.removeItem('eventsos_active_organizer_uuid');
+      localStorage.setItem('strayttix_active_organizer_uuid', uuid);
+      sessionStorage.removeItem('strayttix_active_organizer_uuid');
     } else {
-      sessionStorage.setItem('eventsos_active_organizer_uuid', uuid);
-      localStorage.removeItem('eventsos_active_organizer_uuid');
+      sessionStorage.setItem('strayttix_active_organizer_uuid', uuid);
+      localStorage.removeItem('strayttix_active_organizer_uuid');
     }
   },
 
   clearActiveOrganizerUuid(): void {
-    localStorage.removeItem('eventsos_active_organizer_uuid');
-    sessionStorage.removeItem('eventsos_active_organizer_uuid');
+    localStorage.removeItem('strayttix_active_organizer_uuid');
+    sessionStorage.removeItem('strayttix_active_organizer_uuid');
   }
 };

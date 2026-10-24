@@ -1097,7 +1097,7 @@ export const TeamMembers: React.FC = () => {
                   <div>
                     <p className="text-xs font-bold text-zinc-900">Grant Mobile QR Ticket Scanning Permissions</p>
                     <p className="text-[11px] font-normal text-zinc-500 mt-0.5">
-                      Allows this staff member to validate tickets via the EventsOS Check-in Camera App.
+                      Allows this staff member to validate tickets via the StraytTix Check-in Camera App.
                     </p>
                   </div>
                 </div>

@@ -76,7 +76,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
           </div>
 
           <span className="text-xs font-mono text-zinc-400">
-            eventsos.live
+            strayttix.live
           </span>
         </div>
 

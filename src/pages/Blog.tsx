@@ -61,7 +61,7 @@ export const Blog: React.FC = () => {
     {
       id: 5,
       title: 'Preventing Secondary Scalping: Cryptographic One-Time Rotating QR Codes',
-      excerpt: 'How eventsOs uses time-synced dynamic tokens to completely eradicate duplicated screenshots, unauthorized ticket resales, and gate fraud.',
+      excerpt: 'How StraytTix uses time-synced dynamic tokens to completely eradicate duplicated screenshots, unauthorized ticket resales, and gate fraud.',
       category: 'Engineering & APIs',
       author: 'Tariq Al-Mansoor',
       authorRole: 'Principal Architect',
@@ -99,7 +99,7 @@ export const Blog: React.FC = () => {
         <div className="text-center space-y-4 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-50 border border-red-150 text-[#E31B23] text-xs font-bold uppercase tracking-wider">
             <BookOpen className="w-3.5 h-3.5" />
-            eventsOs Dispatch & Insights
+            StraytTix Dispatch & Insights
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-zinc-950 tracking-tight leading-tight">
             The Event Organizer’s Guide to Scale
@@ -239,7 +239,7 @@ export const Blog: React.FC = () => {
             </p>
           </div>
 
-          <form onSubmit={(e) => { e.preventDefault(); alert('Subscribed to eventsOs Dispatch!'); }} className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <form onSubmit={(e) => { e.preventDefault(); alert('Subscribed to StraytTix Dispatch!'); }} className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <input
               type="email"
               placeholder="Enter your email"

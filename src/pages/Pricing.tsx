@@ -96,7 +96,7 @@ export const Pricing: React.FC = () => {
     },
     {
       q: 'Are there monthly subscription fees or setup costs?',
-      a: 'Zero monthly fees. You only pay when you sell paid tickets. If your event is free or community-run, eventsOs is 100% free with no limits on attendee count.'
+      a: 'Zero monthly fees. You only pay when you sell paid tickets. If your event is free or community-run, StraytTix is 100% free with no limits on attendee count.'
     },
     {
       q: 'Do you offer Developer API access?',
@@ -323,7 +323,7 @@ export const Pricing: React.FC = () => {
               Ready to elevate your event infrastructure?
             </h3>
             <p className="text-zinc-400 text-xs leading-relaxed font-medium">
-              Join thousands of organizers running concerts, hackathons, business summits, and community festivals on eventsOs.
+              Join thousands of organizers running concerts, hackathons, business summits, and community festivals on StraytTix.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-4">

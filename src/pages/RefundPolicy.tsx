@@ -69,7 +69,7 @@ export const RefundPolicy: React.FC = () => {
             Refund & Cancellation Policy
           </h1>
           <p className="text-zinc-500 text-xs font-semibold">
-            Last Updated: {lastUpdated} • eventsOs Attendee Safety Standard
+            Last Updated: {lastUpdated} • StraytTix Attendee Safety Standard
           </p>
         </div>
 
@@ -79,7 +79,7 @@ export const RefundPolicy: React.FC = () => {
             Our Commitment to Transparent Ticketing
           </h2>
           <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed font-medium">
-            At eventsOs, we recognize that live events are unique and unpredictable. We have designed our refund framework to ensure fairness for both attendees who invest in tickets and organizers who commit upfront capital to venues, artists, and production equipment.
+            At StraytTix, we recognize that live events are unique and unpredictable. We have designed our refund framework to ensure fairness for both attendees who invest in tickets and organizers who commit upfront capital to venues, artists, and production equipment.
           </p>
         </div>
 

@@ -32,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Load organizer from storage if any
   useEffect(() => {
-    const cachedOrg = localStorage.getItem('eventsos_active_organizer');
+    const cachedOrg = localStorage.getItem('strayttix_active_organizer');
     if (cachedOrg) {
       try {
         setOrganizer(JSON.parse(cachedOrg));
@@ -45,10 +45,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const setActiveOrganizer = useCallback((org: Organizer | null) => {
     setOrganizer(org);
     if (org) {
-      localStorage.setItem('eventsos_active_organizer', JSON.stringify(org));
+      localStorage.setItem('strayttix_active_organizer', JSON.stringify(org));
       tokenStorage.setActiveOrganizerUuid(org.id, true);
     } else {
-      localStorage.removeItem('eventsos_active_organizer');
+      localStorage.removeItem('strayttix_active_organizer');
       tokenStorage.clearActiveOrganizerUuid();
     }
   }, []);
@@ -183,7 +183,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.warn('Logout API failed:', getApiErrorMessage(err));
     } finally {
       tokenStorage.clearAll();
-      localStorage.removeItem('eventsos_active_organizer');
+      localStorage.removeItem('strayttix_active_organizer');
       setUser(null);
       setToken(null);
       setOrganizer(null);

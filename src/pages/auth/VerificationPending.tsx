@@ -7,7 +7,7 @@ import { getApiErrorMessage, extractThrottleSeconds } from '../../api/client';
 import { useNotification } from '../../context/NotificationContext';
 import { Mail, Clock, ArrowLeft, Send, Loader2, AlertCircle } from 'lucide-react';
 
-const COUNTDOWN_EXPIRY_KEY = 'eventsos_resend_countdown_expiry';
+const COUNTDOWN_EXPIRY_KEY = 'strayttix_resend_countdown_expiry';
 const RESEND_INTERVAL = 15 * 60; // 15 minutes in seconds
 
 export const VerificationPending: React.FC = () => {

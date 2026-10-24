@@ -44,7 +44,7 @@ export const NotFound: React.FC = () => {
 
       {/* Footer */}
       <footer className="py-6 text-center text-xs text-zinc-400 font-semibold bg-white border-t border-zinc-150">
-        &copy; {new Date().getFullYear()} eventsOs Technologies. All rights reserved.
+        &copy; {new Date().getFullYear()} StraytTix Technologies. All rights reserved.
       </footer>
     </div>
   );

@@ -59,7 +59,7 @@ export const ErrorPage: React.FC<ErrorPageProps> = ({ error, resetErrorBoundary 
 
       {/* Footer */}
       <footer className="py-6 text-center text-xs text-brand-muted">
-        &copy; {new Date().getFullYear()} EventsOS Technologies. Protected operations.
+        &copy; {new Date().getFullYear()} StraytTix Technologies. Protected operations.
       </footer>
     </div>
   );

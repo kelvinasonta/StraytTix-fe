@@ -6,7 +6,7 @@ import { getApiErrorMessage, extractThrottleSeconds } from '../../api/client';
 import { CheckCircle2, AlertTriangle, AlertCircle, RefreshCw, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-const VERIFY_THROTTLE_EXPIRY_KEY = 'eventsos_verify_throttle_expiry';
+const VERIFY_THROTTLE_EXPIRY_KEY = 'strayttix_verify_throttle_expiry';
 
 export const VerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -36,8 +36,8 @@ export const VerifyEmail: React.FC = () => {
       clearTimeout(redirectTimeoutRef.current);
     }
 
-    const cachedUserStr = localStorage.getItem('eventsos_auth_user') || sessionStorage.getItem('eventsos_auth_user');
-    const cachedOrg = localStorage.getItem('eventsos_active_organizer');
+    const cachedUserStr = localStorage.getItem('strayttix_auth_user') || sessionStorage.getItem('strayttix_auth_user');
+    const cachedOrg = localStorage.getItem('strayttix_active_organizer');
 
     if (cachedUserStr) {
       try {

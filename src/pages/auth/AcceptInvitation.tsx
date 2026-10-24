@@ -292,7 +292,7 @@ export const AcceptInvitation: React.FC = () => {
 
       await refreshUser();
       setIsSuccess(true);
-      showNotification('Account created and invitation accepted! Welcome to eventsOs.', 'success');
+      showNotification('Account created and invitation accepted! Welcome to StraytTix.', 'success');
       setTimeout(() => {
         navigate('/organizer', { replace: true });
       }, 1200);
@@ -365,7 +365,7 @@ export const AcceptInvitation: React.FC = () => {
   return (
     <AuthLayout
       title={invitationDetails?.organizer_name ? `Join ${invitationDetails.organizer_name}` : "Team Invitation"}
-      subtitle={invitationDetails ? `You've been invited to join the team as ${invitationDetails.role}.` : "You've been invited to join an organization on eventsOs."}
+      subtitle={invitationDetails ? `You've been invited to join the team as ${invitationDetails.role}.` : "You've been invited to join an organization on StraytTix."}
     >
       <div className="space-y-6">
         {/* Invitation Context Banner */}

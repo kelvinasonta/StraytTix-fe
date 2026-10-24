@@ -1,7 +1,7 @@
 import type { EventStaffAssignment, StaffRole } from '../types/api';
 
 const getStorageKey = (organizerId?: string): string => {
-  return `eventsos_event_staff_${organizerId || 'default'}`;
+  return `strayttix_event_staff_${organizerId || 'default'}`;
 };
 
 export const getAllStaffAssignments = (organizerId?: string): EventStaffAssignment[] => {

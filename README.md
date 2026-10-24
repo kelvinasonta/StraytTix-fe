@@ -1,4 +1,4 @@
-# EventsOS Web Platform
+# StraytTix Web Platform
 
 A high-performance, modern event discovery, ticketing, organizer management, and administrative platform built with **React 19**, **TypeScript**, **Vite**, and **Tailwind CSS v4**.
 
@@ -6,7 +6,7 @@ A high-performance, modern event discovery, ticketing, organizer management, and
 
 ## 🌟 Overview
 
-EventsOS is an end-to-end event operating system consisting of two primary applications:
+StraytTix is an end-to-end event operating system consisting of two primary applications:
 
 1. **Client & Organizer Web App (`src/`)**: Event discovery, interactive seat/ticket booking, checkout flow, user authentication, profile & favorites management, and organizer event creation and analytics.
 2. **Admin Web Portal (`apps/admin-web/`)**: Dedicated administrative back-office featuring moderation, order auditing, refunds & payouts management, fraud monitoring, feature flags, and support escalation.
@@ -59,7 +59,7 @@ EventsOS is an end-to-end event operating system consisting of two primary appli
 ## 📁 Repository Structure
 
 ```text
-eventsos-auth-web/
+strayttix-auth-web/
 ├── apps/
 │   └── admin-web/               # Standalone Admin Portal
 │       ├── src/
@@ -112,8 +112,8 @@ eventsos-auth-web/
 Clone the repository and install dependencies at the root:
 
 ```bash
-git clone https://github.com/your-username/eventsos-auth-web.git
-cd eventsos-auth-web
+git clone https://github.com/your-username/strayttix-auth-web.git
+cd strayttix-auth-web
 npm install
 ```
 
@@ -134,8 +134,8 @@ cp .env.example .env
 Open `.env` and configure your API URL:
 
 ```env
-# EventsOS API Base URL (without trailing slash)
-VITE_API_BASE_URL=https://api.eventsos.example.com/api/v1
+# StraytTix API Base URL (without trailing slash)
+VITE_API_BASE_URL=https://api.strayttix.example.com/api/v1
 ```
 
 *(Optional)* Configure an environment file for `apps/admin-web/.env` if connecting to a separate admin backend URL.

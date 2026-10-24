@@ -151,12 +151,12 @@ export const Orders: React.FC = () => {
 
       // Purge any legacy dummy sample orders cached in browser storage
       try {
-        const cacheKey = `eventsos_orders_${organizer?.id || 'default'}`;
+        const cacheKey = `strayttix_orders_${organizer?.id || 'default'}`;
         const cached = localStorage.getItem(cacheKey);
         if (cached && (cached.includes('ORD-89421') || cached.includes('TechFest') || cached.includes('Chiamaka'))) {
           localStorage.removeItem(cacheKey);
         }
-        localStorage.removeItem('eventsos_orders_default');
+        localStorage.removeItem('strayttix_orders_default');
       } catch {
         // Ignore localStorage access restrictions
       }
@@ -258,7 +258,7 @@ export const Orders: React.FC = () => {
       try {
         const matchingEvt = eventFilter !== 'all' ? events.find(e => e.title === eventFilter || e.slug === eventFilter) : undefined;
         const exportUrl = ordersApi.getExportOrdersUrl(organizer.id, matchingEvt?.id);
-        const token = localStorage.getItem('eventsos_auth_token') || sessionStorage.getItem('eventsos_auth_token');
+        const token = localStorage.getItem('strayttix_auth_token') || sessionStorage.getItem('strayttix_auth_token');
         const response = await fetch(exportUrl, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
@@ -267,7 +267,7 @@ export const Orders: React.FC = () => {
           const downloadUrl = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = downloadUrl;
-          link.download = `eventsos-orders-${new Date().toISOString().split('T')[0]}.csv`;
+          link.download = `strayttix-orders-${new Date().toISOString().split('T')[0]}.csv`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -301,7 +301,7 @@ export const Orders: React.FC = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `eventsos-orders-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `strayttix-orders-${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

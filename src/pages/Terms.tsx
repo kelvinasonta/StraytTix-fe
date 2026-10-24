@@ -10,7 +10,7 @@ export const Terms: React.FC = () => {
     {
       id: 'acceptance',
       title: '1. Acceptance of Terms',
-      content: `By accessing, browsing, or using the eventsOs (also operated as "Tix" or "Eventa") ticketing infrastructure, platform, API, mobile services, or associated software (collectively, the "Platform"), you acknowledge that you have read, understood, and unconditionally agree to be bound by these Terms of Service. If you do not agree to these terms, you must discontinue use of the Platform immediately.`
+      content: `By accessing, browsing, or using the StraytTix (also operated as "Tix" or "Eventa") ticketing infrastructure, platform, API, mobile services, or associated software (collectively, the "Platform"), you acknowledge that you have read, understood, and unconditionally agree to be bound by these Terms of Service. If you do not agree to these terms, you must discontinue use of the Platform immediately.`
     },
     {
       id: 'accounts',
@@ -25,27 +25,27 @@ export const Terms: React.FC = () => {
     {
       id: 'fees-payouts',
       title: '4. Ticketing Fees, Taxes & Payout Settlements',
-      content: `eventsOs charges a platform service fee on paid tickets (standard 2.5% + $0.50 per ticket unless custom enterprise contracts apply). Fees can be absorbed by the organizer or added to buyer checkout totals. Payouts for ticket revenue are disbursed on an automated rolling schedule directly to the organizer's verified bank account or settlement ledger, subject to standard anti-fraud reserves and chargeback deductions.`
+      content: `StraytTix charges a platform service fee on paid tickets (standard 2.5% + $0.50 per ticket unless custom enterprise contracts apply). Fees can be absorbed by the organizer or added to buyer checkout totals. Payouts for ticket revenue are disbursed on an automated rolling schedule directly to the organizer's verified bank account or settlement ledger, subject to standard anti-fraud reserves and chargeback deductions.`
     },
     {
       id: 'ticket-purchases',
       title: '5. Ticket Purchases, Entry & Scalping Prohibition',
-      content: `Tickets issued through eventsOs are revocable licenses that grant admission to the specified event. Duplicate reproduction, unauthorized commercial reselling above face value, or generation of counterfeit barcodes is strictly prohibited. The event venue or organizer reserves the right to deny entry if ticket authenticity cannot be cryptographically verified at the gate.`
+      content: `Tickets issued through StraytTix are revocable licenses that grant admission to the specified event. Duplicate reproduction, unauthorized commercial reselling above face value, or generation of counterfeit barcodes is strictly prohibited. The event venue or organizer reserves the right to deny entry if ticket authenticity cannot be cryptographically verified at the gate.`
     },
     {
       id: 'cancellations-refunds',
       title: '6. Cancellations & Postponements',
-      content: `If an event is permanently cancelled, the organizer must promptly issue full refunds to all ticket purchasers or authorize eventsOs to initiate automated batch reversals. In the event of postponement or major relocation, ticket holders must be granted an opportunity to request a refund if they cannot attend the rescheduled date. Please refer to our Refund Policy for complete details.`
+      content: `If an event is permanently cancelled, the organizer must promptly issue full refunds to all ticket purchasers or authorize StraytTix to initiate automated batch reversals. In the event of postponement or major relocation, ticket holders must be granted an opportunity to request a refund if they cannot attend the rescheduled date. Please refer to our Refund Policy for complete details.`
     },
     {
       id: 'api-usage',
       title: '7. API Access & Developer Terms',
-      content: `Access to the eventsOs REST API, webhook endpoints, and embed widgets is granted on a revocable basis. Developers must adhere to published rate limits, maintain token confidentiality, and never scrape or reverse-engineer attendee identity databases. We reserve the right to throttle or revoke API keys that compromise platform stability.`
+      content: `Access to the StraytTix REST API, webhook endpoints, and embed widgets is granted on a revocable basis. Developers must adhere to published rate limits, maintain token confidentiality, and never scrape or reverse-engineer attendee identity databases. We reserve the right to throttle or revoke API keys that compromise platform stability.`
     },
     {
       id: 'liability',
       title: '8. Limitation of Liability',
-      content: `To the maximum extent permitted by applicable law, eventsOs Technologies Inc., its officers, employees, and affiliates shall not be liable for any indirect, incidental, special, or consequential damages resulting from event cancellations, personal injuries sustained at third-party venues, or unforeseen disruptions beyond reasonable technical control.`
+      content: `To the maximum extent permitted by applicable law, StraytTix Technologies Inc., its officers, employees, and affiliates shall not be liable for any indirect, incidental, special, or consequential damages resulting from event cancellations, personal injuries sustained at third-party venues, or unforeseen disruptions beyond reasonable technical control.`
     }
   ];
 
@@ -99,8 +99,8 @@ export const Terms: React.FC = () => {
             <h3 className="text-sm font-bold text-zinc-900">Questions or Legal Inquiries?</h3>
             <p className="text-xs text-zinc-500 font-medium">
               If you have any questions regarding these Terms or compliance, please reach out to our legal department at{' '}
-              <a href="mailto:legal@eventsos.live" className="text-[#E31B23] font-bold underline">
-                legal@eventsos.live
+              <a href="mailto:legal@strayttix.live" className="text-[#E31B23] font-bold underline">
+                legal@strayttix.live
               </a>.
             </p>
           </div>

@@ -43,7 +43,7 @@ export const Login: React.FC = () => {
           return;
         }
 
-        const cachedUserStr = localStorage.getItem('eventsos_auth_user') || sessionStorage.getItem('eventsos_auth_user');
+        const cachedUserStr = localStorage.getItem('strayttix_auth_user') || sessionStorage.getItem('strayttix_auth_user');
         if (cachedUserStr) {
           try {
             const parsed = JSON.parse(cachedUserStr);

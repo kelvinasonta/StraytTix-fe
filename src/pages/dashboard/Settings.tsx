@@ -298,7 +298,7 @@ export const Settings: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `eventsos-data-archive-${user?.id || 'account'}.json`;
+    a.download = `strayttix-data-archive-${user?.id || 'account'}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -426,7 +426,7 @@ export const Settings: React.FC = () => {
             <div className="border-b border-zinc-100 pb-4">
               <h2 className="text-lg font-black text-zinc-950">User Profile & Personal Information</h2>
               <p className="text-sm font-medium text-zinc-500 mt-0.5">
-                Update your contact details and default purchasing preferences across EventsOS.
+                Update your contact details and default purchasing preferences across StraytTix.
               </p>
             </div>
 
@@ -729,7 +729,7 @@ export const Settings: React.FC = () => {
                 Notification Channels & Alerts
               </h2>
               <p className="text-sm font-medium text-zinc-500 mt-0.5">
-                Customize how and when EventsOS alerts you about ticket passes, countdowns, and host updates.
+                Customize how and when StraytTix alerts you about ticket passes, countdowns, and host updates.
               </p>
             </div>
 
@@ -985,7 +985,7 @@ export const Settings: React.FC = () => {
               <div>
                 <p className="font-bold text-zinc-900">PCI-DSS Level 1 Encrypted Storage</p>
                 <p className="text-zinc-500 mt-0.5">
-                  EventsOS never stores raw card CVVs or complete account numbers. Card tokens are securely managed through Paystack.
+                  StraytTix never stores raw card CVVs or complete account numbers. Card tokens are securely managed through Paystack.
                 </p>
               </div>
             </div>
@@ -1002,7 +1002,7 @@ export const Settings: React.FC = () => {
               <div className="border-b border-zinc-100 pb-4">
                 <h2 className="text-lg font-black text-zinc-950">Attendee Privacy Settings</h2>
                 <p className="text-sm font-medium text-zinc-500 mt-0.5">
-                  Control how your profile and event participation details appear across the EventsOS network.
+                  Control how your profile and event participation details appear across the StraytTix network.
                 </p>
               </div>
 
@@ -1234,7 +1234,7 @@ export const Settings: React.FC = () => {
             <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 space-y-1">
               <p className="font-bold">Warning: This action cannot be undone.</p>
               <p>
-                Deleting your account will forfeit access to any future event passes and erase your purchase history from EventsOS.
+                Deleting your account will forfeit access to any future event passes and erase your purchase history from StraytTix.
               </p>
             </div>
 

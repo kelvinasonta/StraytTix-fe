@@ -185,7 +185,7 @@ print(res.json())`
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 text-white text-xs font-bold">
                 <Code2 className="w-3.5 h-3.5 text-[#E31B23]" />
-                eventsOs Developer Platform
+                StraytTix Developer Platform
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-zinc-950 tracking-tight">
                 REST API Documentation
@@ -219,7 +219,7 @@ print(res.json())`
             <section id="overview" className="space-y-4 pt-2">
               <h2 className="text-2xl font-bold text-zinc-950 tracking-tight">Overview & Base URL</h2>
               <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed font-medium">
-                The eventsOs API is organized around REST. All requests communicate over HTTPS and respond with standard JSON bodies and HTTP status codes.
+                The StraytTix API is organized around REST. All requests communicate over HTTPS and respond with standard JSON bodies and HTTP status codes.
               </p>
 
               <div className="bg-zinc-950 rounded-2xl p-4 text-white flex items-center justify-between font-mono text-xs">
@@ -328,7 +328,7 @@ print(res.json())`
 
               <div className="bg-zinc-950 rounded-2xl p-4 font-mono text-xs text-white">
                 <span className="text-zinc-500">curl -X GET </span>
-                <span className="text-emerald-400">https://api.eventsos.live/v1/explore/events/lagos-tech-fest-2026</span>
+                <span className="text-emerald-400">https://api.strayttix.live/v1/explore/events/lagos-tech-fest-2026</span>
               </div>
             </section>
 
@@ -403,7 +403,7 @@ print(res.json())`
                 <h2 className="text-2xl font-bold text-zinc-950 tracking-tight">Real-Time Webhooks</h2>
               </div>
               <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed font-medium">
-                Subscribe to real-time HTTPS callbacks whenever transactions occur. Every webhook payload is signed with a secret HMAC SHA-256 header (<code className="text-[#E31B23]">X-EventsOs-Signature</code>) for tamper verification.
+                Subscribe to real-time HTTPS callbacks whenever transactions occur. Every webhook payload is signed with a secret HMAC SHA-256 header (<code className="text-[#E31B23]">X-StraytTix-Signature</code>) for tamper verification.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

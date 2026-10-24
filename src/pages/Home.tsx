@@ -803,7 +803,7 @@ export const Home: React.FC = () => {
               <div className="max-w-xl space-y-3">
                 <span className="text-xs font-mono uppercase tracking-widest text-zinc-400 font-bold">For Event Organizers</span>
                 <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
-                  Hosting an event? Sell tickets with EventsOS.
+                  Hosting an event? Sell tickets with StraytTix.
                 </h2>
                 <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">
                   Publish your event page in minutes. Manage guestlists, scan tickets at the door with our free camera app, and get settled directly to your bank account post-event.

@@ -127,7 +127,7 @@ export const Analytics: React.FC = () => {
   // Bank Account State
   const [bankAccount, setBankAccount] = useState<BankAccountInfo | null>(() => {
     try {
-      const cacheKey = `eventsos_bank_${organizer?.id || 'default'}`;
+      const cacheKey = `strayttix_bank_${organizer?.id || 'default'}`;
       const cached = localStorage.getItem(cacheKey);
       if (cached && (cached.includes('••••••••4829') || cached.includes('058152062') || cached.includes('Primary Account'))) {
         localStorage.removeItem(cacheKey);
@@ -144,7 +144,7 @@ export const Analytics: React.FC = () => {
   // Payout History state
   const [payouts, setPayouts] = useState<PayoutRecord[]>(() => {
     try {
-      const cacheKey = `eventsos_payouts_${organizer?.id || 'default'}`;
+      const cacheKey = `strayttix_payouts_${organizer?.id || 'default'}`;
       const cached = localStorage.getItem(cacheKey);
       if (cached && (cached.includes('pay-001') || cached.includes('PAY-202609-0821'))) {
         localStorage.removeItem(cacheKey);
@@ -185,7 +185,7 @@ export const Analytics: React.FC = () => {
 
   const [creditsBalance, setCreditsBalance] = useState<number>(() => {
     try {
-      const saved = localStorage.getItem('eventsos_organizer_credits');
+      const saved = localStorage.getItem('strayttix_organizer_credits');
       return saved ? Number(saved) : 0;
     } catch {
       return 0;
@@ -194,9 +194,9 @@ export const Analytics: React.FC = () => {
 
   const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>(() => {
     try {
-      const saved = localStorage.getItem('eventsos_organizer_credit_txs');
+      const saved = localStorage.getItem('strayttix_organizer_credit_txs');
       if (saved && (saved.includes('tx-1') || saved.includes('Growth Pack Top-Up'))) {
-        localStorage.removeItem('eventsos_organizer_credit_txs');
+        localStorage.removeItem('strayttix_organizer_credit_txs');
         return [];
       }
       return saved ? JSON.parse(saved) : [];
@@ -211,11 +211,11 @@ export const Analytics: React.FC = () => {
   const [isProcessingTopUp, setIsProcessingTopUp] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('eventsos_organizer_credits', creditsBalance.toString());
+    localStorage.setItem('strayttix_organizer_credits', creditsBalance.toString());
   }, [creditsBalance]);
 
   useEffect(() => {
-    localStorage.setItem('eventsos_organizer_credit_txs', JSON.stringify(creditTransactions));
+    localStorage.setItem('strayttix_organizer_credit_txs', JSON.stringify(creditTransactions));
   }, [creditTransactions]);
 
   const handleCompleteTopUp = (e: React.FormEvent) => {
@@ -331,12 +331,12 @@ export const Analytics: React.FC = () => {
   // Save changes to localStorage
   const savePayouts = (newPayouts: PayoutRecord[]) => {
     setPayouts(newPayouts);
-    localStorage.setItem(`eventsos_payouts_${organizer?.id || 'default'}`, JSON.stringify(newPayouts));
+    localStorage.setItem(`strayttix_payouts_${organizer?.id || 'default'}`, JSON.stringify(newPayouts));
   };
 
   const saveBank = (newBank: BankAccountInfo) => {
     setBankAccount(newBank);
-    localStorage.setItem(`eventsos_bank_${organizer?.id || 'default'}`, JSON.stringify(newBank));
+    localStorage.setItem(`strayttix_bank_${organizer?.id || 'default'}`, JSON.stringify(newBank));
   };
 
   // Financial Calculations

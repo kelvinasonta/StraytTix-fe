@@ -123,12 +123,12 @@ export const Attendees: React.FC = () => {
 
       // Purge any legacy dummy sample attendees cached in browser storage
       try {
-        const cacheKey = `eventsos_attendees_${organizer?.id || 'default'}`;
+        const cacheKey = `strayttix_attendees_${organizer?.id || 'default'}`;
         const cached = localStorage.getItem(cacheKey);
         if (cached && (cached.includes('att-101') || cached.includes('ORD-89421') || cached.includes('TechFest'))) {
           localStorage.removeItem(cacheKey);
         }
-        localStorage.removeItem('eventsos_attendees_default');
+        localStorage.removeItem('strayttix_attendees_default');
       } catch {
         // Ignore localStorage access restrictions
       }
@@ -167,7 +167,7 @@ export const Attendees: React.FC = () => {
   // Persist local state
   const saveAttendees = (newAttendees: AttendeeRecord[]) => {
     setAttendees(newAttendees);
-    localStorage.setItem(`eventsos_attendees_${organizer?.id || 'default'}`, JSON.stringify(newAttendees));
+    localStorage.setItem(`strayttix_attendees_${organizer?.id || 'default'}`, JSON.stringify(newAttendees));
   };
 
   // Toggle Check-In status
@@ -407,7 +407,7 @@ export const Attendees: React.FC = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `eventsos-attendees-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `strayttix-attendees-${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

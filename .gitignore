@@ -28,3 +28,10 @@ dist-ssr
 
 
 API_DOCUMENTATION.md
+AGENTS.md
+.devdbrc
+.agents/
+skills-lock.json
+
+apps/
+scratch/

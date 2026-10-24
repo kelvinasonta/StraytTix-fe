@@ -121,8 +121,8 @@ export const PrivacyPolicy: React.FC = () => {
             <h3 className="text-sm font-bold text-zinc-900">Data Protection Officer</h3>
             <p className="text-xs text-zinc-500 font-medium">
               To exercise your privacy rights or contact our designated Data Protection Officer (DPO), please email{' '}
-              <a href="mailto:privacy@eventsos.live" className="text-[#E31B23] font-bold underline">
-                privacy@eventsos.live
+              <a href="mailto:privacy@strayttix.live" className="text-[#E31B23] font-bold underline">
+                privacy@strayttix.live
               </a>.
             </p>
           </div>

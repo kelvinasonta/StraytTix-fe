@@ -149,14 +149,14 @@ export const Settings: React.FC = () => {
 
   /* ---------------- STAFF WORKSTATION & SCANNER PREFERENCES ---------------- */
   const [scanSoundEnabled, setScanSoundEnabled] = useState<boolean>(() => {
-    return localStorage.getItem('eventsos_scanner_sound') !== 'false';
+    return localStorage.getItem('strayttix_scanner_sound') !== 'false';
   });
   const [scanDuplicateSound, setScanDuplicateSound] = useState<boolean>(true);
   const [hapticFeedbackEnabled, setHapticFeedbackEnabled] = useState<boolean>(() => {
-    return localStorage.getItem('eventsos_scanner_haptic') !== 'false';
+    return localStorage.getItem('strayttix_scanner_haptic') !== 'false';
   });
   const [continuousScanMode, setContinuousScanMode] = useState<boolean>(() => {
-    return localStorage.getItem('eventsos_scanner_continuous') === 'true';
+    return localStorage.getItem('strayttix_scanner_continuous') === 'true';
   });
   const [autoCheckInMode, setAutoCheckInMode] = useState<boolean>(true);
   const [torchDefaultOn, setTorchDefaultOn] = useState<boolean>(false);
@@ -217,9 +217,9 @@ export const Settings: React.FC = () => {
 
   const handleSaveScannerPrefs = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('eventsos_scanner_sound', String(scanSoundEnabled));
-    localStorage.setItem('eventsos_scanner_haptic', String(hapticFeedbackEnabled));
-    localStorage.setItem('eventsos_scanner_continuous', String(continuousScanMode));
+    localStorage.setItem('strayttix_scanner_sound', String(scanSoundEnabled));
+    localStorage.setItem('strayttix_scanner_haptic', String(hapticFeedbackEnabled));
+    localStorage.setItem('strayttix_scanner_continuous', String(continuousScanMode));
     showNotification('Scanner and terminal preferences saved successfully!', 'success');
   };
 
@@ -263,9 +263,9 @@ export const Settings: React.FC = () => {
   /* ---------------- 2. SESSIONS STATES ---------------- */
   const [sessions, setSessions] = useState<LoginSession[]>(() => {
     try {
-      const saved = localStorage.getItem('eventsos_organizer_sessions');
+      const saved = localStorage.getItem('strayttix_organizer_sessions');
       if (saved && (saved.includes('sess-current') || saved.includes('iPhone 15 Pro Max'))) {
-        localStorage.removeItem('eventsos_organizer_sessions');
+        localStorage.removeItem('strayttix_organizer_sessions');
         return [];
       }
       return saved ? JSON.parse(saved) : [];
@@ -315,9 +315,9 @@ export const Settings: React.FC = () => {
   /* ---------------- 4. AUDIT LOGS STATES ---------------- */
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => {
     try {
-      const saved = localStorage.getItem('eventsos_organizer_audit_logs');
+      const saved = localStorage.getItem('strayttix_organizer_audit_logs');
       if (saved && (saved.includes('log-1') || saved.includes('Kelvin Okonkwo') || saved.includes('Lagos Tech Expo 2026'))) {
-        localStorage.removeItem('eventsos_organizer_audit_logs');
+        localStorage.removeItem('strayttix_organizer_audit_logs');
         return [];
       }
       return saved ? JSON.parse(saved) : [];
@@ -375,11 +375,11 @@ export const Settings: React.FC = () => {
 
   // Sync state helpers to localStorage
   useEffect(() => {
-    localStorage.setItem('eventsos_organizer_sessions', JSON.stringify(sessions));
+    localStorage.setItem('strayttix_organizer_sessions', JSON.stringify(sessions));
   }, [sessions]);
 
   useEffect(() => {
-    localStorage.setItem('eventsos_organizer_audit_logs', JSON.stringify(auditLogs));
+    localStorage.setItem('strayttix_organizer_audit_logs', JSON.stringify(auditLogs));
   }, [auditLogs]);
 
   // Helper to append audit logs

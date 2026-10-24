@@ -5673,7 +5673,7 @@ export const EventManage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-bold shadow-2xs">
                     <Coins className="w-4 h-4 text-amber-600" />
-                    <span>Eventa Credit: <strong>{localStorage.getItem("eventsos_organizer_credits") || "500"} Available</strong></span>
+                    <span>Eventa Credit: <strong>{localStorage.getItem("strayttix_organizer_credits") || "500"} Available</strong></span>
                     <Link to="/organizer/analytics" className="text-[#E31B23] hover:underline text-[11px] font-black ml-1">
                       Top-Up
                     </Link>

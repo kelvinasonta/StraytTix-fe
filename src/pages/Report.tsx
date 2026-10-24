@@ -79,7 +79,7 @@ export const Report: React.FC = () => {
               </div>
               <h3 className="text-2xl font-black text-zinc-950">Report Submitted</h3>
               <p className="text-xs text-zinc-600 leading-relaxed font-medium">
-                Thank you for helping keep the eventsOs platform trustworthy. Case reference <span className="font-mono font-bold text-zinc-900">#SAFE-{Math.floor(100000 + Math.random() * 900000)}</span> has been registered and assigned to an investigator.
+                Thank you for helping keep the StraytTix platform trustworthy. Case reference <span className="font-mono font-bold text-zinc-900">#SAFE-{Math.floor(100000 + Math.random() * 900000)}</span> has been registered and assigned to an investigator.
               </p>
               <button
                 onClick={() => {
@@ -111,7 +111,7 @@ export const Report: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Lagos Tech Fest 2026 or https://eventsos.live/events/..."
+                    placeholder="e.g. Lagos Tech Fest 2026 or https://strayttix.live/events/..."
                     value={eventName}
                     onChange={(e) => setEventName(e.target.value)}
                     className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#E31B23] transition-colors"

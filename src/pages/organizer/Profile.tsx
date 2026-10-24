@@ -767,7 +767,7 @@ export const Profile: React.FC = () => {
                 <div className="space-y-1">
                   <h3 className="text-base font-bold text-amber-950">Verification Under Compliance Review</h3>
                   <p className="text-xs text-amber-800 leading-relaxed font-medium">
-                    Your verification documents for {name} have been submitted to the EventsOS Trust & Safety team. Verification typically takes 24–48 business hours. You will receive an email once approved.
+                    Your verification documents for {name} have been submitted to the StraytTix Trust & Safety team. Verification typically takes 24–48 business hours. You will receive an email once approved.
                   </p>
                 </div>
               </div>
@@ -805,7 +805,7 @@ export const Profile: React.FC = () => {
                     <Shield className="w-6 h-6 text-[#E31B23]" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-base font-bold text-zinc-950">Become an EventsOS Verified Host</h3>
+                    <h3 className="text-base font-bold text-zinc-950">Become an StraytTix Verified Host</h3>
                     <p className="text-xs text-zinc-500 leading-relaxed font-medium">
                       Submit your business incorporation number and government ID to unlock the Verified badge, instant ticket payouts, and higher attendee conversion.
                     </p>
@@ -1021,27 +1021,27 @@ export const Profile: React.FC = () => {
                       label="CAC Certificate of Incorporation URL"
                       value={verifDocCAC}
                       onChange={(e) => setVerifDocCAC(e.target.value)}
-                      placeholder="https://assets.eventsos.live/cac_certificate.pdf"
+                      placeholder="https://assets.strayttix.live/cac_certificate.pdf"
                       required
                     />
                     <Input
                       label="Director / Principal Government ID URL"
                       value={verifDocID}
                       onChange={(e) => setVerifDocID(e.target.value)}
-                      placeholder="https://assets.eventsos.live/director_id.pdf"
+                      placeholder="https://assets.strayttix.live/director_id.pdf"
                       required
                     />
                     <Input
                       label="Headquarters Utility Bill / Proof of Address URL"
                       value={verifDocUtility}
                       onChange={(e) => setVerifDocUtility(e.target.value)}
-                      placeholder="https://assets.eventsos.live/utility_bill.pdf"
+                      placeholder="https://assets.strayttix.live/utility_bill.pdf"
                     />
                   </div>
                 </div>
 
                 <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 leading-relaxed font-medium">
-                  By submitting this verification request, you certify that all business documentation and director identification provided are authentic and compliant with EventsOS Verified Organizer Standards.
+                  By submitting this verification request, you certify that all business documentation and director identification provided are authentic and compliant with StraytTix Verified Organizer Standards.
                 </div>
 
                 <div className="pt-2 flex items-center justify-end gap-3">

@@ -336,7 +336,7 @@ const resolveOrganizerUuid = (uuid?: string): string => {
   const fromStorage = tokenStorage.getActiveOrganizerUuid();
   if (fromStorage) return fromStorage;
 
-  const cachedOrg = localStorage.getItem('eventsos_active_organizer');
+  const cachedOrg = localStorage.getItem('strayttix_active_organizer');
   if (cachedOrg) {
     try {
       const parsed = JSON.parse(cachedOrg);
