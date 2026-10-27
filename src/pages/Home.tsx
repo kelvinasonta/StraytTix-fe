@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import EventCard from '../components/ui/EventCard';
+import { formatDate } from '../utils/format';
 import { eventApi, normalizeBackendEvent } from '../api/events';
 import { favoritesApi } from '../api/favorites';
 import { useAuth } from '../context/AuthContext';
@@ -27,165 +28,7 @@ import {
   Zap
 } from 'lucide-react';
 
-// Curated realistic events for fallback if local API has no events yet
-const FALLBACK_EVENTS: Event[] = [
-  {
-    id: 'demo-1',
-    slug: 'afrobeats-symphony-live-2026',
-    title: 'Afrobeats Symphony Live: Philharmonic & Live Percussion',
-    description: 'An open-air orchestral celebration of contemporary West African classics featuring a 40-piece choir.',
-    category: 'Music',
-    status: 'Published',
-    imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=85',
-    bannerUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=85',
-    startDate: '2026-10-24',
-    startTime: '19:00',
-    endDate: '2026-10-24',
-    endTime: '23:30',
-    timezone: 'Africa/Lagos',
-    locationType: 'physical',
-    city: 'Lagos',
-    venue: 'Eko Convention Centre',
-    venueName: 'Eko Convention Centre',
-    isFeatured: true,
-    organizer: {
-      id: 'org-1',
-      name: 'Lagos Philharmonic Society',
-      slug: 'lagos-philharmonic'
-    },
-    tickets: [
-      { id: 't-1', name: 'Regular Entry', price: 15000, quantity: 500, status: 'available' },
-      { id: 't-2', name: 'VIP Circle', price: 35000, quantity: 100, status: 'available' }
-    ] as any
-  },
-  {
-    id: 'demo-2',
-    slug: 'scale-africa-tech-summit-2026',
-    title: 'Scale Africa: AI & Emerging Tech Summit 2026',
-    description: 'Bringing together 1,200 founders, engineers, and product builders shaping technology across Africa.',
-    category: 'Technology',
-    status: 'Published',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=85',
-    bannerUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=85',
-    startDate: '2026-11-05',
-    startTime: '09:00',
-    endDate: '2026-11-06',
-    endTime: '18:00',
-    timezone: 'Africa/Lagos',
-    locationType: 'physical',
-    city: 'Lagos',
-    venue: 'Landmark Centre, Victoria Island',
-    venueName: 'Landmark Centre, Victoria Island',
-    isFeatured: true,
-    organizer: {
-      id: 'org-2',
-      name: 'Scale Africa Network',
-      slug: 'scale-africa'
-    },
-    tickets: [
-      { id: 't-3', name: 'Standard Pass', price: 25000, quantity: 400, status: 'available' },
-      { id: 't-4', name: 'Investor Pass', price: 75000, quantity: 50, status: 'available' }
-    ] as any
-  },
-  {
-    id: 'demo-3',
-    slug: 'palm-groove-sessions',
-    title: 'Palm Groove: Sunset Electronic & House Sessions',
-    description: 'Intimate beachfront day party featuring deep house, amapiano, and live percussion by the water.',
-    category: 'Nightlife',
-    status: 'Published',
-    imageUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=85',
-    bannerUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=85',
-    startDate: '2026-10-18',
-    startTime: '16:00',
-    endDate: '2026-10-18',
-    endTime: '23:00',
-    timezone: 'Africa/Lagos',
-    locationType: 'physical',
-    city: 'Lagos',
-    venue: 'Wave Beach, Elegushi',
-    venueName: 'Wave Beach, Elegushi',
-    organizer: {
-      id: 'org-3',
-      name: 'Palm Groove Collective',
-      slug: 'palm-groove'
-    },
-    tickets: [
-      { id: 't-5', name: 'Early Entry', price: 8000, quantity: 150, status: 'available' },
-      { id: 't-6', name: 'General Admission', price: 12000, quantity: 300, status: 'available' }
-    ] as any
-  },
-  {
-    id: 'demo-4',
-    slug: 'abuja-culinary-craft-market',
-    title: 'The Capital Food & Craft Festival',
-    description: 'Over 60 independent chefs, bakers, distillers, and artisan stalls in an open garden setting.',
-    category: 'Food & Drink',
-    status: 'Published',
-    imageUrl: 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1200&q=85',
-    bannerUrl: 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1200&q=85',
-    startDate: '2026-10-31',
-    startTime: '11:00',
-    endDate: '2026-10-31',
-    endTime: '20:00',
-    timezone: 'Africa/Lagos',
-    locationType: 'physical',
-    city: 'Abuja',
-    venue: 'Millennium Park, Maitama',
-    venueName: 'Millennium Park, Maitama',
-    organizer: {
-      id: 'org-4',
-      name: 'Abuja Culinary Guild',
-      slug: 'abuja-culinary'
-    },
-    tickets: [
-      { id: 't-7', name: 'Day Pass', price: 5000, quantity: 600, status: 'available' }
-    ] as any
-  }
-];
 
-const FEATURED_SLIDES = [
-  {
-    id: 'slide-1',
-    title: 'Afrobeats Symphony Live: Philharmonic & Choir',
-    description: 'A 40-piece philharmonic choir and guest percussionists reinterpreting legendary African sounds live on stage at Eko Convention Centre.',
-    tag: 'Lagos',
-    image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=85',
-    price: 'From ₦15,000',
-    date: 'Saturday, Oct 24',
-    link: '/discover?category=Music'
-  },
-  {
-    id: 'slide-2',
-    title: "Scale Africa '26: AI Infrastructure & Tech Summit",
-    description: 'Two days of keynotes from 50+ founders, venture partners, and engineering leaders shaping distributed computing across emerging markets.',
-    tag: 'Tech Summit • Victoria Island',
-    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1600&q=85',
-    price: 'From ₦25,000',
-    date: 'Nov 05 - 06',
-    link: '/discover?category=Technology'
-  },
-  {
-    id: 'slide-3',
-    title: 'Palm Groove: Sunset Beach & Amapiano Sessions',
-    description: 'Intimate beachfront day festival featuring deep house, amapiano, and live percussion by the Atlantic ocean shoreline.',
-    tag: 'Festival • Wave Beach',
-    image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1600&q=85',
-    price: 'From ₦8,000',
-    date: 'Sunday, Oct 18',
-    link: '/discover?category=Nightlife'
-  },
-  {
-    id: 'slide-4',
-    title: 'The Capital Food & Craft Festival',
-    description: 'Over 60 independent chefs, artisan stalls, live jazz, and craft tastings in Millennium Park.',
-    tag: 'Culinary & Arts • Abuja',
-    image: 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1600&q=85',
-    price: 'From ₦5,000',
-    date: 'Saturday, Oct 31',
-    link: '/discover?category=Food%20%26%20Drink'
-  }
-];
 
 export const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -200,31 +43,7 @@ export const Home: React.FC = () => {
 
   const { isAuthenticated, user } = useAuth();
 
-  // Carousel auto-advance timer with pause on hover
-  useEffect(() => {
-    if (isPaused) return;
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % FEATURED_SLIDES.length);
-    }, 5500);
-    return () => clearInterval(interval);
-  }, [isPaused]);
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? FEATURED_SLIDES.length - 1 : prev - 1));
-  };
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % FEATURED_SLIDES.length);
-  };
-
-  // Hydrate favorites from backend if user is authenticated
-  useEffect(() => {
-    if (isAuthenticated && user?.id) {
-      favoritesApi.getFavoriteIds().catch(() => {});
-    }
-  }, [isAuthenticated, user?.id]);
-
-  // Load real events from API, with graceful fallback
+  // Load real events from API without mock fallbacks
   useEffect(() => {
     let isMounted = true;
     eventApi.getEvents({ per_page: 8 })
@@ -235,11 +54,12 @@ export const Home: React.FC = () => {
         if (list.length > 0) {
           setEvents(list.map(normalizeBackendEvent));
         } else {
-          setEvents(FALLBACK_EVENTS);
+          setEvents([]);
         }
       })
-      .catch(() => {
-        if (isMounted) setEvents(FALLBACK_EVENTS);
+      .catch((err) => {
+        console.error('Failed to load events for homepage:', err);
+        if (isMounted) setEvents([]);
       })
       .finally(() => {
         if (isMounted) setIsLoading(false);
@@ -247,6 +67,35 @@ export const Home: React.FC = () => {
 
     return () => { isMounted = false; };
   }, []);
+
+  // Hydrate favorites from backend if user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      favoritesApi.getFavoriteIds().catch(() => {});
+    }
+  }, [isAuthenticated, user?.id]);
+
+  // Featured slides derived dynamically from published events
+  const featuredSlides = events.slice(0, 4);
+
+  // Carousel auto-advance timer with pause on hover
+  useEffect(() => {
+    if (isPaused || featuredSlides.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % featuredSlides.length);
+    }, 5500);
+    return () => clearInterval(interval);
+  }, [isPaused, featuredSlides.length]);
+
+  const prevSlide = () => {
+    if (featuredSlides.length === 0) return;
+    setCurrentSlide((prev) => (prev === 0 ? featuredSlides.length - 1 : prev - 1));
+  };
+
+  const nextSlide = () => {
+    if (featuredSlides.length === 0) return;
+    setCurrentSlide((prev) => (prev + 1) % featuredSlides.length);
+  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -424,102 +273,114 @@ export const Home: React.FC = () => {
         </section>
 
         {/* ========================================================================= */}
-        {/* 2. FEATURED HEADLINER HERO SPOTLIGHT CAROUSEL */}
+        {/* 2. FEATURED HEADLINER HERO SPOTLIGHT CAROUSEL (Real Events) */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-zinc-50/70 border-b border-zinc-200/60">
-          <div className="max-w-6xl mx-auto">
-            <div 
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-              className="relative rounded-3xl overflow-hidden bg-zinc-950 text-white shadow-xl min-h-[440px] sm:min-h-[400px] lg:aspect-[21/9] flex flex-col justify-end p-5 sm:p-10 lg:p-12 group"
-            >
-              {/* Background Images with Crossfade Transition */}
-              {FEATURED_SLIDES.map((slide, index) => (
-                <div
-                  key={slide.id}
-                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-                    index === currentSlide ? 'opacity-100 z-0' : 'opacity-0 -z-10 pointer-events-none'
-                  }`}
-                >
-                  <img
-                    src={slide.image}
-                    alt={slide.title}
-                    className="w-full h-full object-cover opacity-70 transform scale-100 group-hover:scale-102 transition-transform duration-1000"
-                  />
-                  {/* Heavy dark gradient on mobile so text is 100% readable */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-zinc-950/20 sm:via-zinc-950/45 sm:to-transparent" />
-                </div>
-              ))}
+        {featuredSlides.length > 0 && (
+          <section className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-zinc-50/70 border-b border-zinc-200/60">
+            <div className="max-w-6xl mx-auto">
+              <div 
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
+                className="relative rounded-3xl overflow-hidden bg-zinc-950 text-white shadow-xl min-h-[440px] sm:min-h-[400px] lg:aspect-[21/9] flex flex-col justify-end p-5 sm:p-10 lg:p-12 group"
+              >
+                {/* Background Images with Crossfade Transition */}
+                {featuredSlides.map((slide, index) => {
+                  const slideImage = slide.bannerUrl || slide.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=85';
+                  return (
+                    <div
+                      key={slide.id}
+                      className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                        index === currentSlide ? 'opacity-100 z-0' : 'opacity-0 -z-10 pointer-events-none'
+                      }`}
+                    >
+                      <img
+                        src={slideImage}
+                        alt={slide.title}
+                        className="w-full h-full object-cover opacity-70 transform scale-100 group-hover:scale-102 transition-transform duration-1000"
+                      />
+                      {/* Heavy dark gradient on mobile so text is 100% readable */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-zinc-950/20 sm:via-zinc-950/45 sm:to-transparent" />
+                    </div>
+                  );
+                })}
 
-              {/* Prev / Next Navigation Arrows */}
-              <div className="absolute top-4 right-4 sm:top-8 sm:right-8 z-20 flex items-center gap-1.5 sm:gap-2">
-                <button
-                  type="button"
-                  onClick={prevSlide}
-                  aria-label="Previous featured event"
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md text-white border border-white/20 flex items-center justify-center cursor-pointer transition-all active:scale-95 shadow-sm"
-                >
-                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={nextSlide}
-                  aria-label="Next featured event"
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md text-white border border-white/20 flex items-center justify-center cursor-pointer transition-all active:scale-95 shadow-sm"
-                >
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
+                {/* Prev / Next Navigation Arrows */}
+                {featuredSlides.length > 1 && (
+                  <div className="absolute top-4 right-4 sm:top-8 sm:right-8 z-20 flex items-center gap-1.5 sm:gap-2">
+                    <button
+                      type="button"
+                      onClick={prevSlide}
+                      aria-label="Previous featured event"
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md text-white border border-white/20 flex items-center justify-center cursor-pointer transition-all active:scale-95 shadow-sm"
+                    >
+                      <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={nextSlide}
+                      aria-label="Next featured event"
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md text-white border border-white/20 flex items-center justify-center cursor-pointer transition-all active:scale-95 shadow-sm"
+                    >
+                      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Active Slide Content */}
+                {featuredSlides[currentSlide] && (
+                  <div className="relative z-10 max-w-2xl space-y-2.5 sm:space-y-3 pt-12 sm:pt-0">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-[11px] sm:text-xs font-semibold border border-white/20">
+                      <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
+                      <span>{featuredSlides[currentSlide].city || (featuredSlides[currentSlide].venue ? featuredSlides[currentSlide].venue : 'Featured Event')}</span>
+                    </div>
+
+                    <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight transition-all duration-300">
+                      {featuredSlides[currentSlide].title}
+                    </h2>
+
+                    <p className="text-zinc-300 text-xs sm:text-sm line-clamp-2 leading-relaxed transition-all duration-300 max-w-xl">
+                      {featuredSlides[currentSlide].description}
+                    </p>
+
+                    <div className="pt-2 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                      <Link
+                        to={`/events/${featuredSlides[currentSlide].slug || featuredSlides[currentSlide].id}`}
+                        className="w-full sm:w-auto px-6 py-3 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <span>Get Tickets</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                      <span className="text-xs text-zinc-300 font-medium font-mono text-center sm:text-left">
+                        {formatDate(featuredSlides[currentSlide].startDate)}
+                        {featuredSlides[currentSlide].startTime ? ` • ${featuredSlides[currentSlide].startTime}` : ''}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Progress Dot Indicators */}
+                {featuredSlides.length > 1 && (
+                  <div className="relative sm:absolute sm:bottom-8 sm:right-8 z-20 flex items-center justify-center sm:justify-end gap-1.5 pt-4 sm:pt-0">
+                    {featuredSlides.map((slide, idx) => (
+                      <button
+                        key={slide.id}
+                        type="button"
+                        onClick={() => setCurrentSlide(idx)}
+                        aria-label={`Go to slide ${idx + 1}: ${slide.title}`}
+                        className={`h-2 rounded-full transition-all cursor-pointer ${
+                          idx === currentSlide
+                            ? 'w-7 bg-[#E31B23]'
+                            : 'w-2 bg-white/40 hover:bg-white/70'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+
               </div>
-
-              {/* Active Slide Content */}
-              <div className="relative z-10 max-w-2xl space-y-2.5 sm:space-y-3 pt-12 sm:pt-0">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-[11px] sm:text-xs font-semibold border border-white/20">
-                  <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
-                  <span>{FEATURED_SLIDES[currentSlide].tag}</span>
-                </div>
-
-                <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight transition-all duration-300">
-                  {FEATURED_SLIDES[currentSlide].title}
-                </h2>
-
-                <p className="text-zinc-300 text-xs sm:text-sm line-clamp-2 leading-relaxed transition-all duration-300 max-w-xl">
-                  {FEATURED_SLIDES[currentSlide].description}
-                </p>
-
-                <div className="pt-2 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                  <Link
-                    to={FEATURED_SLIDES[currentSlide].link}
-                    className="w-full sm:w-auto px-6 py-3 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <span>Get Tickets</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <span className="text-xs text-zinc-300 font-medium font-mono text-center sm:text-left">
-                    {FEATURED_SLIDES[currentSlide].price} • {FEATURED_SLIDES[currentSlide].date}
-                  </span>
-                </div>
-              </div>
-
-              {/* Progress Dot Indicators */}
-              <div className="relative sm:absolute sm:bottom-8 sm:right-8 z-20 flex items-center justify-center sm:justify-end gap-1.5 pt-4 sm:pt-0">
-                {FEATURED_SLIDES.map((slide, idx) => (
-                  <button
-                    key={slide.id}
-                    type="button"
-                    onClick={() => setCurrentSlide(idx)}
-                    aria-label={`Go to slide ${idx + 1}: ${slide.title}`}
-                    className={`h-2 rounded-full transition-all cursor-pointer ${
-                      idx === currentSlide
-                        ? 'w-7 bg-[#E31B23]'
-                        : 'w-2 bg-white/40 hover:bg-white/70'
-                    }`}
-                  />
-                ))}
-              </div>
-
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* ========================================================================= */}
         {/* 3. UPCOMING EVENTS (Real EventCard Grid) */}

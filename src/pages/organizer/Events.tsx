@@ -299,8 +299,8 @@ export const Events: React.FC = () => {
                           </Badge>
                         </td>
                         <td className="p-4 text-zinc-600 font-medium">
-                          <p className="font-bold text-zinc-900 text-sm">{formatDate(evt.startDate)}</p>
-                          <span className="text-xs text-zinc-400">{evt.startTime || '7:00 PM'}</span>
+                          <p className="font-bold text-zinc-900 text-sm">{formatDate(evt.startDate) || 'Date TBA'}</p>
+                          {evt.startTime && <span className="text-xs text-zinc-400">{evt.startTime}</span>}
                         </td>
                         <td className="p-4">
                           <div className="space-y-1.5 max-w-[140px]">

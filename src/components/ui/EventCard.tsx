@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Heart, Calendar, MapPin, Clock, Video } from 'lucide-react';
 import type { Event } from '../../types/api';
-import { formatCurrency, formatDate } from '../../utils/format';
+import { formatCurrency, formatDate, formatEventDateTime } from '../../utils/format';
 import { useNotification } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
 import { isEventFavorited, toggleFavoriteEvent, FAVORITES_UPDATED_EVENT } from '../../utils/favorites';
@@ -112,7 +112,7 @@ export const EventCard: React.FC<EventCardProps> = ({
     return `From ${formatCurrency(minPrice)}`;
   };
 
-  const formattedTime = event.startTime ? `${event.startTime}` : '7:00 PM';
+  const formattedTime = event.startTime ? formatEventDateTime('', event.startTime) : '';
 
   if (variant === 'compact') {
     return (
@@ -247,7 +247,7 @@ export const EventCard: React.FC<EventCardProps> = ({
           {/* Date & Time */}
           <div className="flex items-center gap-2 text-sm text-zinc-600 font-medium">
             <Clock className="w-4 h-4 text-zinc-400 flex-shrink-0" />
-            <span>{formatDate(event.startDate)} • {formattedTime}</span>
+            <span>{formattedTime ? `${formatDate(event.startDate)} • ${formattedTime}` : (formatDate(event.startDate) || 'Date TBA')}</span>
           </div>
         </div>
 

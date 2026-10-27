@@ -30,7 +30,7 @@ export const formatCurrency = (
 /**
  * Formats standard ISO dates to clean, readable formats (e.g., Aug 28, 2026)
  */
-export const formatDate = (dateString: string): string => {
+export const formatDate = (dateString?: string): string => {
   if (!dateString) return '';
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return dateString;
@@ -43,18 +43,21 @@ export const formatDate = (dateString: string): string => {
 };
 
 /**
- * Formats date and time into a unified event schedule string
+ * Formats date and time into a unified event schedule string.
+ * If timeStr is missing or empty, returns just the formatted date.
  */
-export const formatEventDateTime = (dateStr: string, timeStr: string): string => {
+export const formatEventDateTime = (dateStr?: string, timeStr?: string): string => {
   const dateFormatted = formatDate(dateStr);
-  if (!timeStr) return dateFormatted;
+  if (!timeStr || !timeStr.trim()) return dateFormatted;
   
-  // Format 14:00 to 2:00 PM
+  // Format HH:mm or HH:mm:ss to 12-hour AM/PM
   const [hourStr, minStr] = timeStr.split(':');
   const hour = parseInt(hourStr, 10);
+  if (isNaN(hour)) return `${dateFormatted}${dateFormatted ? ' • ' : ''}${timeStr}`;
+  
   const ampm = hour >= 12 ? 'PM' : 'AM';
   const displayHour = hour % 12 || 12;
-  const formattedTime = `${displayHour}:${minStr} ${ampm}`;
+  const formattedTime = `${displayHour}:${minStr || '00'} ${ampm}`;
   
-  return `${dateFormatted} • ${formattedTime}`;
+  return dateFormatted ? `${dateFormatted} • ${formattedTime}` : formattedTime;
 };
