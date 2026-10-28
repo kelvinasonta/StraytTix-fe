@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import OrganizerDashboardLayout from '../../components/layout/OrganizerDashboardLayout';
-import { formatCurrency, formatDate } from '../../utils/format';
+import { formatDate } from '../../utils/format';
 import { 
   PlusCircle, 
   Eye, 
@@ -16,7 +16,6 @@ import {
   LayoutGrid, 
   List, 
   MapPin, 
-  Users,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -402,10 +401,6 @@ export const Events: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedEvents.map((evt) => {
               const eventId = evt.id || (evt as any).uuid;
-              const sold = evt.ticketsSold ?? 0;
-              const totalCap = evt.capacity;
-              const hasCap = typeof totalCap === 'number' && totalCap > 0;
-              const pct = hasCap ? Math.min(100, Math.round((sold / totalCap) * 100)) : 0;
 
               const targetManageUrl = role === 'staff'
                 ? `/organizer/events/${eventId}?tab=attendees&sub=checkin`
@@ -472,42 +467,6 @@ export const Events: React.FC = () => {
                         </span>
                       </p>
                     </div>
-
-                    {/* Capacity and Sales Metric */}
-                    {hasCap ? (
-                      <div className="space-y-1.5 pt-1">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="font-bold text-zinc-800 flex items-center gap-1">
-                            <Users className="w-3.5 h-3.5 text-zinc-400" />
-                            {role === 'staff' ? `${totalCap} Capacity` : `${sold} / ${totalCap} sold`}
-                          </span>
-                          <span className="font-semibold text-zinc-500">{pct}%</span>
-                        </div>
-                        <div className="w-full h-2 bg-zinc-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-[#E31B23] rounded-full transition-all duration-500"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="pt-1 flex justify-between items-center text-xs">
-                        <span className="font-bold text-zinc-800 flex items-center gap-1">
-                          <Users className="w-3.5 h-3.5 text-zinc-400" />
-                          {role === 'staff' ? 'Open Capacity' : `${sold} sold`}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Revenue Stat */}
-                    {perms.canViewRevenue && (
-                      <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-xs">
-                        <span className="text-zinc-500 font-medium">Gross Revenue</span>
-                        <span className="text-zinc-950 font-black text-sm">
-                          {formatCurrency(evt.revenue || 0)}
-                        </span>
-                      </div>
-                    )}
                   </div>
 
                   {/* Card Footer Actions */}
@@ -577,10 +536,6 @@ export const Events: React.FC = () => {
           <div className="space-y-4">
             {paginatedEvents.map((evt) => {
               const eventId = evt.id || (evt as any).uuid;
-              const sold = evt.ticketsSold ?? 0;
-              const totalCap = evt.capacity;
-              const hasCap = typeof totalCap === 'number' && totalCap > 0;
-              const pct = hasCap ? Math.min(100, Math.round((sold / totalCap) * 100)) : 0;
 
               const targetManageUrl = role === 'staff'
                 ? `/organizer/events/${eventId}?tab=attendees&sub=checkin`
@@ -672,45 +627,6 @@ export const Events: React.FC = () => {
                         </p>
                       )}
                     </div>
-                  </div>
-
-                  {/* Middle Block: Sales, Capacity & Revenue (Organizer Metrics) */}
-                  <div className="flex items-center justify-between lg:flex-col lg:items-stretch gap-3 w-full lg:w-52 shrink-0 bg-zinc-50/80 p-2.5 sm:p-3 rounded-2xl border border-zinc-200/70">
-                    {/* Sales & Capacity Bar */}
-                    {hasCap ? (
-                      <div className="space-y-1 flex-1 min-w-0">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-zinc-800 flex items-center gap-1 truncate">
-                            <Users className="w-3 h-3 text-zinc-400 shrink-0" />
-                            <span className="truncate">{role === 'staff' ? `${totalCap} Cap` : `${sold}/${totalCap} sold`}</span>
-                          </span>
-                          <span className="font-mono text-[11px] font-bold text-zinc-500 ml-1">{pct}%</span>
-                        </div>
-                        <div className="w-full h-1.5 sm:h-2 bg-zinc-200/80 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-[#E31B23] rounded-full transition-all duration-500"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex-1 flex items-center text-xs">
-                        <span className="font-bold text-zinc-800 flex items-center gap-1">
-                          <Users className="w-3 h-3 text-zinc-400" />
-                          {role === 'staff' ? 'Open Cap' : `${sold} sold`}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Revenue Display */}
-                    {perms.canViewRevenue && (
-                      <div className="flex flex-col sm:flex-row lg:flex-row items-end sm:items-center justify-between text-xs pl-3 border-l border-zinc-200/70 shrink-0 lg:pl-0 lg:border-l-0 lg:border-t lg:pt-2">
-                        <span className="text-[10px] sm:text-xs text-zinc-400 font-medium">Revenue</span>
-                        <span className="text-zinc-950 font-black text-xs sm:text-sm">
-                          {formatCurrency(evt.revenue || 0)}
-                        </span>
-                      </div>
-                    )}
                   </div>
 
                   {/* Right Block: Action Buttons */}
