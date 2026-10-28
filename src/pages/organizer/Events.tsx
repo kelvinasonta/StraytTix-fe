@@ -173,20 +173,6 @@ export const Events: React.FC = () => {
     }
   };
 
-  const handlePublish = async (eventId: string, title: string, ticketsCount?: number) => {
-    if (ticketsCount !== undefined && ticketsCount === 0) {
-      showNotification('Cannot publish event: You must create at least one ticket tier before publishing live.', 'warning');
-      return;
-    }
-    try {
-      await eventApi.publishEvent(eventId, organizer?.id);
-      showNotification(`"${title}" published successfully.`, 'success');
-      fetchEvents();
-    } catch (err: any) {
-      const errMsg = getApiErrorMessage(err, 'Failed to publish event. Please ensure the event has at least one active ticket tier.');
-      showNotification(errMsg, 'error');
-    }
-  };
 
   const getStatusCount = useCallback((status: EventFilterStatus) => {
     if (status === 'All') return events.length;
@@ -400,9 +386,10 @@ export const Events: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((evt) => {
               const eventId = evt.id || (evt as any).uuid;
-              const sold = evt.ticketsSold || 0;
-              const totalCap = evt.capacity || (sold > 0 ? Math.round(sold * 1.5) : 100);
-              const pct = Math.min(100, Math.round((sold / totalCap) * 100));
+              const sold = evt.ticketsSold ?? 0;
+              const totalCap = evt.capacity;
+              const hasCap = typeof totalCap === 'number' && totalCap > 0;
+              const pct = hasCap ? Math.min(100, Math.round((sold / totalCap) * 100)) : 0;
 
               const targetManageUrl = role === 'staff'
                 ? `/organizer/events/${eventId}?tab=attendees&sub=checkin`
@@ -470,22 +457,31 @@ export const Events: React.FC = () => {
                       </p>
                     </div>
 
-                    {/* Capacity and Sales Progress Bar */}
-                    <div className="space-y-1.5 pt-1">
-                      <div className="flex justify-between items-center text-xs">
+                    {/* Capacity and Sales Metric */}
+                    {hasCap ? (
+                      <div className="space-y-1.5 pt-1">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-bold text-zinc-800 flex items-center gap-1">
+                            <Users className="w-3.5 h-3.5 text-zinc-400" />
+                            {role === 'staff' ? `${totalCap} Capacity` : `${sold} / ${totalCap} sold`}
+                          </span>
+                          <span className="font-semibold text-zinc-500">{pct}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-zinc-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#E31B23] rounded-full transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="pt-1 flex justify-between items-center text-xs">
                         <span className="font-bold text-zinc-800 flex items-center gap-1">
                           <Users className="w-3.5 h-3.5 text-zinc-400" />
-                          {role === 'staff' ? `${totalCap} Capacity` : `${sold} / ${totalCap} sold`}
+                          {role === 'staff' ? 'Open Capacity' : `${sold} sold`}
                         </span>
-                        <span className="font-semibold text-zinc-500">{pct}%</span>
                       </div>
-                      <div className="w-full h-2 bg-zinc-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[#E31B23] rounded-full transition-all duration-500"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
+                    )}
 
                     {/* Revenue Stat */}
                     {perms.canViewRevenue && (
@@ -519,16 +515,6 @@ export const Events: React.FC = () => {
                         </Link>
 
                         <div className="flex items-center gap-1">
-                          {evt.status === 'Draft' && perms.canPublishEvents && (
-                            <button
-                              onClick={() => handlePublish(eventId, evt.title, evt.tickets?.length)}
-                              className="px-2.5 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-xs font-bold cursor-pointer transition-colors"
-                              title="Publish Event"
-                            >
-                              Publish
-                            </button>
-                          )}
-
                           {perms.canConfigureTickets && (
                             <Link
                               to={`/organizer/events/${eventId}?tab=tickets`}
@@ -575,9 +561,10 @@ export const Events: React.FC = () => {
           <div className="space-y-4">
             {filteredEvents.map((evt) => {
               const eventId = evt.id || (evt as any).uuid;
-              const sold = evt.ticketsSold || 0;
-              const totalCap = evt.capacity || (sold > 0 ? Math.round(sold * 1.5) : 100);
-              const pct = Math.min(100, Math.round((sold / totalCap) * 100));
+              const sold = evt.ticketsSold ?? 0;
+              const totalCap = evt.capacity;
+              const hasCap = typeof totalCap === 'number' && totalCap > 0;
+              const pct = hasCap ? Math.min(100, Math.round((sold / totalCap) * 100)) : 0;
 
               const targetManageUrl = role === 'staff'
                 ? `/organizer/events/${eventId}?tab=attendees&sub=checkin`
@@ -659,21 +646,30 @@ export const Events: React.FC = () => {
                   {/* Middle Block: Sales, Capacity & Revenue (Organizer Metrics) */}
                   <div className="flex flex-col sm:flex-row lg:flex-col gap-3 w-full lg:w-52 shrink-0 bg-zinc-50/80 p-3 rounded-2xl border border-zinc-200/70">
                     {/* Sales & Capacity Bar */}
-                    <div className="space-y-1 flex-1">
-                      <div className="flex items-center justify-between text-xs">
+                    {hasCap ? (
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-zinc-800 flex items-center gap-1">
+                            <Users className="w-3 h-3 text-zinc-400" />
+                            {role === 'staff' ? `${totalCap} Cap` : `${sold}/${totalCap} sold`}
+                          </span>
+                          <span className="font-mono text-[11px] font-bold text-zinc-500">{pct}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-zinc-200/80 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#E31B23] rounded-full transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex-1 flex items-center text-xs">
                         <span className="font-bold text-zinc-800 flex items-center gap-1">
                           <Users className="w-3 h-3 text-zinc-400" />
-                          {role === 'staff' ? `${totalCap} Cap` : `${sold}/${totalCap} sold`}
+                          {role === 'staff' ? 'Open Cap' : `${sold} sold`}
                         </span>
-                        <span className="font-mono text-[11px] font-bold text-zinc-500">{pct}%</span>
                       </div>
-                      <div className="w-full h-2 bg-zinc-200/80 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[#E31B23] rounded-full transition-all duration-500"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
+                    )}
 
                     {/* Revenue Display */}
                     {perms.canViewRevenue && (
@@ -708,16 +704,6 @@ export const Events: React.FC = () => {
                         </Link>
 
                         <div className="flex items-center gap-1">
-                          {evt.status === 'Draft' && perms.canPublishEvents && (
-                            <button
-                              onClick={() => handlePublish(eventId, evt.title, evt.tickets?.length)}
-                              className="px-3 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-xs font-bold cursor-pointer transition-colors"
-                              title="Publish Event"
-                            >
-                              Publish
-                            </button>
-                          )}
-
                           {perms.canConfigureTickets && (
                             <Link
                               to={`/organizer/events/${eventId}?tab=tickets`}

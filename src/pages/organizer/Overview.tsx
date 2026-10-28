@@ -192,7 +192,7 @@ export const Overview: React.FC = () => {
           {/* Events List */}
           <div className="divide-y divide-zinc-100">
             {events.slice(0, 3).map((evt) => {
-              const capacity = evt.tickets?.reduce((acc, t) => acc + t.quantity, 0) || 500;
+              const capacity = evt.tickets?.reduce((acc, t) => acc + (t.quantity || 0), 0) || evt.capacity || 0;
               const sold = evt.ticketsSold || 0;
 
               return (
@@ -228,7 +228,7 @@ export const Overview: React.FC = () => {
                     <div className="text-right min-w-[75px]">
                       <span className="text-[10px] text-zinc-400 font-semibold block">Tickets</span>
                       <span className="text-xs font-bold text-zinc-800">
-                        {sold} / {capacity}
+                        {capacity > 0 ? `${sold} / ${capacity}` : `${sold} sold`}
                       </span>
                     </div>
 
