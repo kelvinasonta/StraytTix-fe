@@ -591,29 +591,29 @@ export const Events: React.FC = () => {
               return (
                 <div
                   key={eventId}
-                  className="group bg-white hover:bg-zinc-50/60 border border-zinc-200/90 rounded-3xl p-4 sm:p-5 shadow-2xs hover:shadow-md hover:border-zinc-300 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5"
+                  className="group bg-white hover:bg-zinc-50/60 border border-zinc-200/90 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-2xs hover:shadow-md hover:border-zinc-300 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-5"
                 >
                   {/* Left Block: Thumbnail + Title + Meta Details */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1 min-w-0">
+                  <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 flex-1 min-w-0">
                     {/* Thumbnail with overlay badges */}
                     <Link
                       to={targetManageUrl}
-                      className="relative w-full sm:w-48 h-32 rounded-2xl overflow-hidden shrink-0 bg-zinc-100 block"
+                      className="relative w-24 h-24 sm:w-48 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 bg-zinc-100 block group/thumb"
                     >
                       <img
                         src={evt.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=500&q=80'}
                         alt={evt.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent hidden sm:block" />
 
-                      {/* Category Badge */}
-                      <span className="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] font-bold text-zinc-800 shadow-xs border border-white/60">
+                      {/* Category Badge on thumbnail (tablet/desktop) */}
+                      <span className="hidden sm:inline-block absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] font-bold text-zinc-800 shadow-xs border border-white/60">
                         {evt.category || 'Event'}
                       </span>
 
-                      {/* Status Badge */}
-                      <div className="absolute top-2.5 right-2.5 shadow-xs">
+                      {/* Status Badge on thumbnail (tablet/desktop) */}
+                      <div className="hidden sm:block absolute top-2.5 right-2.5 shadow-xs">
                         <Badge variant={displayStatus.variant} className="text-[10px] px-2 py-0.5">
                           {displayStatus.label}
                         </Badge>
@@ -621,24 +621,39 @@ export const Events: React.FC = () => {
 
                       {/* Format pill bottom */}
                       {evt.eventFormat && (
-                        <span className="absolute bottom-2 left-2.5 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-md text-[9px] uppercase font-mono text-zinc-200 border border-white/20">
+                        <span className="hidden sm:inline-block absolute bottom-2 left-2.5 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-md text-[9px] uppercase font-mono text-zinc-200 border border-white/20">
                           {evt.eventFormat}
                         </span>
                       )}
                     </Link>
 
                     {/* Event Title & Metadata */}
-                    <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex-1 min-w-0 space-y-1 sm:space-y-2">
+                      {/* Mobile Top Badges: Status + Category */}
+                      <div className="flex sm:hidden items-center gap-1.5 flex-wrap">
+                        <Badge variant={displayStatus.variant} className="text-[9px] px-2 py-0.5 font-bold">
+                          {displayStatus.label}
+                        </Badge>
+                        <span className="text-[10px] font-bold text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-full">
+                          {evt.category || 'Event'}
+                        </span>
+                        {evt.eventFormat && (
+                          <span className="text-[9px] font-mono uppercase text-zinc-400 bg-zinc-50 border border-zinc-200/80 px-1.5 py-0.5 rounded">
+                            {evt.eventFormat}
+                          </span>
+                        )}
+                      </div>
+
                       <Link to={targetManageUrl} className="block group/title">
-                        <h3 className="text-base sm:text-lg font-black text-zinc-950 truncate group-hover/title:text-[#E31B23] transition-colors" title={evt.title}>
+                        <h3 className="text-sm sm:text-lg font-black text-zinc-950 line-clamp-2 sm:truncate group-hover/title:text-[#E31B23] transition-colors leading-snug" title={evt.title}>
                           {evt.title}
                         </h3>
                       </Link>
 
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs font-semibold text-zinc-500">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-x-4 sm:gap-y-1.5 text-xs font-semibold text-zinc-500">
                         <span className="inline-flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-[#E31B23]" />
-                          <span>{formatDate(evt.startDate) || 'Date TBA'}</span>
+                          <Calendar className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
+                          <span className="truncate">{formatDate(evt.startDate) || 'Date TBA'}</span>
                           {evt.startTime && <span className="text-zinc-400">at {evt.startTime}</span>}
                         </span>
 
@@ -650,9 +665,9 @@ export const Events: React.FC = () => {
                         </span>
                       </div>
 
-                      {/* Description snippet */}
+                      {/* Description snippet for larger screens */}
                       {evt.description && (
-                        <p className="text-xs text-zinc-400 line-clamp-1 font-normal max-w-xl">
+                        <p className="hidden md:block text-xs text-zinc-400 line-clamp-1 font-normal max-w-xl">
                           {evt.description.replace(/<[^>]*>/g, '')}
                         </p>
                       )}
@@ -660,18 +675,18 @@ export const Events: React.FC = () => {
                   </div>
 
                   {/* Middle Block: Sales, Capacity & Revenue (Organizer Metrics) */}
-                  <div className="flex flex-col sm:flex-row lg:flex-col gap-3 w-full lg:w-52 shrink-0 bg-zinc-50/80 p-3 rounded-2xl border border-zinc-200/70">
+                  <div className="flex items-center justify-between lg:flex-col lg:items-stretch gap-3 w-full lg:w-52 shrink-0 bg-zinc-50/80 p-2.5 sm:p-3 rounded-2xl border border-zinc-200/70">
                     {/* Sales & Capacity Bar */}
                     {hasCap ? (
-                      <div className="space-y-1 flex-1">
+                      <div className="space-y-1 flex-1 min-w-0">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-zinc-800 flex items-center gap-1">
-                            <Users className="w-3 h-3 text-zinc-400" />
-                            {role === 'staff' ? `${totalCap} Cap` : `${sold}/${totalCap} sold`}
+                          <span className="font-bold text-zinc-800 flex items-center gap-1 truncate">
+                            <Users className="w-3 h-3 text-zinc-400 shrink-0" />
+                            <span className="truncate">{role === 'staff' ? `${totalCap} Cap` : `${sold}/${totalCap} sold`}</span>
                           </span>
-                          <span className="font-mono text-[11px] font-bold text-zinc-500">{pct}%</span>
+                          <span className="font-mono text-[11px] font-bold text-zinc-500 ml-1">{pct}%</span>
                         </div>
-                        <div className="w-full h-2 bg-zinc-200/80 rounded-full overflow-hidden">
+                        <div className="w-full h-1.5 sm:h-2 bg-zinc-200/80 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-[#E31B23] rounded-full transition-all duration-500"
                             style={{ width: `${pct}%` }}
@@ -689,9 +704,9 @@ export const Events: React.FC = () => {
 
                     {/* Revenue Display */}
                     {perms.canViewRevenue && (
-                      <div className="flex items-center justify-between text-xs pt-2 sm:pt-0 lg:pt-2 border-t sm:border-t-0 lg:border-t border-zinc-200/70">
-                        <span className="text-zinc-400 font-medium">Revenue</span>
-                        <span className="text-zinc-950 font-black text-sm">
+                      <div className="flex flex-col sm:flex-row lg:flex-row items-end sm:items-center justify-between text-xs pl-3 border-l border-zinc-200/70 shrink-0 lg:pl-0 lg:border-l-0 lg:border-t lg:pt-2">
+                        <span className="text-[10px] sm:text-xs text-zinc-400 font-medium">Revenue</span>
+                        <span className="text-zinc-950 font-black text-xs sm:text-sm">
                           {formatCurrency(evt.revenue || 0)}
                         </span>
                       </div>
@@ -699,11 +714,11 @@ export const Events: React.FC = () => {
                   </div>
 
                   {/* Right Block: Action Buttons */}
-                  <div className="flex items-center justify-end gap-2 shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 border-zinc-150">
+                  <div className="flex items-center justify-between sm:justify-end gap-2 w-full lg:w-auto shrink-0 border-t sm:border-t-0 pt-2.5 sm:pt-0 border-zinc-150">
                     {role === 'staff' ? (
                       <Link
                         to={`/organizer/events/${eventId}?tab=attendees&sub=checkin`}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
                         title="Open Gate Scanner"
                       >
                         <QrCode className="w-3.5 h-3.5" />
@@ -713,7 +728,7 @@ export const Events: React.FC = () => {
                       <>
                         <Link
                           to={`/organizer/events/${eventId}`}
-                          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs"
                         >
                           <Edit className="w-3.5 h-3.5 text-zinc-400" />
                           <span>Manage</span>
@@ -723,7 +738,7 @@ export const Events: React.FC = () => {
                           {perms.canConfigureTickets && (
                             <Link
                               to={`/organizer/events/${eventId}?tab=tickets`}
-                              className="p-2.5 text-zinc-500 hover:text-indigo-600 hover:bg-indigo-50 border border-zinc-200 hover:border-indigo-200 bg-white rounded-xl transition-colors shadow-2xs"
+                              className="p-2 sm:p-2.5 text-zinc-500 hover:text-indigo-600 hover:bg-indigo-50 border border-zinc-200 hover:border-indigo-200 bg-white rounded-xl transition-colors shadow-2xs"
                               title="Configure Tickets"
                             >
                               <Ticket className="w-4 h-4" />
@@ -735,7 +750,7 @@ export const Events: React.FC = () => {
                               href={`/events/${evt.slug || eventId}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="p-2.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 border border-zinc-200 hover:border-zinc-300 bg-white rounded-xl transition-colors shadow-2xs"
+                              className="p-2 sm:p-2.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 border border-zinc-200 hover:border-zinc-300 bg-white rounded-xl transition-colors shadow-2xs"
                               title="View Public Page"
                             >
                               <Eye className="w-4 h-4" />
@@ -745,7 +760,7 @@ export const Events: React.FC = () => {
                           {perms.canDeleteEvents && (
                             <button
                               onClick={() => handleDeletePrompt(eventId, evt.title)}
-                              className="p-2.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 border border-zinc-200 hover:border-red-200 bg-white rounded-xl cursor-pointer transition-colors shadow-2xs"
+                              className="p-2 sm:p-2.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 border border-zinc-200 hover:border-red-200 bg-white rounded-xl cursor-pointer transition-colors shadow-2xs"
                               title="Delete Listing"
                             >
                               <Trash2 className="w-4 h-4" />
