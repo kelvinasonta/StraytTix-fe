@@ -16,7 +16,9 @@ import {
   LayoutGrid, 
   List, 
   MapPin, 
-  Users 
+  Users,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import Badge from '../../components/ui/Badge';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
@@ -203,6 +205,23 @@ export const Events: React.FC = () => {
     });
   }, [events, selectedStatus, searchQuery, isEventEnded]);
 
+  const ITEMS_PER_PAGE = 9;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to first page when filtering or searching
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedStatus, searchQuery]);
+
+  const totalItems = filteredEvents.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+
+  const paginatedEvents = useMemo(() => {
+    const start = (safePage - 1) * ITEMS_PER_PAGE;
+    return filteredEvents.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredEvents, safePage]);
+
   return (
     <OrganizerDashboardLayout>
       <div className="space-y-6">
@@ -381,7 +400,7 @@ export const Events: React.FC = () => {
           /* GRID VIEW (Matching Discover page aesthetics + organizer management)       */
           /* ========================================================================= */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((evt) => {
+            {paginatedEvents.map((evt) => {
               const eventId = evt.id || (evt as any).uuid;
               const sold = evt.ticketsSold ?? 0;
               const totalCap = evt.capacity;
@@ -556,7 +575,7 @@ export const Events: React.FC = () => {
           /* MODERN LIST VIEW (Horizontal cards matching Discover page aesthetic)      */
           /* ========================================================================= */
           <div className="space-y-4">
-            {filteredEvents.map((evt) => {
+            {paginatedEvents.map((evt) => {
               const eventId = evt.id || (evt as any).uuid;
               const sold = evt.ticketsSold ?? 0;
               const totalCap = evt.capacity;
@@ -739,6 +758,65 @@ export const Events: React.FC = () => {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {!isLoading && totalItems > 0 && totalPages > 1 && (
+          <div className="bg-white rounded-2xl border border-zinc-200/90 px-5 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+            <div className="text-xs text-zinc-500 font-semibold">
+              Showing <span className="font-bold text-zinc-900">{(safePage - 1) * ITEMS_PER_PAGE + 1}</span> to{' '}
+              <span className="font-bold text-zinc-900">{Math.min(safePage * ITEMS_PER_PAGE, totalItems)}</span> of{' '}
+              <span className="font-bold text-zinc-900">{totalItems}</span> events
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Previous Button */}
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={safePage <= 1}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Previous</span>
+              </button>
+
+              {/* Page Numbers */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                  if (totalPages > 7) {
+                    if (p !== 1 && p !== totalPages && Math.abs(p - safePage) > 1) {
+                      if (p === 2 && safePage > 3) return <span key={p} className="px-1 text-xs text-zinc-400">...</span>;
+                      if (p === totalPages - 1 && safePage < totalPages - 2) return <span key={p} className="px-1 text-xs text-zinc-400">...</span>;
+                      return null;
+                    }
+                  }
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setCurrentPage(p)}
+                      className={`w-9 h-9 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                        p === safePage
+                          ? 'bg-[#E31B23] text-white shadow-xs scale-105'
+                          : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage >= totalPages}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         )}
 
