@@ -737,7 +737,7 @@ export const CreateEvent: React.FC = () => {
           const newLng = parseFloat(data[0].lon).toFixed(6);
           setLatitude(newLat);
           setLongitude(newLng);
-          showNotification(`📍 Pinned on map: ${venue || address}`, 'success');
+          showNotification('Location updated', 'success');
         } else {
           showNotification('Address not found. Please drop pin on the map.', 'info');
         }
@@ -809,7 +809,7 @@ export const CreateEvent: React.FC = () => {
         setLongitude(lng);
         setPinLabel('Detected GPS Venue Point');
         setIsLocating(false);
-        showNotification(`Pin marked to device GPS coordinates: ${lat}, ${lng}!`, 'success');
+        showNotification(`Pin marked to device GPS coordinates.`, 'success');
       },
       () => {
         setIsLocating(false);
@@ -822,7 +822,7 @@ export const CreateEvent: React.FC = () => {
   const handleCopyCoords = () => {
     navigator.clipboard.writeText(`${latitude}, ${longitude}`);
     setCopiedCoords(true);
-    showNotification('GPS Coordinates copied to clipboard!', 'success');
+    showNotification('Copied', 'success');
     setTimeout(() => setCopiedCoords(false), 2000);
   };
 
@@ -880,9 +880,9 @@ export const CreateEvent: React.FC = () => {
       });
       setImageUrl(data.url);
       setCoverFileName(file.name);
-      showNotification('Cover flyer uploaded and processed successfully!', 'success');
+      showNotification('Cover uploaded', 'success');
     } catch (err: any) {
-      showNotification(err.message || 'Failed to upload cover flyer.', 'error');
+      showNotification(err.message || 'Failed to upload', 'error');
     } finally {
       setIsUploadingCover(false);
       setCoverUploadProgress(null);
@@ -1070,7 +1070,7 @@ export const CreateEvent: React.FC = () => {
   const handleCopySlug = () => {
     navigator.clipboard.writeText(`https://eventa.live/events/${slug}`);
     setCopiedSlug(true);
-    showNotification('Event link copied to clipboard!', 'success');
+    showNotification('Copied', 'success');
     setTimeout(() => setCopiedSlug(false), 2000);
   };
 
@@ -1274,7 +1274,7 @@ export const CreateEvent: React.FC = () => {
 
       if (targetId) {
         await eventApi.updateEvent(targetId, payload, organizer?.id);
-        showNotification(`Event "${title}" successfully saved as ${targetStatus}!`, 'success');
+        showNotification(`Event updated`, 'success');
       } else {
         const res = await eventApi.createEvent(payload, organizer?.id);
         const newEvent = (res as any)?.data?.data || (res as any)?.data || res;
@@ -1283,7 +1283,7 @@ export const CreateEvent: React.FC = () => {
           eventId = String(newId);
           setCreatedEventId(String(newId));
         }
-        showNotification(`🎉 Event "${title}" created successfully as ${targetStatus}!`, 'success');
+        showNotification(`Event created`, 'success');
       }
 
       if (eventId) {
@@ -1334,23 +1334,14 @@ export const CreateEvent: React.FC = () => {
 
           {/* Quick Header Actions */}
           <div className="flex items-center gap-2.5 self-start md:self-center">
-            <button
-              onClick={() => handlePublish('Draft')}
-              disabled={isLoading}
-              className="px-4 py-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 text-zinc-800 text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
-            >
-              <FileText className="w-3.5 h-3.5 text-zinc-400" />
-              <span>Save Draft</span>
-            </button>
-
             {perms.canPublishEvents && (
               <button
-                onClick={() => handlePublish('Published')}
+                onClick={() => handlePublish('Draft')}
                 disabled={isLoading}
                 className="px-5 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-black shadow-sm hover:shadow transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
               >
                 {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Rocket className="w-3.5 h-3.5" />}
-                <span>{isEditing ? 'Update & Publish' : 'Publish Live'}</span>
+                <span>{isEditing ? 'Update & Publish' : 'Save and Continue'}</span>
               </button>
             )}
           </div>
@@ -1420,1728 +1411,1707 @@ export const CreateEvent: React.FC = () => {
             className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-9 md:p-10 shadow-xs space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-200"
           >
 
-              {/* STEP 1: ESSENTIALS */}
-              {step === 1 && (
-                <div className="space-y-7">
-                  <div className="border-b border-zinc-100 pb-4">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-[#E31B23]">Phase 01</span>
-                    <h3 className="text-xl font-black text-zinc-950 tracking-tight mt-0.5">
-                      Event Essentials & Details
-                    </h3>
-                    <p className="text-xs text-zinc-500 mt-1 font-medium">
-                      Provide the core identity, discovery keywords, format, and description for your event.
-                    </p>
+            {/* STEP 1: ESSENTIALS */}
+            {step === 1 && (
+              <div className="space-y-7">
+                <div className="border-b border-zinc-100 pb-4">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#E31B23]">Phase 01</span>
+                  <h3 className="text-xl font-black text-zinc-950 tracking-tight mt-0.5">
+                    Event Essentials & Details
+                  </h3>
+                  <p className="text-xs text-zinc-500 mt-1 font-medium">
+                    Provide the core identity, discovery keywords, format, and description for your event.
+                  </p>
+                </div>
+
+                {/* Name */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
+                      <span>Event Name</span>
+                      <span className="text-[#E31B23] font-bold">*</span>
+                    </label>
+                    <span className="text-[11px] text-zinc-400 font-mono font-medium">{title.length}/100</span>
+                  </div>
+                  <input
+                    type="text"
+                    maxLength={100}
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. Lagos Tech Fest 2026, Afro Nation, AI DevCon..."
+                    className="w-full px-4 py-3 bg-zinc-50/80 hover:bg-zinc-50 border border-zinc-200 focus:border-[#E31B23] focus:bg-white rounded-2xl text-sm font-bold text-zinc-950 placeholder-zinc-400 outline-none transition-all shadow-2xs focus:ring-3 focus:ring-red-500/10"
+                    required
+                  />
+                </div>
+
+                {/* Event Format Selector */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-[#E31B23]" />
+                      <span>Event Format</span>
+                      <span className="text-[#E31B23] font-bold">*</span>
+                    </label>
+                    <span className="text-[11px] font-semibold text-zinc-500">Selected: <strong className="text-zinc-900">{eventFormat}</strong></span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                    {EVENT_FORMATS.map((fmt) => {
+                      const isSelected = eventFormat === fmt;
+                      return (
+                        <button
+                          key={fmt}
+                          type="button"
+                          onClick={() => setEventFormat(fmt)}
+                          className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center truncate ${isSelected
+                            ? 'bg-zinc-950 text-white border-zinc-950 shadow-xs ring-1 ring-zinc-950'
+                            : 'bg-zinc-50 border-zinc-200 text-zinc-700 hover:bg-zinc-100 hover:border-zinc-300'
+                            }`}
+                        >
+                          {fmt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Categories Multi-Select Chips */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+                      <Tag className="w-3.5 h-3.5 text-[#E31B23]" />
+                      <span>Event Categories & Tags *</span>
+                    </label>
+                    <span className="text-[11px] font-medium text-zinc-500">
+                      {eventCategories.length}/5 selected (max 5)
+                    </span>
                   </div>
 
-                  {/* Name */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
-                        <span>Event Name</span>
-                        <span className="text-[#E31B23] font-bold">*</span>
-                      </label>
-                      <span className="text-[11px] text-zinc-400 font-mono font-medium">{title.length}/100</span>
+                  {/* Active Selected Category Tags */}
+                  <div className="flex flex-wrap gap-2 min-h-[38px] p-2.5 bg-zinc-50 border border-zinc-200 rounded-2xl">
+                    {eventCategories.map((cat) => (
+                      <span
+                        key={cat}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-zinc-300 text-zinc-900 rounded-xl text-xs font-bold shadow-2xs"
+                      >
+                        <span>{cat}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCategory(cat)}
+                          className="text-zinc-400 hover:text-red-600 transition-colors cursor-pointer p-0.5"
+                          title={`Remove ${cat}`}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+
+                    {/* Custom Category Input */}
+                    <div className="inline-flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        value={customCategoryInput}
+                        onChange={(e) => setCustomCategoryInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddCustomCategory();
+                          }
+                        }}
+                        placeholder="+ Add tag (press Enter)"
+                        className="px-2.5 py-1 text-xs font-semibold bg-transparent outline-none placeholder-zinc-400 text-zinc-900 w-36"
+                      />
+                      {customCategoryInput.trim() && (
+                        <button
+                          type="button"
+                          onClick={handleAddCustomCategory}
+                          className="px-2 py-1 bg-zinc-900 text-white rounded-lg text-[10px] font-bold hover:bg-zinc-800 transition-all cursor-pointer"
+                        >
+                          Add
+                        </button>
+                      )}
                     </div>
-                    <input
-                      type="text"
-                      maxLength={100}
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="e.g. Lagos Tech Fest 2026, Afro Nation, AI DevCon..."
-                      className="w-full px-4 py-3 bg-zinc-50/80 hover:bg-zinc-50 border border-zinc-200 focus:border-[#E31B23] focus:bg-white rounded-2xl text-sm font-bold text-zinc-950 placeholder-zinc-400 outline-none transition-all shadow-2xs focus:ring-3 focus:ring-red-500/10"
-                      required
-                    />
                   </div>
 
-                  {/* Event Format Selector */}
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
-                        <Layers className="w-3.5 h-3.5 text-[#E31B23]" />
-                        <span>Event Format</span>
-                        <span className="text-[#E31B23] font-bold">*</span>
-                      </label>
-                      <span className="text-[11px] font-semibold text-zinc-500">Selected: <strong className="text-zinc-900">{eventFormat}</strong></span>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                      {EVENT_FORMATS.map((fmt) => {
-                        const isSelected = eventFormat === fmt;
+                  {/* Popular Tag Suggestions */}
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wide">
+                      Suggested Categories:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {POPULAR_CATEGORY_TAGS.map((tag) => {
+                        const isAdded = eventCategories.includes(tag);
                         return (
                           <button
-                            key={fmt}
+                            key={tag}
                             type="button"
-                            onClick={() => setEventFormat(fmt)}
-                            className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center truncate ${isSelected
-                              ? 'bg-zinc-950 text-white border-zinc-950 shadow-xs ring-1 ring-zinc-950'
-                              : 'bg-zinc-50 border-zinc-200 text-zinc-700 hover:bg-zinc-100 hover:border-zinc-300'
+                            onClick={() => {
+                              if (isAdded) {
+                                handleRemoveCategory(tag);
+                              } else {
+                                if (eventCategories.length >= 5) {
+                                  showNotification('You can select a maximum of 5 categories.', 'warning');
+                                  return;
+                                }
+                                setEventCategories((prev) => [...prev, tag]);
+                              }
+                            }}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer ${isAdded
+                              ? 'bg-red-50 border-red-200 text-[#E31B23] font-bold'
+                              : 'bg-white border-zinc-200 text-zinc-600 hover:border-zinc-300'
                               }`}
                           >
-                            {fmt}
+                            {isAdded ? `✓ ${tag}` : `+ ${tag}`}
                           </button>
                         );
                       })}
                     </div>
                   </div>
+                </div>
 
-                  {/* Categories Multi-Select Chips */}
-                  <div className="space-y-2.5">
+                {/* Description Rich Text Editor */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-zinc-800 block">Description / Experience Story *</label>
+                    {!isDescriptionFilled && (
+                      <span className="text-[11px] font-semibold text-amber-600 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> Required for Location & Schedule
+                      </span>
+                    )}
+                  </div>
+                  <RichTextEditor
+                    value={description}
+                    onChange={setDescription}
+                    placeholder="Give attendees a vivid reason to attend. Describe the atmosphere, keynote sessions, performers, and what makes this event unmissable..."
+                    minHeight="180px"
+                  />
+                </div>
+
+                {/* Visibility & Spotlight Toggle */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <div className="p-3.5 rounded-2xl border border-zinc-200 bg-zinc-50/70 space-y-2">
+                    <label className="text-xs font-bold text-zinc-800 flex items-center justify-between">
+                      <span>Event Visibility</span>
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${visibility === 'public' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-200 text-zinc-700'
+                        }`}>
+                        {visibility}
+                      </span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setVisibility('public')}
+                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${visibility === 'public'
+                          ? 'bg-white text-zinc-950 border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
+                          : 'bg-zinc-100/80 border-zinc-200 text-zinc-600 hover:bg-zinc-100'
+                          }`}
+                      >
+                        Public
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setVisibility('private')}
+                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${visibility === 'private'
+                          ? 'bg-white text-zinc-950 border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
+                          : 'bg-zinc-100/80 border-zinc-200 text-zinc-600 hover:bg-zinc-100'
+                          }`}
+                      >
+                        Private
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-zinc-500 font-medium">
+                      {visibility === 'public'
+                        ? 'Listed on Eventa marketplace & indexed on search engines.'
+                        : 'Only accessible to users with the direct secret link.'}
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl border border-zinc-200 bg-zinc-50/70 space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
-                        <Tag className="w-3.5 h-3.5 text-[#E31B23]" />
-                        <span>Event Categories & Tags *</span>
+                        <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
+                        <span>Marketplace Spotlight</span>
                       </label>
-                      <span className="text-[11px] font-medium text-zinc-500">
-                        {eventCategories.length}/5 selected (max 5)
-                      </span>
-                    </div>
-
-                    {/* Active Selected Category Tags */}
-                    <div className="flex flex-wrap gap-2 min-h-[38px] p-2.5 bg-zinc-50 border border-zinc-200 rounded-2xl">
-                      {eventCategories.map((cat) => (
-                        <span
-                          key={cat}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-zinc-300 text-zinc-900 rounded-xl text-xs font-bold shadow-2xs"
-                        >
-                          <span>{cat}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveCategory(cat)}
-                            className="text-zinc-400 hover:text-red-600 transition-colors cursor-pointer p-0.5"
-                            title={`Remove ${cat}`}
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </span>
-                      ))}
-
-                      {/* Custom Category Input */}
-                      <div className="inline-flex items-center gap-1.5">
+                      <label className="relative inline-flex items-center cursor-pointer">
                         <input
-                          type="text"
-                          value={customCategoryInput}
-                          onChange={(e) => setCustomCategoryInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleAddCustomCategory();
-                            }
-                          }}
-                          placeholder="+ Add tag (press Enter)"
-                          className="px-2.5 py-1 text-xs font-semibold bg-transparent outline-none placeholder-zinc-400 text-zinc-900 w-36"
+                          type="checkbox"
+                          checked={isFeatured}
+                          onChange={(e) => setIsFeatured(e.target.checked)}
+                          className="sr-only peer"
                         />
-                        {customCategoryInput.trim() && (
-                          <button
-                            type="button"
-                            onClick={handleAddCustomCategory}
-                            className="px-2 py-1 bg-zinc-900 text-white rounded-lg text-[10px] font-bold hover:bg-zinc-800 transition-all cursor-pointer"
-                          >
-                            Add
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Popular Tag Suggestions */}
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wide">
-                        Suggested Categories:
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {POPULAR_CATEGORY_TAGS.map((tag) => {
-                          const isAdded = eventCategories.includes(tag);
-                          return (
-                            <button
-                              key={tag}
-                              type="button"
-                              onClick={() => {
-                                if (isAdded) {
-                                  handleRemoveCategory(tag);
-                                } else {
-                                  if (eventCategories.length >= 5) {
-                                    showNotification('You can select a maximum of 5 categories.', 'warning');
-                                    return;
-                                  }
-                                  setEventCategories((prev) => [...prev, tag]);
-                                }
-                              }}
-                              className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer ${isAdded
-                                ? 'bg-red-50 border-red-200 text-[#E31B23] font-bold'
-                                : 'bg-white border-zinc-200 text-zinc-600 hover:border-zinc-300'
-                                }`}
-                            >
-                              {isAdded ? `✓ ${tag}` : `+ ${tag}`}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Description Rich Text Editor */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-zinc-800 block">Description / Experience Story *</label>
-                      {!isDescriptionFilled && (
-                        <span className="text-[11px] font-semibold text-amber-600 flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3" /> Required for Location & Schedule
-                        </span>
-                      )}
-                    </div>
-                    <RichTextEditor
-                      value={description}
-                      onChange={setDescription}
-                      placeholder="Give attendees a vivid reason to attend. Describe the atmosphere, keynote sessions, performers, and what makes this event unmissable..."
-                      minHeight="180px"
-                    />
-                  </div>
-
-                  {/* Visibility & Spotlight Toggle */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                    <div className="p-3.5 rounded-2xl border border-zinc-200 bg-zinc-50/70 space-y-2">
-                      <label className="text-xs font-bold text-zinc-800 flex items-center justify-between">
-                        <span>Event Visibility</span>
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${visibility === 'public' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-200 text-zinc-700'
-                          }`}>
-                          {visibility}
-                        </span>
+                        <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E31B23]"></div>
                       </label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setVisibility('public')}
-                          className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${visibility === 'public'
-                            ? 'bg-white text-zinc-950 border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
-                            : 'bg-zinc-100/80 border-zinc-200 text-zinc-600 hover:bg-zinc-100'
-                            }`}
-                        >
-                          Public
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setVisibility('private')}
-                          className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${visibility === 'private'
-                            ? 'bg-white text-zinc-950 border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
-                            : 'bg-zinc-100/80 border-zinc-200 text-zinc-600 hover:bg-zinc-100'
-                            }`}
-                        >
-                          Private
-                        </button>
-                      </div>
-                      <p className="text-[11px] text-zinc-500 font-medium">
-                        {visibility === 'public'
-                          ? 'Listed on Eventa marketplace & indexed on search engines.'
-                          : 'Only accessible to users with the direct secret link.'}
-                      </p>
                     </div>
-
-                    <div className="p-3.5 rounded-2xl border border-zinc-200 bg-zinc-50/70 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
-                          <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
-                          <span>Marketplace Spotlight</span>
-                        </label>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={isFeatured}
-                            onChange={(e) => setIsFeatured(e.target.checked)}
-                            className="sr-only peer"
-                          />
-                          <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E31B23]"></div>
-                        </label>
-                      </div>
-                      <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
-                        Highlight in the "Featured & Spotlight" carousel on the Eventa homepage for increased attendee visibility.
-                      </p>
-                    </div>
+                    <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
+                      Highlight in the "Featured & Spotlight" carousel on the Eventa homepage for increased attendee visibility.
+                    </p>
                   </div>
-
-
                 </div>
-              )}
 
-              {/* STEP 2: LOCATION */}
-              {step === 2 && (
-                <div className="space-y-6 animate-in fade-in duration-200">
-                  <div className="border-b border-zinc-100 pb-4">
-                    <h3 className="text-lg font-black text-zinc-950 tracking-tight">
-                      Event Location
-                    </h3>
-                  </div>
 
-                  {/* Physical vs Virtual Segmented Toggle */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setLocationType('physical')}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${locationType === 'physical'
-                        ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
-                        : 'border-zinc-200 hover:bg-zinc-50'
-                        }`}
-                    >
-                      <MapPin className={`w-5 h-5 mb-2 ${locationType === 'physical' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
-                      <h4 className="text-sm font-black text-zinc-950">In-Person Arena</h4>
-                      <p className="text-xs text-zinc-500 mt-0.5">Physical event venue, hall, or outdoor festival.</p>
-                    </button>
+              </div>
+            )}
 
-                    <button
-                      type="button"
-                      onClick={() => setLocationType('online')}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${locationType === 'online'
-                        ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
-                        : 'border-zinc-200 hover:bg-zinc-50'
-                        }`}
-                    >
-                      <Radio className={`w-5 h-5 mb-2 ${locationType === 'online' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
-                      <h4 className="text-sm font-black text-zinc-950">Virtual Livestream</h4>
-                      <p className="text-xs text-zinc-500 mt-0.5">Zoom, YouTube Live, or private streaming webinar.</p>
-                    </button>
-                  </div>
+            {/* STEP 2: LOCATION */}
+            {step === 2 && (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                <div className="border-b border-zinc-100 pb-4">
+                  <h3 className="text-lg font-black text-zinc-950 tracking-tight">
+                    Event Location
+                  </h3>
+                </div>
 
-                  {locationType === 'physical' ? (
-                    <div className="space-y-5 pt-2">
-                      {/* 1. Country Selection (Top Anchor for Search & Region) */}
+                {/* Physical vs Virtual Segmented Toggle */}
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setLocationType('physical')}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${locationType === 'physical'
+                      ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
+                      : 'border-zinc-200 hover:bg-zinc-50'
+                      }`}
+                  >
+                    <MapPin className={`w-5 h-5 mb-2 ${locationType === 'physical' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
+                    <h4 className="text-sm font-black text-zinc-950">In-Person Arena</h4>
+                    <p className="text-xs text-zinc-500 mt-0.5">Physical event venue, hall, or outdoor festival.</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setLocationType('online')}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${locationType === 'online'
+                      ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
+                      : 'border-zinc-200 hover:bg-zinc-50'
+                      }`}
+                  >
+                    <Radio className={`w-5 h-5 mb-2 ${locationType === 'online' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
+                    <h4 className="text-sm font-black text-zinc-950">Virtual Livestream</h4>
+                    <p className="text-xs text-zinc-500 mt-0.5">Zoom, YouTube Live, or private streaming webinar.</p>
+                  </button>
+                </div>
+
+                {locationType === 'physical' ? (
+                  <div className="space-y-5 pt-2">
+                    {/* 1. Country Selection (Top Anchor for Search & Region) */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-black text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-[#E31B23]" />
+                          <span>Event Country *</span>
+                        </label>
+
+                      </div>
+                      <div className="relative">
+                        <select
+                          value={country}
+                          onChange={(e) => handleCountryChange(e.target.value)}
+                          className="w-full pl-4 pr-10 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none cursor-pointer appearance-none transition-all shadow-xs"
+                        >
+                          {countriesList.map((c) => (
+                            <option key={c.code} value={c.name}>
+                              {c.flag ? `${c.flag} ` : ''}{c.name} ({c.code})
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-zinc-500">
+                          {isLoadingCountries ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 2. Google-Powered Venue & Hall Search (Country-Restricted) */}
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-red-50/50 via-white to-zinc-50 border border-zinc-200 shadow-xs space-y-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <label className="text-xs font-black text-zinc-950 uppercase tracking-wider flex items-center gap-2">
+                          <div className="w-5 h-5 rounded-lg bg-[#E31B23] flex items-center justify-center text-white shadow-xs">
+                            <Search className="w-3 h-3" />
+                          </div>
+                          <span>Search Venue or Event Hall</span>
+
+                        </label>
+                        <span className="text-[11px] font-semibold text-[#E31B23]">
+                          Only results from {country || 'selected country'}
+                        </span>
+                      </div>
+                      <VenueAutocompleteInput
+                        country={country}
+                        countryCode={selectedCountryCode}
+                        placeholder={`Search venue, hall, hotel, or center in ${country || 'selected country'} (e.g. Crisma Hall)...`}
+                        initialValue={venue}
+                        onPlaceSelect={(details) => {
+                          if (details.venue) setVenue(details.venue);
+                          if (details.streetAddress) setAddress(details.streetAddress);
+                          if (details.city) setCity(details.city);
+                          if (details.state) setState(details.state);
+                          if (details.zipCode) setZipCode(details.zipCode);
+                          if (details.country) setCountry(details.country);
+                          if (details.lat) setLatitude(details.lat);
+                          if (details.lng) setLongitude(details.lng);
+                          if (details.venue) {
+                            setPinLabel(`${details.venue} Entrance`);
+                          } else if (details.streetAddress) {
+                            setPinLabel(`${details.streetAddress} Gate`);
+                          }
+                          showNotification(
+                            `Address & map pinpointed`,
+                            'success'
+                          );
+                        }}
+                      />
+                    </div>
+
+                    {/* Venue Name & Street Address Fields */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <label className="text-xs font-black text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
-                            <Globe className="w-3.5 h-3.5 text-[#E31B23]" />
-                            <span>Event Country *</span>
-                          </label>
-
+                          <label className="text-xs font-bold text-zinc-800">Venue Name / Hall / Area *</label>
                         </div>
-                        <div className="relative">
-                          <select
-                            value={country}
-                            onChange={(e) => handleCountryChange(e.target.value)}
-                            className="w-full pl-4 pr-10 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none cursor-pointer appearance-none transition-all shadow-xs"
+                        <input
+                          type="text"
+                          value={venue}
+                          onChange={(e) => setVenue(e.target.value)}
+                          placeholder="e.g. Eko Convention Centre or Crisma Hall"
+                          className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-zinc-800">Street Address</label>
+                        </div>
+                        <input
+                          type="text"
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          placeholder="Plot 1415 Adetokunbo Ademola Street"
+                          className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    {/* City, State, Zip Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-zinc-800">City</label>
+                        <input
+                          type="text"
+                          value={city}
+                          onChange={(e) => setCity(e.target.value)}
+                          placeholder="e.g. Lagos"
+                          className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-zinc-800">State / Region</label>
+                        <input
+                          type="text"
+                          value={state}
+                          onChange={(e) => setState(e.target.value)}
+                          placeholder="e.g. Lagos State"
+                          className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-zinc-800">Zip / Postal Code</label>
+                        <input
+                          type="text"
+                          value={zipCode}
+                          onChange={(e) => setZipCode(e.target.value)}
+                          placeholder="e.g. 101241"
+                          className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-zinc-800">Landmark / Proximity Reference</label>
+                        <span className="text-[10px] text-zinc-400 font-medium">e.g. Adjacent to Eko Hotel</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={landmark}
+                        onChange={(e) => setLandmark(e.target.value)}
+                        placeholder="e.g. Adjacent to Eko Hotel or Opposite City Mall"
+                        className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white"
+                      />
+                    </div>
+
+                    {/* Interactive Map Drop Point & Pin Marker Studio */}
+                    <div className="pt-4 border-t border-zinc-150 space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+
+                          <p className="text-[11px] text-zinc-500 font-medium mt-0.5">
+                            Drop or drag the red pin anywhere on the map to pinpoint your exact gate or entrance.
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+
+                          <button
+                            type="button"
+                            onClick={handleDetectCurrentLocation}
+                            disabled={isLocating}
+                            className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-[11px] font-bold inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer disabled:opacity-50 flex-shrink-0"
                           >
-                            {countriesList.map((c) => (
-                              <option key={c.code} value={c.name}>
-                                {c.flag ? `${c.flag} ` : ''}{c.name} ({c.code})
-                              </option>
-                            ))}
-                          </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-zinc-500">
-                            {isLoadingCountries ? (
-                              <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />
-                            ) : (
-                              <ChevronDown className="w-4 h-4" />
-                            )}
-                          </div>
+                            {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Crosshair className="w-3.5 h-3.5 text-red-400" />}
+                            <span>{isLocating ? 'Detecting GPS...' : 'Use My GPS'}</span>
+                          </button>
                         </div>
                       </div>
 
-                      {/* 2. Google-Powered Venue & Hall Search (Country-Restricted) */}
-                      <div className="p-4 rounded-2xl bg-gradient-to-r from-red-50/50 via-white to-zinc-50 border border-zinc-200 shadow-xs space-y-2">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                          <label className="text-xs font-black text-zinc-950 uppercase tracking-wider flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-lg bg-[#E31B23] flex items-center justify-center text-white shadow-xs">
-                              <Search className="w-3 h-3" />
-                            </div>
-                            <span>Search Venue or Event Hall</span>
-
-                          </label>
-                          <span className="text-[11px] font-semibold text-[#E31B23]">
-                            Only results from {country || 'selected country'}
-                          </span>
-                        </div>
-                        <VenueAutocompleteInput
-                          country={country}
-                          countryCode={selectedCountryCode}
-                          placeholder={`Search venue, hall, hotel, or center in ${country || 'selected country'} (e.g. Crisma Hall)...`}
-                          initialValue={venue}
-                          onPlaceSelect={(details) => {
-                            if (details.venue) setVenue(details.venue);
-                            if (details.streetAddress) setAddress(details.streetAddress);
-                            if (details.city) setCity(details.city);
-                            if (details.state) setState(details.state);
-                            if (details.zipCode) setZipCode(details.zipCode);
-                            if (details.country) setCountry(details.country);
-                            if (details.lat) setLatitude(details.lat);
-                            if (details.lng) setLongitude(details.lng);
+                      {/* Interactive Google Map Drop Point & Pin Marker */}
+                      <MapPinPicker
+                        latitude={latitude}
+                        longitude={longitude}
+                        onChange={(newLat, newLng, details) => {
+                          setLatitude(newLat);
+                          setLongitude(newLng);
+                          if (details) {
+                            if (details.streetAddress) {
+                              setAddress(details.streetAddress);
+                            }
+                            if (details.venue) {
+                              setVenue(details.venue);
+                            }
+                            if (details.city) {
+                              setCity(details.city);
+                            }
+                            if (details.state) {
+                              setState(details.state);
+                            }
+                            if (details.zipCode) {
+                              setZipCode(details.zipCode);
+                            }
+                            if (details.country) {
+                              setCountry(details.country);
+                            }
                             if (details.venue) {
                               setPinLabel(`${details.venue} Entrance`);
                             } else if (details.streetAddress) {
                               setPinLabel(`${details.streetAddress} Gate`);
                             }
-                            showNotification(
-                              `📍 Selected ${details.venue || details.streetAddress}: address & map pinpointed!`,
-                              'success'
-                            );
-                          }}
-                        />
-                      </div>
 
-                      {/* Venue Name & Street Address Fields */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <label className="text-xs font-bold text-zinc-800">Venue Name / Hall / Area *</label>
-                          </div>
-                          <input
-                            type="text"
-                            value={venue}
-                            onChange={(e) => setVenue(e.target.value)}
-                            placeholder="e.g. Eko Convention Centre or Crisma Hall"
-                            className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white"
-                          />
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <label className="text-xs font-bold text-zinc-800">Street Address</label>
-                          </div>
-                          <input
-                            type="text"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            placeholder="Plot 1415 Adetokunbo Ademola Street"
-                            className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white"
-                          />
-                        </div>
-                      </div>
-
-                      {/* City, State, Zip Grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-zinc-800">City</label>
-                          <input
-                            type="text"
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                            placeholder="e.g. Lagos"
-                            className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-zinc-800">State / Region</label>
-                          <input
-                            type="text"
-                            value={state}
-                            onChange={(e) => setState(e.target.value)}
-                            placeholder="e.g. Lagos State"
-                            className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-zinc-800">Zip / Postal Code</label>
-                          <input
-                            type="text"
-                            value={zipCode}
-                            onChange={(e) => setZipCode(e.target.value)}
-                            placeholder="e.g. 101241"
-                            className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-zinc-800">Landmark / Proximity Reference</label>
-                          <span className="text-[10px] text-zinc-400 font-medium">e.g. Adjacent to Eko Hotel</span>
-                        </div>
-                        <input
-                          type="text"
-                          value={landmark}
-                          onChange={(e) => setLandmark(e.target.value)}
-                          placeholder="e.g. Adjacent to Eko Hotel or Opposite City Mall"
-                          className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white"
-                        />
-                      </div>
-
-                      {/* Interactive Map Drop Point & Pin Marker Studio */}
-                      <div className="pt-4 border-t border-zinc-150 space-y-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div>
-
-                            <p className="text-[11px] text-zinc-500 font-medium mt-0.5">
-                              Drop or drag the red pin anywhere on the map to pinpoint your exact gate or entrance.
-                            </p>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-
-                            <button
-                              type="button"
-                              onClick={handleDetectCurrentLocation}
-                              disabled={isLocating}
-                              className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-[11px] font-bold inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer disabled:opacity-50 flex-shrink-0"
-                            >
-                              {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Crosshair className="w-3.5 h-3.5 text-red-400" />}
-                              <span>{isLocating ? 'Detecting GPS...' : 'Use My GPS'}</span>
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Interactive Google Map Drop Point & Pin Marker */}
-                        <MapPinPicker
-                          latitude={latitude}
-                          longitude={longitude}
-                          onChange={(newLat, newLng, details) => {
-                            setLatitude(newLat);
-                            setLongitude(newLng);
-                            if (details) {
-                              if (details.streetAddress) {
-                                setAddress(details.streetAddress);
-                              }
-                              if (details.venue) {
-                                setVenue(details.venue);
-                              }
-                              if (details.city) {
-                                setCity(details.city);
-                              }
-                              if (details.state) {
-                                setState(details.state);
-                              }
-                              if (details.zipCode) {
-                                setZipCode(details.zipCode);
-                              }
-                              if (details.country) {
-                                setCountry(details.country);
-                              }
-                              if (details.venue) {
-                                setPinLabel(`${details.venue} Entrance`);
-                              } else if (details.streetAddress) {
-                                setPinLabel(`${details.streetAddress} Gate`);
-                              }
-
-                              const venueStr = details.venue ? `${details.venue}` : '';
-                              const streetStr = details.streetAddress ? `${details.streetAddress}` : '';
-                              const summary = [venueStr, streetStr].filter(Boolean).join(' • ');
-                              if (summary) {
-                                showNotification(`📍 Location updated: ${summary}`, 'success');
-                              }
+                            const venueStr = details.venue ? `${details.venue}` : '';
+                            const streetStr = details.streetAddress ? `${details.streetAddress}` : '';
+                            const summary = [venueStr, streetStr].filter(Boolean).join(' • ');
+                            if (summary) {
+                              showNotification(`Location updated`, 'success');
                             }
-                          }}
-                          pinLabel={pinLabel}
-                          venueName={venue}
-                        />
-                      </div>
+                          }
+                        }}
+                        pinLabel={pinLabel}
+                        venueName={venue}
+                      />
                     </div>
-                  ) : (
-                    <div className="space-y-4 pt-2">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-zinc-800 flex items-center justify-between">
-                          <label className="text-xs font-black text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
-                            <Globe className="w-3.5 h-3.5 text-[#E31B23]" />
-                            <span>Event Country *</span>
-                          </label>
-                          {isLoadingCountries && <Loader2 className="w-3 h-3 animate-spin text-zinc-400" />}
+                  </div>
+                ) : (
+                  <div className="space-y-4 pt-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-zinc-800 flex items-center justify-between">
+                        <label className="text-xs font-black text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-[#E31B23]" />
+                          <span>Event Country *</span>
                         </label>
-                        <div className="relative">
-                          <select
-                            value={country}
-                            onChange={(e) => handleCountryChange(e.target.value)}
-                            className="w-full pl-4 pr-10 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none cursor-pointer appearance-none transition-all shadow-xs"
-                          >
-                            {countriesList.map((c) => (
-                              <option key={c.code} value={c.name}>
-                                {c.flag ? `${c.flag} ` : ''}{c.name} ({c.code})
-                              </option>
-                            ))}
-                          </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-zinc-500">
-                            {isLoadingCountries ? (
-                              <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />
-                            ) : (
-                              <ChevronDown className="w-4 h-4" />
-                            )}
-                          </div>
+                        {isLoadingCountries && <Loader2 className="w-3 h-3 animate-spin text-zinc-400" />}
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={country}
+                          onChange={(e) => handleCountryChange(e.target.value)}
+                          className="w-full pl-4 pr-10 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none cursor-pointer appearance-none transition-all shadow-xs"
+                        >
+                          {countriesList.map((c) => (
+                            <option key={c.code} value={c.name}>
+                              {c.flag ? `${c.flag} ` : ''}{c.name} ({c.code})
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-zinc-500">
+                          {isLoadingCountries ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
                         </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-zinc-800">Stream or Webinar Access URL *</label>
+                      <input
+                        type="url"
+                        value={streamingUrl}
+                        onChange={(e) => setStreamingUrl(e.target.value)}
+                        placeholder="https://zoom.us/j/123456789 or YouTube Live URL"
+                        className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                      />
+                    </div>
+                  </div>
+
+                )}
+              </div>
+            )}
+
+            {/* STEP 3: SCHEDULE */}
+            {step === 3 && (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                <div className="border-b border-zinc-100 pb-4">
+                  <h3 className="text-lg font-black text-zinc-950 tracking-tight">
+                    Schedule
+                  </h3>
+                </div>
+
+                {/* 1. Schedule Type: Single vs Recurring */}
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setScheduleType('single')}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${scheduleType === 'single'
+                      ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
+                      : 'border-zinc-200 hover:bg-zinc-50'
+                      }`}
+                  >
+                    <Calendar className={`w-5 h-5 mb-2 ${scheduleType === 'single' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
+                    <h4 className="text-sm font-black text-zinc-950">Single-Day / Standalone</h4>
+                    <p className="text-xs text-zinc-500 mt-0.5">One-time event or multi-day convention taking place once.</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setScheduleType('recurring')}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${scheduleType === 'recurring'
+                      ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
+                      : 'border-zinc-200 hover:bg-zinc-50'
+                      }`}
+                  >
+                    <RefreshCw className={`w-5 h-5 mb-2 ${scheduleType === 'recurring' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
+                    <h4 className="text-sm font-black text-zinc-950">Recurring Series</h4>
+                    <p className="text-xs text-zinc-500 mt-0.5">Repeats weekly, daily, or monthly over scheduled occurrences.</p>
+                  </button>
+                </div>
+
+                {/* Recurring Configuration Fields */}
+                {scheduleType === 'recurring' && (
+                  <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3">
+                    <div className="flex items-center gap-2 border-b border-zinc-200/80 pb-2.5">
+                      <RefreshCw className="w-4 h-4 text-[#E31B23]" />
+                      <h4 className="text-xs font-black text-zinc-900 uppercase tracking-wider">
+                        Recurring Series Parameters
+                      </h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-zinc-800">Frequency</label>
+                        <select
+                          value={eventFrequency}
+                          onChange={(e) => setEventFrequency(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                        >
+                          <option value="weekly">Weekly</option>
+                          <option value="daily">Daily</option>
+                          <option value="monthly">Monthly</option>
+                        </select>
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-zinc-800">Stream or Webinar Access URL *</label>
+                        <label className="text-xs font-bold text-zinc-800">End Condition</label>
+                        <select
+                          value={recurringEndType}
+                          onChange={(e) => setRecurringEndType(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                        >
+                          <option value="after_occurrences">After set number of occurrences</option>
+                          <option value="on_date">On specific end date</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-zinc-800">Occurrences Count</label>
                         <input
-                          type="url"
-                          value={streamingUrl}
-                          onChange={(e) => setStreamingUrl(e.target.value)}
-                          placeholder="https://zoom.us/j/123456789 or YouTube Live URL"
-                          className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                          type="number"
+                          min={1}
+                          max={52}
+                          value={recurringOccurrences}
+                          onChange={(e) => setRecurringOccurrences(Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
                         />
                       </div>
                     </div>
+                  </div>
+                )}
 
-                  )}
+                {/* 1-Click Quick Presets */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-wide">Quick Date Presets</label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => applyDatePreset(3)}
+                      className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                    >
+                      In 3 Days
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => applyDatePreset(7)}
+                      className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                    >
+                      Next Week
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => applyDatePreset(14)}
+                      className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                    >
+                      In 2 Weeks
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => applyDatePreset(30)}
+                      className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                    >
+                      In 1 Month
+                    </button>
+                  </div>
                 </div>
-              )}
 
-              {/* STEP 3: SCHEDULE */}
-              {step === 3 && (
-                <div className="space-y-6 animate-in fade-in duration-200">
-                  <div className="border-b border-zinc-100 pb-4">
-                    <h3 className="text-lg font-black text-zinc-950 tracking-tight">
-                      Schedule
-                    </h3>
-                  </div>
-
-                  {/* 1. Schedule Type: Single vs Recurring */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setScheduleType('single')}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${scheduleType === 'single'
-                        ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
-                        : 'border-zinc-200 hover:bg-zinc-50'
-                        }`}
-                    >
-                      <Calendar className={`w-5 h-5 mb-2 ${scheduleType === 'single' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
-                      <h4 className="text-sm font-black text-zinc-950">Single-Day / Standalone</h4>
-                      <p className="text-xs text-zinc-500 mt-0.5">One-time event or multi-day convention taking place once.</p>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setScheduleType('recurring')}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${scheduleType === 'recurring'
-                        ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
-                        : 'border-zinc-200 hover:bg-zinc-50'
-                        }`}
-                    >
-                      <RefreshCw className={`w-5 h-5 mb-2 ${scheduleType === 'recurring' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
-                      <h4 className="text-sm font-black text-zinc-950">Recurring Series</h4>
-                      <p className="text-xs text-zinc-500 mt-0.5">Repeats weekly, daily, or monthly over scheduled occurrences.</p>
-                    </button>
-                  </div>
-
-                  {/* Recurring Configuration Fields */}
-                  {scheduleType === 'recurring' && (
-                    <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3">
-                      <div className="flex items-center gap-2 border-b border-zinc-200/80 pb-2.5">
-                        <RefreshCw className="w-4 h-4 text-[#E31B23]" />
-                        <h4 className="text-xs font-black text-zinc-900 uppercase tracking-wider">
-                          Recurring Series Parameters
-                        </h4>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-zinc-800">Frequency</label>
-                          <select
-                            value={eventFrequency}
-                            onChange={(e) => setEventFrequency(e.target.value)}
-                            className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
-                          >
-                            <option value="weekly">Weekly</option>
-                            <option value="daily">Daily</option>
-                            <option value="monthly">Monthly</option>
-                          </select>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-zinc-800">End Condition</label>
-                          <select
-                            value={recurringEndType}
-                            onChange={(e) => setRecurringEndType(e.target.value)}
-                            className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
-                          >
-                            <option value="after_occurrences">After set number of occurrences</option>
-                            <option value="on_date">On specific end date</option>
-                          </select>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-zinc-800">Occurrences Count</label>
-                          <input
-                            type="number"
-                            min={1}
-                            max={52}
-                            value={recurringOccurrences}
-                            onChange={(e) => setRecurringOccurrences(Math.max(1, parseInt(e.target.value) || 1))}
-                            className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 1-Click Quick Presets */}
+                {/* Start Date & Time */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wide">Quick Date Presets</label>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => applyDatePreset(3)}
-                        className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
-                      >
-                        In 3 Days
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => applyDatePreset(7)}
-                        className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
-                      >
-                        Next Week
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => applyDatePreset(14)}
-                        className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
-                      >
-                        In 2 Weeks
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => applyDatePreset(30)}
-                        className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
-                      >
-                        In 1 Month
-                      </button>
-                    </div>
+                    <label className="text-xs font-bold text-zinc-800">Start Date *</label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
+                    />
                   </div>
 
-                  {/* Start Date & Time */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-zinc-800">Start Date *</label>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
-                      />
-                    </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-zinc-800">Doors Open / Start Time *</label>
+                    <input
+                      type="time"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
+                    />
+                  </div>
+                </div>
 
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-zinc-800">Doors Open / Start Time *</label>
-                      <input
-                        type="time"
-                        value={startTime}
-                        onChange={(e) => setStartTime(e.target.value)}
-                        className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
-                      />
-                    </div>
+                {/* End Date & Time */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-zinc-800">End Date</label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
+                    />
                   </div>
 
-                  {/* End Date & Time */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-zinc-800">End Date</label>
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
-                      />
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-zinc-800">Conclusion / End Time</label>
+                    <input
+                      type="time"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                {/* Interactive Schedules / Agenda Studio */}
+                <div className="pt-4 border-t border-zinc-150 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-black text-zinc-950 uppercase tracking-wider flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-[#E31B23]" />
+                        <span>Event Agenda & Sessions ({schedules.length})</span>
+                      </h4>
+                      <p className="text-[11px] text-zinc-500 font-medium mt-0.5">
+                        Break your event into distinct tracks, keynotes, or workshop segments.
+                      </p>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-zinc-800">Conclusion / End Time</label>
-                      <input
-                        type="time"
-                        value={endTime}
-                        onChange={(e) => setEndTime(e.target.value)}
-                        className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
-                      />
-                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddSchedule}
+                      className="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Session</span>
+                    </button>
                   </div>
 
-                  {/* Interactive Schedules / Agenda Studio */}
-                  <div className="pt-4 border-t border-zinc-150 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-xs font-black text-zinc-950 uppercase tracking-wider flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-[#E31B23]" />
-                          <span>Event Agenda & Sessions ({schedules.length})</span>
-                        </h4>
-                        <p className="text-[11px] text-zinc-500 font-medium mt-0.5">
-                          Break your event into distinct tracks, keynotes, or workshop segments.
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleAddSchedule}
-                        className="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                  <div className="space-y-3">
+                    {schedules.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200 space-y-3 relative hover:border-zinc-300 transition-colors"
                       >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Add Session</span>
-                      </button>
-                    </div>
-
-                    <div className="space-y-3">
-                      {schedules.map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200 space-y-3 relative hover:border-zinc-300 transition-colors"
-                        >
-                          <div className="flex items-center justify-between border-b border-zinc-200/80 pb-2">
-                            <div className="flex items-center gap-2">
-                              <span className="w-5 h-5 rounded-md bg-zinc-900 text-white flex items-center justify-center text-[10px] font-black">
-                                {idx + 1}
-                              </span>
-                              <input
-                                type="text"
-                                value={item.day || `Day ${idx + 1}`}
-                                onChange={(e) => handleScheduleChange(idx, 'day', e.target.value)}
-                                placeholder="e.g. Day 1 or Morning Track"
-                                className="text-xs font-black text-zinc-900 bg-transparent border-b border-dashed border-zinc-300 focus:border-[#E31B23] outline-none px-1 py-0.5 w-32"
-                              />
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveSchedule(idx)}
-                              className="text-zinc-400 hover:text-red-600 transition-colors cursor-pointer p-1"
-                              title="Delete session"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                              <label className="text-[10px] font-bold text-zinc-500 uppercase">Start Time</label>
-                              <input
-                                type="time"
-                                value={item.startTime}
-                                onChange={(e) => handleScheduleChange(idx, 'startTime', e.target.value)}
-                                className="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-[10px] font-bold text-zinc-500 uppercase">End Time</label>
-                              <input
-                                type="time"
-                                value={item.endTime}
-                                onChange={(e) => handleScheduleChange(idx, 'endTime', e.target.value)}
-                                className="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-zinc-500 uppercase">Session Title *</label>
+                        <div className="flex items-center justify-between border-b border-zinc-200/80 pb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-md bg-zinc-900 text-white flex items-center justify-center text-[10px] font-black">
+                              {idx + 1}
+                            </span>
                             <input
                               type="text"
-                              value={item.title}
-                              onChange={(e) => handleScheduleChange(idx, 'title', e.target.value)}
-                              placeholder="e.g. Opening Keynote & Architecture Overview"
+                              value={item.day || `Day ${idx + 1}`}
+                              onChange={(e) => handleScheduleChange(idx, 'day', e.target.value)}
+                              placeholder="e.g. Day 1 or Morning Track"
+                              className="text-xs font-black text-zinc-900 bg-transparent border-b border-dashed border-zinc-300 focus:border-[#E31B23] outline-none px-1 py-0.5 w-32"
+                            />
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSchedule(idx)}
+                            className="text-zinc-400 hover:text-red-600 transition-colors cursor-pointer p-1"
+                            title="Delete session"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-zinc-500 uppercase">Start Time</label>
+                            <input
+                              type="time"
+                              value={item.startTime}
+                              onChange={(e) => handleScheduleChange(idx, 'startTime', e.target.value)}
+                              className="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-zinc-500 uppercase">End Time</label>
+                            <input
+                              type="time"
+                              value={item.endTime}
+                              onChange={(e) => handleScheduleChange(idx, 'endTime', e.target.value)}
+                              className="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-zinc-500 uppercase">Session Title *</label>
+                          <input
+                            type="text"
+                            value={item.title}
+                            onChange={(e) => handleScheduleChange(idx, 'title', e.target.value)}
+                            placeholder="e.g. Opening Keynote & Architecture Overview"
+                            className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-zinc-500 uppercase">Description</label>
+                          <textarea
+                            rows={2}
+                            value={item.description || ''}
+                            onChange={(e) => handleScheduleChange(idx, 'description', e.target.value)}
+                            placeholder="Session details, speaker overview, and expected attendee takeaways..."
+                            className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-medium text-zinc-800 outline-none focus:border-[#E31B23]"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* STEP 4: LINEUP & SPEAKERS */}
+            {step === 4 && (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                <div className="border-b border-zinc-100 pb-4 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-black text-zinc-950 tracking-tight">
+                      Featured Lineup & Speakers
+                    </h3>
+                    <p className="text-xs text-zinc-500 mt-0.5">
+                      Spotlight headline speakers, artists, keynote presenters, and panelists.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddLineupMember}
+                    className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Speaker</span>
+                  </button>
+                </div>
+
+                {lineup.length === 0 ? (
+                  <div className="p-8 border-2 border-dashed border-zinc-200 rounded-2xl text-center space-y-2">
+                    <Users className="w-8 h-8 text-zinc-300 mx-auto" />
+                    <p className="text-xs font-bold text-zinc-600">No speakers or performers added yet</p>
+                    <p className="text-[11px] text-zinc-400 max-w-sm mx-auto">
+                      Spotlight keynote presenters to build excitement and boost conversions, or proceed to Appearance if your lineup is to be announced.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleAddLineupMember}
+                      className="mt-2 px-3 py-1.5 bg-zinc-900 text-white rounded-xl text-xs font-bold hover:bg-zinc-800 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add First Speaker</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {lineup.map((member, mIdx) => (
+                      <div
+                        key={mIdx}
+                        className="p-5 rounded-2xl bg-zinc-50/70 border border-zinc-200 space-y-3 relative hover:border-zinc-300 transition-colors"
+                      >
+                        <div className="flex items-center justify-between border-b border-zinc-200/80 pb-3">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={member.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb'}
+                              alt={member.name}
+                              className="w-9 h-9 rounded-full object-cover border border-zinc-300"
+                            />
+                            <div>
+                              <span className="text-xs font-black text-zinc-900 block">
+                                {member.name || `Speaker #${mIdx + 1}`}
+                              </span>
+                              <span className="text-[10px] text-zinc-500 font-medium block">
+                                {member.role || 'Guest Speaker'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveLineupMember(mIdx)}
+                            className="text-zinc-400 hover:text-red-600 transition-colors cursor-pointer p-1"
+                            title="Delete lineup member"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-zinc-500 uppercase">Full Name *</label>
+                            <input
+                              type="text"
+                              value={member.name}
+                              onChange={(e) => handleLineupChange(mIdx, 'name', e.target.value)}
+                              placeholder="e.g. Alex Mercer"
                               className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
                             />
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-zinc-500 uppercase">Description</label>
-                            <textarea
-                              rows={2}
-                              value={item.description || ''}
-                              onChange={(e) => handleScheduleChange(idx, 'description', e.target.value)}
-                              placeholder="Session details, speaker overview, and expected attendee takeaways..."
-                              className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-medium text-zinc-800 outline-none focus:border-[#E31B23]"
+                            <label className="text-[10px] font-bold text-zinc-500 uppercase">Role / Title *</label>
+                            <input
+                              type="text"
+                              value={member.role}
+                              onChange={(e) => handleLineupChange(mIdx, 'role', e.target.value)}
+                              placeholder="e.g. Lead Systems Architect"
+                              className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
                             />
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
 
-                </div>
-              )}
+                        {/* Avatar & Photo Section */}
+                        <div className="p-3 bg-white rounded-xl border border-zinc-200/80 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
+                              <User className="w-3 h-3 text-[#E31B23]" />
+                              <span>Speaker Photo / Avatar</span>
+                            </label>
+                            {member.avatarUrl && (
+                              <button
+                                type="button"
+                                onClick={() => handleLineupChange(mIdx, 'avatarUrl', '')}
+                                className="text-[10px] font-bold text-zinc-400 hover:text-red-600 cursor-pointer transition-colors"
+                              >
+                                Clear Photo
+                              </button>
+                            )}
+                          </div>
 
-              {/* STEP 4: LINEUP & SPEAKERS */}
-              {step === 4 && (
-                <div className="space-y-6 animate-in fade-in duration-200">
-                  <div className="border-b border-zinc-100 pb-4 flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-black text-zinc-950 tracking-tight">
-                        Featured Lineup & Speakers
-                      </h3>
-                      <p className="text-xs text-zinc-500 mt-0.5">
-                        Spotlight headline speakers, artists, keynote presenters, and panelists.
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleAddLineupMember}
-                      className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add Speaker</span>
-                    </button>
-                  </div>
-
-                  {lineup.length === 0 ? (
-                    <div className="p-8 border-2 border-dashed border-zinc-200 rounded-2xl text-center space-y-2">
-                      <Users className="w-8 h-8 text-zinc-300 mx-auto" />
-                      <p className="text-xs font-bold text-zinc-600">No speakers or performers added yet</p>
-                      <p className="text-[11px] text-zinc-400 max-w-sm mx-auto">
-                        Spotlight keynote presenters to build excitement and boost conversions, or proceed to Appearance if your lineup is to be announced.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleAddLineupMember}
-                        className="mt-2 px-3 py-1.5 bg-zinc-900 text-white rounded-xl text-xs font-bold hover:bg-zinc-800 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Add First Speaker</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {lineup.map((member, mIdx) => (
-                        <div
-                          key={mIdx}
-                          className="p-5 rounded-2xl bg-zinc-50/70 border border-zinc-200 space-y-3 relative hover:border-zinc-300 transition-colors"
-                        >
-                          <div className="flex items-center justify-between border-b border-zinc-200/80 pb-3">
-                            <div className="flex items-center gap-3">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <div className="relative group shrink-0">
                               <img
-                                src={member.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb'}
-                                alt={member.name}
-                                className="w-9 h-9 rounded-full object-cover border border-zinc-300"
+                                src={member.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'}
+                                alt={member.name || 'Speaker'}
+                                className="w-12 h-12 rounded-xl object-cover border-2 border-zinc-200 shadow-2xs group-hover:border-[#E31B23] transition-colors"
                               />
-                              <div>
-                                <span className="text-xs font-black text-zinc-900 block">
-                                  {member.name || `Speaker #${mIdx + 1}`}
-                                </span>
-                                <span className="text-[10px] text-zinc-500 font-medium block">
-                                  {member.role || 'Guest Speaker'}
-                                </span>
-                              </div>
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveLineupMember(mIdx)}
-                              className="text-zinc-400 hover:text-red-600 transition-colors cursor-pointer p-1"
-                              title="Delete lineup member"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                              <label className="text-[10px] font-bold text-zinc-500 uppercase">Full Name *</label>
-                              <input
-                                type="text"
-                                value={member.name}
-                                onChange={(e) => handleLineupChange(mIdx, 'name', e.target.value)}
-                                placeholder="e.g. Alex Mercer"
-                                className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
-                              />
-                            </div>
-
-                            <div className="space-y-1">
-                              <label className="text-[10px] font-bold text-zinc-500 uppercase">Role / Title *</label>
-                              <input
-                                type="text"
-                                value={member.role}
-                                onChange={(e) => handleLineupChange(mIdx, 'role', e.target.value)}
-                                placeholder="e.g. Lead Systems Architect"
-                                className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Avatar & Photo Section */}
-                          <div className="p-3 bg-white rounded-xl border border-zinc-200/80 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
-                                <User className="w-3 h-3 text-[#E31B23]" />
-                                <span>Speaker Photo / Avatar</span>
-                              </label>
                               {member.avatarUrl && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleLineupChange(mIdx, 'avatarUrl', '')}
-                                  className="text-[10px] font-bold text-zinc-400 hover:text-red-600 cursor-pointer transition-colors"
-                                >
-                                  Clear Photo
-                                </button>
+                                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] shadow-xs">
+                                  <Check className="w-2.5 h-2.5" />
+                                </div>
                               )}
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-3">
-                              <div className="relative group shrink-0">
-                                <img
-                                  src={member.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'}
-                                  alt={member.name || 'Speaker'}
-                                  className="w-12 h-12 rounded-xl object-cover border-2 border-zinc-200 shadow-2xs group-hover:border-[#E31B23] transition-colors"
-                                />
-                                {member.avatarUrl && (
-                                  <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] shadow-xs">
-                                    <Check className="w-2.5 h-2.5" />
-                                  </div>
-                                )}
-                              </div>
-
-                              <div className="flex-1 flex flex-wrap items-center gap-2">
-                                {/* Upload Image Button */}
-                                <label className="px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs">
-                                  <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
-                                  <span>Upload Photo</span>
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) handleLineupAvatarUpload(mIdx, file);
-                                      e.target.value = '';
-                                    }}
-                                  />
-                                </label>
-
-                                {/* Select System Avatar Button */}
-                                <button
-                                  type="button"
-                                  onClick={() => setOpenAvatarPickerIdx(openAvatarPickerIdx === mIdx ? null : mIdx)}
-                                  className={`px-3 py-1.5 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-all ${
-                                    openAvatarPickerIdx === mIdx
-                                      ? 'bg-[#E31B23] text-white shadow-xs'
-                                      : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800 shadow-2xs'
-                                  }`}
-                                >
-                                  <ImageIcon className="w-3.5 h-3.5" />
-                                  <span>{openAvatarPickerIdx === mIdx ? 'Close Avatars' : 'Select System Avatar'}</span>
-                                </button>
-
-                                {/* Direct URL toggle */}
-                                <button
-                                  type="button"
-                                  onClick={() => setShowUrlInputIdx(showUrlInputIdx === mIdx ? null : mIdx)}
-                                  className="px-2 py-1 text-zinc-500 hover:text-zinc-800 text-[11px] font-medium cursor-pointer"
-                                >
-                                  {showUrlInputIdx === mIdx ? 'Hide URL' : 'Paste URL'}
-                                </button>
-                              </div>
-                            </div>
-
-                            {/* Direct URL Input drawer */}
-                            {showUrlInputIdx === mIdx && (
-                              <div className="pt-1.5">
+                            <div className="flex-1 flex flex-wrap items-center gap-2">
+                              {/* Upload Image Button */}
+                              <label className="px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs">
+                                <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
+                                <span>Upload Photo</span>
                                 <input
-                                  type="url"
-                                  value={member.avatarUrl || ''}
-                                  onChange={(e) => handleLineupChange(mIdx, 'avatarUrl', e.target.value)}
-                                  placeholder="https://images.unsplash.com/..."
-                                  className="w-full px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-mono text-zinc-800 outline-none focus:border-[#E31B23]"
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleLineupAvatarUpload(mIdx, file);
+                                    e.target.value = '';
+                                  }}
                                 />
-                              </div>
-                            )}
-
-                            {/* System Avatar Selection Grid */}
-                            {openAvatarPickerIdx === mIdx && (
-                              <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2 animate-in fade-in duration-150">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[11px] font-bold text-zinc-700">Choose a System Avatar</span>
-                                  <span className="text-[10px] text-zinc-400">{SYSTEM_AVATARS.length} presets available</span>
-                                </div>
-                                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                                  {SYSTEM_AVATARS.map((av) => {
-                                    const isSelected = member.avatarUrl === av.url;
-                                    return (
-                                      <button
-                                        key={av.id}
-                                        type="button"
-                                        onClick={() => {
-                                          handleLineupChange(mIdx, 'avatarUrl', av.url);
-                                          setOpenAvatarPickerIdx(null);
-                                        }}
-                                        className={`relative group rounded-xl overflow-hidden p-1 border-2 transition-all cursor-pointer aspect-square ${
-                                          isSelected ? 'border-[#E31B23] bg-red-50 ring-2 ring-[#E31B23]/30' : 'border-zinc-200 hover:border-zinc-400 bg-white'
-                                        }`}
-                                        title={av.name}
-                                      >
-                                        <img
-                                          src={av.url}
-                                          alt={av.name}
-                                          className="w-full h-full object-cover rounded-lg"
-                                        />
-                                        {isSelected && (
-                                          <div className="absolute top-1 right-1 w-3.5 h-3.5 bg-[#E31B23] text-white rounded-full flex items-center justify-center text-[8px]">
-                                            <Check className="w-2 h-2" />
-                                          </div>
-                                        )}
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-zinc-500 uppercase">Speaker Bio</label>
-                            <textarea
-                              rows={2}
-                              value={member.bio || ''}
-                              onChange={(e) => handleLineupChange(mIdx, 'bio', e.target.value)}
-                              placeholder="Brief background or credentials..."
-                              className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-medium text-zinc-800 outline-none focus:border-[#E31B23]"
-                            />
-                          </div>
-
-                          {/* Social Links Sub-list */}
-                          <div className="space-y-2 pt-1 border-t border-zinc-200/60">
-                            <div className="flex items-center justify-between">
-                              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
-                                Social & Profile Links
                               </label>
+
+                              {/* Select System Avatar Button */}
                               <button
                                 type="button"
-                                onClick={() => handleAddLineupLink(mIdx, 'github', 'https://github.com/')}
-                                className="text-[10px] font-bold text-[#E31B23] hover:underline cursor-pointer inline-flex items-center gap-1"
+                                onClick={() => setOpenAvatarPickerIdx(openAvatarPickerIdx === mIdx ? null : mIdx)}
+                                className={`px-3 py-1.5 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-all ${openAvatarPickerIdx === mIdx
+                                  ? 'bg-[#E31B23] text-white shadow-xs'
+                                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800 shadow-2xs'
+                                  }`}
                               >
-                                <Plus className="w-3 h-3" />
-                                <span>Add Link</span>
+                                <ImageIcon className="w-3.5 h-3.5" />
+                                <span>{openAvatarPickerIdx === mIdx ? 'Close Avatars' : 'Select System Avatar'}</span>
+                              </button>
+
+                              {/* Direct URL toggle */}
+                              <button
+                                type="button"
+                                onClick={() => setShowUrlInputIdx(showUrlInputIdx === mIdx ? null : mIdx)}
+                                className="px-2 py-1 text-zinc-500 hover:text-zinc-800 text-[11px] font-medium cursor-pointer"
+                              >
+                                {showUrlInputIdx === mIdx ? 'Hide URL' : 'Paste URL'}
                               </button>
                             </div>
+                          </div>
 
-                            {(member.links || []).map((link, lIdx) => (
-                              <div key={lIdx} className="flex items-center gap-2">
-                                <select
-                                  value={link.platform}
-                                  onChange={(e) => {
-                                    const nextLinks = [...(member.links || [])];
-                                    nextLinks[lIdx] = { ...nextLinks[lIdx], platform: e.target.value as any };
-                                    handleLineupChange(mIdx, 'links', nextLinks);
-                                  }}
-                                  className="px-2 py-1 bg-white border border-zinc-200 rounded-lg text-xs font-bold text-zinc-800 outline-none"
-                                >
-                                  <option value="github">GitHub</option>
-                                  <option value="twitter">Twitter / X</option>
-                                  <option value="linkedin">LinkedIn</option>
-                                  <option value="website">Website</option>
-                                </select>
-                                <input
-                                  type="url"
-                                  value={link.url}
-                                  onChange={(e) => {
-                                    const nextLinks = [...(member.links || [])];
-                                    nextLinks[lIdx] = { ...nextLinks[lIdx], url: e.target.value };
-                                    handleLineupChange(mIdx, 'links', nextLinks);
-                                  }}
-                                  placeholder="https://..."
-                                  className="flex-1 px-2.5 py-1 bg-white border border-zinc-200 rounded-lg text-xs font-mono text-zinc-800 outline-none focus:border-[#E31B23]"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveLineupLink(mIdx, lIdx)}
-                                  className="text-zinc-400 hover:text-red-600 cursor-pointer p-1"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
+                          {/* Direct URL Input drawer */}
+                          {showUrlInputIdx === mIdx && (
+                            <div className="pt-1.5">
+                              <input
+                                type="url"
+                                value={member.avatarUrl || ''}
+                                onChange={(e) => handleLineupChange(mIdx, 'avatarUrl', e.target.value)}
+                                placeholder="https://images.unsplash.com/..."
+                                className="w-full px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-mono text-zinc-800 outline-none focus:border-[#E31B23]"
+                              />
+                            </div>
+                          )}
+
+                          {/* System Avatar Selection Grid */}
+                          {openAvatarPickerIdx === mIdx && (
+                            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2 animate-in fade-in duration-150">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-bold text-zinc-700">Choose a System Avatar</span>
+                                <span className="text-[10px] text-zinc-400">{SYSTEM_AVATARS.length} presets available</span>
                               </div>
-                            ))}
+                              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                                {SYSTEM_AVATARS.map((av) => {
+                                  const isSelected = member.avatarUrl === av.url;
+                                  return (
+                                    <button
+                                      key={av.id}
+                                      type="button"
+                                      onClick={() => {
+                                        handleLineupChange(mIdx, 'avatarUrl', av.url);
+                                        setOpenAvatarPickerIdx(null);
+                                      }}
+                                      className={`relative group rounded-xl overflow-hidden p-1 border-2 transition-all cursor-pointer aspect-square ${isSelected ? 'border-[#E31B23] bg-red-50 ring-2 ring-[#E31B23]/30' : 'border-zinc-200 hover:border-zinc-400 bg-white'
+                                        }`}
+                                      title={av.name}
+                                    >
+                                      <img
+                                        src={av.url}
+                                        alt={av.name}
+                                        className="w-full h-full object-cover rounded-lg"
+                                      />
+                                      {isSelected && (
+                                        <div className="absolute top-1 right-1 w-3.5 h-3.5 bg-[#E31B23] text-white rounded-full flex items-center justify-center text-[8px]">
+                                          <Check className="w-2 h-2" />
+                                        </div>
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-zinc-500 uppercase">Speaker Bio</label>
+                          <textarea
+                            rows={2}
+                            value={member.bio || ''}
+                            onChange={(e) => handleLineupChange(mIdx, 'bio', e.target.value)}
+                            placeholder="Brief background or credentials..."
+                            className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-medium text-zinc-800 outline-none focus:border-[#E31B23]"
+                          />
+                        </div>
+
+                        {/* Social Links Sub-list */}
+                        <div className="space-y-2 pt-1 border-t border-zinc-200/60">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
+                              Social & Profile Links
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => handleAddLineupLink(mIdx, 'github', 'https://github.com/')}
+                              className="text-[10px] font-bold text-[#E31B23] hover:underline cursor-pointer inline-flex items-center gap-1"
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>Add Link</span>
+                            </button>
+                          </div>
+
+                          {(member.links || []).map((link, lIdx) => (
+                            <div key={lIdx} className="flex items-center gap-2">
+                              <select
+                                value={link.platform}
+                                onChange={(e) => {
+                                  const nextLinks = [...(member.links || [])];
+                                  nextLinks[lIdx] = { ...nextLinks[lIdx], platform: e.target.value as any };
+                                  handleLineupChange(mIdx, 'links', nextLinks);
+                                }}
+                                className="px-2 py-1 bg-white border border-zinc-200 rounded-lg text-xs font-bold text-zinc-800 outline-none"
+                              >
+                                <option value="github">GitHub</option>
+                                <option value="twitter">Twitter / X</option>
+                                <option value="linkedin">LinkedIn</option>
+                                <option value="website">Website</option>
+                              </select>
+                              <input
+                                type="url"
+                                value={link.url}
+                                onChange={(e) => {
+                                  const nextLinks = [...(member.links || [])];
+                                  nextLinks[lIdx] = { ...nextLinks[lIdx], url: e.target.value };
+                                  handleLineupChange(mIdx, 'links', nextLinks);
+                                }}
+                                placeholder="https://..."
+                                className="flex-1 px-2.5 py-1 bg-white border border-zinc-200 rounded-lg text-xs font-mono text-zinc-800 outline-none focus:border-[#E31B23]"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveLineupLink(mIdx, lIdx)}
+                                className="text-zinc-400 hover:text-red-600 cursor-pointer p-1"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* STEP 5: APPEARANCE & BRANDING */}
+            {step === 5 && (
+              <div className="space-y-7 animate-in fade-in duration-200">
+                <div className="border-b border-zinc-100 pb-4">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#E31B23]">Phase 05</span>
+                  <h3 className="text-xl font-black text-zinc-950 tracking-tight mt-0.5">
+                    Appearance, Flyer & Status
+                  </h3>
+                  <p className="text-xs text-zinc-500 mt-1 font-medium">
+                    Upload your high-res event flyer, select presentation theme, and configure pre/post sale messaging.
+                  </p>
+                </div>
+
+                {/* Pre-Ticketing Creation Notice Banner */}
+                <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/90 flex items-start gap-3 shadow-2xs">
+                  <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 flex-shrink-0 mt-0.5">
+                    <Ticket className="w-4 h-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <h5 className="text-xs font-black text-amber-950 uppercase tracking-wide">
+                      Ticketing & Inventory Workflow
+                    </h5>
+                    <p className="text-xs text-amber-900/90 font-medium leading-relaxed">
+                      When you save or publish your event, you will seamlessly land in the <strong>Event Command Hub</strong> where you can configure ticket tiers, VIP pricing, attendee checkout questions, and promo codes.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Cover Photo & Event Flyer Studio */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-xs font-bold text-zinc-900 block">Cover Photo & Event Flyer</label>
+                      <span className="text-[11px] text-zinc-400">High-res 16:9 banner displayed across event discovery & passes</span>
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-full border border-zinc-200">
+                      16:9 Recommended
+                    </span>
+                  </div>
+
+                  {/* Cover Mode Selector */}
+                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100/80 rounded-xl border border-zinc-200/60 text-xs font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setCoverMode('upload')}
+                      className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'upload'
+                        ? 'bg-white text-zinc-950 shadow-2xs font-extrabold'
+                        : 'text-zinc-600 hover:text-zinc-950'
+                        }`}
+                    >
+                      <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
+                      <span>Upload from Device</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCoverMode('preset')}
+                      className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'preset'
+                        ? 'bg-white text-zinc-950 shadow-2xs font-extrabold'
+                        : 'text-zinc-600 hover:text-zinc-950'
+                        }`}
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
+                      <span>Curated Presets (50)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCoverMode('url')}
+                      className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'url'
+                        ? 'bg-white text-zinc-950 shadow-2xs font-extrabold'
+                        : 'text-zinc-600 hover:text-zinc-950'
+                        }`}
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-[#E31B23]" />
+                      <span>Image Link</span>
+                    </button>
+                  </div>
+
+                  {/* TAB 1: UPLOAD FROM DEVICE */}
+                  {coverMode === 'upload' && (
+                    <div className="space-y-2">
+                      <input
+                        ref={coverFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleCoverFileProcess(file);
+                        }}
+                        className="hidden"
+                      />
+
+                      {imageUrl && (coverFileName || imageUrl.startsWith('data:image') || imageUrl.includes('/storage/events/banners/')) ? (
+                        <div className="relative rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-900 group shadow-xs">
+                          <img src={imageUrl} alt="Uploaded Event Flyer" className="w-full h-44 sm:h-52 object-cover" />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 p-4">
+                            <button
+                              type="button"
+                              onClick={() => coverFileInputRef.current?.click()}
+                              className="px-3.5 py-2 bg-white text-zinc-950 text-xs font-bold rounded-xl shadow-md hover:bg-zinc-100 transition-all flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
+                              <span>Replace Flyer</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setImageUrl(PRESET_COVERS[0].url);
+                                setCoverFileName('');
+                                if (coverFileInputRef.current) coverFileInputRef.current.value = '';
+                              }}
+                              className="px-3.5 py-2 bg-red-600 text-white text-xs font-bold rounded-xl shadow-md hover:bg-red-700 transition-all flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Remove</span>
+                            </button>
+                          </div>
+                          <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black text-white flex items-center gap-1.5">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            <span>Custom Flyer Active {coverFileName ? `• ${coverFileName}` : ''}</span>
                           </div>
                         </div>
-                      ))}
+                      ) : (
+                        <div
+                          onDragOver={(e) => { e.preventDefault(); setIsDraggingCover(true); }}
+                          onDragLeave={() => setIsDraggingCover(false)}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setIsDraggingCover(false);
+                            const file = e.dataTransfer.files?.[0];
+                            if (file) handleCoverFileProcess(file);
+                          }}
+                          onClick={() => coverFileInputRef.current?.click()}
+                          className={`h-44 sm:h-48 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all ${isDraggingCover
+                            ? 'border-[#E31B23] bg-red-50/40 ring-4 ring-red-100'
+                            : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/70 bg-zinc-50/40'
+                            }`}
+                        >
+                          {isUploadingCover ? (
+                            <div className="flex flex-col items-center gap-2">
+                              <Loader2 className="w-8 h-8 text-[#E31B23] animate-spin" />
+                              <span className="text-xs font-bold text-zinc-700">
+                                Sanitizing & uploading flyer... {coverUploadProgress !== null ? `${coverUploadProgress}%` : ''}
+                              </span>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="w-12 h-12 rounded-2xl bg-red-50 text-[#E31B23] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-105 transition-transform">
+                                <Upload className="w-6 h-6" />
+                              </div>
+                              <span className="text-xs font-bold text-zinc-900">
+                                Click to browse or drag & drop event banner flyer
+                              </span>
+                              <span className="text-[11px] text-zinc-400 mt-1 max-w-xs">
+                                Supports high-definition JPG, PNG, WEBP up to 10MB. 16:9 aspect ratio looks sharpest.
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 2: PRESET GALLERY (50 CURATED PRESETS) */}
+                  {coverMode === 'preset' && (
+                    <div className="space-y-3 bg-zinc-50/60 p-3.5 rounded-2xl border border-zinc-200/80">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black text-zinc-900">
+                            Curated Photography Studio
+                          </span>
+                          <span className="text-[10px] font-black px-2 py-0.5 bg-red-100/70 text-[#E31B23] rounded-full border border-red-200">
+                            50 High-Res Presets
+                          </span>
+                        </div>
+
+                        {/* Quick Search */}
+                        <div className="relative w-full sm:w-48">
+                          <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <input
+                            type="text"
+                            value={presetSearchQuery}
+                            onChange={(e) => setPresetSearchQuery(e.target.value)}
+                            placeholder="Filter presets..."
+                            className="w-full pl-8 pr-7 py-1.5 bg-white border border-zinc-200 rounded-xl text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:border-[#E31B23]"
+                          />
+                          {presetSearchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setPresetSearchQuery('')}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 cursor-pointer"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Category Filter Pills */}
+                      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+                        {PRESET_CATEGORIES.map((cat) => {
+                          const isSelected = presetCategoryFilter === cat;
+                          const count =
+                            cat === 'All'
+                              ? PRESET_COVERS.length
+                              : PRESET_COVERS.filter((p) => p.category === cat).length;
+                          return (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => setPresetCategoryFilter(cat)}
+                              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer ${isSelected
+                                ? 'bg-zinc-900 text-white shadow-2xs'
+                                : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-100'
+                                }`}
+                            >
+                              {cat} ({count})
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Gallery Grid */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto pr-1">
+                        {filteredPresets.map((preset, pIdx) => {
+                          const isChosen = imageUrl === preset.url;
+                          return (
+                            <div
+                              key={pIdx}
+                              onClick={() => {
+                                setImageUrl(preset.url);
+                                showNotification(`Cover image applied`, 'success');
+                              }}
+                              className={`group relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${isChosen
+                                ? 'border-[#E31B23] ring-2 ring-red-200 shadow-sm'
+                                : 'border-transparent hover:border-zinc-300'
+                                }`}
+                            >
+                              <img
+                                src={preset.url}
+                                alt={preset.name}
+                                className="w-full h-20 sm:h-22 object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90 p-1.5 flex flex-col justify-end">
+                                <span className="text-[10px] font-bold text-white leading-tight truncate">
+                                  {preset.name}
+                                </span>
+                              </div>
+                              {isChosen && (
+                                <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-[#E31B23] text-white flex items-center justify-center shadow-xs">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB 3: CUSTOM URL */}
+                  {coverMode === 'url' && (
+                    <div className="space-y-2">
+                      <input
+                        type="url"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder="https://images.unsplash.com/..."
+                        className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-mono text-zinc-800 placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white transition-all"
+                      />
+                      {imageUrl && !imageUrl.startsWith('data:image') && (
+                        <div className="relative rounded-xl overflow-hidden border border-zinc-200 h-32 bg-zinc-100">
+                          <img src={imageUrl} alt="Cover Preview" className="w-full h-full object-cover" />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
 
-              {/* STEP 5: APPEARANCE & BRANDING */}
-              {step === 5 && (
-                <div className="space-y-7 animate-in fade-in duration-200">
-                  <div className="border-b border-zinc-100 pb-4">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-[#E31B23]">Phase 05</span>
-                    <h3 className="text-xl font-black text-zinc-950 tracking-tight mt-0.5">
-                      Appearance, Flyer & Status
-                    </h3>
-                    <p className="text-xs text-zinc-500 mt-1 font-medium">
-                      Upload your high-res event flyer, select presentation theme, and configure pre/post sale messaging.
+                {/* Hero Header Layout Selection */}
+                <div className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-2xs">
+                  <HeroHeaderPicker
+                    value={bannerStyle}
+                    onChange={(s) => setBannerStyle(s)}
+                    previewImageUrl={imageUrl}
+                    eventTitle={title || 'Your Event Title'}
+                    eventCategory={eventCategories[0] || 'Technology'}
+                    eventDate={`${formatDate(startDate)} • ${startTime}`}
+                    eventVenue={locationType === 'physical' ? (venue || 'Venue Location') : 'Virtual / Online Stream'}
+                    showLivePreview={true}
+                  />
+                </div>
+
+                {/* Custom URL Slug Preview */}
+                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-2">
+                  <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-[#E31B23]" />
+                    <span>Custom Event URL</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono text-zinc-500 bg-white px-3 py-2 rounded-xl border border-zinc-200 flex-1 truncate">
+                      https://eventa.live/events/<span className="text-zinc-950 font-bold">{slug}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopySlug}
+                      className="px-3 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer flex-shrink-0"
+                    >
+                      {copiedSlug ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedSlug ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* EVENT STATUS MESSAGE CARD */}
+                <div className="p-5 rounded-2xl bg-white border border-zinc-200 space-y-4 shadow-2xs">
+                  <div>
+                    <h4 className="text-sm font-black text-zinc-950">Event status message</h4>
+                    <p className="text-xs text-zinc-500 mt-0.5">
+                      You can use this feature to put up your event page before you’re ready to start sales or display a custom message after sales have ended.
                     </p>
                   </div>
 
-                  {/* Pre-Ticketing Creation Notice Banner */}
-                  <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/90 flex items-start gap-3 shadow-2xs">
-                    <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 flex-shrink-0 mt-0.5">
-                      <Ticket className="w-4 h-4" />
-                    </div>
-                    <div className="space-y-1">
-                      <h5 className="text-xs font-black text-amber-950 uppercase tracking-wide">
-                        Ticketing & Inventory Workflow
-                      </h5>
-                      <p className="text-xs text-amber-900/90 font-medium leading-relaxed">
-                        When you save or publish your event, you will seamlessly land in the <strong>Event Command Hub</strong> where you can configure ticket tiers, VIP pricing, attendee checkout questions, and promo codes.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Cover Photo & Event Flyer Studio */}
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="text-xs font-bold text-zinc-900 block">Cover Photo & Event Flyer</label>
-                        <span className="text-[11px] text-zinc-400">High-res 16:9 banner displayed across event discovery & passes</span>
-                      </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-full border border-zinc-200">
-                        16:9 Recommended
-                      </span>
+                    <label className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider block">
+                      Choose a message
+                    </label>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      {/* NONE */}
+                      <button
+                        type="button"
+                        onClick={() => setStatusMessageType('none')}
+                        className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${statusMessageType === 'none'
+                          ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
+                          : 'border-zinc-200 hover:border-zinc-300 bg-zinc-50/50'
+                          }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${statusMessageType === 'none' ? 'bg-red-100 text-[#E31B23]' : 'bg-zinc-200 text-zinc-600'
+                            }`}>
+                            <MinusCircle className="w-3.5 h-3.5" />
+                          </div>
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'none' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
+                            }`}>
+                            {statusMessageType === 'none' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold text-zinc-900 block">None</span>
+                          <span className="text-[10px] text-zinc-500 mt-0.5 block leading-tight">Regular ticket sales active</span>
+                        </div>
+                      </button>
+
+                      {/* SHOW A PRE SALE MESSAGE */}
+                      <button
+                        type="button"
+                        onClick={() => setStatusMessageType('pre_sale')}
+                        className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${statusMessageType === 'pre_sale'
+                          ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
+                          : 'border-zinc-200 hover:border-zinc-300 bg-zinc-50/50'
+                          }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${statusMessageType === 'pre_sale' ? 'bg-amber-100 text-amber-600' : 'bg-zinc-200 text-zinc-600'
+                            }`}>
+                            <Clock className="w-3.5 h-3.5" />
+                          </div>
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'pre_sale' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
+                            }`}>
+                            {statusMessageType === 'pre_sale' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold text-zinc-900 block">Show a pre sale message</span>
+                          <span className="text-[10px] text-zinc-500 mt-0.5 block leading-tight">Notice before sales start</span>
+                        </div>
+                      </button>
+
+                      {/* SHOW A POST SALES MESSAGE */}
+                      <button
+                        type="button"
+                        onClick={() => setStatusMessageType('post_sales')}
+                        className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${statusMessageType === 'post_sales'
+                          ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
+                          : 'border-zinc-200 hover:border-zinc-300 bg-zinc-50/50'
+                          }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${statusMessageType === 'post_sales' ? 'bg-rose-100 text-rose-600' : 'bg-zinc-200 text-zinc-600'
+                            }`}>
+                            <AlertCircle className="w-3.5 h-3.5" />
+                          </div>
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'post_sales' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
+                            }`}>
+                            {statusMessageType === 'post_sales' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold text-zinc-900 block">Show a post sales message</span>
+                          <span className="text-[10px] text-zinc-500 mt-0.5 block leading-tight">Notice after sales close</span>
+                        </div>
+                      </button>
                     </div>
-
-                    {/* Cover Mode Selector */}
-                    <div className="flex items-center gap-1.5 p-1 bg-zinc-100/80 rounded-xl border border-zinc-200/60 text-xs font-bold">
-                      <button
-                        type="button"
-                        onClick={() => setCoverMode('upload')}
-                        className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'upload'
-                          ? 'bg-white text-zinc-950 shadow-2xs font-extrabold'
-                          : 'text-zinc-600 hover:text-zinc-950'
-                          }`}
-                      >
-                        <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
-                        <span>Upload from Device</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCoverMode('preset')}
-                        className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'preset'
-                          ? 'bg-white text-zinc-950 shadow-2xs font-extrabold'
-                          : 'text-zinc-600 hover:text-zinc-950'
-                          }`}
-                      >
-                        <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
-                        <span>Curated Presets (50)</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCoverMode('url')}
-                        className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'url'
-                          ? 'bg-white text-zinc-950 shadow-2xs font-extrabold'
-                          : 'text-zinc-600 hover:text-zinc-950'
-                          }`}
-                      >
-                        <ExternalLink className="w-3.5 h-3.5 text-[#E31B23]" />
-                        <span>Image Link</span>
-                      </button>
-                    </div>
-
-                    {/* TAB 1: UPLOAD FROM DEVICE */}
-                    {coverMode === 'upload' && (
-                      <div className="space-y-2">
-                        <input
-                          ref={coverFileInputRef}
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleCoverFileProcess(file);
-                          }}
-                          className="hidden"
-                        />
-
-                        {imageUrl && (coverFileName || imageUrl.startsWith('data:image') || imageUrl.includes('/storage/events/banners/')) ? (
-                          <div className="relative rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-900 group shadow-xs">
-                            <img src={imageUrl} alt="Uploaded Event Flyer" className="w-full h-44 sm:h-52 object-cover" />
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 p-4">
-                              <button
-                                type="button"
-                                onClick={() => coverFileInputRef.current?.click()}
-                                className="px-3.5 py-2 bg-white text-zinc-950 text-xs font-bold rounded-xl shadow-md hover:bg-zinc-100 transition-all flex items-center gap-1.5 cursor-pointer"
-                              >
-                                <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
-                                <span>Replace Flyer</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setImageUrl(PRESET_COVERS[0].url);
-                                  setCoverFileName('');
-                                  if (coverFileInputRef.current) coverFileInputRef.current.value = '';
-                                }}
-                                className="px-3.5 py-2 bg-red-600 text-white text-xs font-bold rounded-xl shadow-md hover:bg-red-700 transition-all flex items-center gap-1.5 cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                <span>Remove</span>
-                              </button>
-                            </div>
-                            <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black text-white flex items-center gap-1.5">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                              <span>Custom Flyer Active {coverFileName ? `• ${coverFileName}` : ''}</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div
-                            onDragOver={(e) => { e.preventDefault(); setIsDraggingCover(true); }}
-                            onDragLeave={() => setIsDraggingCover(false)}
-                            onDrop={(e) => {
-                              e.preventDefault();
-                              setIsDraggingCover(false);
-                              const file = e.dataTransfer.files?.[0];
-                              if (file) handleCoverFileProcess(file);
-                            }}
-                            onClick={() => coverFileInputRef.current?.click()}
-                            className={`h-44 sm:h-48 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all ${isDraggingCover
-                              ? 'border-[#E31B23] bg-red-50/40 ring-4 ring-red-100'
-                              : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/70 bg-zinc-50/40'
-                              }`}
-                          >
-                            {isUploadingCover ? (
-                              <div className="flex flex-col items-center gap-2">
-                                <Loader2 className="w-8 h-8 text-[#E31B23] animate-spin" />
-                                <span className="text-xs font-bold text-zinc-700">
-                                  Sanitizing & uploading flyer... {coverUploadProgress !== null ? `${coverUploadProgress}%` : ''}
-                                </span>
-                              </div>
-                            ) : (
-                              <>
-                                <div className="w-12 h-12 rounded-2xl bg-red-50 text-[#E31B23] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-105 transition-transform">
-                                  <Upload className="w-6 h-6" />
-                                </div>
-                                <span className="text-xs font-bold text-zinc-900">
-                                  Click to browse or drag & drop event banner flyer
-                                </span>
-                                <span className="text-[11px] text-zinc-400 mt-1 max-w-xs">
-                                  Supports high-definition JPG, PNG, WEBP up to 10MB. 16:9 aspect ratio looks sharpest.
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* TAB 2: PRESET GALLERY (50 CURATED PRESETS) */}
-                    {coverMode === 'preset' && (
-                      <div className="space-y-3 bg-zinc-50/60 p-3.5 rounded-2xl border border-zinc-200/80">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-black text-zinc-900">
-                              Curated Photography Studio
-                            </span>
-                            <span className="text-[10px] font-black px-2 py-0.5 bg-red-100/70 text-[#E31B23] rounded-full border border-red-200">
-                              50 High-Res Presets
-                            </span>
-                          </div>
-
-                          {/* Quick Search */}
-                          <div className="relative w-full sm:w-48">
-                            <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                            <input
-                              type="text"
-                              value={presetSearchQuery}
-                              onChange={(e) => setPresetSearchQuery(e.target.value)}
-                              placeholder="Filter presets..."
-                              className="w-full pl-8 pr-7 py-1.5 bg-white border border-zinc-200 rounded-xl text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:border-[#E31B23]"
-                            />
-                            {presetSearchQuery && (
-                              <button
-                                type="button"
-                                onClick={() => setPresetSearchQuery('')}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 cursor-pointer"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Category Filter Pills */}
-                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
-                          {PRESET_CATEGORIES.map((cat) => {
-                            const isSelected = presetCategoryFilter === cat;
-                            const count =
-                              cat === 'All'
-                                ? PRESET_COVERS.length
-                                : PRESET_COVERS.filter((p) => p.category === cat).length;
-                            return (
-                              <button
-                                key={cat}
-                                type="button"
-                                onClick={() => setPresetCategoryFilter(cat)}
-                                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer ${isSelected
-                                  ? 'bg-zinc-900 text-white shadow-2xs'
-                                  : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-100'
-                                  }`}
-                              >
-                                {cat} ({count})
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Gallery Grid */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto pr-1">
-                          {filteredPresets.map((preset, pIdx) => {
-                            const isChosen = imageUrl === preset.url;
-                            return (
-                              <div
-                                key={pIdx}
-                                onClick={() => {
-                                  setImageUrl(preset.url);
-                                  showNotification(`Applied "${preset.name}" cover image`, 'success');
-                                }}
-                                className={`group relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${isChosen
-                                  ? 'border-[#E31B23] ring-2 ring-red-200 shadow-sm'
-                                  : 'border-transparent hover:border-zinc-300'
-                                  }`}
-                              >
-                                <img
-                                  src={preset.url}
-                                  alt={preset.name}
-                                  className="w-full h-20 sm:h-22 object-cover group-hover:scale-105 transition-transform duration-300"
-                                  loading="lazy"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90 p-1.5 flex flex-col justify-end">
-                                  <span className="text-[10px] font-bold text-white leading-tight truncate">
-                                    {preset.name}
-                                  </span>
-                                </div>
-                                {isChosen && (
-                                  <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-[#E31B23] text-white flex items-center justify-center shadow-xs">
-                                    <Check className="w-3 h-3 stroke-[3]" />
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* TAB 3: CUSTOM URL */}
-                    {coverMode === 'url' && (
-                      <div className="space-y-2">
-                        <input
-                          type="url"
-                          value={imageUrl}
-                          onChange={(e) => setImageUrl(e.target.value)}
-                          placeholder="https://images.unsplash.com/..."
-                          className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-mono text-zinc-800 placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white transition-all"
-                        />
-                        {imageUrl && !imageUrl.startsWith('data:image') && (
-                          <div className="relative rounded-xl overflow-hidden border border-zinc-200 h-32 bg-zinc-100">
-                            <img src={imageUrl} alt="Cover Preview" className="w-full h-full object-cover" />
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
 
-                  {/* Hero Header Layout Selection */}
-                  <div className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-2xs">
-                    <HeroHeaderPicker
-                      value={bannerStyle}
-                      onChange={(s) => setBannerStyle(s)}
-                      previewImageUrl={imageUrl}
-                      eventTitle={title || 'Your Event Title'}
-                      eventCategory={eventCategories[0] || 'Technology'}
-                      eventDate={`${formatDate(startDate)} • ${startTime}`}
-                      eventVenue={locationType === 'physical' ? (venue || 'Venue Location') : 'Virtual / Online Stream'}
-                      showLivePreview={true}
+                  {/* Pre-sale Message Input & Live Preview */}
+                  {statusMessageType === 'pre_sale' && (
+                    <div className="p-4 rounded-xl bg-amber-50/50 border border-amber-200/80 space-y-3 animate-in fade-in duration-200">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Pre-sale Announcement Message</span>
+                        </label>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                          Pre-Sale Mode
+                        </span>
+                      </div>
+                      <textarea
+                        rows={2}
+                        value={preSaleMessage}
+                        onChange={(e) => setPreSaleMessage(e.target.value)}
+                        placeholder="e.g. Tickets will go on sale soon. Join the waitlist to get early access!"
+                        className="w-full px-3.5 py-2 bg-white border border-amber-200 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-amber-500 shadow-2xs"
+                      />
+                      <div className="p-3 rounded-lg bg-amber-100/70 border border-amber-200 text-amber-950 flex items-start gap-2.5 text-xs">
+                        <Clock className="w-3.5 h-3.5 text-amber-700 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-bold block text-amber-900 text-[10px] uppercase">Attendee Preview</span>
+                          <p className="mt-0.5 text-zinc-800">{preSaleMessage || 'Tickets will go on sale soon.'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Post-sales Message Input & Live Preview */}
+                  {statusMessageType === 'post_sales' && (
+                    <div className="p-4 rounded-xl bg-rose-50/50 border border-rose-200/80 space-y-3 animate-in fade-in duration-200">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
+                          <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                          <span>Post-sales Notice Message</span>
+                        </label>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
+                          Post-Sales Mode
+                        </span>
+                      </div>
+                      <textarea
+                        rows={2}
+                        value={postSaleMessage}
+                        onChange={(e) => setPostSaleMessage(e.target.value)}
+                        placeholder="e.g. Ticket sales have ended. Thank you for your support!"
+                        className="w-full px-3.5 py-2 bg-white border border-rose-200 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-rose-500 shadow-2xs"
+                      />
+                      <div className="p-3 rounded-lg bg-rose-100/70 border border-rose-200 text-rose-950 flex items-start gap-2.5 text-xs">
+                        <AlertCircle className="w-3.5 h-3.5 text-rose-700 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-bold block text-rose-900 text-[10px] uppercase">Attendee Preview</span>
+                          <p className="mt-0.5 text-zinc-800">{postSaleMessage || 'Ticket sales have ended.'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Event Review & Command Hub Handoff Card */}
+                <div className="p-5 rounded-2xl bg-zinc-950 text-white space-y-4 shadow-md">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#E31B23]" />
+                      <h4 className="text-sm font-black">Pre-Flight Review</h4>
+                    </div>
+                    <span className="text-xs font-black text-emerald-400">{readinessPercentage}% Ready</span>
+                  </div>
+
+                  {/* Readiness Bar */}
+                  <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#E31B23] to-emerald-500 rounded-full transition-all duration-500"
+                      style={{ width: `${readinessPercentage}%` }}
                     />
                   </div>
 
-                  {/* Custom URL Slug Preview */}
-                  <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-2">
-                    <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
-                      <Globe className="w-3.5 h-3.5 text-[#E31B23]" />
-                      <span>Custom Event URL</span>
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-zinc-500 bg-white px-3 py-2 rounded-xl border border-zinc-200 flex-1 truncate">
-                        https://eventa.live/events/<span className="text-zinc-950 font-bold">{slug}</span>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+                    <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
+                      <span className="text-zinc-400 text-[10px] uppercase font-bold block">Format</span>
+                      <span className="font-bold text-white mt-0.5 block truncate">{eventFormat}</span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
+                      <span className="text-zinc-400 text-[10px] uppercase font-bold block">
+                        {locationType === 'physical' ? 'Venue' : 'Format'}
                       </span>
-                      <button
-                        type="button"
-                        onClick={handleCopySlug}
-                        className="px-3 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer flex-shrink-0"
-                      >
-                        {copiedSlug ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copiedSlug ? 'Copied' : 'Copy'}</span>
-                      </button>
+                      <span className="font-bold text-white mt-0.5 block truncate">
+                        {locationType === 'online' ? 'Virtual or Online Event' : (venue || 'Venue')}
+                      </span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 col-span-2 sm:col-span-1">
+                      <span className="text-zinc-400 text-[10px] uppercase font-bold block">Date</span>
+                      <span className="font-bold text-white mt-0.5 block truncate">
+                        {startDate ? formatDate(startDate) : 'To be set'}
+                      </span>
                     </div>
                   </div>
 
-                  {/* EVENT STATUS MESSAGE CARD */}
-                  <div className="p-5 rounded-2xl bg-white border border-zinc-200 space-y-4 shadow-2xs">
-                    <div>
-                      <h4 className="text-sm font-black text-zinc-950">Event status message</h4>
-                      <p className="text-xs text-zinc-500 mt-0.5">
-                        You can use this feature to put up your event page before you’re ready to start sales or display a custom message after sales have ended.
+                  {/* Handoff Notice */}
+                  <div className="p-3.5 rounded-xl bg-red-950/40 border border-red-800/50 flex items-start gap-3">
+                    <Ticket className="w-4 h-4 text-[#E31B23] flex-shrink-0 mt-0.5" />
+                    <div className="space-y-0.5 text-[11px] leading-relaxed">
+                      <span className="font-bold text-white block">Tickets & Policies in Event Command Hub</span>
+                      <p className="text-zinc-300">
+                        After creating this event, you will be redirected to the Event Command Hub where you can add VIP & regular ticket tiers, pricing, attendee questions, and refund rules.
                       </p>
                     </div>
-
-                    <div className="space-y-3">
-                      <label className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider block">
-                        Choose a message
-                      </label>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                        {/* NONE */}
-                        <button
-                          type="button"
-                          onClick={() => setStatusMessageType('none')}
-                          className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
-                            statusMessageType === 'none'
-                              ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                              : 'border-zinc-200 hover:border-zinc-300 bg-zinc-50/50'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between w-full">
-                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                              statusMessageType === 'none' ? 'bg-red-100 text-[#E31B23]' : 'bg-zinc-200 text-zinc-600'
-                            }`}>
-                              <MinusCircle className="w-3.5 h-3.5" />
-                            </div>
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                              statusMessageType === 'none' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
-                            }`}>
-                              {statusMessageType === 'none' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-xs font-bold text-zinc-900 block">None</span>
-                            <span className="text-[10px] text-zinc-500 mt-0.5 block leading-tight">Regular ticket sales active</span>
-                          </div>
-                        </button>
-
-                        {/* SHOW A PRE SALE MESSAGE */}
-                        <button
-                          type="button"
-                          onClick={() => setStatusMessageType('pre_sale')}
-                          className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
-                            statusMessageType === 'pre_sale'
-                              ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                              : 'border-zinc-200 hover:border-zinc-300 bg-zinc-50/50'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between w-full">
-                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                              statusMessageType === 'pre_sale' ? 'bg-amber-100 text-amber-600' : 'bg-zinc-200 text-zinc-600'
-                            }`}>
-                              <Clock className="w-3.5 h-3.5" />
-                            </div>
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                              statusMessageType === 'pre_sale' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
-                            }`}>
-                              {statusMessageType === 'pre_sale' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-xs font-bold text-zinc-900 block">Show a pre sale message</span>
-                            <span className="text-[10px] text-zinc-500 mt-0.5 block leading-tight">Notice before sales start</span>
-                          </div>
-                        </button>
-
-                        {/* SHOW A POST SALES MESSAGE */}
-                        <button
-                          type="button"
-                          onClick={() => setStatusMessageType('post_sales')}
-                          className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
-                            statusMessageType === 'post_sales'
-                              ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                              : 'border-zinc-200 hover:border-zinc-300 bg-zinc-50/50'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between w-full">
-                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                              statusMessageType === 'post_sales' ? 'bg-rose-100 text-rose-600' : 'bg-zinc-200 text-zinc-600'
-                            }`}>
-                              <AlertCircle className="w-3.5 h-3.5" />
-                            </div>
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                              statusMessageType === 'post_sales' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
-                            }`}>
-                              {statusMessageType === 'post_sales' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-xs font-bold text-zinc-900 block">Show a post sales message</span>
-                            <span className="text-[10px] text-zinc-500 mt-0.5 block leading-tight">Notice after sales close</span>
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Pre-sale Message Input & Live Preview */}
-                    {statusMessageType === 'pre_sale' && (
-                      <div className="p-4 rounded-xl bg-amber-50/50 border border-amber-200/80 space-y-3 animate-in fade-in duration-200">
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5 text-amber-600" />
-                            <span>Pre-sale Announcement Message</span>
-                          </label>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                            Pre-Sale Mode
-                          </span>
-                        </div>
-                        <textarea
-                          rows={2}
-                          value={preSaleMessage}
-                          onChange={(e) => setPreSaleMessage(e.target.value)}
-                          placeholder="e.g. Tickets will go on sale soon. Join the waitlist to get early access!"
-                          className="w-full px-3.5 py-2 bg-white border border-amber-200 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-amber-500 shadow-2xs"
-                        />
-                        <div className="p-3 rounded-lg bg-amber-100/70 border border-amber-200 text-amber-950 flex items-start gap-2.5 text-xs">
-                          <Clock className="w-3.5 h-3.5 text-amber-700 flex-shrink-0 mt-0.5" />
-                          <div>
-                            <span className="font-bold block text-amber-900 text-[10px] uppercase">Attendee Preview</span>
-                            <p className="mt-0.5 text-zinc-800">{preSaleMessage || 'Tickets will go on sale soon.'}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Post-sales Message Input & Live Preview */}
-                    {statusMessageType === 'post_sales' && (
-                      <div className="p-4 rounded-xl bg-rose-50/50 border border-rose-200/80 space-y-3 animate-in fade-in duration-200">
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
-                            <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
-                            <span>Post-sales Notice Message</span>
-                          </label>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
-                            Post-Sales Mode
-                          </span>
-                        </div>
-                        <textarea
-                          rows={2}
-                          value={postSaleMessage}
-                          onChange={(e) => setPostSaleMessage(e.target.value)}
-                          placeholder="e.g. Ticket sales have ended. Thank you for your support!"
-                          className="w-full px-3.5 py-2 bg-white border border-rose-200 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-rose-500 shadow-2xs"
-                        />
-                        <div className="p-3 rounded-lg bg-rose-100/70 border border-rose-200 text-rose-950 flex items-start gap-2.5 text-xs">
-                          <AlertCircle className="w-3.5 h-3.5 text-rose-700 flex-shrink-0 mt-0.5" />
-                          <div>
-                            <span className="font-bold block text-rose-900 text-[10px] uppercase">Attendee Preview</span>
-                            <p className="mt-0.5 text-zinc-800">{postSaleMessage || 'Ticket sales have ended.'}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Event Review & Command Hub Handoff Card */}
-                  <div className="p-5 rounded-2xl bg-zinc-950 text-white space-y-4 shadow-md">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-[#E31B23]" />
-                        <h4 className="text-sm font-black">Pre-Flight Review</h4>
-                      </div>
-                      <span className="text-xs font-black text-emerald-400">{readinessPercentage}% Ready</span>
-                    </div>
-
-                    {/* Readiness Bar */}
-                    <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-[#E31B23] to-emerald-500 rounded-full transition-all duration-500"
-                        style={{ width: `${readinessPercentage}%` }}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
-                      <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
-                        <span className="text-zinc-400 text-[10px] uppercase font-bold block">Format</span>
-                        <span className="font-bold text-white mt-0.5 block truncate">{eventFormat}</span>
-                      </div>
-                      <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
-                        <span className="text-zinc-400 text-[10px] uppercase font-bold block">
-                          {locationType === 'physical' ? 'Venue' : 'Format'}
-                        </span>
-                        <span className="font-bold text-white mt-0.5 block truncate">
-                          {locationType === 'online' ? 'Virtual or Online Event' : (venue || 'Venue')}
-                        </span>
-                      </div>
-                      <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 col-span-2 sm:col-span-1">
-                        <span className="text-zinc-400 text-[10px] uppercase font-bold block">Date</span>
-                        <span className="font-bold text-white mt-0.5 block truncate">
-                          {startDate ? formatDate(startDate) : 'To be set'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Handoff Notice */}
-                    <div className="p-3.5 rounded-xl bg-red-950/40 border border-red-800/50 flex items-start gap-3">
-                      <Ticket className="w-4 h-4 text-[#E31B23] flex-shrink-0 mt-0.5" />
-                      <div className="space-y-0.5 text-[11px] leading-relaxed">
-                        <span className="font-bold text-white block">Tickets & Policies in Event Command Hub</span>
-                        <p className="text-zinc-300">
-                          After creating this event, you will be redirected to the Event Command Hub where you can add VIP & regular ticket tiers, pricing, attendee questions, and refund rules.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                    {perms.canPublishEvents && (
                       <button
                         type="button"
                         disabled={isLoading}
                         onClick={() => handlePublish('Draft')}
-                        className="flex-1 py-3.5 px-5 border border-zinc-700 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+                        className="flex-1 py-3.5 px-5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer hover:shadow-lg active:scale-[0.99]"
                       >
-                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                        <span>{perms.canConfigureTickets ? 'Save as Draft & Configure Tickets' : 'Save Event as Draft'}</span>
+                        {isLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : isEditing ? (
+                          <Sparkles className="w-4 h-4" />
+                        ) : (
+                          <Rocket className="w-4 h-4" />
+                        )}
+                        <span>{isEditing ? 'Update & Manage Event' : 'Save and Continue'}</span>
                       </button>
-
-                      {perms.canPublishEvents && (
-                        <button
-                          type="button"
-                          disabled={isLoading}
-                          onClick={() => handlePublish('Published')}
-                          className="flex-1 py-3.5 px-5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer hover:shadow-lg active:scale-[0.99]"
-                        >
-                          {isLoading ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : isEditing ? (
-                            <Sparkles className="w-4 h-4" />
-                          ) : (
-                            <Rocket className="w-4 h-4" />
-                          )}
-                          <span>{isEditing ? 'Update & Manage Event' : 'Launch Experience Live'}</span>
-                        </button>
-                      )}
-                    </div>
-                    {!perms.canPublishEvents && (
-                      <p className="text-xs text-zinc-400 mt-2 text-center">
-                        You have Manager permissions to draft events. An Admin or Owner will review and publish this event live.
-                      </p>
                     )}
                   </div>
+                  {!perms.canPublishEvents && (
+                    <p className="text-xs text-zinc-400 mt-2 text-center">
+                      You have Manager permissions to draft events. An Admin or Owner will review and publish this event live.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Stepper Navigation Buttons */}
+            <div className="flex justify-between items-center border-t border-zinc-100 pt-6 mt-2">
+              {step > 1 ? (
+                <button
+                  type="button"
+                  onClick={() => setStep(prev => prev - 1)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 transition-all cursor-pointer shadow-2xs active:scale-[0.99]"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 text-zinc-500" />
+                  <span>Back</span>
+                </button>
+              ) : (
+                <div className="text-[11px] font-semibold text-zinc-400">
+                  Step 1 of 5
                 </div>
               )}
 
-              {/* Stepper Navigation Buttons */}
-              <div className="flex justify-between items-center border-t border-zinc-100 pt-6 mt-2">
-                {step > 1 ? (
+              {step < 5 ? (
+                <div className="flex items-center gap-3">
+                  {step === 1 && !isStep1Complete && (
+                    <span className="text-[11px] font-semibold text-amber-600 flex items-center gap-1.5 animate-pulse">
+                      <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>Name & description required</span>
+                    </span>
+                  )}
                   <button
                     type="button"
-                    onClick={() => setStep(prev => prev - 1)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 transition-all cursor-pointer shadow-2xs active:scale-[0.99]"
+                    onClick={handleProceedNext}
+                    disabled={isLoading || (step === 1 && !isStep1Complete)}
+                    className={`inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl transition-all ${step === 1 && !isStep1Complete
+                      ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed border border-zinc-200 shadow-none'
+                      : 'bg-zinc-950 hover:bg-zinc-800 text-white cursor-pointer shadow-sm hover:shadow active:scale-[0.99]'
+                      }`}
                   >
-                    <ArrowLeft className="w-3.5 h-3.5 text-zinc-500" />
-                    <span>Back</span>
+                    <span>Continue to {STEPS[step]?.label || 'Next'}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
-                ) : (
-                  <div className="text-[11px] font-semibold text-zinc-400">
-                    Step 1 of 5
-                  </div>
-                )}
-
-                {step < 5 ? (
-                  <div className="flex items-center gap-3">
-                    {step === 1 && !isStep1Complete && (
-                      <span className="text-[11px] font-semibold text-amber-600 flex items-center gap-1.5 animate-pulse">
-                        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>Name & description required</span>
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={handleProceedNext}
-                      disabled={isLoading || (step === 1 && !isStep1Complete)}
-                      className={`inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl transition-all ${step === 1 && !isStep1Complete
-                        ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed border border-zinc-200 shadow-none'
-                        : 'bg-zinc-950 hover:bg-zinc-800 text-white cursor-pointer shadow-sm hover:shadow active:scale-[0.99]'
-                        }`}
-                    >
-                      <span>Continue to {STEPS[step]?.label || 'Next'}</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <div />
-                )}
-              </div>
-
+                </div>
+              ) : (
+                <div />
+              )}
             </div>
+
+          </div>
         </div>
 
       </div>
