@@ -27,7 +27,7 @@ import { getApiErrorMessage } from '../../api/client';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
 import type { Event } from '../../types/api';
 
-type EventFilterStatus = 'All' | 'Published' | 'Upcoming' | 'Draft' | 'Ended';
+type EventFilterStatus = 'All' | 'Published' | 'Draft' | 'Ended';
 
 export const Events: React.FC = () => {
   const { organizer } = useAuth();
@@ -178,8 +178,7 @@ export const Events: React.FC = () => {
     if (status === 'All') return events.length;
     if (status === 'Ended') return events.filter(e => (isEventEnded(e) && e.status !== 'Draft') || e.status === 'Ended' || e.status === 'Completed').length;
     if (status === 'Draft') return events.filter(e => e.status === 'Draft').length;
-    if (status === 'Upcoming') return events.filter(e => (e.status === 'Upcoming' || (e.status === 'Published' && new Date(e.startDate) > new Date())) && !isEventEnded(e)).length;
-    if (status === 'Published') return events.filter(e => e.status === 'Published' && !isEventEnded(e)).length;
+    if (status === 'Published') return events.filter(e => (e.status === 'Published' || e.status === 'Upcoming') && !isEventEnded(e)).length;
     return 0;
   }, [events, isEventEnded]);
 
@@ -191,10 +190,8 @@ export const Events: React.FC = () => {
         matchStatus = ended;
       } else if (selectedStatus === 'Draft') {
         matchStatus = e.status === 'Draft';
-      } else if (selectedStatus === 'Upcoming') {
-        matchStatus = !ended && (e.status === 'Upcoming' || (e.status === 'Published' && new Date(e.startDate) > new Date()));
       } else if (selectedStatus === 'Published') {
-        matchStatus = e.status === 'Published' && !ended;
+        matchStatus = (e.status === 'Published' || e.status === 'Upcoming') && !ended;
       }
 
       const matchQuery = !searchQuery.trim() ||
@@ -245,7 +242,7 @@ export const Events: React.FC = () => {
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           {/* Status Filter Tabs (including Ended) */}
           <div className="flex items-center gap-1.5 bg-zinc-100/80 p-1.5 rounded-2xl border border-zinc-200/80 overflow-x-auto no-scrollbar">
-            {(['All', 'Published', 'Upcoming', 'Draft', 'Ended'] as const).map((status) => {
+            {(['All', 'Published', 'Draft', 'Ended'] as const).map((status) => {
               const count = getStatusCount(status);
               const isActive = selectedStatus === status;
               return (
