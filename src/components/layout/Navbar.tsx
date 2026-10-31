@@ -48,6 +48,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   }, []);
 
   const isDashboardView = isDashboard || hideNavLinks || location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/organizer');
+  const isHomePage = location.pathname === '/';
+  const isTransparentHeroNav = isHomePage && !isScrolled;
 
   const handleLogout = async () => {
     await logout();
@@ -123,7 +125,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
             : 'bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] py-0'
           : isScrolled
             ? 'pt-2.5 sm:pt-3.5 pb-1.5 px-3 sm:px-6 bg-transparent border-b border-transparent pointer-events-none'
-            : 'pt-0 pb-0 px-0 bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] pointer-events-auto'
+            : isTransparentHeroNav
+              ? 'pt-0 pb-0 px-0 bg-transparent border-b border-transparent pointer-events-auto'
+              : 'pt-0 pb-0 px-0 bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] pointer-events-auto'
       }`}
     >
       <nav
@@ -137,7 +141,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
         }`}
       >
         {/* Brand Logo */}
-        <Logo to={logoTarget} size="md" />
+        <Logo to={logoTarget} size="md" variant={isTransparentHeroNav ? 'light' : 'dark'} />
 
         {/* Center Desktop Navigation: Different for Guest vs Auth (hidden below lg to prevent tablet wrap) */}
         <div className={`hidden lg:flex items-center transition-[gap] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
@@ -151,8 +155,12 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               className={({ isActive }) =>
                 `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                   isActive
-                    ? 'text-[#E31B23] font-bold'
-                    : 'text-zinc-600 hover:text-zinc-950'
+                    ? isTransparentHeroNav
+                      ? 'text-white font-bold'
+                      : 'text-[#E31B23] font-bold'
+                    : isTransparentHeroNav
+                      ? 'text-white/80 hover:text-white'
+                      : 'text-zinc-600 hover:text-zinc-950'
                 }`
               }
             >
@@ -362,7 +370,11 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               >
                 <Link
                   to="/discover"
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                    isTransparentHeroNav
+                      ? 'text-white/80 hover:text-white hover:bg-white/10'
+                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                  }`}
                   title="Search events"
                 >
                   <Search className="w-5 h-5" />
@@ -374,7 +386,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                 className={`rounded-full font-bold transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer whitespace-nowrap ${
                   isPillState
                     ? 'px-3.5 py-1.5 text-xs xl:text-[13px] text-slate-600 hover:text-slate-950 border border-transparent'
-                    : 'px-5 py-2 text-sm text-zinc-700 hover:text-zinc-950 border border-zinc-200 hover:border-zinc-300'
+                    : isTransparentHeroNav
+                      ? 'px-5 py-2 text-sm text-white/90 hover:text-white border border-white/20 hover:border-white/40 hover:bg-white/5'
+                      : 'px-5 py-2 text-sm text-zinc-700 hover:text-zinc-950 border border-zinc-200 hover:border-zinc-300'
                 }`}
               >
                 Log In
@@ -421,14 +435,22 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
         <div className="flex items-center gap-2 lg:hidden">
           <Link
             to="/discover"
-            className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition-colors"
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
+              isTransparentHeroNav
+                ? 'text-white/80 hover:text-white hover:bg-white/10'
+                : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+            }`}
             title="Search events"
           >
             <Search className="w-5 h-5" />
           </Link>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 text-zinc-700 hover:text-zinc-950 rounded-xl hover:bg-zinc-100 focus:outline-none transition-colors"
+            className={`p-2 rounded-xl focus:outline-none transition-colors ${
+              isTransparentHeroNav
+                ? 'text-white hover:text-white hover:bg-white/10'
+                : 'text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100'
+            }`}
             aria-label="Toggle navigation menu"
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

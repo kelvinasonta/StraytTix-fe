@@ -133,16 +133,16 @@ export const Home: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] text-zinc-900 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased">
-      {/* Navbar untouched as strictly requested */}
+    <div className="min-h-screen bg-[#FDFDFD] text-zinc-900 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased overflow-x-hidden">
+      {/* Navbar overlaying hero banner */}
       <Navbar />
 
-      <main className="flex-1">
+      <main className="flex-1 -mt-16">
         {/* ========================================================================= */}
-        {/* 1. HERO SECTION: Awwwards-Tier Cinematic Full-Bleed Atmosphere            */}
+        {/* 1. HERO SECTION: Full-Bleed Viewport Atmosphere (Behind Navbar)          */}
         {/*    Direct reference to Jetron Ticket composition with luxury refinement   */}
         {/* ========================================================================= */}
-        <section className="relative min-h-[640px] sm:min-h-[720px] lg:min-h-[820px] flex flex-col justify-between bg-[#08080A] overflow-hidden text-center px-4 sm:px-6 lg:px-8 border-b border-zinc-900">
+        <section className="relative min-h-[100dvh] w-full flex flex-col justify-between bg-[#08080A] overflow-hidden text-center px-4 sm:px-6 lg:px-8 border-b border-zinc-900">
           
           {/* Ambient Lighting & High-Fidelity Festival Photography Background */}
           <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -161,11 +161,11 @@ export const Home: React.FC = () => {
             <div className="absolute inset-0 bg-radial from-transparent via-[#08080A]/35 to-[#08080A]/95" />
           </div>
 
-          {/* Top Spacing Anchor */}
-          <div className="h-6 sm:h-12" />
+          {/* Top Spacing to compensate for navbar height */}
+          <div className="h-16 sm:h-20 shrink-0" />
 
           {/* Hero Center Text & Actions */}
-          <div className="relative z-10 max-w-4xl mx-auto py-12 sm:py-16 space-y-7 flex flex-col items-center">
+          <div className="relative z-10 max-w-4xl mx-auto py-8 sm:py-12 my-auto space-y-6 sm:space-y-7 flex flex-col items-center">
             
             {/* Micro Eyebrow Badge (Live Ticket Engine Indicator) */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/15 backdrop-blur-xl shadow-inner text-[11px] sm:text-xs font-semibold text-zinc-200">
