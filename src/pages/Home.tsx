@@ -1,24 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import EventCard from '../components/ui/EventCard';
-import { formatDate } from '../utils/format';
-import { eventApi, normalizeBackendEvent } from '../api/events';
-import { favoritesApi } from '../api/favorites';
-import { useAuth } from '../context/AuthContext';
-import type { Event } from '../types/api';
 import { 
   Search, 
   MapPin, 
   ArrowRight,
-  Calendar,
   Ticket,
   ShieldCheck,
   Smartphone,
-  ChevronRight,
-  ChevronLeft,
   ChevronDown,
   Music2,
   Cpu,
@@ -37,67 +28,7 @@ export const Home: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState('All');
   const [selectedDateFilter, setSelectedDateFilter] = useState('All Dates');
   const [activeCategory, setActiveCategory] = useState('All');
-  const [events, setEvents] = useState<Event[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   const navigate = useNavigate();
-
-  const { isAuthenticated, user } = useAuth();
-
-  // Load real events from API without mock fallbacks
-  useEffect(() => {
-    let isMounted = true;
-    eventApi.getEvents({ per_page: 12 })
-      .then((res: any) => {
-        if (!isMounted) return;
-        const resData = res?.data?.data || res?.data;
-        const list = Array.isArray(resData) ? resData : (resData as any)?.items || [];
-        if (list.length > 0) {
-          setEvents(list.map(normalizeBackendEvent));
-        } else {
-          setEvents([]);
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to load events for homepage:', err);
-        if (isMounted) setEvents([]);
-      })
-      .finally(() => {
-        if (isMounted) setIsLoading(false);
-      });
-
-    return () => { isMounted = false; };
-  }, []);
-
-  // Hydrate favorites from backend if user is authenticated
-  useEffect(() => {
-    if (isAuthenticated && user?.id) {
-      favoritesApi.getFavoriteIds().catch(() => {});
-    }
-  }, [isAuthenticated, user?.id]);
-
-  // Featured slides derived dynamically from published events
-  const featuredSlides = events.slice(0, 4);
-
-  // Carousel auto-advance timer with pause on hover
-  useEffect(() => {
-    if (isPaused || featuredSlides.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % featuredSlides.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [isPaused, featuredSlides.length]);
-
-  const prevSlide = () => {
-    if (featuredSlides.length === 0) return;
-    setCurrentSlide((prev) => (prev === 0 ? featuredSlides.length - 1 : prev - 1));
-  };
-
-  const nextSlide = () => {
-    if (featuredSlides.length === 0) return;
-    setCurrentSlide((prev) => (prev + 1) % featuredSlides.length);
-  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +41,7 @@ export const Home: React.FC = () => {
     navigate(`/discover?${params.toString()}`);
   };
 
-  const scrollToEvents = () => {
+  const scrollToExplore = () => {
     const el = document.getElementById('explore');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
@@ -125,13 +56,6 @@ export const Home: React.FC = () => {
     { name: 'Comedy', label: 'Standup & Theatre', icon: Smile },
     { name: 'Food & Drink', label: 'Festivals & Dining', icon: GlassWater }
   ];
-
-  // Filter events client-side based on activeCategory
-  const displayedEvents = events.filter((evt) => {
-    if (activeCategory === 'All') return true;
-    const cat = (evt.category || '').toLowerCase();
-    return cat.includes(activeCategory.toLowerCase());
-  });
 
   return (
     <div className="relative min-h-screen bg-[#08080A] text-zinc-900 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased overflow-x-hidden">
@@ -238,12 +162,12 @@ export const Home: React.FC = () => {
           <div className="relative z-10 pb-8 sm:pb-10 flex flex-col items-center">
             <button
               type="button"
-              onClick={scrollToEvents}
-              aria-label="Scroll down to browse live events"
+              onClick={scrollToExplore}
+              aria-label="Scroll down to browse platform features"
               className="inline-flex flex-col items-center gap-1.5 text-zinc-400 hover:text-white transition-colors cursor-pointer group"
             >
               <span className="text-[10px] font-mono tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-zinc-300">
-                Explore Events
+                Explore Platform
               </span>
               <div className="w-9 h-9 rounded-full bg-white/[0.06] border border-white/10 backdrop-blur-md flex items-center justify-center group-hover:border-white/30 transition-all">
                 <ChevronDown className="w-4 h-4 text-white/80 animate-bounce group-hover:text-white" />
@@ -333,25 +257,24 @@ export const Home: React.FC = () => {
         </section>
 
         {/* ========================================================================= */}
-        {/* 3. CATEGORY TAXONOMY STRIP                                                */}
+        {/* 3. CATEGORY TAXONOMY STRIP (One-Click Deep Link To /discover)             */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 pt-10 pb-4">
+        <section className="px-4 sm:px-6 lg:px-8 pt-10 pb-8">
           <div className="max-w-6xl mx-auto flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
             {categories.map((cat) => {
               const Icon = cat.icon;
-              const isActive = activeCategory === cat.name;
               return (
                 <button
                   key={cat.name}
                   type="button"
-                  onClick={() => setActiveCategory(cat.name)}
-                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center gap-2 cursor-pointer ${
-                    isActive
-                      ? 'bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950/10'
-                      : 'bg-zinc-100/80 hover:bg-zinc-200/80 text-zinc-700 border border-zinc-200/60'
-                  }`}
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    if (cat.name !== 'All') params.set('category', cat.name);
+                    navigate(`/discover?${params.toString()}`);
+                  }}
+                  className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center gap-2 cursor-pointer bg-zinc-100/90 hover:bg-zinc-200 text-zinc-700 border border-zinc-200/80 active:scale-95"
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-zinc-500'}`} />
+                  <Icon className="w-3.5 h-3.5 text-[#E31B23]" />
                   <span>{cat.label}</span>
                 </button>
               );
@@ -360,234 +283,9 @@ export const Home: React.FC = () => {
         </section>
 
         {/* ========================================================================= */}
-        {/* 4. LIVE TICKETING GRID: Clean Editorial Cards                             */}
+        {/* 4. THE STRAYTTIX HIGH-ASSURANCE STANDARD: Architectural Bento             */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-          <div className="max-w-6xl mx-auto space-y-8">
-            
-            {/* Header with Live Ticker */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-zinc-500 font-bold">
-                  <span className="w-2 h-2 rounded-full bg-[#E31B23] animate-pulse" />
-                  <span>Live Marketplace</span>
-                </div>
-                <h2 className="text-2xl sm:text-4xl font-black text-zinc-950 tracking-tight">
-                  Upcoming &amp; Trending Events
-                </h2>
-                <p className="text-zinc-500 text-xs sm:text-sm font-medium">
-                  Direct official tickets with instant Apple/Google wallet and QR pass delivery.
-                </p>
-              </div>
-
-              <Link
-                to="/discover"
-                className="group inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#E31B23] hover:text-[#B91C1C] shrink-0 transition-colors"
-              >
-                <span>View all events</span>
-                <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            </div>
-
-            {/* Event Cards Grid with Whimsical Staggered Scroll-In */}
-            {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                  <div key={n} className="rounded-2xl border border-zinc-200/90 bg-white p-4 space-y-4 animate-pulse">
-                    <div className="aspect-[4/3] bg-zinc-100 rounded-xl" />
-                    <div className="h-4 bg-zinc-200 rounded w-3/4" />
-                    <div className="h-3 bg-zinc-100 rounded w-1/2" />
-                    <div className="pt-2 border-t border-zinc-100 flex justify-between">
-                      <div className="h-3 bg-zinc-100 rounded w-1/4" />
-                      <div className="h-3 bg-zinc-200 rounded w-1/4" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : displayedEvents.length > 0 ? (
-              <motion.div 
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-60px" }}
-                variants={{
-                  hidden: { opacity: 0 },
-                  visible: {
-                    opacity: 1,
-                    transition: {
-                      staggerChildren: 0.08,
-                    },
-                  },
-                }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-              >
-                {displayedEvents.map((evt) => (
-                  <motion.div
-                    key={evt.id}
-                    variants={{
-                      hidden: { opacity: 0, y: 32, scale: 0.96 },
-                      visible: { 
-                        opacity: 1, 
-                        y: 0, 
-                        scale: 1,
-                        transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } 
-                      },
-                    }}
-                    whileHover={{ y: -6, transition: { duration: 0.25 } }}
-                  >
-                    <EventCard event={evt} variant="default" />
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : (
-              <div className="p-12 sm:p-16 text-center border border-zinc-200/90 rounded-3xl bg-zinc-50/70 space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-zinc-200/80 flex items-center justify-center mx-auto text-zinc-500">
-                  <Calendar className="w-6 h-6" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-base font-bold text-zinc-950">No events found in this category</h3>
-                  <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-                    Try switching categories, clearing your search query, or explore our full event catalog.
-                  </p>
-                </div>
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => { setActiveCategory('All'); setSearchQuery(''); setSelectedCity('All'); }}
-                    className="px-5 py-2.5 bg-zinc-950 text-white rounded-xl text-xs font-bold hover:bg-zinc-800 transition-colors cursor-pointer"
-                  >
-                    Reset Filters &amp; View All
-                  </button>
-                </div>
-              </div>
-            )}
-
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 5. SPOTLIGHT HEADLINERS CAROUSEL (Boiler Room / Stage Aesthetic)          */}
-        {/* ========================================================================= */}
-        {featuredSlides.length > 0 && (
-          <section className="px-4 sm:px-6 lg:px-8 py-12 sm:py-16 bg-[#0B0B0E] text-white border-y border-zinc-800/80">
-            <div className="max-w-6xl mx-auto space-y-6">
-              
-              <div className="flex items-end justify-between">
-                <div className="space-y-1">
-                  <span className="text-[11px] font-mono uppercase tracking-widest text-[#E31B23] font-bold">
-                    Curated Spotlight
-                  </span>
-                  <h3 className="text-xl sm:text-3xl font-black text-white tracking-tight">
-                    Headlining This Month
-                  </h3>
-                </div>
-
-                {featuredSlides.length > 1 && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={prevSlide}
-                      aria-label="Previous featured event"
-                      className="w-10 h-10 rounded-full bg-white/[0.08] hover:bg-white/[0.15] text-white border border-white/10 flex items-center justify-center cursor-pointer transition-all active:scale-95"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={nextSlide}
-                      aria-label="Next featured event"
-                      className="w-10 h-10 rounded-full bg-white/[0.08] hover:bg-white/[0.15] text-white border border-white/10 flex items-center justify-center cursor-pointer transition-all active:scale-95"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div 
-                onMouseEnter={() => setIsPaused(true)}
-                onMouseLeave={() => setIsPaused(false)}
-                className="relative rounded-[2rem] overflow-hidden bg-zinc-950 text-white shadow-2xl min-h-[420px] sm:min-h-[460px] lg:aspect-[21/9] flex flex-col justify-end p-6 sm:p-10 lg:p-12 group border border-white/10"
-              >
-                {/* Crossfading Backgrounds */}
-                {featuredSlides.map((slide, index) => {
-                  const slideImage = slide.bannerUrl || slide.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=85';
-                  return (
-                    <div
-                      key={slide.id}
-                      className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-                        index === currentSlide ? 'opacity-100 z-0' : 'opacity-0 -z-10 pointer-events-none'
-                      }`}
-                    >
-                      <img
-                        src={slideImage}
-                        alt={slide.title}
-                        className="w-full h-full object-cover opacity-60 transform scale-100 group-hover:scale-102 transition-transform duration-1000"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/65 to-transparent" />
-                    </div>
-                  );
-                })}
-
-                {/* Active Slide Content */}
-                {featuredSlides[currentSlide] && (
-                  <div className="relative z-10 max-w-2xl space-y-3.5">
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-semibold border border-white/20">
-                      <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
-                      <span>{featuredSlides[currentSlide].city || (featuredSlides[currentSlide].venue ? featuredSlides[currentSlide].venue : 'Editor Pick')}</span>
-                    </div>
-
-                    <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-                      {featuredSlides[currentSlide].title}
-                    </h2>
-
-                    <p className="text-zinc-300 text-xs sm:text-sm line-clamp-2 leading-relaxed max-w-xl">
-                      {featuredSlides[currentSlide].description}
-                    </p>
-
-                    <div className="pt-2 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
-                      <Link
-                        to={`/events/${featuredSlides[currentSlide].slug || featuredSlides[currentSlide].id}`}
-                        className="w-full sm:w-auto px-7 py-3.5 bg-[#E31B23] hover:bg-[#C9141B] text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <span>Get Tickets</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </Link>
-                      <span className="text-xs text-zinc-300 font-mono">
-                        {formatDate(featuredSlides[currentSlide].startDate)}
-                        {featuredSlides[currentSlide].startTime ? ` • ${featuredSlides[currentSlide].startTime}` : ''}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Progress Indicators */}
-                {featuredSlides.length > 1 && (
-                  <div className="relative sm:absolute sm:bottom-8 sm:right-8 z-20 flex items-center justify-center sm:justify-end gap-1.5 pt-4 sm:pt-0">
-                    {featuredSlides.map((slide, idx) => (
-                      <button
-                        key={slide.id}
-                        type="button"
-                        onClick={() => setCurrentSlide(idx)}
-                        aria-label={`Go to slide ${idx + 1}`}
-                        className={`h-2 rounded-full transition-all cursor-pointer ${
-                          idx === currentSlide
-                            ? 'w-8 bg-[#E31B23]'
-                            : 'w-2 bg-white/30 hover:bg-white/60'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
-
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ========================================================================= */}
-        {/* 6. THE STRAYTTIX HIGH-ASSURANCE STANDARD: Architectural Bento             */}
-        {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-white border-b border-zinc-100">
+        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-white border-y border-zinc-100">
           <div className="max-w-6xl mx-auto space-y-14">
             
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
