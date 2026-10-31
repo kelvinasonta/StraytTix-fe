@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import EventCard from '../components/ui/EventCard';
 import { eventApi, normalizeBackendEvent } from '../api/events';
 import { organizerApi } from '../api/organizers';
+import { NotFound } from './NotFound';
 import type { Event, Organizer } from '../types/api';
 import { resolveImageUrl, getOrganizerCoverPhoto } from '../utils/imageUrl';
 import { 
@@ -45,7 +46,15 @@ import { useAuth } from '../context/AuthContext';
 import { formatCurrency, formatDate } from '../utils/format';
 
 export const OrganizerProfile: React.FC = () => {
+  const location = useLocation();
   const { slug: rawSlug } = useParams<{ slug: string }>();
+
+  // If path doesn't start with /@ or /organizers/, discard plain /artful-media and render 404
+  const isOrganizerRoute = location.pathname.startsWith('/@') || location.pathname.startsWith('/organizers/');
+  if (!isOrganizerRoute) {
+    return <NotFound />;
+  }
+
   // Strip leading '@' if navigated via /@username
   const slug = rawSlug ? rawSlug.replace(/^@/, '') : undefined;
   const { showNotification } = useNotification();
