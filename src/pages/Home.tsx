@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import EventCard from '../components/ui/EventCard';
@@ -173,11 +174,20 @@ export const Home: React.FC = () => {
           {/* Top Spacing to compensate for navbar height */}
           <div className="h-16 sm:h-20 shrink-0" />
 
-          {/* Hero Center Text & Actions */}
-          <div className="relative z-10 max-w-4xl mx-auto py-8 sm:py-12 my-auto space-y-6 sm:space-y-7 flex flex-col items-center">
+          {/* Hero Center Text & Actions (Floating whimsical entrance) */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-10 max-w-4xl mx-auto py-8 sm:py-12 my-auto space-y-6 sm:space-y-7 flex flex-col items-center"
+          >
             
-            {/* Micro Eyebrow Badge (Live Ticket Engine Indicator) */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/15 backdrop-blur-xl shadow-inner text-[11px] sm:text-xs font-semibold text-zinc-200">
+            {/* Micro Eyebrow Badge (Live Ticket Engine Indicator with interactive hover sparkle) */}
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/15 backdrop-blur-xl shadow-inner text-[11px] sm:text-xs font-semibold text-zinc-200 cursor-default"
+            >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -185,7 +195,7 @@ export const Home: React.FC = () => {
               <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-zinc-300">Live Ticketing Engine</span>
               <span className="text-zinc-500">•</span>
               <span className="text-zinc-200">Zero Scalping • Instant Pass Delivery</span>
-            </div>
+            </motion.div>
 
             {/* Headline matching user reference image */}
             <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white tracking-[-0.035em] leading-[1.12] sm:leading-[1.08] text-balance drop-shadow-lg px-2">
@@ -202,10 +212,10 @@ export const Home: React.FC = () => {
               {/* Primary: Discover Events */}
               <Link
                 to="/discover"
-                className="w-full sm:w-auto group inline-flex items-center justify-between sm:justify-start gap-3 bg-[#E31B23] hover:bg-[#C9141B] text-white font-bold rounded-full pl-7 pr-2.5 py-2 text-sm sm:text-base shadow-[0_12px_32px_-6px_rgba(227,27,35,0.5)] transition-all duration-300 active:scale-[0.98] cursor-pointer"
+                className="w-full sm:w-auto group inline-flex items-center justify-between sm:justify-start gap-3 bg-[#E31B23] hover:bg-[#C9141B] text-white font-bold rounded-full pl-7 pr-2.5 py-2 text-sm sm:text-base shadow-[0_12px_32px_-6px_rgba(227,27,35,0.5)] transition-all duration-300 hover:shadow-[0_16px_40px_-6px_rgba(227,27,35,0.7)] hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer"
               >
                 <span>Discover Events</span>
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/20 group-hover:bg-black/30 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1 shrink-0">
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/20 group-hover:bg-black/30 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1.5 shrink-0">
                   <ArrowRight className="w-4 h-4 text-white" />
                 </span>
               </Link>
@@ -213,7 +223,7 @@ export const Home: React.FC = () => {
               {/* Secondary: Create Event (Translucent Frosted Glass Pill) */}
               <Link
                 to="/organizer/events/create"
-                className="w-full sm:w-auto group inline-flex items-center justify-between sm:justify-start gap-3 bg-white/[0.08] hover:bg-white/[0.14] text-white font-bold rounded-full pl-7 pr-2.5 py-2 text-sm sm:text-base border border-white/20 backdrop-blur-2xl transition-all duration-300 active:scale-[0.98] cursor-pointer shadow-sm"
+                className="w-full sm:w-auto group inline-flex items-center justify-between sm:justify-start gap-3 bg-white/[0.08] hover:bg-white/[0.14] text-white font-bold rounded-full pl-7 pr-2.5 py-2 text-sm sm:text-base border border-white/20 backdrop-blur-2xl transition-all duration-300 hover:border-white/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer shadow-sm"
               >
                 <span>Create Event</span>
                 <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 group-hover:bg-white/20 flex items-center justify-center transition-transform duration-300 group-hover:rotate-90 shrink-0">
@@ -222,7 +232,7 @@ export const Home: React.FC = () => {
               </Link>
             </div>
 
-          </div>
+          </motion.div>
 
           {/* Bottom Downward Scroll Chevron matching reference */}
           <div className="relative z-10 pb-8 sm:pb-10 flex flex-col items-center">
@@ -247,7 +257,13 @@ export const Home: React.FC = () => {
         {/* 2. FLOATING DISCOVERY ISLAND: Architectural Double-Bezel Console          */}
         {/* ========================================================================= */}
         <section id="explore" className="relative z-20 px-4 sm:px-6 lg:px-8 -mt-7 sm:-mt-9">
-          <div className="max-w-5xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-5xl mx-auto"
+          >
             {/* Outer Machine Bezel */}
             <div className="p-1.5 sm:p-2 rounded-3xl bg-zinc-900/10 backdrop-blur-xl border border-black/5 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.18)]">
               {/* Inner Core */}
@@ -313,7 +329,7 @@ export const Home: React.FC = () => {
                 </button>
               </form>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* ========================================================================= */}
@@ -373,7 +389,7 @@ export const Home: React.FC = () => {
               </Link>
             </div>
 
-            {/* Event Cards Grid */}
+            {/* Event Cards Grid with Whimsical Staggered Scroll-In */}
             {isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
@@ -389,11 +405,39 @@ export const Home: React.FC = () => {
                 ))}
               </div>
             ) : displayedEvents.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-60px" }}
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.08,
+                    },
+                  },
+                }}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+              >
                 {displayedEvents.map((evt) => (
-                  <EventCard key={evt.id} event={evt} variant="default" />
+                  <motion.div
+                    key={evt.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 32, scale: 0.96 },
+                      visible: { 
+                        opacity: 1, 
+                        y: 0, 
+                        scale: 1,
+                        transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } 
+                      },
+                    }}
+                    whileHover={{ y: -6, transition: { duration: 0.25 } }}
+                  >
+                    <EventCard event={evt} variant="default" />
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             ) : (
               <div className="p-12 sm:p-16 text-center border border-zinc-200/90 rounded-3xl bg-zinc-50/70 space-y-4">
                 <div className="w-12 h-12 rounded-2xl bg-zinc-200/80 flex items-center justify-center mx-auto text-zinc-500">
@@ -566,14 +610,21 @@ export const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* 3 Hardware Bento Cards */}
+            {/* 3 Hardware Bento Cards with Whimsical Hover Spring & Tilt */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
               
               {/* Bento 1: 100% Verified Tickets */}
-              <div className="group rounded-[1.75rem] border border-zinc-200/90 bg-gradient-to-b from-white via-white to-zinc-50/70 p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 hover:shadow-xl transition-all duration-300 space-y-6">
+              <motion.div 
+                initial={{ opacity: 0, y: 36 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+                whileHover={{ y: -8, scale: 1.01 }}
+                className="group rounded-[1.75rem] border border-zinc-200/90 bg-gradient-to-b from-white via-white to-zinc-50/70 p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 hover:shadow-2xl hover:shadow-zinc-200/50 transition-all duration-300 space-y-6"
+              >
                 
                 {/* Visual Header Mockup */}
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-2.5">
+                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-2.5 transition-transform duration-300 group-hover:scale-[1.02]">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
@@ -582,7 +633,7 @@ export const Home: React.FC = () => {
                     <span className="text-[10px] font-mono text-zinc-400">#ZERO-SCALPING</span>
                   </div>
                   <div className="flex items-center gap-3 pt-1">
-                    <div className="w-9 h-9 rounded-xl bg-zinc-950 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-zinc-950 text-white flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-[#E31B23] transition-colors">
                       ✓
                     </div>
                     <div className="min-w-0">
@@ -605,13 +656,20 @@ export const Home: React.FC = () => {
                   <ShieldCheck className="w-4 h-4 text-[#E31B23]" />
                   <span>Full refund guarantee on organizer cancellations</span>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Bento 2: Instant Mobile Passes */}
-              <div className="group rounded-[1.75rem] border border-zinc-200/90 bg-gradient-to-b from-white via-white to-zinc-50/70 p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 hover:shadow-xl transition-all duration-300 space-y-6">
+              <motion.div 
+                initial={{ opacity: 0, y: 36 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+                whileHover={{ y: -8, scale: 1.01 }}
+                className="group rounded-[1.75rem] border border-zinc-200/90 bg-gradient-to-b from-white via-white to-zinc-50/70 p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 hover:shadow-2xl hover:shadow-zinc-200/50 transition-all duration-300 space-y-6"
+              >
                 
                 {/* Visual Header Mockup */}
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-2.5">
+                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-2.5 transition-transform duration-300 group-hover:scale-[1.02]">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-800 bg-zinc-200/80 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
                       <Smartphone className="w-3 h-3 text-zinc-600" />
@@ -643,13 +701,20 @@ export const Home: React.FC = () => {
                   <Zap className="w-4 h-4 text-amber-500" />
                   <span>Works with zero mobile reception at packed venues</span>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Bento 3: Smooth Gate Entry */}
-              <div className="group rounded-[1.75rem] border border-zinc-200/90 bg-gradient-to-b from-white via-white to-zinc-50/70 p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 hover:shadow-xl transition-all duration-300 space-y-6">
+              <motion.div 
+                initial={{ opacity: 0, y: 36 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
+                whileHover={{ y: -8, scale: 1.01 }}
+                className="group rounded-[1.75rem] border border-zinc-200/90 bg-gradient-to-b from-white via-white to-zinc-50/70 p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 hover:shadow-2xl hover:shadow-zinc-200/50 transition-all duration-300 space-y-6"
+              >
                 
                 {/* Visual Header Mockup */}
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-2.5">
+                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-2.5 transition-transform duration-300 group-hover:scale-[1.02]">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
                       <Zap className="w-3 h-3 text-emerald-600" />
@@ -658,8 +723,8 @@ export const Home: React.FC = () => {
                     <span className="text-[10px] font-mono text-zinc-400">TURNSTILE CLEAR</span>
                   </div>
                   <div className="flex items-center gap-3 pt-1">
-                    <div className="w-9 h-9 rounded-xl bg-zinc-950 text-white flex items-center justify-center shrink-0">
-                      <Ticket className="w-4 h-4 text-emerald-400" />
+                    <div className="w-9 h-9 rounded-xl bg-zinc-950 text-white flex items-center justify-center shrink-0 group-hover:bg-emerald-600 transition-colors">
+                      <Ticket className="w-4 h-4 text-white" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-zinc-950 truncate">Sub-Second Gate Clearance</p>
@@ -681,7 +746,7 @@ export const Home: React.FC = () => {
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                   <span>Zero physical paper printouts required</span>
                 </div>
-              </div>
+              </motion.div>
 
             </div>
 
@@ -692,24 +757,30 @@ export const Home: React.FC = () => {
         {/* 7. LIVE SCALE METRICS (Monochrome Authority)                              */}
         {/* ========================================================================= */}
         <section className="px-4 sm:px-6 lg:px-8 py-14 sm:py-18 bg-[#09090C] text-white border-b border-zinc-900">
-          <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 text-center lg:text-left">
-            <div className="space-y-1">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 text-center lg:text-left"
+          >
+            <motion.div whileHover={{ scale: 1.04 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="space-y-1">
               <p className="text-3xl sm:text-5xl font-black font-mono tracking-tight text-white">₦1.8B+</p>
               <p className="text-xs sm:text-sm text-zinc-400 font-medium">Ticket Gross Volume Processed</p>
-            </div>
-            <div className="space-y-1">
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.04 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="space-y-1">
               <p className="text-3xl sm:text-5xl font-black font-mono tracking-tight text-white">180K+</p>
               <p className="text-xs sm:text-sm text-zinc-400 font-medium">Tickets Safely Scanned</p>
-            </div>
-            <div className="space-y-1">
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.04 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="space-y-1">
               <p className="text-3xl sm:text-5xl font-black font-mono tracking-tight text-white">&lt;0.2s</p>
               <p className="text-xs sm:text-sm text-zinc-400 font-medium">Average Gate Clearance Latency</p>
-            </div>
-            <div className="space-y-1">
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.04 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="space-y-1">
               <p className="text-3xl sm:text-5xl font-black font-mono tracking-tight text-white">0%</p>
               <p className="text-xs sm:text-sm text-zinc-400 font-medium">Counterfeit Ticket Incidents</p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </section>
 
         {/* ========================================================================= */}
@@ -717,7 +788,13 @@ export const Home: React.FC = () => {
         {/* ========================================================================= */}
         <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-white">
           <div className="max-w-6xl mx-auto">
-            <div className="rounded-[2.25rem] bg-[#0A0A0D] text-white p-8 sm:p-14 lg:p-16 flex flex-col lg:flex-row lg:items-center justify-between gap-10 border border-white/10 shadow-2xl relative overflow-hidden">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.97, y: 36 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="rounded-[2.25rem] bg-[#0A0A0D] text-white p-8 sm:p-14 lg:p-16 flex flex-col lg:flex-row lg:items-center justify-between gap-10 border border-white/10 shadow-2xl relative overflow-hidden"
+            >
               
               {/* Subtle Ambient Radial Glow */}
               <div className="absolute -right-20 -bottom-20 w-[450px] h-[450px] bg-[#E31B23]/15 blur-[120px] rounded-full pointer-events-none" />
@@ -742,21 +819,21 @@ export const Home: React.FC = () => {
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 shrink-0 relative z-10">
                 <Link
                   to="/organizer/events/create"
-                  className="px-8 py-4 bg-[#E31B23] hover:bg-[#C9141B] text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-xl active:scale-95 text-center cursor-pointer flex items-center justify-center gap-2"
+                  className="px-8 py-4 bg-[#E31B23] hover:bg-[#C9141B] text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-xl hover:shadow-[0_12px_28px_-4px_rgba(227,27,35,0.6)] hover:-translate-y-0.5 active:scale-95 text-center cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Create an Event</span>
                 </Link>
                 <Link
                   to="/pricing"
-                  className="px-8 py-4 bg-white/10 hover:bg-white/15 text-white text-sm sm:text-base font-semibold rounded-xl transition-all border border-white/15 text-center cursor-pointer flex items-center justify-center gap-2"
+                  className="px-8 py-4 bg-white/10 hover:bg-white/15 text-white text-sm sm:text-base font-semibold rounded-xl transition-all border border-white/15 hover:border-white/30 hover:-translate-y-0.5 text-center cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>View Pricing</span>
                   <ArrowUpRight className="w-4 h-4" />
                 </Link>
               </div>
 
-            </div>
+            </motion.div>
           </div>
         </section>
 
