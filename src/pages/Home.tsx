@@ -20,7 +20,17 @@ import {
   QrCode,
   Zap,
   Plus,
-  ArrowUpRight
+  ArrowUpRight,
+  Users2,
+  Layers,
+  Code2,
+  Radio,
+  BarChart3,
+  Globe2,
+  Lock,
+  Headphones,
+  SlidersHorizontal,
+  Workflow
 } from 'lucide-react';
 
 export const Home: React.FC = () => {
@@ -446,6 +456,258 @@ export const Home: React.FC = () => {
                 </div>
               </motion.div>
 
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 5. ENTERPRISE JETRON-INSPIRED EVENT TECH CAPABILITIES                     */}
+        {/* ========================================================================= */}
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-28 bg-[#08080B] text-white border-t border-zinc-900 relative overflow-hidden">
+          {/* Subtle Ambient Backdrops */}
+          <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-[#E31B23]/10 blur-[150px] rounded-full pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-[450px] h-[450px] bg-indigo-500/10 blur-[150px] rounded-full pointer-events-none" />
+
+          <div className="max-w-6xl mx-auto space-y-16 relative z-10">
+            {/* Section Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div className="space-y-2.5 max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.08] border border-white/15 text-xs font-mono font-bold text-zinc-300">
+                  <Workflow className="w-3.5 h-3.5 text-[#E31B23]" />
+                  <span>Next-Gen Event Infrastructure</span>
+                </div>
+                <h2 className="text-3xl sm:text-5xl font-black text-white tracking-[-0.03em] leading-tight">
+                  High-capacity tools built for modern live productions.
+                </h2>
+                <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">
+                  From high-traffic drop waiting rooms to precision venue seat selection, run stadium-level events with enterprise reliability.
+                </p>
+              </div>
+
+              <Link
+                to="/pricing"
+                className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-white hover:text-zinc-300 transition-colors shrink-0 group border-b border-white/20 pb-1"
+              >
+                <span>Explore all organizer features</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+
+            {/* 4 Feature Pillars Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+              
+              {/* Feature 1: Interactive Seat Maps */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ y: -6 }}
+                className="p-8 sm:p-10 rounded-[2rem] bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all duration-300 space-y-6 flex flex-col justify-between"
+              >
+                <div className="space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#E31B23] to-[#B91C1C] flex items-center justify-center text-white shadow-lg shadow-[#E31B23]/25">
+                    <Layers className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-bold">
+                      Venue Architecture
+                    </span>
+                    <h3 className="text-2xl font-black text-white tracking-tight">
+                      Interactive 3D Seat Maps
+                    </h3>
+                    <p className="text-sm text-zinc-400 leading-relaxed font-normal">
+                      Empower attendees to hand-pick their exact row, tier, and table. Custom multi-tiered venue maps reflect live real-time inventory locks with sub-second sync.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Micro Visual UI Tag */}
+                <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-zinc-400">
+                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Reserved Table Tiers</span>
+                  <span className="text-zinc-500">DYNAMIC SEATS</span>
+                </div>
+              </motion.div>
+
+              {/* Feature 2: High-Traffic Managed Queues */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+                whileHover={{ y: -6 }}
+                className="p-8 sm:p-10 rounded-[2rem] bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all duration-300 space-y-6 flex flex-col justify-between"
+              >
+                <div className="space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-lg shadow-amber-500/25">
+                    <Radio className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400 font-bold">
+                      FairPass Queue Protection
+                    </span>
+                    <h3 className="text-2xl font-black text-white tracking-tight">
+                      Managed High-Drop Waiting Rooms
+                    </h3>
+                    <p className="text-sm text-zinc-400 leading-relaxed font-normal">
+                      When 20,000+ fans arrive for a viral headliner drop, our intelligent virtual queue protects inventory from bot sweeps and eliminates checkout crashes.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Micro Visual UI Tag */}
+                <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-zinc-400">
+                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Bot-Proof Rate Limiting</span>
+                  <span className="text-zinc-500">0% DOWNTIME</span>
+                </div>
+              </motion.div>
+
+              {/* Feature 3: Embeddable Checkout (Jetron Fluid Equivalent) */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+                whileHover={{ y: -6 }}
+                className="p-8 sm:p-10 rounded-[2rem] bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all duration-300 space-y-6 flex flex-col justify-between"
+              >
+                <div className="space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25">
+                    <Code2 className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-bold">
+                      Direct Embeds &amp; APIs
+                    </span>
+                    <h3 className="text-2xl font-black text-white tracking-tight">
+                      White-Label Web Checkout
+                    </h3>
+                    <p className="text-sm text-zinc-400 leading-relaxed font-normal">
+                      Keep buyers directly on your official festival website. Embed our frictionless 2-step checkout widget or connect via REST APIs &amp; Webhooks.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Micro Visual UI Tag */}
+                <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-zinc-400">
+                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Custom Domain Native</span>
+                  <span className="text-zinc-500">REST API</span>
+                </div>
+              </motion.div>
+
+              {/* Feature 4: Gate Scanner App & Team Access */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                whileHover={{ y: -6 }}
+                className="p-8 sm:p-10 rounded-[2rem] bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all duration-300 space-y-6 flex flex-col justify-between"
+              >
+                <div className="space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-purple-500/25">
+                    <Users2 className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-purple-400 font-bold">
+                      Team &amp; Gate Access
+                    </span>
+                    <h3 className="text-2xl font-black text-white tracking-tight">
+                      Multi-Staff Door Control
+                    </h3>
+                    <p className="text-sm text-zinc-400 leading-relaxed font-normal">
+                      Deploy 20 gate bouncers and ticket scanners in seconds without sharing master credentials. Assign role permissions, staff PINs, and monitor door throughput live.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Micro Visual UI Tag */}
+                <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-zinc-400">
+                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Role-Based Staff PINs</span>
+                  <span className="text-zinc-500">OFFLINE SYNC</span>
+                </div>
+              </motion.div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 6. HOW IT WORKS: 3-Step Flow for Attendees & Organizers                   */}
+        {/* ========================================================================= */}
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-24 bg-white border-b border-zinc-100">
+          <div className="max-w-6xl mx-auto space-y-16">
+            
+            <div className="text-center max-w-2xl mx-auto space-y-3">
+              <span className="text-xs font-mono uppercase tracking-widest text-[#E31B23] font-bold">
+                Effortless Experience
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-black text-zinc-950 tracking-[-0.03em]">
+                How Eventa Works
+              </h2>
+              <p className="text-zinc-500 text-sm sm:text-base">
+                Whether you're discovering your next memorable night or launching a festival, the experience is simple and seamless.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+              {/* Step 1 */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                className="p-8 rounded-3xl bg-zinc-50/80 border border-zinc-200/80 space-y-4 hover:border-zinc-300 transition-all"
+              >
+                <div className="w-10 h-10 rounded-2xl bg-zinc-950 text-white font-mono font-bold flex items-center justify-center text-sm">
+                  01
+                </div>
+                <h3 className="text-xl font-black text-zinc-950 tracking-tight">
+                  Discover or Create
+                </h3>
+                <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
+                  Search live events across concerts, raves, dining, and summits — or publish your own event with custom ticket tiers in 5 minutes.
+                </p>
+              </motion.div>
+
+              {/* Step 2 */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+                className="p-8 rounded-3xl bg-zinc-50/80 border border-zinc-200/80 space-y-4 hover:border-zinc-300 transition-all"
+              >
+                <div className="w-10 h-10 rounded-2xl bg-[#E31B23] text-white font-mono font-bold flex items-center justify-center text-sm">
+                  02
+                </div>
+                <h3 className="text-xl font-black text-zinc-950 tracking-tight">
+                  Instant Verification
+                </h3>
+                <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
+                  Lock your tickets with zero hidden fees. Receive encrypted QR passes instantly in your email and Apple/Google wallet.
+                </p>
+              </motion.div>
+
+              {/* Step 3 */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                className="p-8 rounded-3xl bg-zinc-50/80 border border-zinc-200/80 space-y-4 hover:border-zinc-300 transition-all"
+              >
+                <div className="w-10 h-10 rounded-2xl bg-zinc-950 text-white font-mono font-bold flex items-center justify-center text-sm">
+                  03
+                </div>
+                <h3 className="text-xl font-black text-zinc-950 tracking-tight">
+                  Fast Gate Clearance
+                </h3>
+                <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
+                  Show your phone at the entrance for sub-second check-in with offline capability. Organizers receive instant bank settlements.
+                </p>
+              </motion.div>
             </div>
 
           </div>
