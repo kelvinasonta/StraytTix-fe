@@ -181,12 +181,12 @@ export const Home: React.FC = () => {
             </div>
 
             {/* Headline matching user reference image */}
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-[-0.035em] leading-[1.08] sm:leading-[1.06] text-balance drop-shadow-lg">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white tracking-[-0.035em] leading-[1.12] sm:leading-[1.08] text-balance drop-shadow-lg px-2">
               Attending And Creating Events Has Never Been Easier.
             </h1>
 
             {/* Supporting Subtitle matching reference */}
-            <p className="text-zinc-300/95 text-sm sm:text-base md:text-lg leading-relaxed max-w-2xl font-normal text-balance drop-shadow-sm">
+            <p className="text-zinc-300/95 text-xs sm:text-base md:text-lg leading-relaxed max-w-2xl font-normal text-balance drop-shadow-sm px-3">
               Nigeria&apos;s #1 ticketing platform for discovering events, buying tickets, and creating, promoting, and selling tickets for your own events.
             </p>
 

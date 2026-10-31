@@ -49,6 +49,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
       // Hide navbar when scrolling down, show when scrolling up
       if (currentScrollY <= 20) {
         setIsVisible(true);
+      } else if (isOpen) {
+        // Keep visible if mobile drawer is currently open
+        setIsVisible(true);
       } else if (currentScrollY > lastScrollY && currentScrollY > 60) {
         // Scrolling down -> hide navbar
         setIsVisible(false);
