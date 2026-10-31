@@ -146,21 +146,28 @@ export const Home: React.FC = () => {
         {/* ========================================================================= */}
         <section className="relative min-h-[100dvh] w-full flex flex-col justify-between bg-[#08080A] overflow-hidden text-center px-4 sm:px-6 lg:px-8 border-b border-zinc-900">
           
-          {/* Ambient Lighting & High-Fidelity Festival Photography Background */}
+          {/* Ambient Lighting & High-Fidelity Cinematic Festival Video Background */}
           <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
             {/* Ambient Radial Mesh Glows */}
-            <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] sm:w-[1000px] h-[500px] bg-gradient-to-b from-[#E31B23]/25 via-[#E31B23]/10 to-transparent blur-[120px] rounded-full" />
-            <div className="absolute top-1/3 left-1/4 w-[400px] h-[300px] bg-amber-500/10 blur-[140px] rounded-full" />
+            <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] sm:w-[1000px] h-[500px] bg-gradient-to-b from-[#E31B23]/25 via-[#E31B23]/10 to-transparent blur-[120px] rounded-full z-1" />
+            <div className="absolute top-1/3 left-1/4 w-[400px] h-[300px] bg-amber-500/10 blur-[140px] rounded-full z-1" />
             
-            <img
-              src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=2600&q=85"
-              alt="Joyful festival attendees celebrating live event"
-              className="w-full h-full object-cover object-center filter brightness-[0.68] contrast-[1.12] saturate-[1.1] scale-100"
-              loading="eager"
-            />
+            {/* Cinematic Background Video with Poster Fallback */}
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              poster="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=2600&q=85"
+              className="w-full h-full object-cover object-center filter brightness-[0.62] contrast-[1.12] saturate-[1.15] scale-105"
+            >
+              <source src="/videos/hero-festival.mp4" type="video/mp4" />
+              <source src="https://assets.mixkit.co/videos/14088/14088-720.mp4" type="video/mp4" />
+            </video>
+
             {/* Deep studio vignette & gradient feathering */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#08080A] via-[#08080A]/60 to-[#08080A]/85" />
-            <div className="absolute inset-0 bg-radial from-transparent via-[#08080A]/35 to-[#08080A]/95" />
+            <div className="absolute inset-0 z-2 bg-gradient-to-t from-[#08080A] via-[#08080A]/60 to-[#08080A]/85" />
+            <div className="absolute inset-0 z-2 bg-radial from-transparent via-[#08080A]/35 to-[#08080A]/95" />
           </div>
 
           {/* Top Spacing to compensate for navbar height */}
