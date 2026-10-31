@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Logo } from '../ui/Logo';
-import { ArrowLeft, CheckCircle2, ShieldCheck, MapPin } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ShieldCheck, MapPin, Sparkles } from 'lucide-react';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -81,13 +82,26 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
           </span>
         </div>
 
-        {/* Center Floating Pass Preview */}
+        {/* Center Floating Pass Preview with Whimsical Levitation Animation */}
         <div className="relative z-10 my-auto py-8">
-          <div className="max-w-md mx-auto bg-zinc-900/90 backdrop-blur-xl border border-white/15 rounded-3xl p-6 shadow-2xl space-y-4">
+          <motion.div 
+            animate={{ 
+              y: [0, -10, 0],
+              rotate: [0, 0.4, 0]
+            }}
+            transition={{ 
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            whileHover={{ scale: 1.02, y: -4 }}
+            className="max-w-md mx-auto bg-zinc-900/90 backdrop-blur-xl border border-white/15 rounded-3xl p-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] space-y-4 transition-colors"
+          >
             
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-red-400 font-bold">
-                Live Pass Preview
+              <span className="text-[11px] font-mono uppercase tracking-wider text-red-400 font-bold flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E31B23] animate-ping" />
+                <span>Live Pass Preview</span>
               </span>
               <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-800/40">
                 <CheckCircle2 className="w-3 h-3" />
@@ -116,7 +130,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
               </div>
             </div>
 
-          </div>
+          </motion.div>
         </div>
 
         {/* Bottom Testimonial / Social Proof */}
