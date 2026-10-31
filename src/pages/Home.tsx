@@ -133,11 +133,13 @@ export const Home: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] text-zinc-900 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased overflow-x-hidden">
-      {/* Navbar overlaying hero banner */}
-      <Navbar />
+    <div className="relative min-h-screen bg-[#08080A] text-zinc-900 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased overflow-x-hidden">
+      {/* Fixed top Navbar overlay */}
+      <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
+        <Navbar />
+      </div>
 
-      <main className="flex-1 -mt-16">
+      <main className="flex-1">
         {/* ========================================================================= */}
         {/* 1. HERO SECTION: Full-Bleed Viewport Atmosphere (Behind Navbar)          */}
         {/*    Direct reference to Jetron Ticket composition with luxury refinement   */}

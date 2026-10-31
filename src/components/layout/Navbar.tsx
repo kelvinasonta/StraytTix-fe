@@ -33,13 +33,31 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   const [isOpen, setIsOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
+    let lastScrollY = window.scrollY || document.documentElement.scrollTop;
+
     const handleScroll = () => {
-      const scrollY = window.scrollY || document.documentElement.scrollTop;
-      setIsScrolled(scrollY > 16);
+      const currentScrollY = window.scrollY || document.documentElement.scrollTop;
+
+      // Detect whether page is past top threshold
+      setIsScrolled(currentScrollY > 16);
+
+      // Hide navbar when scrolling down, show when scrolling up
+      if (currentScrollY <= 20) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 60) {
+        // Scrolling down -> hide navbar
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up -> show navbar
+        setIsVisible(true);
+      }
+
+      lastScrollY = currentScrollY <= 0 ? 0 : currentScrollY;
     };
 
     handleScroll();
@@ -118,7 +136,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-[padding,background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+      className={`sticky top-0 z-40 transition-[transform,padding,background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        isVisible ? 'translate-y-0' : '-translate-y-full'
+      } ${
         isDashboardView
           ? isScrolled
             ? 'bg-white/80 backdrop-blur-xl border-b border-zinc-200/80 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] py-1'
