@@ -11,11 +11,6 @@ import {
   ShieldCheck,
   Smartphone,
   ChevronDown,
-  Music2,
-  Cpu,
-  GlassWater,
-  Sparkles,
-  Smile,
   CheckCircle2,
   QrCode,
   Zap,
@@ -25,19 +20,12 @@ import {
   Layers,
   Code2,
   Radio,
-  BarChart3,
-  Globe2,
-  Lock,
-  Headphones,
-  SlidersHorizontal,
   Workflow
 } from 'lucide-react';
 
 export const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('All');
-  const [selectedDateFilter, setSelectedDateFilter] = useState('All Dates');
-  const [activeCategory, setActiveCategory] = useState('All');
   const navigate = useNavigate();
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -45,9 +33,6 @@ export const Home: React.FC = () => {
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.set('search', searchQuery.trim());
     if (selectedCity && selectedCity !== 'All') params.set('city', selectedCity);
-    if (activeCategory && activeCategory !== 'All') params.set('category', activeCategory);
-    if (selectedDateFilter === 'This Weekend') params.set('timeframe', 'weekend');
-    if (selectedDateFilter === 'Free') params.set('price', 'free');
     navigate(`/discover?${params.toString()}`);
   };
 
@@ -57,15 +42,6 @@ export const Home: React.FC = () => {
       el.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  const categories = [
-    { name: 'All', label: 'All Experiences', icon: Sparkles },
-    { name: 'Music', label: 'Concerts & Live Sets', icon: Music2 },
-    { name: 'Nightlife', label: 'Parties & DJ Clubs', icon: GlassWater },
-    { name: 'Technology', label: 'Tech & Summits', icon: Cpu },
-    { name: 'Comedy', label: 'Standup & Theatre', icon: Smile },
-    { name: 'Food & Drink', label: 'Festivals & Dining', icon: GlassWater }
-  ];
 
   return (
     <div className="relative min-h-screen bg-[#08080A] text-zinc-900 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased overflow-x-hidden">
@@ -235,28 +211,10 @@ export const Home: React.FC = () => {
                   </select>
                 </div>
 
-                {/* Date Filter Quick Pills */}
-                <div className="hidden lg:flex items-center gap-1.5 px-2 md:border-l border-zinc-200 shrink-0 text-xs">
-                  {['All Dates', 'This Weekend', 'Free'].map((pill) => (
-                    <button
-                      key={pill}
-                      type="button"
-                      onClick={() => setSelectedDateFilter(pill)}
-                      className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                        selectedDateFilter === pill 
-                          ? 'bg-zinc-950 text-white shadow-2xs' 
-                          : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
-                      }`}
-                    >
-                      {pill}
-                    </button>
-                  ))}
-                </div>
-
                 {/* Execute Button */}
                 <button
                   type="submit"
-                  className="px-6 sm:px-7 py-3 bg-[#E31B23] hover:bg-[#C9141B] text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2 shrink-0"
+                  className="px-6 sm:px-7 py-3 bg-[#E31B23] hover:bg-[#C9141B] text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2 shrink-0 ml-auto"
                 >
                   <span>Search</span>
                   <ArrowRight className="w-4 h-4" />
@@ -264,32 +222,6 @@ export const Home: React.FC = () => {
               </form>
             </div>
           </motion.div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 3. CATEGORY TAXONOMY STRIP (One-Click Deep Link To /discover)             */}
-        {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 pt-10 pb-8">
-          <div className="max-w-6xl mx-auto flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
-            {categories.map((cat) => {
-              const Icon = cat.icon;
-              return (
-                <button
-                  key={cat.name}
-                  type="button"
-                  onClick={() => {
-                    const params = new URLSearchParams();
-                    if (cat.name !== 'All') params.set('category', cat.name);
-                    navigate(`/discover?${params.toString()}`);
-                  }}
-                  className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center gap-2 cursor-pointer bg-zinc-100/90 hover:bg-zinc-200 text-zinc-700 border border-zinc-200/80 active:scale-95"
-                >
-                  <Icon className="w-3.5 h-3.5 text-[#E31B23]" />
-                  <span>{cat.label}</span>
-                </button>
-              );
-            })}
-          </div>
         </section>
 
         {/* ========================================================================= */}
