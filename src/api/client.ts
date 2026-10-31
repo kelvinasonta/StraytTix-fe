@@ -3,7 +3,8 @@ import { tokenStorage } from '../utils/storage';
 import type { ApiErrorResponse } from '../types/auth';
 import type { ApiResponse, AuthPayload } from '../types/api';
 
-const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api/v1`;
+const RAW_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+const API_BASE_URL = `${RAW_BASE_URL}/api/v1`;
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -252,30 +253,52 @@ export const getValidationErrors = (error: unknown): Record<string, string[]> =>
   return {};
 };
 
-export const extractThrottleSeconds = (error: unknown): number | null => {
-  const errObj = error as any;
-  if (!errObj) return null;
+export const extractThrottleSeconds = (responseOrError: unknown): number | null => {
+  if (!responseOrError) return null;
+  const anyObj = responseOrError as any;
+  const res = anyObj?.response || anyObj;
 
   // 1. Check Retry-After header
-  const retryHeader = errObj?.response?.headers?.['retry-after'];
+  const retryHeader = res?.headers?.['retry-after'] || res?.headers?.['Retry-After'];
   if (retryHeader) {
     const parsed = parseInt(retryHeader, 10);
     if (!isNaN(parsed) && parsed > 0) return parsed;
   }
 
-  // 2. Check message string for numbers e.g. "try again in 718 seconds"
-  const message = errObj?.response?.data?.message || errObj?.message || '';
-  if (typeof message === 'string') {
-    const match = message.match(/(?:try again in|wait|throttle.*)\s+(\d+)\s*(?:seconds?|s)/i);
-    if (match && match[1]) {
-      const parsed = parseInt(match[1], 10);
-      if (!isNaN(parsed) && parsed > 0) return parsed;
-    }
+  const data = res?.data || anyObj?.data;
+
+  // 2. Direct data payload fields from backend (e.g. cooldown, retry_after, retryAfter, seconds, expires_in)
+  const candidateNumber = 
+    data?.retry_after ?? 
+    data?.retryAfter ?? 
+    data?.cooldown ?? 
+    data?.cooldown_seconds ?? 
+    data?.seconds ?? 
+    data?.throttle_seconds ??
+    data?.data?.retry_after ??
+    data?.data?.cooldown;
+  if (typeof candidateNumber === 'number' && candidateNumber > 0) {
+    return candidateNumber;
+  }
+  if (typeof candidateNumber === 'string') {
+    const parsed = parseInt(candidateNumber, 10);
+    if (!isNaN(parsed) && parsed > 0) return parsed;
   }
 
-  // 3. Direct response fields
-  const direct = errObj?.response?.data?.retry_after ?? errObj?.response?.data?.seconds;
-  if (typeof direct === 'number' && direct > 0) return direct;
+  // 3. Check message string for numbers e.g. "try again in 718 seconds" or "please wait 60 seconds"
+  const message = data?.message || anyObj?.message || '';
+  if (typeof message === 'string') {
+    const match = message.match(/(?:try again in|wait|throttle|available in|cooldown[^\d]*)(\d+)\s*(?:seconds?|s|mins?|minutes?)?/i);
+    if (match && match[1]) {
+      const num = parseInt(match[1], 10);
+      if (!isNaN(num) && num > 0) {
+        if (match[0].toLowerCase().includes('min')) {
+          return num * 60;
+        }
+        return num;
+      }
+    }
+  }
 
   return null;
 };

@@ -73,21 +73,86 @@ export const Events: React.FC = () => {
     message: '',
   });
 
-  const fetchEvents = useCallback(async () => {
+  const [paginationMeta, setPaginationMeta] = useState<{
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+  }>({
+    current_page: 1,
+    last_page: 1,
+    per_page: 10,
+    total: 0,
+    from: null,
+    to: null,
+  });
+
+  const fetchEvents = useCallback(async (targetPage: number = 1) => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await eventApi.getOrganizerEvents(organizer?.id);
-      const rawData = res.data;
-      const rawList: any[] = Array.isArray(rawData)
-        ? rawData
-        : Array.isArray((rawData as any)?.data)
-          ? (rawData as any).data
-          : Array.isArray((rawData as any)?.events)
-            ? (rawData as any).events
-            : [];
+      const params: Record<string, any> = {
+        page: targetPage,
+      };
+      if (searchQuery.trim()) {
+        params.search = searchQuery.trim();
+        params.q = searchQuery.trim();
+      }
+      if (selectedStatus !== 'All') {
+        params.status = selectedStatus.toLowerCase();
+      }
+
+      const res = await eventApi.getOrganizerEvents(organizer?.id, params);
+      const resData = res.data as any;
+
+      // Extract events array directly from whatever structure backend sends
+      const rawList: any[] = Array.isArray(resData?.data)
+        ? resData.data
+        : Array.isArray(resData?.data?.data)
+          ? resData.data.data
+          : Array.isArray(resData)
+            ? resData
+            : Array.isArray(resData?.events)
+              ? resData.events
+              : [];
+
       const items = rawList.map(normalizeBackendEvent);
       setEvents(items);
+
+      // Extract pagination metadata dynamically from backend response
+      const meta = resData?.meta || resData?.pagination || resData?.data?.meta || (resData?.current_page ? resData : resData?.data?.current_page ? resData.data : null);
+      if (meta) {
+        const currentPage = Number(meta.current_page ?? meta.currentPage) || targetPage;
+        const lastPage = Number(meta.last_page ?? meta.lastPage ?? meta.totalPages) || 1;
+        const perPageCount = Number(meta.per_page ?? meta.perPage) || (items.length > 0 ? items.length : 10);
+        const total = Number(meta.total ?? items.length);
+        const from = meta.from !== undefined && meta.from !== null
+          ? Number(meta.from)
+          : (items.length > 0 ? (currentPage - 1) * perPageCount + 1 : null);
+        const to = meta.to !== undefined && meta.to !== null
+          ? Number(meta.to)
+          : (items.length > 0 ? (currentPage - 1) * perPageCount + items.length : null);
+
+        setPaginationMeta({
+          current_page: currentPage,
+          last_page: lastPage,
+          per_page: perPageCount,
+          total: total,
+          from: from,
+          to: to,
+        });
+      } else {
+        setPaginationMeta({
+          current_page: targetPage,
+          last_page: 1,
+          per_page: items.length || 10,
+          total: items.length,
+          from: items.length > 0 ? 1 : null,
+          to: items.length,
+        });
+      }
     } catch (err: any) {
       console.error('Failed to load organizer events:', err);
       setEvents([]);
@@ -95,11 +160,17 @@ export const Events: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [organizer?.id]);
+  }, [organizer?.id, searchQuery, selectedStatus]);
 
   useEffect(() => {
-    fetchEvents();
+    fetchEvents(1);
   }, [fetchEvents]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > paginationMeta.last_page || newPage === paginationMeta.current_page || isLoading) return;
+    fetchEvents(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Determine whether an event has concluded
   const isEventEnded = useCallback((evt: Event): boolean => {
@@ -176,12 +247,12 @@ export const Events: React.FC = () => {
 
 
   const getStatusCount = useCallback((status: EventFilterStatus) => {
-    if (status === 'All') return events.length;
+    if (status === 'All') return paginationMeta.total || events.length;
     if (status === 'Ended') return events.filter(e => (isEventEnded(e) && e.status !== 'Draft') || e.status === 'Ended' || e.status === 'Completed').length;
     if (status === 'Draft') return events.filter(e => e.status === 'Draft').length;
     if (status === 'Published') return events.filter(e => (e.status === 'Published' || e.status === 'Upcoming') && !isEventEnded(e)).length;
     return 0;
-  }, [events, isEventEnded]);
+  }, [events, isEventEnded, paginationMeta.total]);
 
   const filteredEvents = useMemo(() => {
     return events.filter((e) => {
@@ -204,22 +275,7 @@ export const Events: React.FC = () => {
     });
   }, [events, selectedStatus, searchQuery, isEventEnded]);
 
-  const ITEMS_PER_PAGE = 9;
-  const [currentPage, setCurrentPage] = useState(1);
 
-  // Reset to first page when filtering or searching
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedStatus, searchQuery]);
-
-  const totalItems = filteredEvents.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
-  const safePage = Math.min(currentPage, totalPages);
-
-  const paginatedEvents = useMemo(() => {
-    const start = (safePage - 1) * ITEMS_PER_PAGE;
-    return filteredEvents.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredEvents, safePage]);
 
   return (
     <OrganizerDashboardLayout>
@@ -247,7 +303,7 @@ export const Events: React.FC = () => {
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
             </button>
             {perms.canCreateEvents && (
-              <Link to="/organizer/events/create">
+              <Link to="/organizer/events/create" className="hidden sm:inline-flex">
                 <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-xl shadow-xs transition-all cursor-pointer">
                   <PlusCircle className="w-5 h-5" /> Create New Event
                 </button>
@@ -399,7 +455,7 @@ export const Events: React.FC = () => {
           /* GRID VIEW (Matching Discover page aesthetics + organizer management)       */
           /* ========================================================================= */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paginatedEvents.map((evt) => {
+            {filteredEvents.map((evt) => {
               const eventId = evt.id || (evt as any).uuid;
 
               const targetManageUrl = role === 'staff'
@@ -534,7 +590,7 @@ export const Events: React.FC = () => {
           /* MODERN LIST VIEW (Horizontal cards matching Discover page aesthetic)      */
           /* ========================================================================= */
           <div className="space-y-4">
-            {paginatedEvents.map((evt) => {
+            {filteredEvents.map((evt) => {
               const eventId = evt.id || (evt as any).uuid;
 
               const targetManageUrl = role === 'staff'
@@ -693,19 +749,19 @@ export const Events: React.FC = () => {
         )}
 
         {/* Pagination Controls */}
-        {!isLoading && totalItems > 0 && totalPages > 1 && (
+        {!isLoading && (paginationMeta.total > 0 || events.length > 0) && paginationMeta.last_page > 1 && (
           <div className="bg-white rounded-2xl border border-zinc-200/90 px-5 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
             <div className="text-xs text-zinc-500 font-semibold">
-              Showing <span className="font-bold text-zinc-900">{(safePage - 1) * ITEMS_PER_PAGE + 1}</span> to{' '}
-              <span className="font-bold text-zinc-900">{Math.min(safePage * ITEMS_PER_PAGE, totalItems)}</span> of{' '}
-              <span className="font-bold text-zinc-900">{totalItems}</span> events
+              Showing <span className="font-bold text-zinc-900">{paginationMeta.from || (filteredEvents.length > 0 ? 1 : 0)}</span> to{' '}
+              <span className="font-bold text-zinc-900">{paginationMeta.to || filteredEvents.length}</span> of{' '}
+              <span className="font-bold text-zinc-900">{paginationMeta.total}</span> events
             </div>
 
             <div className="flex items-center gap-2">
               {/* Previous Button */}
               <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={safePage <= 1}
+                onClick={() => handlePageChange(paginationMeta.current_page - 1)}
+                disabled={paginationMeta.current_page <= 1 || isLoading}
                 className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -714,20 +770,21 @@ export const Events: React.FC = () => {
 
               {/* Page Numbers */}
               <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-                  if (totalPages > 7) {
-                    if (p !== 1 && p !== totalPages && Math.abs(p - safePage) > 1) {
-                      if (p === 2 && safePage > 3) return <span key={p} className="px-1 text-xs text-zinc-400">...</span>;
-                      if (p === totalPages - 1 && safePage < totalPages - 2) return <span key={p} className="px-1 text-xs text-zinc-400">...</span>;
+                {Array.from({ length: Math.max(1, paginationMeta.last_page) }, (_, i) => i + 1).map((p) => {
+                  if (paginationMeta.last_page > 7) {
+                    if (p !== 1 && p !== paginationMeta.last_page && Math.abs(p - paginationMeta.current_page) > 1) {
+                      if (p === 2 && paginationMeta.current_page > 3) return <span key={p} className="px-1 text-xs text-zinc-400">...</span>;
+                      if (p === paginationMeta.last_page - 1 && paginationMeta.current_page < paginationMeta.last_page - 2) return <span key={p} className="px-1 text-xs text-zinc-400">...</span>;
                       return null;
                     }
                   }
                   return (
                     <button
                       key={p}
-                      onClick={() => setCurrentPage(p)}
+                      onClick={() => handlePageChange(p)}
+                      disabled={isLoading}
                       className={`w-9 h-9 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                        p === safePage
+                        p === paginationMeta.current_page
                           ? 'bg-[#E31B23] text-white shadow-xs scale-105'
                           : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200'
                       }`}
@@ -740,8 +797,8 @@ export const Events: React.FC = () => {
 
               {/* Next Button */}
               <button
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={safePage >= totalPages}
+                onClick={() => handlePageChange(paginationMeta.current_page + 1)}
+                disabled={paginationMeta.current_page >= paginationMeta.last_page || isLoading}
                 className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
               >
                 <span className="hidden sm:inline">Next</span>

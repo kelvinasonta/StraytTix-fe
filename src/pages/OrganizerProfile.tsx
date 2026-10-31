@@ -45,7 +45,9 @@ import { useAuth } from '../context/AuthContext';
 import { formatCurrency, formatDate } from '../utils/format';
 
 export const OrganizerProfile: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug: rawSlug } = useParams<{ slug: string }>();
+  // Strip leading '@' if navigated via /@username
+  const slug = rawSlug ? rawSlug.replace(/^@/, '') : undefined;
   const { showNotification } = useNotification();
 
   // Navigation Tabs

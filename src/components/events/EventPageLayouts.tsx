@@ -349,7 +349,7 @@ export const CinematicPageLayout: React.FC<EventPageLayoutProps> = (props) => {
 
               <div className="flex items-center gap-3 flex-wrap">
                 <Link
-                  to={`/organizers/${event.organizer?.slug || event.organizer?.id || ''}`}
+                  to={`/@${event.organizer?.slug || event.organizer?.id || ''}`}
                   className="px-5 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-102"
                 >
                   <Building className="w-4 h-4" />
@@ -635,7 +635,7 @@ export const CompactPageLayout: React.FC<EventPageLayoutProps> = (props) => {
 
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <Link
-                    to={`/organizers/${event.organizer?.slug || event.organizer?.id || ''}`}
+                    to={`/@${event.organizer?.slug || event.organizer?.id || ''}`}
                     className="px-4 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all hover:scale-102"
                   >
                     <Building className="w-4 h-4" />
@@ -895,7 +895,7 @@ export const SplitPageLayout: React.FC<EventPageLayoutProps> = (props) => {
                   </div>
                 </div>
                 <Link
-                  to={`/organizers/${event.organizer?.slug || event.organizer?.id || ''}`}
+                  to={`/@${event.organizer?.slug || event.organizer?.id || ''}`}
                   className="px-3.5 py-1.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-lg inline-flex items-center justify-center gap-1.5 shadow-xs transition-all hover:scale-102 flex-shrink-0"
                 >
                   <Building className="w-3.5 h-3.5" />
@@ -1063,7 +1063,7 @@ export const SplitPageLayout: React.FC<EventPageLayoutProps> = (props) => {
 
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <Link
-                    to={`/organizers/${event.organizer?.slug || event.organizer?.id || ''}`}
+                    to={`/@${event.organizer?.slug || event.organizer?.id || ''}`}
                     className="px-4 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all hover:scale-102"
                   >
                     <Building className="w-4 h-4" />
@@ -1246,7 +1246,7 @@ export const BentoPageLayout: React.FC<EventPageLayoutProps> = (props) => {
 
             <div className="flex flex-col gap-2 pt-1">
               <Link
-                to={`/organizers/${event.organizer?.slug || event.organizer?.id || ''}`}
+                to={`/@${event.organizer?.slug || event.organizer?.id || ''}`}
                 className="w-full py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs hover:scale-102"
               >
                 <Building className="w-3.5 h-3.5" />
@@ -1630,7 +1630,7 @@ export const BentoPageLayout: React.FC<EventPageLayoutProps> = (props) => {
 
               <div className="flex items-center gap-2.5 flex-wrap">
                 <Link
-                  to={`/organizers/${event.organizer?.slug || event.organizer?.id || ''}`}
+                  to={`/@${event.organizer?.slug || event.organizer?.id || ''}`}
                   className="px-5 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all hover:scale-102"
                 >
                   <Building className="w-4 h-4" />

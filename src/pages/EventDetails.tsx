@@ -1071,7 +1071,7 @@ export const EventDetails: React.FC = () => {
                       </div>
                     </div>
                     <Link
-                      to={`/organizers/${event.organizer.slug || event.organizer.id}`}
+                      to={`/@${event.organizer.slug || event.organizer.id}`}
                       className={`px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-colors inline-flex items-center gap-1.5 flex-shrink-0 ${
                         isDark
                           ? 'border-white/10 bg-white/5 text-white hover:bg-white/10'

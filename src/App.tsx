@@ -296,6 +296,9 @@ export const App: React.FC = () => {
               }
             />
 
+            {/* Public Organizer Profile (Supports direct /artful-media or /@artful-media) */}
+            <Route path="/:slug" element={<OrganizerProfile />} />
+
             {/* Fallback 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>

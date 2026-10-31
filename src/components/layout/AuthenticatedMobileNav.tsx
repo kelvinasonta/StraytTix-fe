@@ -77,33 +77,13 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
         <div className="flex items-center gap-2.5">
           <Logo to={isOrganizerMode ? '/organizer' : '/dashboard'} size="sm" />
 
-          {isOrganizerMode ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black tracking-wide uppercase bg-indigo-50 text-indigo-700 border border-indigo-200/60">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-600" />
-              <span>{role}</span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black tracking-wide uppercase bg-zinc-100 text-zinc-700 border border-zinc-200/60">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E31B23]" />
-            </span>
-          )}
+          {/* Role badge hidden on mobile view as requested */}
         </div>
 
         {/* Right: Quick actions & Navigation Buttons */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Primary Action Button (Discover / Create) */}
-          {isOrganizerMode ? (
-            perms.canCreateEvents ? (
-              <Link
-                to="/organizer/events/create"
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-[11px] font-black rounded-full shadow-xs transition-colors"
-                title="Create Event"
-              >
-                <PlusCircle className="w-3.5 h-3.5" />
-                <span>Create</span>
-              </Link>
-            ) : null
-          ) : (
+          {/* Primary Action Button (Discover for attendee mode; Create hidden on mobile for organizer) */}
+          {!isOrganizerMode && (
             <Link
               to="/discover"
               className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-[11px] font-black rounded-full shadow-xs transition-colors"
