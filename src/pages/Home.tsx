@@ -1,11 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import { EventCard } from '../components/ui/EventCard';
-import { eventApi, normalizeBackendEvent } from '../api/events';
-import type { Event } from '../types/api';
 import { 
   Search, 
   ArrowRight,
@@ -13,8 +10,6 @@ import {
   ShieldCheck,
   Smartphone,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   CheckCircle2,
   QrCode,
   Zap,
@@ -44,7 +39,6 @@ import {
   ShieldAlert,
   HelpCircle,
   Clock,
-  Flame,
   Award
 } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
@@ -61,39 +55,6 @@ export const Home: React.FC = () => {
 
   const navigate = useNavigate();
   const searchBarRef = useRef<HTMLElement>(null);
-  const eventsTrackRef = useRef<HTMLDivElement>(null);
-
-  // Live Explore Events loaded directly via API client without external QueryClientProvider dependency
-  const [liveEvents, setLiveEvents] = useState<Event[]>([]);
-  const [isEventsLoading, setIsEventsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    setIsEventsLoading(true);
-    eventApi.getExploreEvents({ limit: 8, per_page: 8 })
-      .then((res) => {
-        if (!isMounted) return;
-        const rawList = res?.data?.data || (Array.isArray(res?.data) ? res?.data : []);
-        const normalized = (rawList as any[]).map(normalizeBackendEvent);
-        setLiveEvents(normalized);
-      })
-      .catch((err) => {
-        console.warn('Home: error fetching explore events:', err);
-      })
-      .finally(() => {
-        if (isMounted) setIsEventsLoading(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const scrollEventsTrack = (direction: 'left' | 'right') => {
-    if (!eventsTrackRef.current) return;
-    const offset = direction === 'left' ? -380 : 380;
-    eventsTrackRef.current.scrollBy({ left: offset, behavior: 'smooth' });
-  };
 
   // Fee calculation mechanics:
   // StraytTix platform fee: 2.5% + ₦100 flat processing per ticket (capped at ₦2,000 per ticket max)
@@ -332,89 +293,6 @@ export const Home: React.FC = () => {
                 ))}
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 3. LIVE UPCOMING EVENTS RAIL: High-Demand Real Drops (Direct from Backend)  */}
-        {/*    Horizontal kinetic carousel directly wired to /explore/events          */}
-        {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 bg-zinc-50/60 dark:bg-[#09090D] border-b border-zinc-200/80 dark:border-white/5 transition-colors duration-300">
-          <div className="max-w-6xl mx-auto space-y-8">
-            
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-              <div className="space-y-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-xs font-mono font-bold text-[#E31B23]">
-                  <Flame className="w-3.5 h-3.5" />
-                  <span>Happening Soon</span>
-                </div>
-                <h2 className="text-2xl sm:text-4xl font-black text-zinc-950 dark:text-white tracking-tight">
-                  Featured Live Events
-                </h2>
-                <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm">
-                  Curated concerts, rave nights, and tech summits on sale now with instant digital pass issuance.
-                </p>
-              </div>
-
-              {/* Navigation Controls & Explore All Link */}
-              <div className="flex items-center gap-3">
-                <div className="hidden sm:flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => scrollEventsTrack('left')}
-                    aria-label="Scroll left"
-                    className="w-9 h-9 rounded-full bg-white dark:bg-white/10 border border-zinc-200 dark:border-white/15 flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/15 transition-all shadow-sm cursor-pointer"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => scrollEventsTrack('right')}
-                    aria-label="Scroll right"
-                    className="w-9 h-9 rounded-full bg-white dark:bg-white/10 border border-zinc-200 dark:border-white/15 flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/15 transition-all shadow-sm cursor-pointer"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <Link
-                  to="/discover"
-                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#E31B23] hover:text-[#C9141B] transition-colors"
-                >
-                  <span>See all events</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Events Track */}
-            {isEventsLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3].map((n) => (
-                  <div key={n} className="rounded-3xl bg-zinc-200/50 dark:bg-white/5 animate-pulse h-96 border border-zinc-200 dark:border-white/10" />
-                ))}
-              </div>
-            ) : liveEvents.length > 0 ? (
-              <div 
-                ref={eventsTrackRef}
-                className="flex gap-6 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scrollbar-none scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0"
-              >
-                {liveEvents.map((event) => (
-                  <div key={event.id} className="min-w-[280px] sm:min-w-[340px] max-w-[340px] snap-start shrink-0">
-                    <EventCard event={event} variant="default" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 rounded-3xl bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 space-y-3">
-                <Ticket className="w-10 h-10 text-zinc-400 mx-auto" />
-                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">No public events listed currently</p>
-                <Link to="/organizer/events/create" className="text-xs font-bold text-[#E31B23] hover:underline inline-block">
-                  Be the first to publish an event &rarr;
-                </Link>
-              </div>
-            )}
-
           </div>
         </section>
 
