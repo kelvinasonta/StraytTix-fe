@@ -5,7 +5,6 @@ import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import { 
   Search, 
-  MapPin, 
   ArrowRight,
   Ticket,
   ShieldCheck,
@@ -25,14 +24,12 @@ import {
 
 export const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCity, setSelectedCity] = useState('All');
   const navigate = useNavigate();
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.set('search', searchQuery.trim());
-    if (selectedCity && selectedCity !== 'All') params.set('city', selectedCity);
     navigate(`/discover?${params.toString()}`);
   };
 
@@ -191,24 +188,6 @@ export const Home: React.FC = () => {
                     placeholder="Find events by name, location, or artist..."
                     className="w-full bg-transparent text-sm sm:text-base text-zinc-950 placeholder-zinc-400 outline-none font-medium truncate"
                   />
-                </div>
-
-                {/* City Picker Dropdown */}
-                <div className="flex items-center gap-2 px-3 py-2 md:border-l border-zinc-200 shrink-0">
-                  <MapPin className="w-4 h-4 text-[#E31B23] shrink-0" />
-                  <select
-                    value={selectedCity}
-                    onChange={(e) => setSelectedCity(e.target.value)}
-                    aria-label="Filter events by city"
-                    className="bg-transparent text-xs sm:text-sm font-bold text-zinc-800 outline-none cursor-pointer pr-1"
-                  >
-                    <option value="All">All Locations</option>
-                    <option value="Lagos">Lagos, NG</option>
-                    <option value="Abuja">Abuja, NG</option>
-                    <option value="Port Harcourt">Port Harcourt, NG</option>
-                    <option value="Accra">Accra, GH</option>
-                    <option value="London">London, UK</option>
-                  </select>
                 </div>
 
                 {/* Execute Button */}
