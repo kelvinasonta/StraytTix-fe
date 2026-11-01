@@ -162,8 +162,10 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-[transform,padding,background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-        isVisible ? 'translate-y-0' : '-translate-y-full'
+      className={`sticky top-0 z-40 transition-[transform,opacity,filter,padding,background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        isVisible 
+          ? 'translate-y-0 opacity-100 scale-100 blur-0' 
+          : '-translate-y-6 opacity-0 scale-[0.97] blur-[2px] pointer-events-none'
       } ${
         isDashboardView
           ? isScrolled
