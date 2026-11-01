@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import { 
@@ -28,6 +28,18 @@ import {
 export const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const searchBarRef = useRef<HTMLElement>(null);
+
+  // Smooth scroll exit animation: As the search bar scrolls out of view,
+  // it gracefully scales down, tilts slightly, and fades out rather than abrupt cutoff
+  const { scrollYProgress } = useScroll({
+    target: searchBarRef,
+    offset: ['start center', 'end start']
+  });
+
+  const searchBarOpacity = useTransform(scrollYProgress, [0.35, 0.85], [1, 0]);
+  const searchBarScale = useTransform(scrollYProgress, [0.35, 0.85], [1, 0.94]);
+  const searchBarY = useTransform(scrollYProgress, [0.35, 0.85], [0, -16]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,10 +152,19 @@ export const Home: React.FC = () => {
         {/* 2. FLOATING DISCOVERY ISLAND: Architectural Double-Bezel Console          */}
         {/*    Straddles exactly across the boundary line between Hero and Next Sec  */}
         {/* ========================================================================= */}
-        <section id="explore" className="relative z-30 px-4 sm:px-6 lg:px-8 -my-8 sm:-my-10">
+        <section 
+          ref={searchBarRef}
+          id="explore" 
+          className="relative z-30 px-4 sm:px-6 lg:px-8 -my-8 sm:-my-10"
+        >
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            style={{ 
+              opacity: searchBarOpacity, 
+              scale: searchBarScale, 
+              y: searchBarY 
+            }}
+            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, margin: "-40px" }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-4xl mx-auto"
