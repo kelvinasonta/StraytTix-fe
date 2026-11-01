@@ -307,11 +307,11 @@ export const Discover: React.FC = () => {
               </p>
             </div>
 
-            {/* Elevated Search Bar */}
+            {/* Elevated Search Bar with High-Contrast White Glass */}
             <div className="w-full lg:max-w-xl">
-              <div className="p-1.5 sm:p-2.5 rounded-2xl bg-white/[0.06] border border-white/15 backdrop-blur-xl shadow-2xl transition-all duration-300 focus-within:border-white/30 focus-within:bg-white/[0.09]">
-                <div className="flex items-center gap-3 px-3.5 py-3">
-                  <Search className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400 shrink-0" />
+              <div className="p-1.5 sm:p-2 rounded-2xl bg-white/[0.08] border border-white/25 backdrop-blur-2xl shadow-2xl transition-all duration-300 focus-within:border-white focus-within:bg-white/[0.12] focus-within:shadow-[0_0_25px_rgba(255,255,255,0.12)]">
+                <div className="flex items-center gap-3 px-3.5 py-2.5">
+                  <Search className="w-4 h-4 sm:w-5 sm:h-5 text-white/80 shrink-0" />
                   <input
                     type="text"
                     value={search}
@@ -322,7 +322,7 @@ export const Discover: React.FC = () => {
                   {search && (
                     <button
                       onClick={() => setSearch('')}
-                      className="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                      className="p-1 rounded-lg hover:bg-white/20 text-zinc-300 hover:text-white transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -333,10 +333,10 @@ export const Discover: React.FC = () => {
           </div>
 
           {/* ======================================================================= */}
-          {/* HORIZONTAL CATEGORY TAXONOMY STRIP (With Icons & Active States)        */}
+          {/* HORIZONTAL CATEGORY TAXONOMY STRIP (High-Contrast White & Red Pill UI) */}
           {/* ======================================================================= */}
           <div className="pt-2">
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
               {CATEGORY_ITEMS.map((cat) => {
                 const Icon = cat.icon;
                 const isActive = category === cat.name;
@@ -345,13 +345,13 @@ export const Discover: React.FC = () => {
                     key={cat.name}
                     type="button"
                     onClick={() => setCategory(cat.name)}
-                    className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center gap-2 cursor-pointer active:scale-95 border ${
+                    className={`px-4.5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center gap-2 cursor-pointer active:scale-95 border ${
                       isActive
-                        ? 'bg-[#E31B23] text-white border-[#E31B23] shadow-lg shadow-[#E31B23]/25'
-                        : 'bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 border-white/10'
+                        ? 'bg-[#E31B23] text-white border-[#E31B23] shadow-lg shadow-[#E31B23]/35 scale-102'
+                        : 'bg-white/[0.05] hover:bg-white text-zinc-300 hover:text-zinc-950 border-white/15 hover:border-white shadow-xs'
                     }`}
                   >
-                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-[#E31B23]'}`} />
+                    <Icon className={`w-3.5 h-3.5 transition-colors ${isActive ? 'text-white' : 'text-[#E31B23] group-hover:text-zinc-950'}`} />
                     <span>{cat.label}</span>
                   </button>
                 );
@@ -437,26 +437,24 @@ export const Discover: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none" />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent pointer-events-none" />
 
-                    {/* Top Overlay Bar: Badge + Category + Price */}
+                    {/* Top Overlay Bar: Badge + Category + Price (High-Contrast White & Red) */}
                     <div className="relative z-10 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className={`w-9 h-9 rounded-xl flex items-center justify-center font-mono font-black text-xs backdrop-blur-md border ${
+                        <span className={`w-9 h-9 rounded-xl flex items-center justify-center font-mono font-black text-xs border ${
                           index === 0 
                             ? 'bg-[#E31B23] text-white border-[#E31B23] shadow-lg shadow-[#E31B23]/40' 
                             : index === 1
                             ? 'bg-amber-500 text-white border-amber-400 shadow-lg shadow-amber-500/30'
-                            : index === 2
-                            ? 'bg-white text-zinc-950 border-white font-black'
-                            : 'bg-black/50 text-white border-white/20'
+                            : 'bg-white text-zinc-950 border-white shadow-md font-black'
                         }`}>
                           #{index + 1}
                         </span>
-                        <span className="px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-xs font-mono uppercase tracking-wider text-zinc-200">
+                        <span className="px-3 py-1.5 rounded-full bg-white text-zinc-950 font-bold text-xs uppercase tracking-wider shadow-lg border border-white">
                           {featuredEvent.category || 'Event'}
                         </span>
                       </div>
 
-                      <span className="px-3 py-1.5 rounded-full bg-[#E31B23]/95 backdrop-blur-md text-white text-xs font-mono font-black shadow-lg shadow-[#E31B23]/35">
+                      <span className="px-3.5 py-1.5 rounded-full bg-[#E31B23] text-white text-xs font-mono font-black shadow-lg shadow-[#E31B23]/40 border border-red-500/50">
                         {minPrice === 0 ? 'FREE RSVP' : formatCurrency(minPrice)}
                       </span>
                     </div>
@@ -464,9 +462,11 @@ export const Discover: React.FC = () => {
                     {/* Bottom Overlay Content */}
                     <div className="relative z-10 space-y-4 pt-10">
                       <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
-                          <Calendar className="w-4 h-4 text-[#E31B23] shrink-0" />
-                          <span>{formatDate(featuredEvent.startDate)}</span>
+                        <div className="flex items-center gap-2 text-xs font-mono">
+                          <span className="bg-white/95 text-zinc-950 font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                            <Calendar className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
+                            <span>{formatDate(featuredEvent.startDate)}</span>
+                          </span>
                         </div>
                         <h3 className="text-xl sm:text-2xl font-black text-white line-clamp-2 leading-tight group-hover:text-red-400 transition-colors drop-shadow-md">
                           {featuredEvent.title}
@@ -478,12 +478,12 @@ export const Discover: React.FC = () => {
                       </div>
 
                       {/* Quick Access CTA Pill */}
-                      <div className="pt-3 border-t border-white/15 flex items-center justify-between">
+                      <div className="pt-3 border-t border-white/20 flex items-center justify-between">
                         <span className="text-sm font-bold text-white group-hover:text-[#E31B23] transition-colors">
                           Get Tickets
                         </span>
-                        <div className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-[#E31B23] flex items-center justify-center transition-all duration-300 shadow-sm">
-                          <ArrowRight className="w-4 h-4 text-white transition-transform group-hover:translate-x-1" />
+                        <div className="w-8 h-8 rounded-full bg-white text-zinc-950 group-hover:bg-[#E31B23] group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-md">
+                          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                         </div>
                       </div>
                     </div>

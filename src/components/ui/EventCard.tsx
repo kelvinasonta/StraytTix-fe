@@ -196,29 +196,29 @@ export const EventCard: React.FC<EventCardProps> = ({
     );
   }
 
-  // Default Grid Card: Full-bleed image filling the div with event details layered directly on top for high-end luxury feel
+  // Default Grid Card: Full-bleed image filling the div with high-contrast White, Dark & Red layered details
   return (
-    <div className="group relative rounded-[2rem] overflow-hidden border border-white/10 hover:border-white/30 h-[440px] sm:h-[480px] flex flex-col justify-between p-6 transition-all duration-500 hover:shadow-2xl hover:shadow-[#E31B23]/15 hover:-translate-y-1.5 bg-zinc-950">
+    <div className="group relative rounded-[2rem] overflow-hidden border border-white/15 hover:border-white/40 h-[450px] sm:h-[490px] flex flex-col justify-between p-6 transition-all duration-500 hover:shadow-2xl hover:shadow-[#E31B23]/20 hover:-translate-y-2 bg-zinc-950">
       {/* Full Bleed Background Event Image */}
       <img 
         src={event.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=800&q=80'} 
         alt={event.title} 
-        className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.72] contrast-[1.08] group-hover:scale-110 group-hover:brightness-[0.6] transition-all duration-700 pointer-events-none"
+        className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.74] contrast-[1.1] group-hover:scale-110 group-hover:brightness-[0.62] transition-all duration-700 pointer-events-none"
       />
 
       {/* Layered Gradient Scrims: Dark gradient from bottom up, subtle top vignette for badge contrast */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-transparent pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent pointer-events-none" />
 
-      {/* Top Floating Bar: Category Pill & Favorite Action Button */}
+      {/* Top Floating Bar: Crisp White Category Pill & Favorite Action Button */}
       <div className="relative z-10 flex items-center justify-between">
-        <span className="px-3.5 py-1.5 rounded-full bg-black/50 backdrop-blur-xl border border-white/20 text-xs font-mono font-bold text-zinc-100 shadow-md">
+        <span className="px-3.5 py-1.5 rounded-full bg-white text-zinc-950 font-bold text-xs uppercase tracking-wider shadow-lg border border-white">
           {categoryName}
         </span>
 
         <button 
           onClick={handleFavoriteClick}
-          className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-xl border border-white/20 text-white flex items-center justify-center hover:bg-white hover:text-[#E31B23] hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+          className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-xl border border-white/30 text-white flex items-center justify-center hover:bg-white hover:text-[#E31B23] hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
           title="Save event"
         >
           <Heart className={`w-4 h-4 ${fav ? 'fill-[#E31B23] text-[#E31B23]' : ''}`} />
@@ -229,12 +229,12 @@ export const EventCard: React.FC<EventCardProps> = ({
       <div className="relative z-10 space-y-4 pt-8">
         
         {/* Meta badges: Date & Location */}
-        <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-zinc-300">
-          <span className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10">
+        <div className="flex flex-wrap items-center gap-2.5 text-xs font-mono">
+          <span className="bg-white/95 text-zinc-950 font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
             <Calendar className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
             <span>{formatDate(event.startDate)}</span>
           </span>
-          <span className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 truncate max-w-[200px]">
+          <span className="flex items-center gap-1.5 bg-black/50 backdrop-blur-md text-zinc-300 font-medium px-2.5 py-1 rounded-lg border border-white/15 truncate max-w-[200px]">
             {isOnline ? (
               <>
                 <Video className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
@@ -257,7 +257,7 @@ export const EventCard: React.FC<EventCardProps> = ({
         </Link>
 
         {/* Price & Primary CTA */}
-        <div className="pt-3 border-t border-white/15 flex items-center justify-between gap-4">
+        <div className="pt-3 border-t border-white/20 flex items-center justify-between gap-4">
           <div>
             <p className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Tickets</p>
             <p className="text-lg sm:text-xl font-black font-mono text-white">
