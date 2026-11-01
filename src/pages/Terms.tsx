@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import { Shield, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Shield, FileText } from 'lucide-react';
 
 export const Terms: React.FC = () => {
   const lastUpdated = 'September 16, 2026';
@@ -10,7 +10,7 @@ export const Terms: React.FC = () => {
     {
       id: 'acceptance',
       title: '1. Acceptance of Terms',
-      content: `By accessing, browsing, or using the StraytTix (also operated as "Tix" or "Eventa") ticketing infrastructure, platform, API, mobile services, or associated software (collectively, the "Platform"), you acknowledge that you have read, understood, and unconditionally agree to be bound by these Terms of Service. If you do not agree to these terms, you must discontinue use of the Platform immediately.`
+      content: `By accessing, browsing, or using the StraytTix ticketing infrastructure, platform, API, mobile services, or associated software (collectively, the "Platform"), you acknowledge that you have read, understood, and unconditionally agree to be bound by these Terms of Service. If you do not agree to these terms, you must discontinue use of the Platform immediately.`
     },
     {
       id: 'accounts',
@@ -50,56 +50,56 @@ export const Terms: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-brand-bg flex flex-col justify-between">
+    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between selection:bg-[#E31B23] selection:text-white">
       <Navbar />
 
-      <main className="flex-1 py-16 px-6 max-w-5xl mx-auto w-full space-y-12">
+      <main className="flex-1 py-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 max-w-[1600px] mx-auto w-full space-y-12">
         {/* Header */}
-        <div className="space-y-4 text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-50 border border-red-150 text-[#E31B23] text-xs font-bold uppercase tracking-wider">
+        <div className="space-y-4 text-center max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#E31B23] text-xs font-bold uppercase tracking-wider backdrop-blur-md">
             <FileText className="w-3.5 h-3.5" />
             Legal Agreement
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-zinc-950 tracking-tight leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-[1.1]">
             Terms of Service
           </h1>
-          <p className="text-zinc-500 text-xs font-semibold">
+          <p className="text-zinc-400 text-xs sm:text-sm font-normal">
             Last Updated: {lastUpdated} • Version 2.4 (Global SaaS)
           </p>
         </div>
 
         {/* Highlight Callout */}
-        <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs flex items-start gap-4">
-          <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl flex-shrink-0">
+        <div className="max-w-4xl mx-auto bg-zinc-950/70 border border-white/10 rounded-2xl p-6 shadow-lg backdrop-blur-sm flex items-start gap-4">
+          <div className="p-3 bg-emerald-500/15 text-emerald-400 rounded-2xl flex-shrink-0 border border-emerald-500/30">
             <Shield className="w-5 h-5" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-sm font-bold text-zinc-900">Summary of Key Principles</h3>
-            <p className="text-xs text-zinc-500 leading-relaxed font-medium">
+            <h3 className="text-sm font-bold text-white">Summary of Key Principles</h3>
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
               We provide the secure software engine connecting attendees and event organizers. Organizers own their events and venue operations; buyers receive cryptographically verified digital passes; and fees are transparent with zero hidden surcharges.
             </p>
           </div>
         </div>
 
         {/* Content Sections */}
-        <div className="bg-white border border-zinc-200 rounded-3xl p-8 sm:p-12 shadow-sm space-y-10">
+        <div className="max-w-4xl mx-auto bg-zinc-950/80 border border-white/10 rounded-3xl p-8 sm:p-14 shadow-2xl backdrop-blur-md space-y-10">
           {sections.map((sec) => (
-            <section key={sec.id} id={sec.id} className="space-y-3 pt-6 first:pt-0 border-t border-zinc-100 first:border-t-0">
-              <h2 className="text-lg sm:text-xl font-bold text-zinc-950 tracking-tight">
+            <section key={sec.id} id={sec.id} className="space-y-3 pt-8 first:pt-0 border-t border-white/10 first:border-t-0">
+              <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
                 {sec.title}
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed font-medium">
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
                 {sec.content}
               </p>
             </section>
           ))}
 
           {/* Contact Information */}
-          <div className="pt-8 border-t border-zinc-200 space-y-2">
-            <h3 className="text-sm font-bold text-zinc-900">Questions or Legal Inquiries?</h3>
-            <p className="text-xs text-zinc-500 font-medium">
+          <div className="pt-8 border-t border-white/10 space-y-2">
+            <h3 className="text-sm font-bold text-white">Questions or Legal Inquiries?</h3>
+            <p className="text-xs sm:text-sm text-zinc-400 font-normal">
               If you have any questions regarding these Terms or compliance, please reach out to our legal department at{' '}
-              <a href="mailto:legal@strayttix.live" className="text-[#E31B23] font-bold underline">
+              <a href="mailto:legal@strayttix.live" className="text-[#E31B23] font-bold underline hover:text-[#B91C1C]">
                 legal@strayttix.live
               </a>.
             </p>

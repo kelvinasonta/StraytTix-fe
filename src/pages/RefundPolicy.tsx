@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import { RefreshCw, CheckCircle2, AlertTriangle, Clock, HelpCircle, ArrowRight } from 'lucide-react';
+import { RefreshCw, CheckCircle2, AlertTriangle, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const RefundPolicy: React.FC = () => {
@@ -11,7 +11,7 @@ export const RefundPolicy: React.FC = () => {
     {
       title: 'Full Automatic Refund Guaranteed',
       icon: CheckCircle2,
-      color: 'text-emerald-600 bg-emerald-50 border-emerald-200',
+      color: 'text-emerald-400 bg-emerald-500/15 border-emerald-500/30',
       points: [
         'The event is permanently cancelled by the organizer with no rescheduled date.',
         'The event date is changed and you notify the organizer within 7 days of the announcement that you cannot attend.',
@@ -22,7 +22,7 @@ export const RefundPolicy: React.FC = () => {
     {
       title: 'Organizer Discretionary Policy',
       icon: AlertTriangle,
-      color: 'text-amber-600 bg-amber-50 border-amber-200',
+      color: 'text-amber-400 bg-amber-500/15 border-amber-500/30',
       points: [
         'Personal schedule conflicts, sickness, or change of mind are governed by the specific event’s stated policy (e.g. "Refunds available up to 7 days before event" or "All sales final").',
         'Organizers have the unilateral ability to approve manual refunds through their Organizer Orders portal at any time.',
@@ -33,70 +33,70 @@ export const RefundPolicy: React.FC = () => {
 
   const steps = [
     {
-      step: '1',
+      step: '01',
       title: 'Open Your Tickets',
       desc: 'Log in and navigate to My Tickets in your customer account dashboard.'
     },
     {
-      step: '2',
+      step: '02',
       title: 'Select Order',
       desc: 'Click on the specific event order you wish to request a refund or cancellation for.'
     },
     {
-      step: '3',
+      step: '03',
       title: 'Submit Request',
       desc: 'Click "Request Refund", choose your reason, and provide any pertinent details.'
     },
     {
-      step: '4',
+      step: '04',
       title: 'Receive Funds',
       desc: 'Once approved, refunds are credited back to your original payment method in 3–7 business days.'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-brand-bg flex flex-col justify-between">
+    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between selection:bg-[#E31B23] selection:text-white">
       <Navbar />
 
-      <main className="flex-1 py-16 px-6 max-w-5xl mx-auto w-full space-y-12">
+      <main className="flex-1 py-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 max-w-[1600px] mx-auto w-full space-y-12">
         {/* Header */}
-        <div className="space-y-4 text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-50 border border-red-150 text-[#E31B23] text-xs font-bold uppercase tracking-wider">
+        <div className="space-y-4 text-center max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#E31B23] text-xs font-bold uppercase tracking-wider backdrop-blur-md">
             <RefreshCw className="w-3.5 h-3.5" />
             Buyer Protection Guarantee
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-zinc-950 tracking-tight leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-[1.1]">
             Refund & Cancellation Policy
           </h1>
-          <p className="text-zinc-500 text-xs font-semibold">
+          <p className="text-zinc-400 text-xs sm:text-sm font-normal">
             Last Updated: {lastUpdated} • StraytTix Attendee Safety Standard
           </p>
         </div>
 
         {/* Introduction Callout */}
-        <div className="bg-white border border-zinc-200 rounded-3xl p-8 sm:p-10 shadow-sm space-y-6">
-          <h2 className="text-xl font-bold text-zinc-900 tracking-tight">
+        <div className="max-w-4xl mx-auto bg-zinc-950/70 border border-white/10 rounded-3xl p-8 sm:p-10 shadow-lg backdrop-blur-sm space-y-3">
+          <h2 className="text-xl font-bold text-white tracking-tight">
             Our Commitment to Transparent Ticketing
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed font-medium">
+          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
             At StraytTix, we recognize that live events are unique and unpredictable. We have designed our refund framework to ensure fairness for both attendees who invest in tickets and organizers who commit upfront capital to venues, artists, and production equipment.
           </p>
         </div>
 
         {/* Rule Categories */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
           {refundRules.map((category, idx) => (
-            <div key={idx} className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-xs space-y-5">
+            <div key={idx} className="bg-zinc-950/80 border border-white/10 rounded-3xl p-8 shadow-xl space-y-5 backdrop-blur-md">
               <div className="flex items-center gap-3">
-                <div className={`p-2.5 rounded-xl border ${category.color}`}>
+                <div className={`p-3 rounded-2xl border ${category.color}`}>
                   <category.icon className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-zinc-950">{category.title}</h3>
+                <h3 className="text-base font-bold text-white">{category.title}</h3>
               </div>
-              <ul className="space-y-3">
+              <ul className="space-y-3.5">
                 {category.points.map((point, pIdx) => (
-                  <li key={pIdx} className="flex items-start gap-2.5 text-xs text-zinc-600 font-medium leading-relaxed">
-                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 mt-1.5 flex-shrink-0" />
+                  <li key={pIdx} className="flex items-start gap-3 text-xs sm:text-sm text-zinc-400 font-normal leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E31B23] mt-2 flex-shrink-0" />
                     <span>{point}</span>
                   </li>
                 ))}
@@ -106,33 +106,33 @@ export const RefundPolicy: React.FC = () => {
         </div>
 
         {/* How to request refund steps */}
-        <div className="bg-white border border-zinc-200 rounded-3xl p-8 sm:p-10 shadow-sm space-y-8">
+        <div className="max-w-4xl mx-auto bg-zinc-950/80 border border-white/10 rounded-3xl p-8 sm:p-12 shadow-2xl backdrop-blur-md space-y-8">
           <div className="space-y-1">
-            <h2 className="text-xl font-bold text-zinc-950 tracking-tight">
+            <h2 className="text-xl font-bold text-white tracking-tight">
               How to Request a Refund in 4 Simple Steps
             </h2>
-            <p className="text-xs text-zinc-500 font-medium">
+            <p className="text-xs sm:text-sm text-zinc-400 font-normal">
               Self-service refund management directly inside your attendee dashboard.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {steps.map((item, idx) => (
-              <div key={idx} className="bg-zinc-50 border border-zinc-150 rounded-2xl p-6 space-y-3 relative">
-                <span className="text-2xl font-black text-[#E31B23]">{item.step}</span>
-                <h4 className="text-sm font-bold text-zinc-900">{item.title}</h4>
-                <p className="text-xs text-zinc-500 leading-relaxed font-medium">{item.desc}</p>
+              <div key={idx} className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 space-y-3 relative hover:border-white/20 transition-colors">
+                <span className="text-2xl font-mono font-black text-[#E31B23]">{item.step}</span>
+                <h4 className="text-sm font-bold text-white">{item.title}</h4>
+                <p className="text-xs text-zinc-400 leading-relaxed font-normal">{item.desc}</p>
               </div>
             ))}
           </div>
 
-          <div className="pt-4 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-xs text-zinc-500 font-medium">
-              <Clock className="w-4 h-4 text-zinc-400" />
+          <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-xs text-zinc-400 font-normal">
+              <Clock className="w-4 h-4 text-[#E31B23]" />
               <span>Standard bank settlement processing takes 3–7 business days depending on your bank provider.</span>
             </div>
             <Link to="/dashboard/tickets">
-              <button className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer">
+              <button className="px-6 py-2.5 bg-white text-zinc-950 hover:bg-zinc-200 text-xs font-black rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-white/10">
                 Go to My Tickets <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </Link>
@@ -140,17 +140,17 @@ export const RefundPolicy: React.FC = () => {
         </div>
 
         {/* Escalations & Safety */}
-        <div className="bg-red-50/60 border border-red-150 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="max-w-4xl mx-auto rounded-3xl p-8 sm:p-10 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-white/15 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2">
-            <h3 className="text-base font-bold text-zinc-950">
+            <h3 className="text-base sm:text-lg font-bold text-white">
               Organizer Unresponsive or Suspect an Event Fraud?
             </h3>
-            <p className="text-xs text-zinc-600 leading-relaxed font-medium max-w-xl">
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal max-w-xl">
               If an event has been cancelled or an organizer has failed to respond to your valid refund inquiry within 5 business days, our Trust & Safety team can intervene and execute an administrative reversal.
             </p>
           </div>
           <Link to="/report" className="flex-shrink-0">
-            <button className="px-6 py-3 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer">
+            <button className="px-6 py-3 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-2xl shadow-lg shadow-[#E31B23]/25 transition-all cursor-pointer whitespace-nowrap">
               File a Dispute / Report
             </button>
           </Link>
