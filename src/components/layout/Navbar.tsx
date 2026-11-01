@@ -17,13 +17,11 @@ import {
   Users,
   ChevronRight,
   ArrowRight,
-  User as UserIcon,
-  Globe
+  User as UserIcon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Logo } from '../ui/Logo';
 import { resolveOrganizerRole } from '../../utils/permissions';
-import { countriesApi, type Country, DEFAULT_COUNTRIES } from '../../api/countries';
 
 interface NavbarProps {
   isDashboard?: boolean;
@@ -34,55 +32,11 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   const { isAuthenticated, user, organizer, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
-  const [countryDropdown, setCountryDropdown] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  
-  // Country state loaded from backend API
-  const [countries, setCountries] = useState<Country[]>(DEFAULT_COUNTRIES);
-  const [selectedCountry, setSelectedCountry] = useState<Country>(() => {
-    const saved = localStorage.getItem('strayttix_selected_country');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        // Fall back to default
-      }
-    }
-    return DEFAULT_COUNTRIES[0];
-  });
 
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Load countries dynamically from backend API on mount
-  useEffect(() => {
-    countriesApi.getCountries()
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setCountries(data);
-          // If existing selection is in list, keep it; else set first
-          const match = data.find((c) => c.code === selectedCountry.code || c.name === selectedCountry.name);
-          if (match) {
-            setSelectedCountry(match);
-          }
-        }
-      })
-      .catch((err) => {
-        console.warn('Navbar: error loading countries from backend, using default list:', err);
-      });
-  }, []);
-
-  const handleSelectCountry = (c: Country) => {
-    setSelectedCountry(c);
-    localStorage.setItem('strayttix_selected_country', JSON.stringify(c));
-    setCountryDropdown(false);
-
-    // If currently on Discover page, dispatch a custom event or navigate with query parameter
-    if (location.pathname === '/discover') {
-      window.dispatchEvent(new CustomEvent('strayttix:country_changed', { detail: c }));
-    }
-  };
 
   useEffect(() => {
     let lastScrollY = window.scrollY || document.documentElement.scrollTop;
@@ -244,63 +198,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               : 'max-w-[1600px] h-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 rounded-none bg-transparent border border-transparent shadow-none'
         }`}
       >
-        {/* Brand Logo & Country Dropdown */}
-        <div className="flex items-center gap-4">
-          <Logo to={logoTarget} size="md" variant={isDarkCanvasPage ? 'light' : 'dark'} />
-
-          {/* Supported Country Selector Dropdown (Loaded from backend API) */}
-          {!isDashboardView && (
-            <div className="relative hidden sm:block">
-              <button
-                type="button"
-                onClick={() => setCountryDropdown(!countryDropdown)}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                  isDarkCanvasPage
-                    ? 'bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white border-white/15'
-                    : 'bg-zinc-100 hover:bg-zinc-200/80 text-zinc-700 hover:text-zinc-950 border-zinc-200'
-                }`}
-                title="Change Country"
-              >
-                <span>{selectedCountry.flag || '🌐'}</span>
-                <span className="font-mono text-[11px] uppercase tracking-wider">{selectedCountry.code || 'NG'}</span>
-                <ChevronDown className="w-3 h-3 text-zinc-400" />
-              </button>
-
-              {countryDropdown && (
-                <div 
-                  className={`absolute left-0 mt-2 w-56 rounded-2xl p-2 z-50 shadow-2xl border animate-in fade-in zoom-in-95 duration-150 max-h-80 overflow-y-auto ${
-                    isDarkCanvasPage
-                      ? 'bg-[#0E0E14] border-white/15 text-white'
-                      : 'bg-white border-zinc-200 text-zinc-900'
-                  }`}
-                >
-                  <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-400 border-b border-white/10 mb-1">
-                    Select Your Country
-                  </div>
-                  {countries.map((c) => (
-                    <button
-                      key={c.code}
-                      onClick={() => handleSelectCountry(c)}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                        selectedCountry.code === c.code
-                          ? 'bg-[#E31B23] text-white font-bold'
-                          : isDarkCanvasPage
-                            ? 'text-zinc-300 hover:bg-white/10 hover:text-white'
-                            : 'text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <span>{c.flag || '🌐'}</span>
-                        <span className="truncate">{c.name}</span>
-                      </div>
-                      <span className="text-[10px] font-mono opacity-80">{c.currency || c.code}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        {/* Brand Logo */}
+        <Logo to={logoTarget} size="md" variant={isDarkCanvasPage ? 'light' : 'dark'} />
 
         {/* Center Desktop Navigation: Different for Guest vs Auth */}
         <div className={`hidden lg:flex items-center transition-[gap] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
@@ -600,25 +499,6 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
             ? 'bg-[#0E0E14] border-white/15 text-white'
             : 'bg-white border-slate-200 text-slate-800'
         }`}>
-          {/* Mobile Country Selector */}
-          <div className="flex items-center justify-between pb-3 border-b border-white/10">
-            <span className="text-xs font-mono uppercase text-zinc-400">Country:</span>
-            <select
-              value={selectedCountry.code}
-              onChange={(e) => {
-                const c = countries.find(item => item.code === e.target.value);
-                if (c) handleSelectCountry(c);
-              }}
-              className="bg-white/10 border border-white/20 text-white rounded-xl text-xs px-3 py-1.5 focus:outline-none"
-            >
-              {countries.map((c) => (
-                <option key={c.code} value={c.code} className="bg-zinc-900 text-white">
-                  {c.flag} {c.name} ({c.code})
-                </option>
-              ))}
-            </select>
-          </div>
-
           {/* Nav links */}
           <div className="flex flex-col gap-1">
             {currentNavLinks.map((link) => (

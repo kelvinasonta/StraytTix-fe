@@ -32,13 +32,13 @@ export const About: React.FC = () => {
     {
       num: '01',
       title: 'Anti-Scalping by Architecture',
-      desc: 'We reject predatory second-market scalpers and bot swarms. Every ticket pass on Eventa is minted directly by the verified organizer with cryptographically signed QR tokens.',
+      desc: 'We reject predatory second-market scalpers and bot swarms. Every ticket pass on StraytTix is minted directly by the verified organizer with cryptographically signed QR tokens.',
       badge: 'Fair-Access First'
     },
     {
       num: '02',
       title: 'Zero-Signal Resilience',
-      desc: 'Venues are notorious dead zones for cellular coverage. Eventa was architected from day one with offline caching, meaning your ticket always displays and your door scanner never fails.',
+      desc: 'Venues are notorious dead zones for cellular coverage. StraytTix was architected from day one with offline caching, meaning your ticket always displays and your door scanner never fails.',
       badge: 'Offline Engineered'
     },
     {
@@ -75,6 +75,37 @@ export const About: React.FC = () => {
       year: 'TODAY & BEYOND',
       title: 'The modern standard for live events',
       desc: 'A full-stack ecosystem uniting attendee discovery, sub-second gate check-in, organizer analytics, and native mobile wallet passes.'
+    }
+  ];
+
+  const team = [
+    {
+      name: 'Kelvin Vance',
+      role: 'Founder & Chief Executive Officer',
+      bio: 'Product architect obsessed with live performance culture, offline resilience, and high-frequency fintech systems.',
+      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
+      social: 'https://twitter.com'
+    },
+    {
+      name: 'Tariq Al-Mansoor',
+      role: 'Head of Infrastructure & Cryptography',
+      bio: 'Distributed systems veteran specializing in dynamic rotating QR barcodes, edge caching, and zero-downtime gate telemetry.',
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80',
+      social: 'https://twitter.com'
+    },
+    {
+      name: 'Amara Okafor',
+      role: 'VP of Organizer Growth & Culture',
+      bio: 'Leading partnerships with headline music festivals, warehouse clubs, indie promoters, and major cultural conferences.',
+      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&auto=format&fit=crop&q=80',
+      social: 'https://twitter.com'
+    },
+    {
+      name: 'Elena Rostova',
+      role: 'Lead Mobile & Device Experience',
+      bio: 'Designing tactile ticket passes, offline wallet storage, and sub-100ms hardware scanner workflows for gate teams.',
+      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&auto=format&fit=crop&q=80',
+      social: 'https://twitter.com'
     }
   ];
 
@@ -248,6 +279,68 @@ export const About: React.FC = () => {
                 </p>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 5.5 LEADERSHIP & TEAM: High-Assurance Team Section                         */}
+        {/* ========================================================================= */}
+        <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-20 sm:py-28 bg-[#0A0A0E] border-t border-white/5">
+          <div className="max-w-[1600px] mx-auto space-y-14">
+            
+            <div className="text-center space-y-4 max-w-2xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono font-bold text-zinc-300">
+                <Users className="w-3.5 h-3.5 text-[#E31B23]" />
+                <span>BUILDERS & CULTURE LEADS</span>
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
+                The team engineering the future of live events
+              </h2>
+              <p className="text-zinc-400 text-sm sm:text-base font-normal leading-relaxed">
+                A multidisciplinary collective of distributed systems engineers, nightlife producers, and event fintech architects.
+              </p>
+            </div>
+
+            {/* Team Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
+              {team.map((member, idx) => (
+                <div
+                  key={idx}
+                  className="group rounded-3xl bg-zinc-950/70 border border-white/10 hover:border-white/25 p-5 space-y-4 transition-all duration-300 shadow-xl hover:-translate-y-1.5 backdrop-blur-md"
+                >
+                  {/* Portrait photo container */}
+                  <div className="relative w-full h-72 sm:h-80 rounded-2xl overflow-hidden bg-zinc-900 border border-white/10">
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="w-full h-full object-cover object-center filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                    
+                    {/* Floating pill badge */}
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <span className="px-3 py-1 rounded-full bg-white text-zinc-950 text-[10px] font-black uppercase tracking-wider shadow-md inline-block">
+                        {member.role.split(' ')[0]}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Details */}
+                  <div className="space-y-1.5">
+                    <h3 className="text-lg font-black text-white group-hover:text-[#E31B23] transition-colors">
+                      {member.name}
+                    </h3>
+                    <p className="text-xs font-bold text-[#E31B23] font-mono tracking-wide">
+                      {member.role}
+                    </p>
+                    <p className="text-xs text-zinc-400 font-normal leading-relaxed pt-1">
+                      {member.bio}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
           </div>
         </section>
 
