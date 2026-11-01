@@ -19,7 +19,10 @@ import {
   Layers,
   Code2,
   Radio,
-  Workflow
+  Workflow,
+  Sparkles,
+  Compass,
+  Check
 } from 'lucide-react';
 
 export const Home: React.FC = () => {
@@ -363,174 +366,297 @@ export const Home: React.FC = () => {
         </section>
 
         {/* ========================================================================= */}
-        {/* 5. ENTERPRISE JETRON-INSPIRED EVENT TECH CAPABILITIES                     */}
+        {/* 5. TIX & JETRON DELIVERABLE: ALL-IN-ONE POWERFUL CAPABILITIES              */}
+        {/*    Structured around what the platform delivers to Creators & Attendees   */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-28 bg-[#08080B] text-white border-t border-zinc-900 relative overflow-hidden">
-          {/* Subtle Ambient Backdrops */}
-          <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-[#E31B23]/10 blur-[150px] rounded-full pointer-events-none" />
-          <div className="absolute bottom-0 right-0 w-[450px] h-[450px] bg-indigo-500/10 blur-[150px] rounded-full pointer-events-none" />
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-28 bg-[#090A0E] text-white relative overflow-hidden">
+          {/* Subtle Dynamic Ambient Lighting */}
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#E31B23]/10 blur-[160px] rounded-full pointer-events-none" />
+          <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none" />
 
-          <div className="max-w-6xl mx-auto space-y-16 relative z-10">
-            {/* Section Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <div className="space-y-2.5 max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.08] border border-white/15 text-xs font-mono font-bold text-zinc-300">
-                  <Workflow className="w-3.5 h-3.5 text-[#E31B23]" />
-                  <span>Next-Gen Event Infrastructure</span>
-                </div>
-                <h2 className="text-3xl sm:text-5xl font-black text-white tracking-[-0.03em] leading-tight">
-                  High-capacity tools built for modern live productions.
-                </h2>
-                <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">
-                  From high-traffic drop waiting rooms to precision venue seat selection, run stadium-level events with enterprise reliability.
-                </p>
+          <div className="max-w-6xl mx-auto space-y-20 relative z-10">
+
+            {/* Main Header */}
+            <div className="text-center max-w-3xl mx-auto space-y-4">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/15 text-xs font-mono font-bold text-zinc-300">
+                <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
+                <span>What We Deliver</span>
               </div>
-
-              <Link
-                to="/pricing"
-                className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-white hover:text-zinc-300 transition-colors shrink-0 group border-b border-white/20 pb-1"
-              >
-                <span>Explore all organizer features</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Link>
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-[-0.035em] leading-[1.12]">
+                Everything you need to discover, sell, and run live events.
+              </h2>
+              <p className="text-zinc-400 text-sm sm:text-base md:text-lg leading-relaxed text-balance">
+                Built specifically for creators, promoters, and event-goers across Nigeria and beyond. High-speed checkouts, zero gate queues, and instant bank settlements.
+              </p>
             </div>
 
-            {/* 4 Feature Pillars Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            {/* Split Deliverable Grid: Left (Attendees) & Right (Organizers) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               
-              {/* Feature 1: Interactive Seat Maps */}
+              {/* Pillar A: For Attendees */}
               <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ y: -6 }}
-                className="p-8 sm:p-10 rounded-[2rem] bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all duration-300 space-y-6 flex flex-col justify-between"
+                className="rounded-[2.25rem] bg-white/[0.03] border border-white/10 p-8 sm:p-10 flex flex-col justify-between hover:border-white/20 transition-all duration-300 space-y-8"
               >
-                <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#E31B23] to-[#B91C1C] flex items-center justify-center text-white shadow-lg shadow-[#E31B23]/25">
-                    <Layers className="w-6 h-6" />
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-bold">
-                      Venue Architecture
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <span className="px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold">
+                      FOR ATTENDEES
                     </span>
-                    <h3 className="text-2xl font-black text-white tracking-tight">
-                      Interactive 3D Seat Maps
+                    <Compass className="w-5 h-5 text-zinc-400" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                      Find your vibe. Lock your pass without hassle.
                     </h3>
-                    <p className="text-sm text-zinc-400 leading-relaxed font-normal">
-                      Empower attendees to hand-pick their exact row, tier, and table. Custom multi-tiered venue maps reflect live real-time inventory locks with sub-second sync.
+                    <p className="text-sm text-zinc-400 leading-relaxed">
+                      Discover music festivals, secret raves, comedy specials, and summits. Buy tickets in seconds using your preferred local payment methods.
                     </p>
                   </div>
+
+                  {/* Feature Checklist */}
+                  <div className="space-y-3.5 pt-2">
+                    {[
+                      { title: 'Zero Surprise Service Fees', desc: 'What you see is what you pay. Transparent pricing on every ticket tier.' },
+                      { title: 'Multiple Local Payment Options', desc: 'Pay smoothly with Naira Debit Cards, Apple Pay, Bank Transfer, or USSD.' },
+                      { title: 'Instant Offline Passes', desc: 'Access your ticket QR code anytime even when venue cellular reception drops.' },
+                      { title: 'Anti-Scalp Protection', desc: 'Single-issuance cryptographic barcodes stop fraudulent ticket scalpers cold.' }
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                          <Check className="w-3 h-3" />
+                        </div>
+                        <div>
+                          <p className="text-xs sm:text-sm font-bold text-zinc-200">{item.title}</p>
+                          <p className="text-[11px] sm:text-xs text-zinc-500">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Micro Visual UI Tag */}
-                <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-zinc-400">
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Reserved Table Tiers</span>
-                  <span className="text-zinc-500">DYNAMIC SEATS</span>
-                </div>
+                <Link
+                  to="/discover"
+                  className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-sm transition-all border border-white/10 hover:border-white/25 active:scale-98"
+                >
+                  <span>Explore Live Events</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
               </motion.div>
 
-              {/* Feature 2: High-Traffic Managed Queues */}
+              {/* Pillar B: For Creators & Organizers */}
               <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-                whileHover={{ y: -6 }}
-                className="p-8 sm:p-10 rounded-[2rem] bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all duration-300 space-y-6 flex flex-col justify-between"
+                className="rounded-[2.25rem] bg-gradient-to-b from-[#E31B23]/10 to-white/[0.02] border border-[#E31B23]/25 p-8 sm:p-10 flex flex-col justify-between hover:border-[#E31B23]/40 transition-all duration-300 space-y-8"
               >
-                <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-lg shadow-amber-500/25">
-                    <Radio className="w-6 h-6" />
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400 font-bold">
-                      FairPass Queue Protection
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <span className="px-3.5 py-1 rounded-full bg-[#E31B23]/20 border border-[#E31B23]/30 text-red-400 text-xs font-mono font-bold">
+                      FOR CREATORS &amp; ORGANIZERS
                     </span>
-                    <h3 className="text-2xl font-black text-white tracking-tight">
-                      Managed High-Drop Waiting Rooms
+                    <Workflow className="w-5 h-5 text-red-400" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                      Publish once. Sell out fast. Get paid instantly.
                     </h3>
-                    <p className="text-sm text-zinc-400 leading-relaxed font-normal">
-                      When 20,000+ fans arrive for a viral headliner drop, our intelligent virtual queue protects inventory from bot sweeps and eliminates checkout crashes.
+                    <p className="text-sm text-zinc-400 leading-relaxed">
+                      All the infrastructure required to host small community meetups or 50,000-capacity arena concerts with bank-grade reliability.
                     </p>
                   </div>
-                </div>
 
-                {/* Micro Visual UI Tag */}
-                <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-zinc-400">
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Bot-Proof Rate Limiting</span>
-                  <span className="text-zinc-500">0% DOWNTIME</span>
-                </div>
-              </motion.div>
-
-              {/* Feature 3: Embeddable Checkout (Jetron Fluid Equivalent) */}
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-                whileHover={{ y: -6 }}
-                className="p-8 sm:p-10 rounded-[2rem] bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all duration-300 space-y-6 flex flex-col justify-between"
-              >
-                <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25">
-                    <Code2 className="w-6 h-6" />
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-bold">
-                      Direct Embeds &amp; APIs
-                    </span>
-                    <h3 className="text-2xl font-black text-white tracking-tight">
-                      White-Label Web Checkout
-                    </h3>
-                    <p className="text-sm text-zinc-400 leading-relaxed font-normal">
-                      Keep buyers directly on your official festival website. Embed our frictionless 2-step checkout widget or connect via REST APIs &amp; Webhooks.
-                    </p>
+                  {/* Feature Checklist */}
+                  <div className="space-y-3.5 pt-2">
+                    {[
+                      { title: 'Sub-5 Minute Setup', desc: 'Create custom ticket tiers, early-bird limits, and promo codes effortlessly.' },
+                      { title: 'Automated Instant Bank Payouts', desc: 'Revenue settled directly into your Nigerian bank account with zero manual delays.' },
+                      { title: 'High-Density Check-in Scanner', desc: 'Turn any smartphone into a gate terminal scanning passes in under 0.2 seconds.' },
+                      { title: 'White-Label Embeds & APIs', desc: 'Embed our checkout directly on your custom website domain with zero code.' }
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                        <div className="w-5 h-5 rounded-full bg-[#E31B23]/20 text-[#E31B23] flex items-center justify-center shrink-0 mt-0.5">
+                          <Check className="w-3 h-3" />
+                        </div>
+                        <div>
+                          <p className="text-xs sm:text-sm font-bold text-zinc-200">{item.title}</p>
+                          <p className="text-[11px] sm:text-xs text-zinc-500">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Micro Visual UI Tag */}
-                <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-zinc-400">
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Custom Domain Native</span>
-                  <span className="text-zinc-500">REST API</span>
-                </div>
-              </motion.div>
-
-              {/* Feature 4: Gate Scanner App & Team Access */}
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-                whileHover={{ y: -6 }}
-                className="p-8 sm:p-10 rounded-[2rem] bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all duration-300 space-y-6 flex flex-col justify-between"
-              >
-                <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-purple-500/25">
-                    <Users2 className="w-6 h-6" />
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-[11px] font-mono uppercase tracking-wider text-purple-400 font-bold">
-                      Team &amp; Gate Access
-                    </span>
-                    <h3 className="text-2xl font-black text-white tracking-tight">
-                      Multi-Staff Door Control
-                    </h3>
-                    <p className="text-sm text-zinc-400 leading-relaxed font-normal">
-                      Deploy 20 gate bouncers and ticket scanners in seconds without sharing master credentials. Assign role permissions, staff PINs, and monitor door throughput live.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Micro Visual UI Tag */}
-                <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-zinc-400">
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Role-Based Staff PINs</span>
-                  <span className="text-zinc-500">OFFLINE SYNC</span>
-                </div>
+                <Link
+                  to="/pricing"
+                  className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C9141B] text-white font-bold text-sm transition-all shadow-lg shadow-[#E31B23]/30 active:scale-98"
+                >
+                  <span>Explore Organizer Tools &amp; Pricing</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
               </motion.div>
 
             </div>
+
+            {/* 4 Feature Pillars Grid (Jetron + Tix Enterprise Capabilities) */}
+            <div className="pt-8 space-y-8">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div className="space-y-1">
+                  <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+                    Enterprise Event Operations
+                  </h3>
+                  <p className="text-zinc-400 text-xs sm:text-sm">
+                    Powerful features engineered for serious production crews, event agencies, and high-demand drops.
+                  </p>
+                </div>
+                <div className="text-xs font-mono text-zinc-500">
+                  POWERED BY THE STRAYTTIX PLATFORM
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                {/* 1. Interactive 3D Seat Maps */}
+                <motion.div 
+                  whileHover={{ y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between space-y-4"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E31B23] to-[#B91C1C] flex items-center justify-center text-white shadow-md shadow-[#E31B23]/25">
+                    <Layers className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <h4 className="text-base font-bold text-white">Interactive Seat Maps</h4>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      Enable attendees to reserve exact rows, VIP tables, or floor zones with real-time seat locks.
+                    </p>
+                  </div>
+                  <div className="pt-3 border-t border-white/5 text-[11px] font-mono text-zinc-500">
+                    REAL-TIME SYNC
+                  </div>
+                </motion.div>
+
+                {/* 2. Virtual Waiting Rooms */}
+                <motion.div 
+                  whileHover={{ y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between space-y-4"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-md shadow-amber-500/25">
+                    <Radio className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <h4 className="text-base font-bold text-white">Traffic Waiting Rooms</h4>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      Handle 20,000+ simultaneous fans during viral ticket drops without checkout timeouts or crashes.
+                    </p>
+                  </div>
+                  <div className="pt-3 border-t border-white/5 text-[11px] font-mono text-zinc-500">
+                    BOT-PROOF QUEUES
+                  </div>
+                </motion.div>
+
+                {/* 3. White-Label Checkout */}
+                <motion.div 
+                  whileHover={{ y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between space-y-4"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-md shadow-emerald-500/25">
+                    <Code2 className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <h4 className="text-base font-bold text-white">Embeddable Checkout</h4>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      Keep fans on your own domain with frictionless inline ticket checkout widgets, webhooks, and REST APIs.
+                    </p>
+                  </div>
+                  <div className="pt-3 border-t border-white/5 text-[11px] font-mono text-zinc-500">
+                    REST API &amp; WEBHOOKS
+                  </div>
+                </motion.div>
+
+                {/* 4. Multi-Staff Door Control */}
+                <motion.div 
+                  whileHover={{ y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between space-y-4"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-purple-500/25">
+                    <Users2 className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <h4 className="text-base font-bold text-white">Multi-Staff Scanner PINs</h4>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      Safely assign bouncers and check-in crew PIN codes to scan passes without access to finances.
+                    </p>
+                  </div>
+                  <div className="pt-3 border-t border-white/5 text-[11px] font-mono text-zinc-500">
+                    ROLE PERMISSIONS
+                  </div>
+                </motion.div>
+
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 6. COMPARISON: WHY CREATORS & ATTENDEES CHOOSE US OVER TRADITIONAL SITES   */}
+        {/* ========================================================================= */}
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-24 bg-white border-b border-zinc-100">
+          <div className="max-w-6xl mx-auto space-y-14">
+            
+            <div className="text-center max-w-2xl mx-auto space-y-3">
+              <span className="text-xs font-mono uppercase tracking-widest text-[#E31B23] font-bold">
+                Why Switch to StraytTix
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-black text-zinc-950 tracking-[-0.03em]">
+                Built different. By design.
+              </h2>
+              <p className="text-zinc-600 text-sm sm:text-base">
+                See how we compare against legacy ticketing platforms and manual transfer arrangements.
+              </p>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[640px]">
+                <thead>
+                  <tr className="border-b border-zinc-200">
+                    <th className="py-4 px-6 text-sm font-bold text-zinc-500 uppercase tracking-wider font-mono">Platform Feature</th>
+                    <th className="py-4 px-6 text-base font-black text-[#E31B23] bg-red-50/60 rounded-t-2xl">StraytTix</th>
+                    <th className="py-4 px-6 text-sm font-bold text-zinc-500">Traditional Sites</th>
+                    <th className="py-4 px-6 text-sm font-bold text-zinc-500">Manual Transfers</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-150 text-sm">
+                  {[
+                    { feature: 'Ticket Scalp & Duplicate Protection', us: '100% Cryptographic QR Locks', them: 'Basic static barcodes', manual: 'Zero protection' },
+                    { feature: 'Payout Timeframe', us: 'Instant Automated Bank Transfers', them: '5 - 14 Business Days', manual: 'Messy manual tracking' },
+                    { feature: 'High-Demand Drop Queue', us: 'Managed Virtual Waiting Room', them: 'Crashes on high traffic', manual: 'DMs flood & freeze' },
+                    { feature: 'Door Check-in Latency', us: '< 0.2s with Offline Sync', them: 'Slow paper / web lookups', manual: 'Manual name paper list' },
+                    { feature: 'Hidden Buyer Checkout Fees', us: 'Zero Surprise Markups', them: '10% - 25% added at payment', manual: 'None (high fraud risk)' },
+                    { feature: 'Custom Website Embeds', us: 'Native 2-step Widget & REST API', them: 'Redirects off your website', manual: 'Not possible' }
+                  ].map((row, idx) => (
+                    <tr key={idx} className="hover:bg-zinc-50/80 transition-colors">
+                      <td className="py-4 px-6 font-bold text-zinc-900">{row.feature}</td>
+                      <td className="py-4 px-6 font-bold text-[#E31B23] bg-red-50/40">{row.us}</td>
+                      <td className="py-4 px-6 text-zinc-500">{row.them}</td>
+                      <td className="py-4 px-6 text-zinc-400">{row.manual}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
           </div>
         </section>
 
