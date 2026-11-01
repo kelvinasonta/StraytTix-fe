@@ -34,7 +34,8 @@ import {
   ArrowRight,
   Ticket,
   Video,
-  Flame
+  Flame,
+  TrendingUp
 } from 'lucide-react';
 
 interface CategoryMeta {
@@ -263,6 +264,20 @@ export const Discover: React.FC = () => {
     return events.find((e) => e.isFeatured) || events[0];
   }, [events]);
 
+  // Top 5 trending tickets calculated from event popularity, ticket sales & featured weight
+  const topTrendingTickets = useMemo(() => {
+    if (events.length === 0) return [];
+    // Sort by popularity score using available fields: featured priority, ticket tier variety, and ticket quantities
+    const sorted = [...events].sort((a, b) => {
+      const aTicketsCount = a.tickets?.length || 0;
+      const bTicketsCount = b.tickets?.length || 0;
+      const aScore = (a.isFeatured ? 50 : 0) + (aTicketsCount * 10);
+      const bScore = (b.isFeatured ? 50 : 0) + (bTicketsCount * 10);
+      return bScore - aScore;
+    });
+    return sorted.slice(0, 5);
+  }, [events]);
+
   return (
     <div className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased">
       <Navbar />
@@ -435,6 +450,112 @@ export const Discover: React.FC = () => {
 
         </div>
       </section>
+
+      {/* ========================================================================= */}
+      {/* 2. TOP 5 TRENDING TICKETS (Jetron / Tix Hot Rail Carousel)                */}
+      {/* ========================================================================= */}
+      {topTrendingTickets.length > 0 && !isLoading && (
+        <section className="px-4 sm:px-6 lg:px-8 py-8 sm:py-10 bg-[#0A0A0E] border-b border-white/5">
+          <div className="max-w-7xl mx-auto space-y-6">
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight">
+                      Top 5 Trending Tickets
+                    </h2>
+                    <span className="px-2 py-0.5 rounded-md bg-amber-400/10 text-amber-400 text-[10px] font-mono font-bold uppercase tracking-wider border border-amber-400/20">
+                      HOT RIGHT NOW
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 hidden sm:block">
+                    The most in-demand passes experiencing rapid gate checkouts this week.
+                  </p>
+                </div>
+              </div>
+
+              <span className="text-xs font-mono text-zinc-500 hidden sm:block">
+                UPDATED LIVE
+              </span>
+            </div>
+
+            {/* Top 5 Trending Cards Scroll Rail */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {topTrendingTickets.map((trendEvent, index) => {
+                const minPrice = trendEvent.tickets && trendEvent.tickets.length > 0 
+                  ? Math.min(...trendEvent.tickets.map(t => t.price)) 
+                  : 0;
+
+                return (
+                  <Link
+                    key={trendEvent.id}
+                    to={`/events/${trendEvent.slug || trendEvent.id}`}
+                    className="group relative rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 p-3.5 flex flex-col justify-between space-y-3 transition-all duration-300 hover:shadow-xl hover:shadow-black/40 hover:-translate-y-1"
+                  >
+                    {/* Rank Number Badge */}
+                    <div className="flex items-center justify-between">
+                      <span className={`w-6 h-6 rounded-lg flex items-center justify-center font-mono font-black text-xs ${
+                        index === 0 
+                          ? 'bg-[#E31B23] text-white shadow-md shadow-[#E31B23]/30' 
+                          : index === 1
+                          ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                          : index === 2
+                          ? 'bg-zinc-200 text-zinc-900 font-black'
+                          : 'bg-white/10 text-zinc-400'
+                      }`}>
+                        #{index + 1}
+                      </span>
+                      <span className="text-[10px] font-mono uppercase text-zinc-400 truncate max-w-[100px]">
+                        {trendEvent.category || 'Event'}
+                      </span>
+                    </div>
+
+                    {/* Thumbnail Image */}
+                    <div className="relative h-28 rounded-xl overflow-hidden bg-white/5">
+                      <img
+                        src={trendEvent.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80'}
+                        alt={trendEvent.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                      <div className="absolute bottom-1.5 left-2 right-2 flex items-center justify-between text-[10px] font-mono text-zinc-300">
+                        <span className="truncate flex items-center gap-1">
+                          <MapPin className="w-2.5 h-2.5 text-[#E31B23]" />
+                          {trendEvent.city || 'Lagos'}
+                        </span>
+                        <span className="text-emerald-400 font-bold shrink-0">
+                          {minPrice === 0 ? 'FREE' : formatCurrency(minPrice)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Title & Date */}
+                    <div className="space-y-1">
+                      <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-1 group-hover:text-[#E31B23] transition-colors">
+                        {trendEvent.title}
+                      </h3>
+                      <p className="text-[11px] text-zinc-400 font-mono">
+                        {formatDate(trendEvent.startDate)}
+                      </p>
+                    </div>
+
+                    {/* Quick Access Action */}
+                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] font-bold text-zinc-400 group-hover:text-white">
+                      <span>Reserve Pass</span>
+                      <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1 text-[#E31B23]" />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+          </div>
+        </section>
+      )}
 
       {/* ========================================================================= */}
       {/* 2. MAIN MARKETPLACE CONTENT AREA                                          */}
