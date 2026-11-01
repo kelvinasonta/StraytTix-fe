@@ -162,21 +162,22 @@ export const Home: React.FC = () => {
 
         {/* ========================================================================= */}
         {/* 2. FLOATING DISCOVERY ISLAND: Architectural Double-Bezel Console          */}
+        {/*    Straddles exactly across the boundary line between Hero and Next Sec  */}
         {/* ========================================================================= */}
-        <section id="explore" className="relative z-20 px-4 sm:px-6 lg:px-8 -mt-7 sm:-mt-9">
+        <section id="explore" className="relative z-30 px-4 sm:px-6 lg:px-8 -my-8 sm:-my-10">
           <motion.div 
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-5xl mx-auto"
+            className="max-w-4xl mx-auto"
           >
-            {/* Outer Machine Bezel */}
-            <div className="p-1.5 sm:p-2 rounded-3xl bg-zinc-900/10 backdrop-blur-xl border border-black/5 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.18)]">
+            {/* Outer Machine Bezel with elevation shadow to pop off the seam */}
+            <div className="p-2 sm:p-2.5 rounded-3xl bg-zinc-900/40 backdrop-blur-2xl border border-white/20 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.45)] ring-1 ring-black/10">
               {/* Inner Core */}
               <form 
                 onSubmit={handleSearchSubmit}
-                className="bg-white rounded-[1.35rem] p-2 sm:p-2.5 border border-zinc-200/80 flex flex-col md:flex-row items-stretch md:items-center gap-2 transition-all focus-within:border-zinc-400"
+                className="bg-white rounded-[1.35rem] p-2 sm:p-2.5 border border-zinc-200/90 shadow-sm flex flex-col md:flex-row items-stretch md:items-center gap-2 transition-all focus-within:border-zinc-400 focus-within:shadow-md"
               >
                 {/* Search Keyword Input */}
                 <div className="flex items-center gap-3 px-3.5 py-2.5 flex-1 min-w-0">
@@ -206,7 +207,7 @@ export const Home: React.FC = () => {
         {/* ========================================================================= */}
         {/* 4. THE STRAYTTIX HIGH-ASSURANCE STANDARD: Architectural Bento             */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-white border-y border-zinc-100">
+        <section className="px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 sm:pb-24 bg-white border-y border-zinc-100">
           <div className="max-w-6xl mx-auto space-y-14">
             
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
