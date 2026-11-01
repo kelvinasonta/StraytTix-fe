@@ -249,15 +249,15 @@ export const EventDetails: React.FC = () => {
     navigate(`/events/${event.slug || event.id}/tickets`);
   };
 
-  const pageBgClass = 'bg-[#F8F9FB] text-[#111827]';
+  const pageBgClass = 'bg-[#070709] text-white';
 
-  const telemetryCardClass = 'bg-white border border-[#E5E7EB] text-zinc-950';
+  const telemetryCardClass = 'bg-zinc-950/80 border border-white/10 text-white backdrop-blur-md';
 
-  const telemetryIconClass = 'bg-red-50 text-[#E31B23]';
+  const telemetryIconClass = 'bg-[#E31B23]/15 text-[#E31B23] border border-[#E31B23]/30';
 
-  const handshakeNavClass = 'bg-white/95 border-zinc-200/90 text-zinc-800 shadow-xs';
+  const handshakeNavClass = 'bg-zinc-950/80 border-white/10 text-zinc-300 backdrop-blur-md shadow-lg';
 
-  const handshakePillActiveClass = 'bg-zinc-950 text-white shadow-xs';
+  const handshakePillActiveClass = 'bg-white text-zinc-950 shadow-md font-black';
 
   const tickets = rawTickets.length > 0
     ? rawTickets
@@ -1190,19 +1190,19 @@ export const EventDetails: React.FC = () => {
     <div className={`min-h-screen ${pageBgClass} flex flex-col justify-between transition-colors duration-500`}>
       <Navbar />
       
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 space-y-8 lg:space-y-12 pb-32 lg:pb-16">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-6 sm:py-8 lg:py-10 space-y-8 lg:space-y-12 pb-32 lg:pb-16">
         
         {/* ========================================================================= */}
         {/* 1. BREADCRUMBS NAVIGATION */}
         {/* ========================================================================= */}
         <nav className="flex items-center gap-2 text-xs font-semibold text-zinc-400 overflow-x-auto whitespace-nowrap">
-          <Link to="/" className="hover:text-zinc-900 transition-colors">Home</Link>
-          <ChevronRight className="w-3.5 h-3.5 text-zinc-300 flex-shrink-0" />
-          <Link to="/discover" className="hover:text-zinc-900 transition-colors">Discover Events</Link>
-          <ChevronRight className="w-3.5 h-3.5 text-zinc-300 flex-shrink-0" />
-          <span className="text-zinc-600 font-bold">{categoryLabel}</span>
-          <ChevronRight className="w-3.5 h-3.5 text-zinc-300 flex-shrink-0" />
-          <span className="text-zinc-950 font-bold truncate max-w-[220px]">{event.title}</span>
+          <Link to="/" className="hover:text-white transition-colors">Home</Link>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
+          <Link to="/discover" className="hover:text-white transition-colors">Discover Events</Link>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
+          <span className="text-zinc-300 font-bold">{categoryLabel}</span>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
+          <span className="text-white font-bold truncate max-w-[220px]">{event.title}</span>
         </nav>
 
         {/* ========================================================================= */}
@@ -1362,7 +1362,7 @@ export const EventDetails: React.FC = () => {
                 className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all whitespace-nowrap cursor-pointer ${
                   activeTab === tab.id
                     ? handshakePillActiveClass
-                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+                    : 'text-zinc-400 hover:text-white hover:bg-white/10'
                 }`}
               >
                 {tab.label}

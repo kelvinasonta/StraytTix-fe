@@ -210,15 +210,37 @@ export const EventCard: React.FC<EventCardProps> = ({
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-transparent pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent pointer-events-none" />
 
-      {/* Top Floating Bar: Crisp White Category Pill & Favorite Action Button */}
-      <div className="relative z-10 flex items-center justify-between">
-        <span className="px-3.5 py-1.5 rounded-full bg-white text-zinc-950 font-bold text-xs uppercase tracking-wider shadow-lg border border-white">
-          {categoryName}
-        </span>
+      {/* Top Floating Bar: Crisp White Category Pill, Urgency Tag & Favorite Action Button */}
+      <div className="relative z-10 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="px-3.5 py-1.5 rounded-full bg-white text-zinc-950 font-black text-xs uppercase tracking-wider shadow-lg border border-white">
+            {categoryName}
+          </span>
+
+          {/* Urgency Pressure Badge */}
+          {event.tickets && event.tickets.length > 0 && (() => {
+            const totalRemaining = event.tickets.reduce((acc, t) => acc + (t.remainingQuantity ?? t.quantity ?? 100), 0);
+            if (totalRemaining > 0 && totalRemaining <= 15) {
+              return (
+                <span className="px-2.5 py-1 rounded-full bg-[#E31B23] text-white font-mono font-black text-[10px] uppercase tracking-wider shadow-md animate-pulse">
+                  Only {totalRemaining} Left
+                </span>
+              );
+            }
+            if ((event as any).isFeatured) {
+              return (
+                <span className="px-2.5 py-1 rounded-full bg-amber-400 text-zinc-950 font-black text-[10px] uppercase tracking-wider shadow-md">
+                  Selling Fast 🔥
+                </span>
+              );
+            }
+            return null;
+          })()}
+        </div>
 
         <button 
           onClick={handleFavoriteClick}
-          className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-xl border border-white/30 text-white flex items-center justify-center hover:bg-white hover:text-[#E31B23] hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+          className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-xl border border-white/30 text-white flex items-center justify-center hover:bg-white hover:text-[#E31B23] hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer shrink-0"
           title="Save event"
         >
           <Heart className={`w-4 h-4 ${fav ? 'fill-[#E31B23] text-[#E31B23]' : ''}`} />

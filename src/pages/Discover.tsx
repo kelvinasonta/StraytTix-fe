@@ -77,9 +77,22 @@ export const Discover: React.FC = () => {
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
   const [category, setCategory] = useState(initialCategory);
   const [formatFilter, setFormatFilter] = useState<'All' | 'physical' | 'virtual'>(initialFormat);
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'weekend' | 'month'>('all');
   const [priceRange, setPriceRange] = useState('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+
+  // Synchronize country switch event from Navbar
+  useEffect(() => {
+    const handleCountryChange = (e: any) => {
+      const country = e.detail;
+      if (country?.name) {
+        setSearch(country.name);
+      }
+    };
+    window.addEventListener('strayttix:country_changed', handleCountryChange);
+    return () => window.removeEventListener('strayttix:country_changed', handleCountryChange);
+  }, []);
 
   const { isAuthenticated, user } = useAuth();
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -240,20 +253,61 @@ export const Discover: React.FC = () => {
     fetchEvents(1, '', 'All', 'All');
   };
 
-  // Optional client-side price filter if user toggles price
+  // Optional client-side price and date filter
   const displayEvents = useMemo(() => {
-    if (priceRange === 'All') return events;
-    return events.filter((e) => {
-      if (!e.tickets || e.tickets.length === 0) return priceRange === 'free';
-      const prices = e.tickets.map((t) => t.price);
-      const minPrice = Math.min(...prices);
-      if (priceRange === 'free') return minPrice === 0;
-      if (priceRange === 'under10k') return minPrice < 10000;
-      if (priceRange === '10k-30k') return minPrice >= 10000 && minPrice <= 30000;
-      if (priceRange === 'over30k') return minPrice > 30000;
-      return true;
-    });
-  }, [events, priceRange]);
+    let filtered = events;
+
+    // Filter by Price
+    if (priceRange !== 'All') {
+      filtered = filtered.filter((e) => {
+        if (!e.tickets || e.tickets.length === 0) return priceRange === 'free';
+        const prices = e.tickets.map((t) => t.price);
+        const minPrice = Math.min(...prices);
+        if (priceRange === 'free') return minPrice === 0;
+        if (priceRange === 'under10k') return minPrice < 10000;
+        if (priceRange === '10k-30k') return minPrice >= 10000 && minPrice <= 30000;
+        if (priceRange === 'over30k') return minPrice > 30000;
+        return true;
+      });
+    }
+
+    // Filter by Date (Today, This Weekend, Next 30 Days)
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      filtered = filtered.filter((e) => {
+        if (!e.startDate) return false;
+        const eventDate = new Date(e.startDate);
+
+        if (dateFilter === 'today') {
+          return eventDate.toDateString() === now.toDateString();
+        }
+
+        if (dateFilter === 'weekend') {
+          const day = now.getDay();
+          // Distance to upcoming Friday, Saturday, Sunday
+          const diffToFriday = (5 - day + 7) % 7;
+          const friday = new Date(now);
+          friday.setDate(now.getDate() + diffToFriday);
+          friday.setHours(0, 0, 0, 0);
+
+          const sunday = new Date(friday);
+          sunday.setDate(friday.getDate() + 2);
+          sunday.setHours(23, 59, 59, 999);
+
+          return eventDate >= friday && eventDate <= sunday;
+        }
+
+        if (dateFilter === 'month') {
+          const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+          return eventDate >= now && eventDate <= in30Days;
+        }
+
+        return true;
+      });
+    }
+
+    return filtered;
+  }, [events, priceRange, dateFilter]);
 
   // Featured events calculated from featured priority and popularity (up to 8 for rich carousel scroll)
   const featuredEvents = useMemo(() => {
@@ -330,6 +384,30 @@ export const Discover: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Quick Date Filters (Today, This Weekend, Next 30 Days) */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            <span className="text-xs font-mono uppercase text-zinc-400 font-bold mr-1">When:</span>
+            {[
+              { id: 'all', label: 'All Dates' },
+              { id: 'today', label: 'Today' },
+              { id: 'weekend', label: 'This Weekend' },
+              { id: 'month', label: 'Next 30 Days' },
+            ].map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                onClick={() => setDateFilter(d.id as any)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap border ${
+                  dateFilter === d.id
+                    ? 'bg-white text-zinc-950 border-white shadow-md font-black'
+                    : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border-white/10'
+                }`}
+              >
+                {d.label}
+              </button>
+            ))}
           </div>
 
           {/* ======================================================================= */}

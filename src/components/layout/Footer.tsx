@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
     }
   };
 
-  const sitename = settings?.sitename || 'Eventra';
+  const sitename = settings?.sitename || 'StraytTix';
 
   return (
     <footer className="relative bg-[#070709] border-t border-white/5 pt-20 pb-12 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 text-zinc-400 overflow-hidden">

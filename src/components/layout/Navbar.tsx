@@ -17,11 +17,13 @@ import {
   Users,
   ChevronRight,
   ArrowRight,
-  User as UserIcon
+  User as UserIcon,
+  Globe
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Logo } from '../ui/Logo';
 import { resolveOrganizerRole } from '../../utils/permissions';
+import { countriesApi, type Country, DEFAULT_COUNTRIES } from '../../api/countries';
 
 interface NavbarProps {
   isDashboard?: boolean;
@@ -32,52 +34,85 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   const { isAuthenticated, user, organizer, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
+  const [countryDropdown, setCountryDropdown] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  
+  // Country state loaded from backend API
+  const [countries, setCountries] = useState<Country[]>(DEFAULT_COUNTRIES);
+  const [selectedCountry, setSelectedCountry] = useState<Country>(() => {
+    const saved = localStorage.getItem('strayttix_selected_country');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // Fall back to default
+      }
+    }
+    return DEFAULT_COUNTRIES[0];
+  });
+
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Load countries dynamically from backend API on mount
+  useEffect(() => {
+    countriesApi.getCountries()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCountries(data);
+          // If existing selection is in list, keep it; else set first
+          const match = data.find((c) => c.code === selectedCountry.code || c.name === selectedCountry.name);
+          if (match) {
+            setSelectedCountry(match);
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('Navbar: error loading countries from backend, using default list:', err);
+      });
+  }, []);
+
+  const handleSelectCountry = (c: Country) => {
+    setSelectedCountry(c);
+    localStorage.setItem('strayttix_selected_country', JSON.stringify(c));
+    setCountryDropdown(false);
+
+    // If currently on Discover page, dispatch a custom event or navigate with query parameter
+    if (location.pathname === '/discover') {
+      window.dispatchEvent(new CustomEvent('strayttix:country_changed', { detail: c }));
+    }
+  };
 
   useEffect(() => {
     let lastScrollY = window.scrollY || document.documentElement.scrollTop;
     let accumulatedDownScroll = 0;
     let accumulatedUpScroll = 0;
 
-    // Require user to scroll at least 240px downward before hiding
     const SCROLL_DELTA_THRESHOLD = 240;
-    // Keep navbar locked and visible across the entire hero banner (hero is ~100vh)
     const MIN_PAGE_OFFSET = 450;
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY || document.documentElement.scrollTop;
       const delta = currentScrollY - lastScrollY;
 
-      // Detect whether page is past top threshold for frosted pill styling
-      // Using a higher threshold (120px) gives comfortable room on initial scroll
       setIsScrolled(currentScrollY > 120);
 
-      // Keep visible near the top of the page
       if (currentScrollY <= MIN_PAGE_OFFSET) {
         setIsVisible(true);
         accumulatedDownScroll = 0;
         accumulatedUpScroll = 0;
       } else if (isOpen) {
-        // Keep visible if mobile drawer is currently open
         setIsVisible(true);
       } else if (delta > 0) {
-        // User is scrolling down
         accumulatedUpScroll = 0;
         accumulatedDownScroll += delta;
-        
-        // Only hide if user has intentionally scrolled down past threshold
         if (accumulatedDownScroll >= SCROLL_DELTA_THRESHOLD) {
           setIsVisible(false);
         }
       } else if (delta < 0) {
-        // User is scrolling up
         accumulatedDownScroll = 0;
         accumulatedUpScroll += Math.abs(delta);
-        
-        // Restore quickly when intentionally scrolling up
         if (accumulatedUpScroll >= 20 || currentScrollY <= MIN_PAGE_OFFSET) {
           setIsVisible(true);
         }
@@ -92,9 +127,29 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   }, [isOpen]);
 
   const isDashboardView = isDashboard || hideNavLinks || location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/organizer');
-  const isHomePage = location.pathname === '/';
-  const isDiscoverPage = location.pathname === '/discover';
-  const isDarkHeroPage = isHomePage || isDiscoverPage;
+  
+  // High-assurance dark public pages list: all these pages share the deep #070709 theme
+  const darkThemeRoutes = [
+    '/',
+    '/discover',
+    '/pricing',
+    '/about',
+    '/how-it-works',
+    '/download',
+    '/app',
+    '/blog',
+    '/api-docs',
+    '/docs',
+    '/report',
+    '/terms',
+    '/privacy',
+    '/refund-policy'
+  ];
+  
+  const isEventDetailPage = location.pathname.startsWith('/events/');
+  const isOrganizerProfilePage = location.pathname.startsWith('/organizers/') || location.pathname.startsWith('/@');
+  const isDarkCanvasPage = darkThemeRoutes.includes(location.pathname) || isEventDetailPage || isOrganizerProfilePage;
+  const isDarkHeroPage = location.pathname === '/' || location.pathname === '/discover';
   const isTransparentHeroNav = isDarkHeroPage && !isScrolled;
 
   const handleLogout = async () => {
@@ -107,17 +162,17 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   const isOrganization = isOrganizer && organizer?.type === 'organization';
   const role = resolveOrganizerRole(organizer);
 
-  // 1. Guest Nav Links (Shown only to non-logged in visitors)
+  // 1. Guest Nav Links
   const guestNavLinks = [
     { to: '/discover', label: 'Discover' },
-    { to: '/how-it-works', label: 'How Tix Works' },
+    { to: '/how-it-works', label: 'How StraytTix Works' },
     { to: '/pricing', label: 'Pricing' },
     { to: '/about', label: 'About us' },
     { to: '/blog', label: 'Blog' },
     { to: '/download', label: 'Download' },
   ];
 
-  // 2. Auth Nav Links (Shown to authenticated users)
+  // 2. Auth Nav Links
   const organizerLinks = [
     { to: '/organizer', label: 'Console', icon: LayoutDashboard },
     { to: '/discover', label: 'Discover Events', icon: Compass },
@@ -126,7 +181,6 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
     ...(isOrganization ? [{ to: '/organizer/team', label: 'Team', icon: Users }] : []),
   ];
 
-  // Customer strictly sees only attendee content - NEVER any organizer links
   const customerLinks = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/discover', label: 'Discover', icon: Compass },
@@ -136,8 +190,6 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
   const authNavLinks = isOrganizer ? organizerLinks : customerLinks;
 
-  // On dashboard views:
-  // Customer sees attendee links; Organizer sees public discover or clean links
   const dashboardQuickLinks = isOrganizer
     ? [
       { to: '/organizer', label: 'Console', icon: LayoutDashboard },
@@ -175,8 +227,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
             : 'bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] py-0'
           : isScrolled
             ? 'pt-2.5 sm:pt-3.5 pb-1.5 px-3 sm:px-6 bg-transparent border-b border-transparent pointer-events-none'
-            : isTransparentHeroNav
-              ? 'pt-0 pb-0 px-0 bg-transparent border-b border-transparent pointer-events-auto'
+            : isDarkCanvasPage
+              ? 'pt-0 pb-0 px-0 bg-[#070709]/85 backdrop-blur-xl border-b border-white/10 pointer-events-auto'
               : 'pt-0 pb-0 px-0 bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] pointer-events-auto'
       }`}
     >
@@ -186,14 +238,71 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
           isDashboardView
             ? `max-w-7xl px-4 sm:px-6 ${isScrolled ? 'h-14' : 'h-16'}`
             : isScrolled
-              ? 'max-w-5xl h-14 px-4 sm:px-6 rounded-full bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_12px_36px_-8px_rgba(15,23,42,0.12)]'
-              : 'max-w-7xl h-16 px-4 sm:px-6 rounded-none bg-transparent border border-transparent shadow-none'
+              ? isDarkCanvasPage
+                ? 'max-w-5xl h-14 px-4 sm:px-6 rounded-full bg-zinc-950/90 backdrop-blur-2xl border border-white/15 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.7)]'
+                : 'max-w-5xl h-14 px-4 sm:px-6 rounded-full bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_12px_36px_-8px_rgba(15,23,42,0.12)]'
+              : 'max-w-[1600px] h-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 rounded-none bg-transparent border border-transparent shadow-none'
         }`}
       >
-        {/* Brand Logo */}
-        <Logo to={logoTarget} size="md" variant={isTransparentHeroNav ? 'light' : 'dark'} />
+        {/* Brand Logo & Country Dropdown */}
+        <div className="flex items-center gap-4">
+          <Logo to={logoTarget} size="md" variant={isDarkCanvasPage ? 'light' : 'dark'} />
 
-        {/* Center Desktop Navigation: Different for Guest vs Auth (hidden below lg to prevent tablet wrap) */}
+          {/* Supported Country Selector Dropdown (Loaded from backend API) */}
+          {!isDashboardView && (
+            <div className="relative hidden sm:block">
+              <button
+                type="button"
+                onClick={() => setCountryDropdown(!countryDropdown)}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                  isDarkCanvasPage
+                    ? 'bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white border-white/15'
+                    : 'bg-zinc-100 hover:bg-zinc-200/80 text-zinc-700 hover:text-zinc-950 border-zinc-200'
+                }`}
+                title="Change Country"
+              >
+                <span>{selectedCountry.flag || '🌐'}</span>
+                <span className="font-mono text-[11px] uppercase tracking-wider">{selectedCountry.code || 'NG'}</span>
+                <ChevronDown className="w-3 h-3 text-zinc-400" />
+              </button>
+
+              {countryDropdown && (
+                <div 
+                  className={`absolute left-0 mt-2 w-56 rounded-2xl p-2 z-50 shadow-2xl border animate-in fade-in zoom-in-95 duration-150 max-h-80 overflow-y-auto ${
+                    isDarkCanvasPage
+                      ? 'bg-[#0E0E14] border-white/15 text-white'
+                      : 'bg-white border-zinc-200 text-zinc-900'
+                  }`}
+                >
+                  <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-400 border-b border-white/10 mb-1">
+                    Select Your Country
+                  </div>
+                  {countries.map((c) => (
+                    <button
+                      key={c.code}
+                      onClick={() => handleSelectCountry(c)}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                        selectedCountry.code === c.code
+                          ? 'bg-[#E31B23] text-white font-bold'
+                          : isDarkCanvasPage
+                            ? 'text-zinc-300 hover:bg-white/10 hover:text-white'
+                            : 'text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <span>{c.flag || '🌐'}</span>
+                        <span className="truncate">{c.name}</span>
+                      </div>
+                      <span className="text-[10px] font-mono opacity-80">{c.currency || c.code}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Center Desktop Navigation: Different for Guest vs Auth */}
         <div className={`hidden lg:flex items-center transition-[gap] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           isPillState ? 'gap-6 xl:gap-7' : 'gap-6 xl:gap-8'
         }`}>
@@ -205,11 +314,11 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               className={({ isActive }) =>
                 `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                   isActive
-                    ? isTransparentHeroNav
-                      ? 'text-white font-bold'
+                    ? isDarkCanvasPage
+                      ? 'text-white font-black'
                       : 'text-[#E31B23] font-bold'
-                    : isTransparentHeroNav
-                      ? 'text-white/80 hover:text-white'
+                    : isDarkCanvasPage
+                      ? 'text-zinc-400 hover:text-white'
                       : 'text-zinc-600 hover:text-zinc-950'
                 }`
               }
@@ -227,7 +336,11 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               {/* Search Trigger */}
               <Link
                 to="/discover"
-                className="w-10 h-10 rounded-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  isDarkCanvasPage
+                    ? 'text-zinc-400 hover:text-white hover:bg-white/10'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                }`}
                 title="Search events"
               >
                 <Search className="w-5 h-5" />
@@ -235,7 +348,11 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
               {/* Notification Bell */}
               <button
-                className="relative w-10 h-10 rounded-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors cursor-pointer"
+                className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                  isDarkCanvasPage
+                    ? 'text-zinc-400 hover:text-white hover:bg-white/10'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                }`}
                 title="Notifications"
               >
                 <Bell className="w-5 h-5" />
@@ -245,14 +362,14 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               {/* Primary Action Button in Auth Nav */}
               {isOrganizer ? (
                 <Link to="/organizer/events/create">
-                  <button className="inline-flex items-center gap-2 px-5 py-2 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-full transition-all shadow-xs cursor-pointer">
+                  <button className="inline-flex items-center gap-2 px-5 py-2 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-full transition-all shadow-lg shadow-[#E31B23]/25 cursor-pointer">
                     <PlusCircle className="w-4 h-4" />
                     <span>Create Event</span>
                   </button>
                 </Link>
               ) : (
                 <Link to={location.pathname === '/discover' ? '/dashboard/tickets' : '/discover'}>
-                  <button className="inline-flex items-center gap-2 px-5 py-2 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-full transition-all shadow-xs cursor-pointer">
+                  <button className="inline-flex items-center gap-2 px-5 py-2 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-full transition-all shadow-lg shadow-[#E31B23]/25 cursor-pointer">
                     {location.pathname === '/discover' ? (
                       <>
                         <Ticket className="w-4 h-4" />
@@ -272,21 +389,26 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               <div className="relative">
                 <button
                   onClick={() => setUserDropdown(!userDropdown)}
-                  className="flex items-center gap-2 p-1.5 rounded-full hover:bg-zinc-100 transition-colors cursor-pointer"
+                  className={`flex items-center gap-2 p-1.5 rounded-full transition-colors cursor-pointer ${
+                    isDarkCanvasPage ? 'hover:bg-white/10' : 'hover:bg-zinc-100'
+                  }`}
                 >
-                  <div className="w-9 h-9 rounded-full bg-zinc-900 text-white font-bold text-xs flex items-center justify-center border border-zinc-200">
+                  <div className="w-9 h-9 rounded-full bg-white text-zinc-950 font-black text-xs flex items-center justify-center border border-white/20 shadow-md">
                     {user?.firstName?.[0] || 'U'}
                   </div>
-                  <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
                 </button>
 
                 {userDropdown && (
-                  <div className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-zinc-150 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className={`absolute right-0 mt-2 w-60 rounded-2xl shadow-2xl py-2 z-50 border animate-in fade-in zoom-in-95 duration-100 ${
+                    isDarkCanvasPage
+                      ? 'bg-[#0E0E14] border-white/15 text-white'
+                      : 'bg-white border-zinc-200 text-zinc-900'
+                  }`}>
                     {isOrganizer ? (
-                      /* ================= ORGANIZER USER DROPDOWN ================= */
                       <>
-                        <div className="px-4 py-2.5 border-b border-zinc-100">
-                          <p className="text-xs font-bold text-zinc-900 truncate">
+                        <div className="px-4 py-2.5 border-b border-white/10">
+                          <p className="text-xs font-bold text-white truncate">
                             {user?.firstName} {user?.lastName}
                           </p>
                           <p className="text-[10px] text-zinc-400 truncate">{user?.email}</p>
@@ -296,21 +418,21 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                           <Link
                             to="/organizer"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#E31B23] transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
                           >
                             <LayoutDashboard className="w-3.5 h-3.5 text-zinc-400" /> Organizer Console
                           </Link>
                           <Link
                             to="/organizer/events"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#E31B23] transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
                           >
                             <Calendar className="w-3.5 h-3.5 text-zinc-400" /> My Events
                           </Link>
                           <Link
                             to="/organizer/orders"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#E31B23] transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
                           >
                             <Ticket className="w-3.5 h-3.5 text-zinc-400" /> Sales & Orders
                           </Link>
@@ -318,7 +440,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                             <Link
                               to="/organizer/team"
                               onClick={() => setUserDropdown(false)}
-                              className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#E31B23] transition-colors"
+                              className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
                             >
                               <Users className="w-3.5 h-3.5 text-zinc-400" /> Team Members
                             </Link>
@@ -327,7 +449,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                             <Link
                               to="/organizer/profile"
                               onClick={() => setUserDropdown(false)}
-                              className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#E31B23] transition-colors"
+                              className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
                             >
                               <UserIcon className="w-3.5 h-3.5 text-zinc-400" /> Organizer Profile
                             </Link>
@@ -335,21 +457,20 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                           <Link
                             to="/organizer/settings"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#E31B23] transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
                           >
                             <Settings className="w-3.5 h-3.5 text-zinc-400" /> {role === 'staff' ? 'Staff Settings' : 'Organization Settings'}
                           </Link>
                         </div>
                       </>
                     ) : (
-                      /* ================= CUSTOMER USER DROPDOWN (Strictly Attendee) ================= */
                       <>
-                        <div className="px-4 py-2.5 border-b border-zinc-100">
-                          <p className="text-xs font-bold text-zinc-900 truncate">
+                        <div className="px-4 py-2.5 border-b border-white/10">
+                          <p className="text-xs font-bold text-white truncate">
                             {user?.firstName} {user?.lastName}
                           </p>
                           <p className="text-[10px] text-zinc-400 truncate">{user?.email}</p>
-                          <span className="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-zinc-100 text-zinc-600">
+                          <span className="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-white/10 text-zinc-300">
                             Attendee Account
                           </span>
                         </div>
@@ -358,35 +479,28 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                           <Link
                             to="/dashboard"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#E31B23] transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
                           >
                             <LayoutDashboard className="w-3.5 h-3.5 text-zinc-400" /> Attendee Dashboard
                           </Link>
                           <Link
                             to="/dashboard/tickets"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#E31B23] transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
                           >
                             <Ticket className="w-3.5 h-3.5 text-zinc-400" /> My Tickets
                           </Link>
                           <Link
                             to="/dashboard/favorites"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#E31B23] transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
                           >
-                            <Heart className="w-3.5 h-3.5 text-zinc-400" /> Saved Experiences
-                          </Link>
-                          <Link
-                            to="/dashboard/profile"
-                            onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#E31B23] transition-colors"
-                          >
-                            <UserIcon className="w-3.5 h-3.5 text-zinc-400" /> Profile
+                            <Heart className="w-3.5 h-3.5 text-zinc-400" /> Favorites
                           </Link>
                           <Link
                             to="/dashboard/settings"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#E31B23] transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
                           >
                             <Settings className="w-3.5 h-3.5 text-zinc-400" /> Account Settings
                           </Link>
@@ -394,13 +508,13 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                       </>
                     )}
 
-                    <div className="border-t border-zinc-100 pt-1">
+                    <div className="border-t border-white/10 pt-1">
                       <button
                         onClick={() => {
                           setUserDropdown(false);
                           handleLogout();
                         }}
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors text-left cursor-pointer"
                       >
                         <LogOut className="w-3.5 h-3.5" /> Sign Out
                       </button>
@@ -410,9 +524,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               </div>
             </div>
           ) : (
-            /* ================= GUEST USER ACTIONS (Smooth Morph between Top & Scrolled Pill) ================= */
-            <div className="flex items-center gap-2.5">
-              {/* Left Search Icon: smoothly collapses when scrolled into pill */}
+            /* ================= GUEST USER ACTIONS ================= */
+            <div className="flex items-center gap-3">
               <div
                 className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                   isPillState ? 'w-0 opacity-0 -mr-2.5 pointer-events-none' : 'w-10 opacity-100'
@@ -421,8 +534,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                 <Link
                   to="/discover"
                   className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                    isTransparentHeroNav
-                      ? 'text-white/80 hover:text-white hover:bg-white/10'
+                    isDarkCanvasPage
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/10'
                       : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
                   }`}
                   title="Search events"
@@ -433,12 +546,10 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
               <Link
                 to="/login"
-                className={`rounded-full font-bold transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer whitespace-nowrap ${
-                  isPillState
-                    ? 'px-3.5 py-1.5 text-xs xl:text-[13px] text-slate-600 hover:text-slate-950 border border-transparent'
-                    : isTransparentHeroNav
-                      ? 'px-5 py-2 text-sm text-white/90 hover:text-white border border-white/20 hover:border-white/40 hover:bg-white/5'
-                      : 'px-5 py-2 text-sm text-zinc-700 hover:text-zinc-950 border border-zinc-200 hover:border-zinc-300'
+                className={`rounded-full font-bold transition-all duration-300 cursor-pointer whitespace-nowrap ${
+                  isDarkCanvasPage
+                    ? 'px-5 py-2 text-xs xl:text-sm text-zinc-300 hover:text-white border border-white/20 hover:border-white/40 hover:bg-white/5'
+                    : 'px-5 py-2 text-xs xl:text-sm text-zinc-700 hover:text-zinc-950 border border-zinc-200 hover:border-zinc-300'
                 }`}
               >
                 Log In
@@ -446,48 +557,22 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
               <Link
                 to="/register"
-                className={`inline-flex items-center justify-center gap-1.5 text-white bg-[#E31B23] hover:bg-[#B91C1C] rounded-full transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer whitespace-nowrap ${
-                  isPillState
-                    ? 'px-5 py-2 text-xs xl:text-[13px] font-bold shadow-[0_6px_20px_-3px_rgba(227,27,35,0.45)] hover:shadow-[0_8px_25px_-3px_rgba(227,27,35,0.6)]'
-                    : 'px-6 py-2 text-sm font-black shadow-xs hover:shadow-md'
-                }`}
+                className="inline-flex items-center justify-center gap-1.5 text-white bg-[#E31B23] hover:bg-[#B91C1C] px-6 py-2 text-xs xl:text-sm font-bold rounded-full transition-all shadow-lg shadow-[#E31B23]/25 cursor-pointer whitespace-nowrap hover:scale-102 active:scale-95"
               >
-                <span>{isPillState ? 'Get started' : 'Sign Up'}</span>
-                <ArrowRight
-                  className={`transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                    isPillState ? 'w-3.5 h-3.5 opacity-100 translate-x-0' : 'w-0 h-3.5 opacity-0 -translate-x-1 overflow-hidden -ml-1.5'
-                  }`}
-                />
+                <span>Get started</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
-
-              {/* Right Quick-Search Pill Switch: smoothly expands when scrolled into pill */}
-              <div
-                className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                  isPillState ? 'w-13 opacity-100 ml-0.5' : 'w-0 opacity-0 -ml-2.5 pointer-events-none'
-                }`}
-              >
-                <Link
-                  to="/discover"
-                  aria-label="Explore all events"
-                  title="Explore all events"
-                  className="w-12 h-7 rounded-full bg-slate-100 hover:bg-slate-200/80 border border-slate-200/90 p-0.5 flex items-center transition-colors group"
-                >
-                  <span className="w-5 h-5 rounded-full bg-white shadow-xs border border-slate-200/80 flex items-center justify-center text-slate-500 group-hover:text-[#E31B23] group-hover:translate-x-5 transition-all duration-200">
-                    <Search className="w-3 h-3" />
-                  </span>
-                </Link>
-              </div>
             </div>
           )}
         </div>
 
-        {/* Mobile Menu Button (Visible on screens smaller than lg) */}
+        {/* Mobile Menu Button */}
         <div className="flex items-center gap-2 lg:hidden">
           <Link
             to="/discover"
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
-              isTransparentHeroNav
-                ? 'text-white/80 hover:text-white hover:bg-white/10'
+              isDarkCanvasPage
+                ? 'text-zinc-300 hover:text-white hover:bg-white/10'
                 : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
             }`}
             title="Search events"
@@ -497,9 +582,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`p-2 rounded-xl focus:outline-none transition-colors ${
-              isTransparentHeroNav
-                ? 'text-white hover:text-white hover:bg-white/10'
-                : 'text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100'
+              isDarkCanvasPage
+                ? 'text-white hover:bg-white/10'
+                : 'text-zinc-700 hover:bg-zinc-100'
             }`}
             aria-label="Toggle navigation menu"
           >
@@ -508,9 +593,32 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
         </div>
       </nav>
 
-      {/* Mobile Menu Drawer: Guest vs Auth */}
+      {/* Mobile Menu Drawer */}
       {isOpen && (
-        <div className="pointer-events-auto lg:hidden mt-2 max-w-5xl mx-auto bg-white rounded-3xl border border-slate-200 px-6 py-5 flex flex-col gap-4 shadow-2xl max-h-[calc(100dvh-5rem)] overflow-y-auto animate-in slide-in-from-top-2 duration-150">
+        <div className={`pointer-events-auto lg:hidden mt-2 max-w-5xl mx-4 sm:mx-auto rounded-3xl border px-6 py-5 flex flex-col gap-4 shadow-2xl max-h-[calc(100dvh-5rem)] overflow-y-auto animate-in slide-in-from-top-2 duration-150 ${
+          isDarkCanvasPage
+            ? 'bg-[#0E0E14] border-white/15 text-white'
+            : 'bg-white border-slate-200 text-slate-800'
+        }`}>
+          {/* Mobile Country Selector */}
+          <div className="flex items-center justify-between pb-3 border-b border-white/10">
+            <span className="text-xs font-mono uppercase text-zinc-400">Country:</span>
+            <select
+              value={selectedCountry.code}
+              onChange={(e) => {
+                const c = countries.find(item => item.code === e.target.value);
+                if (c) handleSelectCountry(c);
+              }}
+              className="bg-white/10 border border-white/20 text-white rounded-xl text-xs px-3 py-1.5 focus:outline-none"
+            >
+              {countries.map((c) => (
+                <option key={c.code} value={c.code} className="bg-zinc-900 text-white">
+                  {c.flag} {c.name} ({c.code})
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Nav links */}
           <div className="flex flex-col gap-1">
             {currentNavLinks.map((link) => (
@@ -520,126 +628,51 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) => 
                   `text-sm font-bold py-2.5 px-3 rounded-xl transition-colors flex items-center justify-between ${
-                    isActive ? 'bg-red-50 text-[#E31B23]' : 'text-slate-800 hover:bg-slate-50'
+                    isActive 
+                      ? 'bg-[#E31B23]/15 text-[#E31B23]' 
+                      : isDarkCanvasPage 
+                        ? 'text-zinc-300 hover:bg-white/10' 
+                        : 'text-slate-800 hover:bg-slate-50'
                   }`
                 }
               >
                 <span>{link.label}</span>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
+                <ChevronRight className="w-4 h-4 text-zinc-400" />
               </NavLink>
             ))}
           </div>
 
-          <hr className="border-slate-100 my-1" />
+          <hr className={isDarkCanvasPage ? 'border-white/10 my-1' : 'border-slate-100 my-1'} />
 
           {isAuthenticated ? (
-            isOrganizer ? (
-              /* Organizer Mobile Drawer */
-              <div className="flex flex-col gap-2.5">
-                <Link
-                  to="/organizer/events/create"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-3 bg-[#E31B23] text-white font-bold rounded-full text-xs shadow-xs"
-                >
-                  + Create Event
-                </Link>
-                <Link
-                  to="/organizer"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2.5 bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-full text-xs"
-                >
-                  Organizer Console
-                </Link>
-                <Link
-                  to="/organizer/events"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2.5 bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-full text-xs"
-                >
-                  My Events
-                </Link>
-                {isOrganization && (
-                  <Link
-                    to="/organizer/team"
-                    onClick={() => setIsOpen(false)}
-                    className="w-full text-center py-2.5 bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-full text-xs"
-                  >
-                    Team Members
-                  </Link>
-                )}
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    handleLogout();
-                  }}
-                  className="w-full text-center py-2.5 text-red-600 font-bold rounded-full text-xs bg-red-50 cursor-pointer"
-                >
-                  Sign Out
-                </button>
-              </div>
-            ) : (
-              /* Customer Mobile Drawer - Strictly Attendee */
-              <div className="flex flex-col gap-2.5">
-                <Link
-                  to="/discover"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-3 bg-[#E31B23] text-white font-bold rounded-full text-xs shadow-xs"
-                >
-                  Discover Events
-                </Link>
-                <Link
-                  to="/dashboard"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2.5 bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-full text-xs"
-                >
-                  Attendee Dashboard
-                </Link>
-                <Link
-                  to="/dashboard/tickets"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2.5 bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-full text-xs"
-                >
-                  My Tickets
-                </Link>
-                <Link
-                  to="/dashboard/favorites"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2.5 bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-full text-xs"
-                >
-                  Saved Experiences
-                </Link>
-                <Link
-                  to="/dashboard/profile"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2.5 bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-full text-xs"
-                >
-                  Profile Settings
-                </Link>
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    handleLogout();
-                  }}
-                  className="w-full text-center py-2.5 text-red-600 font-bold rounded-full text-xs bg-red-50 cursor-pointer"
-                >
-                  Sign Out
-                </button>
-              </div>
-            )
+            <div className="flex flex-col gap-2.5">
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  handleLogout();
+                }}
+                className="w-full text-center py-2.5 text-red-500 font-bold rounded-full text-xs bg-red-500/10 cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </div>
           ) : (
             <div className="flex flex-col gap-2.5">
               <Link
                 to="/login"
                 onClick={() => setIsOpen(false)}
-                className="w-full text-center py-2.5 text-slate-800 border border-slate-200 font-bold rounded-full text-xs"
+                className={`w-full text-center py-2.5 font-bold rounded-full text-xs border ${
+                  isDarkCanvasPage ? 'text-white border-white/20' : 'text-slate-800 border-slate-200'
+                }`}
               >
                 Log in
               </Link>
               <Link
                 to="/register"
                 onClick={() => setIsOpen(false)}
-                className="w-full text-center py-3 bg-[#E31B23] text-white font-bold rounded-full text-xs shadow-[0_4px_14px_rgba(227,27,35,0.35)]"
+                className="w-full text-center py-3 bg-[#E31B23] text-white font-bold rounded-full text-xs shadow-lg shadow-[#E31B23]/30"
               >
-                Get started →
+                Get started free &rarr;
               </Link>
             </div>
           )}
