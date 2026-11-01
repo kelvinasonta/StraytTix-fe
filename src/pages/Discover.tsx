@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import EventCard from '../components/ui/EventCard';
@@ -7,6 +8,8 @@ import { eventApi, normalizeBackendEvent } from '../api/events';
 import { favoritesApi } from '../api/favorites';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../api/client';
+import { formatDate, formatCurrency } from '../utils/format';
+import { countriesApi, type Country, DEFAULT_COUNTRIES } from '../api/countries';
 import type { Event } from '../types/api';
 import { 
   Search, 
@@ -14,14 +17,52 @@ import {
   LayoutGrid, 
   List, 
   RotateCcw, 
-  Calendar,
-  Filter,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  AlertCircle,
-  X
+  Calendar, 
+  Filter, 
+  ChevronLeft, 
+  ChevronRight, 
+  Loader2, 
+  AlertCircle, 
+  X,
+  Sparkles,
+  Music2,
+  Cpu,
+  GlassWater,
+  Smile,
+  Trophy,
+  Briefcase,
+  MapPin,
+  ArrowRight,
+  Ticket,
+  Flame,
+  Globe,
+  ChevronDown
 } from 'lucide-react';
+
+interface CategoryMeta {
+  name: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const CATEGORY_ITEMS: CategoryMeta[] = [
+  { name: 'All', label: 'All Events', icon: Sparkles },
+  { name: 'Music', label: 'Concerts & Sets', icon: Music2 },
+  { name: 'Nightlife', label: 'Parties & Raves', icon: GlassWater },
+  { name: 'Technology', label: 'Tech & Summits', icon: Cpu },
+  { name: 'Business', label: 'Conferences', icon: Briefcase },
+  { name: 'Comedy', label: 'Standup & Arts', icon: Smile },
+  { name: 'Sports', label: 'Tournaments', icon: Trophy },
+  { name: 'Food & Drink', label: 'Dining & Tastings', icon: GlassWater }
+];
+
+const PRICE_OPTIONS = [
+  { value: 'All', label: 'All Prices' },
+  { value: 'free', label: 'Free RSVP' },
+  { value: 'under10k', label: 'Under ₦10,000' },
+  { value: '10k-30k', label: '₦10,000 – ₦30,000' },
+  { value: 'over30k', label: '₦30,000+' }
+];
 
 export const Discover: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -39,11 +80,52 @@ export const Discover: React.FC = () => {
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
   const [category, setCategory] = useState(initialCategory);
   const [formatFilter, setFormatFilter] = useState<'All' | 'physical' | 'virtual'>(initialFormat);
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'weekend' | 'month'>('all');
   const [priceRange, setPriceRange] = useState('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
+  // Country state loaded from backend API
+  const [countries, setCountries] = useState<Country[]>(DEFAULT_COUNTRIES);
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(() => {
+    const saved = localStorage.getItem('strayttix_selected_country');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // Fall back to null (All Countries)
+      }
+    }
+    return null;
+  });
+  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+
+  // Fetch backend supported countries
+  useEffect(() => {
+    countriesApi.getCountries()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCountries(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Discover: error loading countries from backend:', err);
+      });
+  }, []);
+
+  const handleSelectCountry = (c: Country | null) => {
+    setSelectedCountry(c);
+    setCountryDropdownOpen(false);
+    if (c) {
+      localStorage.setItem('strayttix_selected_country', JSON.stringify(c));
+    } else {
+      localStorage.removeItem('strayttix_selected_country');
+    }
+  };
+
   const { isAuthenticated, user } = useAuth();
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const isFirstMount = useRef(true);
 
   // Hydrate favorites from backend if user is authenticated
   useEffect(() => {
@@ -68,29 +150,6 @@ export const Discover: React.FC = () => {
     to: null,
   });
 
-  const resultsRef = useRef<HTMLDivElement>(null);
-
-  const categories = [
-    'All',
-    'Technology',
-    'Music',
-    'Conference',
-    'Business',
-    'Comedy',
-    'Design',
-    'Sports',
-    'Nightlife',
-    'Food & Drink'
-  ];
-
-  const priceOptions = [
-    { value: 'All', label: 'All Prices' },
-    { value: 'free', label: 'Free RSVP' },
-    { value: 'under10k', label: 'Under ₦10,000' },
-    { value: '10k-30k', label: '₦10,000 – ₦30,000' },
-    { value: 'over30k', label: '₦30,000+' }
-  ];
-
   // Debounce search input by 300ms
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -99,10 +158,13 @@ export const Discover: React.FC = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const isFirstMount = useRef(true);
-
   // Primary API fetcher connecting directly to backend /explore/events
-  const fetchEvents = useCallback(async (targetPage: number, currentSearch = debouncedSearch, currentCat = category, currentFormat = formatFilter) => {
+  const fetchEvents = useCallback(async (
+    targetPage: number, 
+    currentSearch = debouncedSearch, 
+    currentCat = category, 
+    currentFormat = formatFilter
+  ) => {
     setIsLoading(true);
     setError(null);
 
@@ -220,10 +282,13 @@ export const Discover: React.FC = () => {
     fetchEvents(1, '', 'All', 'All');
   };
 
-  // Optional client-side price filter if user toggles price
-  const displayEvents = priceRange === 'All'
-    ? events
-    : events.filter((e) => {
+  // Optional client-side price and date filter
+  const displayEvents = useMemo(() => {
+    let filtered = events;
+
+    // Filter by Price
+    if (priceRange !== 'All') {
+      filtered = filtered.filter((e) => {
         if (!e.tickets || e.tickets.length === 0) return priceRange === 'free';
         const prices = e.tickets.map((t) => t.price);
         const minPrice = Math.min(...prices);
@@ -233,179 +298,518 @@ export const Discover: React.FC = () => {
         if (priceRange === 'over30k') return minPrice > 30000;
         return true;
       });
+    }
+
+    // Filter by Date (Today, This Weekend, Next 30 Days)
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      filtered = filtered.filter((e) => {
+        if (!e.startDate) return false;
+        const eventDate = new Date(e.startDate);
+
+        if (dateFilter === 'today') {
+          return eventDate.toDateString() === now.toDateString();
+        }
+
+        if (dateFilter === 'weekend') {
+          const day = now.getDay();
+          // Distance to upcoming Friday, Saturday, Sunday
+          const diffToFriday = (5 - day + 7) % 7;
+          const friday = new Date(now);
+          friday.setDate(now.getDate() + diffToFriday);
+          friday.setHours(0, 0, 0, 0);
+
+          const sunday = new Date(friday);
+          sunday.setDate(friday.getDate() + 2);
+          sunday.setHours(23, 59, 59, 999);
+
+          return eventDate >= friday && eventDate <= sunday;
+        }
+
+        if (dateFilter === 'month') {
+          const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+          return eventDate >= now && eventDate <= in30Days;
+        }
+
+        return true;
+      });
+    }
+
+    // Filter by Selected Country
+    if (selectedCountry) {
+      filtered = filtered.filter((e) => {
+        const countryVal = ((e as any).country || (e as any).eventCountry || e.venue || '').toLowerCase();
+        return countryVal.includes(selectedCountry.name.toLowerCase()) || countryVal.includes(selectedCountry.code.toLowerCase());
+      });
+    }
+
+    return filtered;
+  }, [events, priceRange, dateFilter, selectedCountry]);
+
+  // Featured events calculated from featured priority and popularity (up to 8 for rich carousel scroll)
+  const featuredEvents = useMemo(() => {
+    if (events.length === 0) return [];
+    const sorted = [...events].sort((a, b) => {
+      const aTicketsCount = a.tickets?.length || 0;
+      const bTicketsCount = b.tickets?.length || 0;
+      const aScore = (a.isFeatured ? 100 : 0) + (aTicketsCount * 10);
+      const bScore = (b.isFeatured ? 100 : 0) + (bTicketsCount * 10);
+      return bScore - aScore;
+    });
+    return sorted.slice(0, 8);
+  }, [events]);
+
+  const featuredScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollFeatured = (direction: 'left' | 'right') => {
+    if (featuredScrollRef.current) {
+      const offset = direction === 'left' ? -420 : 420;
+      featuredScrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB] text-[#111827] flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased transition-colors duration-300">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 md:py-12 space-y-8" ref={resultsRef}>
-        {/* Marketplace Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-black text-zinc-950 tracking-tight">
-              Discover Events
-            </h1>
-            <p className="text-zinc-500 text-sm sm:text-base font-medium mt-1">
-              Explore live experiences, conferences, festivals, and summits.
-            </p>
-          </div>
+      {/* ========================================================================= */}
+      {/* 1. EDITORIAL SPOTLIGHT & SEARCH HEADER (Dark Luxury Bento)                */}
+      {/* ========================================================================= */}
+      <section className="relative px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pt-10 pb-12 sm:pb-16 overflow-hidden border-b border-white/5">
+        
+        {/* Subtle Ambient Radial Lighting */}
+        <div className="absolute top-0 left-1/3 w-[600px] h-[400px] bg-[#E31B23]/15 blur-[160px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 right-10 w-[450px] h-[350px] bg-purple-600/10 blur-[150px] rounded-full pointer-events-none" />
 
-          {/* Search bar inside header */}
-          <div className="relative w-full md:w-96">
-            <Search className="w-5 h-5 text-zinc-400 absolute left-4 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search title, venue, or category..."
-              className="w-full pl-11 pr-4 py-3 bg-white border border-zinc-200 rounded-2xl text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all font-medium shadow-xs"
-            />
-          </div>
-        </div>
+        <div className="max-w-[1600px] mx-auto space-y-8 relative z-10">
 
-        {/* Mobile Filter Toggle */}
-        <div className="md:hidden flex items-center justify-between gap-3">
-          <button
-            onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-zinc-200 text-sm font-bold text-zinc-800 shadow-xs cursor-pointer"
-          >
-            <Filter className="w-4 h-4 text-[#E31B23]" />
-            <span>Filters ({category !== 'All' ? '1+' : '0'})</span>
-          </button>
+          {/* Top Title & Search Island Bar */}
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.08] border border-white/10 text-xs font-mono font-bold text-zinc-300">
+                <Flame className="w-3.5 h-3.5 text-[#E31B23]" />
+                <span>Live Event Marketplace</span>
+              </div>
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-zinc-950 dark:text-white tracking-[-0.035em] leading-[1.12]">
+                Discover Live Experiences.
+              </h1>
+              <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-base font-normal leading-relaxed">
+                Explore concerts, secret raves, tech summits, and festivals across Nigeria. Verified tickets with instant pass delivery.
+              </p>
+            </div>
 
-          <span className="text-sm font-bold text-zinc-700">
-            {paginationMeta.total} {paginationMeta.total === 1 ? 'event' : 'events'} found
-          </span>
-        </div>
+            {/* Elevated Search Bar with Country Pill Dropdown */}
+            <div className="w-full lg:max-w-xl space-y-2">
+              <div className="p-1.5 sm:p-2 rounded-2xl bg-white dark:bg-white/[0.08] border border-zinc-300 dark:border-white/25 backdrop-blur-2xl shadow-lg dark:shadow-2xl transition-all duration-300 focus-within:border-zinc-500 dark:focus-within:border-white flex items-center gap-2">
+                
+                {/* Interactive Country Selector Pill on Top of Discover */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setCountryDropdownOpen(!countryDropdownOpen)}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 dark:hover:bg-white/20 text-zinc-900 dark:text-white font-mono text-xs font-bold transition-all border border-zinc-300 dark:border-white/15 cursor-pointer shrink-0"
+                    title="Filter by country"
+                  >
+                    <span>{selectedCountry ? selectedCountry.flag : '🌐'}</span>
+                    <span className="uppercase">{selectedCountry ? selectedCountry.code : 'All'}</span>
+                    <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+                  </button>
 
-        {/* Marketplace Main Grid: Left Sidebar Filters + Right Results */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-          
-          {/* ========================================================================= */}
-          {/* MOBILE FILTER MODAL / SLIDE-OVER DRAWER */}
-          {/* ========================================================================= */}
-          {mobileFilterOpen && (
-            <div className="fixed inset-0 z-50 md:hidden flex justify-end">
-              {/* Dark backdrop */}
-              <div 
-                className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
-                onClick={() => setMobileFilterOpen(false)}
-              />
+                  {countryDropdownOpen && (
+                    <div className="absolute left-0 mt-2 w-64 rounded-2xl p-2 bg-[#0E0E14] border border-white/20 text-white shadow-2xl z-50 max-h-80 overflow-y-auto animate-in fade-in zoom-in-95 duration-100">
+                      <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-400 border-b border-white/10 mb-1 flex items-center justify-between">
+                        <span>Select Region</span>
+                        {selectedCountry && (
+                          <button
+                            type="button"
+                            onClick={() => handleSelectCountry(null)}
+                            className="text-[10px] text-[#E31B23] hover:underline cursor-pointer"
+                          >
+                            Reset
+                          </button>
+                        )}
+                      </div>
+                      
+                      <button
+                        type="button"
+                        onClick={() => handleSelectCountry(null)}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                          !selectedCountry ? 'bg-[#E31B23] text-white font-bold' : 'text-zinc-300 hover:bg-white/10'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span>🌐</span>
+                          <span>All Countries & Global</span>
+                        </div>
+                      </button>
 
-              {/* Sliding Filter Panel */}
-              <div className="relative w-full max-w-xs bg-white h-full shadow-2xl p-6 overflow-y-auto space-y-6 flex flex-col justify-between z-10">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between pb-4 border-b border-zinc-150">
-                    <span className="text-base font-black text-zinc-950 flex items-center gap-2">
-                      <SlidersHorizontal className="w-4 h-4 text-[#E31B23]" />
-                      Filter Events
-                    </span>
+                      {countries.map((c) => (
+                        <button
+                          key={c.code}
+                          type="button"
+                          onClick={() => handleSelectCountry(c)}
+                          className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                            selectedCountry?.code === c.code ? 'bg-[#E31B23] text-white font-bold' : 'text-zinc-300 hover:bg-white/10'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 truncate">
+                            <span>{c.flag || '🌐'}</span>
+                            <span className="truncate">{c.name}</span>
+                          </div>
+                          <span className="text-[10px] font-mono opacity-80">{c.code}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Search Input */}
+                <div className="flex items-center gap-2 px-2 flex-1 min-w-0">
+                  <Search className="w-4 h-4 text-white/80 shrink-0" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search by artist, festival, city..."
+                    className="w-full bg-transparent text-sm sm:text-base text-white placeholder-zinc-400 outline-none border-none font-medium truncate"
+                  />
+                  {search && (
                     <button
-                      onClick={() => setMobileFilterOpen(false)}
-                      className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-600 hover:bg-zinc-200 cursor-pointer"
+                      onClick={() => setSearch('')}
+                      className="p-1 rounded-lg hover:bg-white/20 text-zinc-300 hover:text-white transition-colors cursor-pointer"
                     >
                       <X className="w-4 h-4" />
                     </button>
-                  </div>
-
-                  {/* Category Filter */}
-                  <div className="space-y-3">
-                    <label className="text-xs font-bold text-zinc-900 uppercase tracking-wider block">
-                      Category
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {categories.map((cat) => (
-                        <button
-                          key={cat}
-                          onClick={() => setCategory(cat)}
-                          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                            category === cat
-                              ? 'bg-[#E31B23] text-white shadow-xs'
-                              : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
-                          }`}
-                        >
-                          {cat}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Price Filter */}
-                  <div className="space-y-3">
-                    <label className="text-xs font-bold text-zinc-900 uppercase tracking-wider block">
-                      Price
-                    </label>
-                    <div className="space-y-2">
-                      {priceOptions.map((opt) => (
-                        <label
-                          key={opt.value}
-                          className="flex items-center gap-2.5 text-sm font-semibold text-zinc-700 hover:text-zinc-950 cursor-pointer py-0.5"
-                        >
-                          <input
-                            type="radio"
-                            name="mobilePrice"
-                            checked={priceRange === opt.value}
-                            onChange={() => setPriceRange(opt.value)}
-                            className="accent-[#E31B23] w-4 h-4"
-                          />
-                          <span>{opt.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Format Filter */}
-                  <div className="space-y-3">
-                    <label className="text-xs font-bold text-zinc-900 uppercase tracking-wider block">
-                      Event Format
-                    </label>
-                    <div className="grid grid-cols-3 gap-1.5 bg-zinc-100 p-1.5 rounded-2xl">
-                      {(['All', 'physical', 'virtual'] as const).map((fmt) => (
-                        <button
-                          key={fmt}
-                          onClick={() => setFormatFilter(fmt)}
-                          className={`py-2 text-xs font-bold rounded-xl capitalize transition-all cursor-pointer ${
-                            formatFilter === fmt
-                              ? 'bg-white text-zinc-950 shadow-xs'
-                              : 'text-zinc-500 hover:text-zinc-900'
-                          }`}
-                        >
-                          {fmt === 'physical' ? 'In-Person' : fmt === 'virtual' ? 'Virtual' : 'All'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  )}
                 </div>
 
-                <div className="pt-4 border-t border-zinc-150 space-y-2">
-                  <button
-                    onClick={() => setMobileFilterOpen(false)}
-                    className="w-full py-3 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-xl transition-all shadow-xs cursor-pointer text-center"
-                  >
-                    View {paginationMeta.total} {paginationMeta.total === 1 ? 'Event' : 'Events'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleResetFilters();
-                      setMobileFilterOpen(false);
-                    }}
-                    className="w-full py-2 text-xs font-bold text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" /> Reset Filters
-                  </button>
-                </div>
               </div>
             </div>
-          )}
+          </div>
+
+          {/* Quick Date Filters (Today, This Weekend, Next 30 Days) */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            <span className="text-xs font-mono uppercase text-zinc-400 font-bold mr-1">When:</span>
+            {[
+              { id: 'all', label: 'All Dates' },
+              { id: 'today', label: 'Today' },
+              { id: 'weekend', label: 'This Weekend' },
+              { id: 'month', label: 'Next 30 Days' },
+            ].map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                onClick={() => setDateFilter(d.id as any)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap border ${
+                  dateFilter === d.id
+                    ? 'bg-white text-zinc-950 border-white shadow-md font-black'
+                    : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border-white/10'
+                }`}
+              >
+                {d.label}
+              </button>
+            ))}
+          </div>
+
+          {/* ======================================================================= */}
+          {/* HORIZONTAL CATEGORY TAXONOMY STRIP (High-Contrast White & Red Pill UI) */}
+          {/* ======================================================================= */}
+          <div className="pt-2">
+            <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
+              {CATEGORY_ITEMS.map((cat) => {
+                const Icon = cat.icon;
+                const isActive = category === cat.name;
+                return (
+                  <button
+                    key={cat.name}
+                    type="button"
+                    onClick={() => setCategory(cat.name)}
+                    className={`px-4.5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center gap-2 cursor-pointer active:scale-95 border ${
+                      isActive
+                        ? 'bg-[#E31B23] text-white border-[#E31B23] shadow-lg shadow-[#E31B23]/35 scale-102'
+                        : 'bg-white/[0.05] hover:bg-white text-zinc-300 hover:text-zinc-950 border-white/15 hover:border-white shadow-xs'
+                    }`}
+                  >
+                    <Icon className={`w-3.5 h-3.5 transition-colors ${isActive ? 'text-white' : 'text-[#E31B23] group-hover:text-zinc-950'}`} />
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 2. FEATURED EVENTS (Cinema-Scale Interactive Carousel)                    */}
+      {/* ========================================================================= */}
+      {featuredEvents.length > 0 && !isLoading && (
+        <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-12 sm:py-16 bg-white dark:bg-[#0A0A0E] border-b border-zinc-200 dark:border-white/5 overflow-hidden">
+          <div className="max-w-[1600px] mx-auto space-y-7">
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#E31B23]/10 border border-[#E31B23]/25 text-[#E31B23] flex items-center justify-center shadow-lg shadow-[#E31B23]/10">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">
+                      Featured Events
+                    </h2>
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#E31B23]/10 text-[#E31B23] text-[10px] font-mono font-bold uppercase tracking-wider border border-[#E31B23]/25 shadow-xs">
+                      CURATED
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-zinc-400 hidden sm:block">
+                    Hand-picked live experiences, headline concerts, and festivals happening soon.
+                  </p>
+                </div>
+              </div>
+
+              {/* Carousel Navigation Arrows */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => scrollFeatured('left')}
+                  className="w-10 h-10 rounded-2xl bg-white/[0.04] hover:bg-white/10 active:scale-95 border border-white/10 hover:border-white/25 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollFeatured('right')}
+                  className="w-10 h-10 rounded-2xl bg-white/[0.04] hover:bg-white/10 active:scale-95 border border-white/10 hover:border-white/25 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Cinema Carousel Track (Horizontal snap scroll with enlarged dimensions) */}
+            <div 
+              ref={featuredScrollRef}
+              className="flex items-stretch gap-6 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scrollbar-none scroll-smooth"
+            >
+              {featuredEvents.map((featuredEvent, index) => {
+                const minPrice = featuredEvent.tickets && featuredEvent.tickets.length > 0 
+                  ? Math.min(...featuredEvent.tickets.map(t => t.price)) 
+                  : 0;
+
+                return (
+                  <Link
+                    key={featuredEvent.id}
+                    to={`/events/${featuredEvent.slug || featuredEvent.id}`}
+                    className="group relative rounded-[2rem] overflow-hidden border border-white/10 hover:border-white/30 h-[480px] sm:h-[540px] w-[300px] sm:w-[380px] lg:w-[420px] flex-shrink-0 snap-start flex flex-col justify-between p-6 sm:p-7 transition-all duration-500 hover:shadow-2xl hover:shadow-[#E31B23]/20 hover:-translate-y-2 bg-zinc-950"
+                  >
+                    {/* Full-bleed Background Image */}
+                    <img
+                      src={featuredEvent.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80'}
+                      alt={featuredEvent.title}
+                      className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.72] contrast-[1.08] group-hover:scale-110 group-hover:brightness-[0.6] transition-all duration-700 pointer-events-none"
+                    />
+
+                    {/* Gradient Cinematic Scrims */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent pointer-events-none" />
+
+                    {/* Top Overlay Bar: Badge + Category + Price (High-Contrast White & Red) */}
+                    <div className="relative z-10 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-9 h-9 rounded-xl flex items-center justify-center font-mono font-black text-xs border ${
+                          index === 0 
+                            ? 'bg-[#E31B23] text-white border-[#E31B23] shadow-lg shadow-[#E31B23]/40' 
+                            : index === 1
+                            ? 'bg-amber-500 text-white border-amber-400 shadow-lg shadow-amber-500/30'
+                            : 'bg-white text-zinc-950 border-white shadow-md font-black'
+                        }`}>
+                          #{index + 1}
+                        </span>
+                        <span className="px-3 py-1.5 rounded-full bg-white text-zinc-950 font-bold text-xs uppercase tracking-wider shadow-lg border border-white">
+                          {featuredEvent.category || 'Event'}
+                        </span>
+                      </div>
+
+                      <span className="px-3.5 py-1.5 rounded-full bg-[#E31B23] text-white text-xs font-mono font-black shadow-lg shadow-[#E31B23]/40 border border-red-500/50">
+                        {minPrice === 0 ? 'FREE RSVP' : formatCurrency(minPrice)}
+                      </span>
+                    </div>
+
+                    {/* Bottom Overlay Content */}
+                    <div className="relative z-10 space-y-4 pt-10">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-xs font-mono">
+                          <span className="bg-white/95 text-zinc-950 font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                            <Calendar className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
+                            <span>{formatDate(featuredEvent.startDate)}</span>
+                          </span>
+                        </div>
+                        <h3 className="text-xl sm:text-2xl font-black text-white line-clamp-2 leading-tight group-hover:text-red-400 transition-colors drop-shadow-md">
+                          {featuredEvent.title}
+                        </h3>
+                        <div className="flex items-center gap-1.5 text-xs text-zinc-300 font-mono truncate">
+                          <MapPin className="w-4 h-4 text-[#E31B23] shrink-0" />
+                          <span className="truncate">{featuredEvent.venue || featuredEvent.city || 'Lagos, Nigeria'}</span>
+                        </div>
+                      </div>
+
+                      {/* Quick Access CTA Pill */}
+                      <div className="pt-3 border-t border-white/20 flex items-center justify-between">
+                        <span className="text-sm font-bold text-white group-hover:text-[#E31B23] transition-colors">
+                          Get Tickets
+                        </span>
+                        <div className="w-8 h-8 rounded-full bg-white text-zinc-950 group-hover:bg-[#E31B23] group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-md">
+                          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+          </div>
+        </section>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 3. MAIN MARKETPLACE CONTENT AREA                                          */}
+      {/* ========================================================================= */}
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-12 sm:py-16 space-y-10" ref={resultsRef}>
+        
+        {/* Mobile Filter Toggle & Quick Bar */}
+        <div className="md:hidden flex items-center justify-between gap-3 bg-white/[0.04] p-3 rounded-2xl border border-white/10">
+          <button
+            onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold text-white cursor-pointer transition-all border border-white/10"
+          >
+            <Filter className="w-3.5 h-3.5 text-[#E31B23]" />
+            <span>Refine Filters ({category !== 'All' || priceRange !== 'All' || formatFilter !== 'All' ? 'Active' : '0'})</span>
+          </button>
+
+          <span className="text-xs font-mono text-zinc-400">
+            {paginationMeta.total} {paginationMeta.total === 1 ? 'event' : 'events'}
+          </span>
+        </div>
+
+        {/* Marketplace Grid: Left Sidebar Filters + Right Results */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+          
+          {/* ========================================================================= */}
+          {/* MOBILE FILTER MODAL / SLIDE-OVER DRAWER                                   */}
+          {/* ========================================================================= */}
+          <AnimatePresence>
+            {mobileFilterOpen && (
+              <div className="fixed inset-0 z-50 md:hidden flex justify-end">
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+                  onClick={() => setMobileFilterOpen(false)}
+                />
+
+                <motion.div 
+                  initial={{ x: '100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '100%' }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                  className="relative w-full max-w-xs bg-[#0F0F14] text-white h-full shadow-2xl p-6 overflow-y-auto space-y-6 flex flex-col justify-between z-10 border-l border-white/10"
+                >
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                      <span className="text-base font-black text-white flex items-center gap-2">
+                        <SlidersHorizontal className="w-4 h-4 text-[#E31B23]" />
+                        Filter Events
+                      </span>
+                      <button
+                        onClick={() => setMobileFilterOpen(false)}
+                        className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white cursor-pointer"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Format Filter */}
+                    <div className="space-y-3">
+                      <label className="text-xs font-mono uppercase tracking-wider text-zinc-400 block">
+                        Event Format
+                      </label>
+                      <div className="grid grid-cols-3 gap-1.5 bg-white/[0.04] p-1.5 rounded-2xl border border-white/10">
+                        {(['All', 'physical', 'virtual'] as const).map((fmt) => (
+                          <button
+                            key={fmt}
+                            onClick={() => setFormatFilter(fmt)}
+                            className={`py-2 text-xs font-bold rounded-xl capitalize transition-all cursor-pointer ${
+                              formatFilter === fmt
+                                ? 'bg-[#E31B23] text-white shadow-xs'
+                                : 'text-zinc-400 hover:text-white'
+                            }`}
+                          >
+                            {fmt === 'physical' ? 'In-Person' : fmt === 'virtual' ? 'Virtual' : 'All'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Price Filter */}
+                    <div className="space-y-3">
+                      <label className="text-xs font-mono uppercase tracking-wider text-zinc-400 block">
+                        Price Range
+                      </label>
+                      <div className="space-y-2">
+                        {PRICE_OPTIONS.map((opt) => (
+                          <label
+                            key={opt.value}
+                            className="flex items-center gap-2.5 text-xs font-semibold text-zinc-300 hover:text-white cursor-pointer py-1"
+                          >
+                            <input
+                              type="radio"
+                              name="mobilePrice"
+                              checked={priceRange === opt.value}
+                              onChange={() => setPriceRange(opt.value)}
+                              className="accent-[#E31B23] w-4 h-4"
+                            />
+                            <span>{opt.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/10 space-y-2">
+                    <button
+                      onClick={() => setMobileFilterOpen(false)}
+                      className="w-full py-3 bg-[#E31B23] hover:bg-[#C9141B] text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-[#E31B23]/30 cursor-pointer text-center"
+                    >
+                      View {displayEvents.length} {displayEvents.length === 1 ? 'Event' : 'Events'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleResetFilters();
+                        setMobileFilterOpen(false);
+                      }}
+                      className="w-full py-2 text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" /> Reset Filters
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
 
           {/* ========================================================================= */}
-          {/* DESKTOP FILTERS SIDEBAR */}
+          {/* DESKTOP FILTERS SIDEBAR (Refined Dark Glass Bento)                        */}
           {/* ========================================================================= */}
-          <aside className="hidden md:block md:col-span-3 bg-white p-6 rounded-3xl border border-[#E5E7EB] shadow-xs space-y-6 sticky top-24">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
-              <span className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+          <aside className="hidden md:block md:col-span-3 bg-white/[0.03] p-6 rounded-3xl border border-white/10 backdrop-blur-xl shadow-xl space-y-6 sticky top-24">
+            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <span className="text-sm font-bold text-white flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-[#E31B23]" />
-                Filters
+                Refine Search
               </span>
               <button
                 onClick={handleResetFilters}
@@ -415,38 +819,38 @@ export const Discover: React.FC = () => {
               </button>
             </div>
 
-            {/* Category Filter */}
+            {/* Event Format (In-Person / Virtual) */}
             <div className="space-y-3">
-              <label className="text-xs font-bold text-zinc-900 uppercase tracking-wider block">
-                Category
+              <label className="text-xs font-mono uppercase tracking-wider text-zinc-400 block">
+                Experience Type
               </label>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((cat) => (
+              <div className="grid grid-cols-3 gap-1 bg-white/[0.04] p-1 rounded-2xl border border-white/10">
+                {(['All', 'physical', 'virtual'] as const).map((fmt) => (
                   <button
-                    key={cat}
-                    onClick={() => setCategory(cat)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                      category === cat
+                    key={fmt}
+                    onClick={() => setFormatFilter(fmt)}
+                    className={`py-2 text-xs font-bold rounded-xl capitalize transition-all cursor-pointer ${
+                      formatFilter === fmt
                         ? 'bg-[#E31B23] text-white shadow-xs'
-                        : 'bg-zinc-50 hover:bg-zinc-100 text-zinc-700 border border-zinc-200'
+                        : 'text-zinc-400 hover:text-white'
                     }`}
                   >
-                    {cat}
+                    {fmt === 'physical' ? 'Live' : fmt === 'virtual' ? 'Virtual' : 'All'}
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Price Filter */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-zinc-900 uppercase tracking-wider block">
-                Price
+            <div className="space-y-3 pt-2 border-t border-white/10">
+              <label className="text-xs font-mono uppercase tracking-wider text-zinc-400 block">
+                Ticket Price
               </label>
               <div className="space-y-1.5">
-                {priceOptions.map((opt) => (
+                {PRICE_OPTIONS.map((opt) => (
                   <label
                     key={opt.value}
-                    className="flex items-center gap-2.5 text-sm font-medium text-zinc-700 hover:text-zinc-950 cursor-pointer py-1"
+                    className="flex items-center gap-2.5 text-xs font-medium text-zinc-300 hover:text-white cursor-pointer py-1 transition-colors"
                   >
                     <input
                       type="radio"
@@ -461,53 +865,38 @@ export const Discover: React.FC = () => {
               </div>
             </div>
 
-            {/* Format Filter (In-Person / Virtual) */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-zinc-900 uppercase tracking-wider block">
-                Event Format
-              </label>
-              <div className="grid grid-cols-3 gap-1.5 bg-zinc-100 p-1.5 rounded-2xl">
-                {(['All', 'physical', 'virtual'] as const).map((fmt) => (
-                  <button
-                    key={fmt}
-                    onClick={() => setFormatFilter(fmt)}
-                    className={`py-2 text-xs font-bold rounded-xl capitalize transition-all cursor-pointer ${
-                      formatFilter === fmt
-                        ? 'bg-white text-zinc-950 shadow-xs'
-                        : 'text-zinc-500 hover:text-zinc-900'
-                    }`}
-                  >
-                    {fmt === 'physical' ? 'In-Person' : fmt === 'virtual' ? 'Virtual' : 'All'}
-                  </button>
-                ))}
-              </div>
+            {/* Quick Guarantee Micro-badge */}
+            <div className="pt-4 border-t border-white/10 flex items-center gap-2 text-[11px] font-mono text-zinc-400">
+              <Ticket className="w-3.5 h-3.5 text-[#E31B23]" />
+              <span>Zero Scalp Guaranteed Passes</span>
             </div>
           </aside>
 
           {/* ========================================================================= */}
-          {/* RIGHT EVENT RESULTS AREA */}
+          {/* RIGHT EVENT RESULTS AREA                                                  */}
           {/* ========================================================================= */}
           <section className="col-span-1 md:col-span-9 space-y-6">
+            
             {/* Top Toolbar (Count + View Mode Switcher) */}
-            <div className="flex items-center justify-between bg-white px-6 py-3.5 rounded-2xl border border-[#E5E7EB] shadow-xs">
-              <p className="text-sm font-bold text-zinc-800">
+            <div className="flex items-center justify-between bg-white/[0.03] px-6 py-3.5 rounded-2xl border border-white/10 backdrop-blur-xl shadow-xs">
+              <p className="text-xs sm:text-sm font-bold text-zinc-300">
                 {isLoading ? (
-                  <span className="flex items-center gap-2 text-zinc-500">
-                    <Loader2 className="w-4 h-4 animate-spin text-[#E31B23]" /> Loading events...
+                  <span className="flex items-center gap-2 text-zinc-400">
+                    <Loader2 className="w-4 h-4 animate-spin text-[#E31B23]" /> Loading verified events...
                   </span>
                 ) : (
                   <>
                     Showing <span className="text-[#E31B23]">{paginationMeta.from || (displayEvents.length > 0 ? 1 : 0)}</span>–<span className="text-[#E31B23]">{paginationMeta.to || displayEvents.length}</span> of{' '}
-                    <span className="text-zinc-950">{paginationMeta.total}</span> events
+                    <span className="text-white">{paginationMeta.total}</span> events
                   </>
                 )}
               </p>
 
-              <div className="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-xl">
+              <div className="flex items-center gap-1.5 bg-white/[0.04] p-1 rounded-xl border border-white/10">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg transition-all cursor-pointer ${
-                    viewMode === 'grid' ? 'bg-white text-zinc-950 shadow-xs' : 'text-zinc-400 hover:text-zinc-700'
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                    viewMode === 'grid' ? 'bg-[#E31B23] text-white shadow-xs' : 'text-zinc-400 hover:text-white'
                   }`}
                   title="Grid view"
                 >
@@ -515,8 +904,8 @@ export const Discover: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-all cursor-pointer ${
-                    viewMode === 'list' ? 'bg-white text-zinc-950 shadow-xs' : 'text-zinc-400 hover:text-zinc-700'
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                    viewMode === 'list' ? 'bg-[#E31B23] text-white shadow-xs' : 'text-zinc-400 hover:text-white'
                   }`}
                   title="List view"
                 >
@@ -527,12 +916,12 @@ export const Discover: React.FC = () => {
 
             {/* Error State */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center space-y-3">
+              <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center space-y-3">
                 <AlertCircle className="w-8 h-8 text-[#E31B23] mx-auto" />
-                <p className="text-sm font-bold text-zinc-900">{error}</p>
+                <p className="text-sm font-bold text-white">{error}</p>
                 <button
                   onClick={() => fetchEvents(paginationMeta.current_page)}
-                  className="px-4 py-2 bg-[#E31B23] text-white text-xs font-bold rounded-xl cursor-pointer hover:bg-[#B91C1C]"
+                  className="px-4 py-2 bg-[#E31B23] text-white text-xs font-bold rounded-xl cursor-pointer hover:bg-[#C9141B]"
                 >
                   Retry
                 </button>
@@ -543,15 +932,15 @@ export const Discover: React.FC = () => {
             {isLoading && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="bg-white rounded-3xl p-4 border border-zinc-200 animate-pulse space-y-4 shadow-xs">
-                    <div className="h-48 bg-zinc-100 rounded-2xl w-full" />
+                  <div key={i} className="bg-white/[0.03] rounded-3xl p-4 border border-white/10 animate-pulse space-y-4">
+                    <div className="h-48 bg-white/[0.05] rounded-2xl w-full" />
                     <div className="space-y-2 px-1">
-                      <div className="h-5 bg-zinc-100 rounded-md w-3/4" />
-                      <div className="h-4 bg-zinc-100 rounded-md w-1/2" />
+                      <div className="h-5 bg-white/[0.05] rounded-md w-3/4" />
+                      <div className="h-4 bg-white/[0.05] rounded-md w-1/2" />
                     </div>
-                    <div className="pt-3 border-t border-zinc-100 flex justify-between items-center px-1">
-                      <div className="h-4 bg-zinc-100 rounded-md w-1/4" />
-                      <div className="h-8 bg-zinc-100 rounded-xl w-24" />
+                    <div className="pt-3 border-t border-white/10 flex justify-between items-center px-1">
+                      <div className="h-4 bg-white/[0.05] rounded-md w-1/4" />
+                      <div className="h-8 bg-white/[0.05] rounded-xl w-24" />
                     </div>
                   </div>
                 ))}
@@ -560,17 +949,17 @@ export const Discover: React.FC = () => {
 
             {/* Empty State */}
             {!isLoading && !error && displayEvents.length === 0 && (
-              <div className="bg-white rounded-3xl border border-[#E5E7EB] p-16 text-center space-y-4 shadow-xs">
-                <div className="w-14 h-14 rounded-2xl bg-[#FEF2F2] text-[#E31B23] flex items-center justify-center mx-auto">
+              <div className="bg-white/[0.02] rounded-3xl border border-white/10 p-16 text-center space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-[#E31B23]/10 text-[#E31B23] flex items-center justify-center mx-auto border border-[#E31B23]/20">
                   <Calendar className="w-7 h-7" />
                 </div>
-                <h3 className="text-lg font-black text-zinc-900">No events found</h3>
-                <p className="text-sm text-zinc-500 max-w-sm mx-auto leading-relaxed">
-                  No upcoming events match your selected filters. Try clearing some filters or searching for a different keyword.
+                <h3 className="text-xl font-black text-white">No events found</h3>
+                <p className="text-xs sm:text-sm text-zinc-400 max-w-sm mx-auto leading-relaxed">
+                  No upcoming events match your selected filters. Try searching for a different keyword or resetting filters.
                 </p>
                 <button
                   onClick={handleResetFilters}
-                  className="px-6 py-3 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] transition-all shadow-xs cursor-pointer"
+                  className="px-6 py-3 bg-[#E31B23] text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-[#C9141B] transition-all shadow-lg shadow-[#E31B23]/25 cursor-pointer"
                 >
                   Reset All Filters
                 </button>
@@ -595,13 +984,13 @@ export const Discover: React.FC = () => {
             )}
 
             {/* ========================================================================= */}
-            {/* PAGINATION CONTROLS BAR */}
+            {/* PAGINATION CONTROLS BAR                                                   */}
             {/* ========================================================================= */}
             {!isLoading && paginationMeta.last_page > 1 && (
-              <div className="bg-white rounded-2xl border border-zinc-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
-                <div className="text-xs text-zinc-500 font-medium">
-                  Page <span className="font-bold text-zinc-900">{paginationMeta.current_page}</span> of{' '}
-                  <span className="font-bold text-zinc-900">{paginationMeta.last_page}</span>
+              <div className="bg-white/[0.03] rounded-2xl border border-white/10 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+                <div className="text-xs text-zinc-400 font-mono">
+                  Page <span className="font-bold text-white">{paginationMeta.current_page}</span> of{' '}
+                  <span className="font-bold text-white">{paginationMeta.last_page}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -609,7 +998,7 @@ export const Discover: React.FC = () => {
                   <button
                     onClick={() => handlePageChange(paginationMeta.current_page - 1)}
                     disabled={paginationMeta.current_page <= 1 || isLoading}
-                    className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white/10 hover:bg-white/15 border border-white/10 text-white"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span className="hidden sm:inline">Previous</span>
@@ -623,8 +1012,8 @@ export const Discover: React.FC = () => {
                         onClick={() => handlePageChange(pageNum)}
                         className={`w-9 h-9 rounded-xl text-xs font-black transition-all cursor-pointer ${
                           pageNum === paginationMeta.current_page
-                            ? 'bg-[#E31B23] text-white shadow-xs scale-105'
-                            : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200'
+                            ? 'bg-[#E31B23] text-white shadow-lg shadow-[#E31B23]/30 scale-105'
+                            : 'bg-white/[0.04] text-zinc-300 hover:bg-white/10 border border-white/10'
                         }`}
                       >
                         {pageNum}
@@ -636,7 +1025,7 @@ export const Discover: React.FC = () => {
                   <button
                     onClick={() => handlePageChange(paginationMeta.current_page + 1)}
                     disabled={paginationMeta.current_page >= paginationMeta.last_page || isLoading}
-                    className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white/10 hover:bg-white/15 border border-white/10 text-white"
                   >
                     <span className="hidden sm:inline">Next</span>
                     <ChevronRight className="w-4 h-4" />

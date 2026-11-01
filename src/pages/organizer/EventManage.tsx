@@ -808,8 +808,8 @@ export const EventManage: React.FC = () => {
     const customQuestionsCandidate = (Array.isArray(ev.customQuestions) && ev.customQuestions.length > 0)
       ? ev.customQuestions
       : (Array.isArray(ev.custom_questions) && ev.custom_questions.length > 0)
-      ? ev.custom_questions
-      : (Array.isArray(m.customQuestions) ? m.customQuestions : []);
+        ? ev.custom_questions
+        : (Array.isArray(m.customQuestions) ? m.customQuestions : []);
     if (customQuestionsCandidate.length > 0) {
       setCustomQuestions(customQuestionsCandidate);
     }
@@ -1311,8 +1311,8 @@ export const EventManage: React.FC = () => {
         payload.promoters = formattedPromos;
       }
 
-      const rawQuestionsCandidate = updates.customQuestions !== undefined 
-        ? updates.customQuestions 
+      const rawQuestionsCandidate = updates.customQuestions !== undefined
+        ? updates.customQuestions
         : (updates.custom_questions !== undefined ? updates.custom_questions : customMetaUpdates?.customQuestions);
       if (rawQuestionsCandidate !== undefined) {
         const formattedQs = (Array.isArray(rawQuestionsCandidate) ? rawQuestionsCandidate : []).map((q: any, idx: number) => ({
@@ -1902,7 +1902,7 @@ export const EventManage: React.FC = () => {
       const res = await eventApi.duplicateEvent(event.id, organizer?.id);
       const cloned = (res.data as any)?.data || res.data;
       const newId = cloned?.uuid || cloned?.id;
-      showNotification(`Cloned "${event.title}" as a new Draft listing!`, 'success');
+      showNotification(`Event duplicated`, 'success');
       if (newId) {
         navigate(`/organizer/events/${newId}`);
       } else {
@@ -2705,7 +2705,7 @@ export const EventManage: React.FC = () => {
                       category: eventCategories[0] || 'General',
                       visibility,
                       isFeatured,
-                    }, {}, 'Core event details saved!')}
+                    }, {}, 'Event updated')}
                     className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50 shadow-xs"
                   >
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -4188,21 +4188,18 @@ export const EventManage: React.FC = () => {
                         setStatusMessageType('none');
                         setIsStatusMsgEnabled(false);
                       }}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${
-                        statusMessageType === 'none'
-                          ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                          : 'border-zinc-200 hover:border-zinc-300 bg-white'
-                      }`}
+                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${statusMessageType === 'none'
+                        ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
+                        : 'border-zinc-200 hover:border-zinc-300 bg-white'
+                        }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                          statusMessageType === 'none' ? 'bg-red-100 text-[#E31B23]' : 'bg-zinc-100 text-zinc-500'
-                        }`}>
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'none' ? 'bg-red-100 text-[#E31B23]' : 'bg-zinc-100 text-zinc-500'
+                          }`}>
                           <MinusCircle className="w-4 h-4" />
                         </div>
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                          statusMessageType === 'none' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
-                        }`}>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'none' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
+                          }`}>
                           {statusMessageType === 'none' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
                       </div>
@@ -4221,21 +4218,18 @@ export const EventManage: React.FC = () => {
                         setStatusMessageType('pre_sale');
                         setIsStatusMsgEnabled(true);
                       }}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${
-                        statusMessageType === 'pre_sale'
-                          ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                          : 'border-zinc-200 hover:border-zinc-300 bg-white'
-                      }`}
+                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${statusMessageType === 'pre_sale'
+                        ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
+                        : 'border-zinc-200 hover:border-zinc-300 bg-white'
+                        }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                          statusMessageType === 'pre_sale' ? 'bg-amber-100 text-amber-600' : 'bg-zinc-100 text-zinc-500'
-                        }`}>
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'pre_sale' ? 'bg-amber-100 text-amber-600' : 'bg-zinc-100 text-zinc-500'
+                          }`}>
                           <Clock className="w-4 h-4" />
                         </div>
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                          statusMessageType === 'pre_sale' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
-                        }`}>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'pre_sale' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
+                          }`}>
                           {statusMessageType === 'pre_sale' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
                       </div>
@@ -4254,21 +4248,18 @@ export const EventManage: React.FC = () => {
                         setStatusMessageType('post_sales');
                         setIsStatusMsgEnabled(true);
                       }}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${
-                        statusMessageType === 'post_sales'
-                          ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                          : 'border-zinc-200 hover:border-zinc-300 bg-white'
-                      }`}
+                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${statusMessageType === 'post_sales'
+                        ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
+                        : 'border-zinc-200 hover:border-zinc-300 bg-white'
+                        }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                          statusMessageType === 'post_sales' ? 'bg-rose-100 text-rose-600' : 'bg-zinc-100 text-zinc-500'
-                        }`}>
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'post_sales' ? 'bg-rose-100 text-rose-600' : 'bg-zinc-100 text-zinc-500'
+                          }`}>
                           <AlertCircle className="w-4 h-4" />
                         </div>
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                          statusMessageType === 'post_sales' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
-                        }`}>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'post_sales' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
+                          }`}>
                           {statusMessageType === 'post_sales' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
                       </div>
@@ -4625,11 +4616,10 @@ export const EventManage: React.FC = () => {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-bold text-zinc-900">{q.question}</p>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                              (q.isRequired || q.is_required)
-                                ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                                : 'bg-zinc-200 text-zinc-700'
-                            }`}>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${(q.isRequired || q.is_required)
+                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                              : 'bg-zinc-200 text-zinc-700'
+                              }`}>
                               {(q.isRequired || q.is_required) ? 'Required' : 'Optional'}
                             </span>
                           </div>
@@ -4709,11 +4699,11 @@ export const EventManage: React.FC = () => {
                           showNotification('Please enter the question prompt.', 'warning');
                           return;
                         }
-                        const newQ = { 
-                          id: `q-${Date.now()}`, 
+                        const newQ = {
+                          id: `q-${Date.now()}`,
                           uuid: `q-${Date.now()}`,
-                          question: newQuestionText.trim(), 
-                          type: newQuestionType, 
+                          question: newQuestionText.trim(),
+                          type: newQuestionType,
                           options: newQuestionOptions.trim(),
                           isRequired: newQuestionRequired,
                           is_required: newQuestionRequired,
@@ -5323,7 +5313,7 @@ export const EventManage: React.FC = () => {
                       <tbody className="divide-y divide-zinc-100 font-semibold text-zinc-700">
                         {eventStaff
                           .filter(s => {
-                            const matchQuery = !staffSearchQuery || 
+                            const matchQuery = !staffSearchQuery ||
                               s.memberName.toLowerCase().includes(staffSearchQuery.toLowerCase()) ||
                               s.memberEmail.toLowerCase().includes(staffSearchQuery.toLowerCase());
                             const matchDuty = staffDutyFilter === 'all' || s.duty.toLowerCase() === staffDutyFilter.toLowerCase();
@@ -5344,12 +5334,11 @@ export const EventManage: React.FC = () => {
                               </td>
 
                               <td className="p-3.5">
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                                  staff.role === 'owner' ? 'bg-purple-100 text-purple-800' :
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${staff.role === 'owner' ? 'bg-purple-100 text-purple-800' :
                                   staff.role === 'admin' ? 'bg-indigo-100 text-indigo-800' :
-                                  staff.role === 'manager' ? 'bg-blue-100 text-blue-800' :
-                                  'bg-zinc-100 text-zinc-700'
-                                }`}>
+                                    staff.role === 'manager' ? 'bg-blue-100 text-blue-800' :
+                                      'bg-zinc-100 text-zinc-700'
+                                  }`}>
                                   {staff.role}
                                 </span>
                               </td>
@@ -5532,9 +5521,8 @@ export const EventManage: React.FC = () => {
                             <div>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs font-bold text-zinc-900">{discountLabel}</span>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                  isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-200 text-zinc-600'
-                                }`}>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-200 text-zinc-600'
+                                  }`}>
                                   {isActive ? 'Active' : 'Inactive'}
                                 </span>
                               </div>
@@ -5633,14 +5621,14 @@ export const EventManage: React.FC = () => {
                           showNotification('Please enter a valid discount amount or percentage.', 'warning');
                           return;
                         }
-                        const newPromo = { 
-                          id: `prm-${Date.now()}`, 
+                        const newPromo = {
+                          id: `prm-${Date.now()}`,
                           uuid: `prm-${Date.now()}`,
-                          code: trimmedCode, 
-                          discount: newPromoDiscount, 
+                          code: trimmedCode,
+                          discount: newPromoDiscount,
                           discountType: newPromoDiscountType,
                           discount_type: newPromoDiscountType,
-                          uses: 0, 
+                          uses: 0,
                           sales: 0,
                           maxUses: newPromoMaxUses !== '' ? Number(newPromoMaxUses) : null,
                           max_uses: newPromoMaxUses !== '' ? Number(newPromoMaxUses) : null,

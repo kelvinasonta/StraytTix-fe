@@ -60,16 +60,19 @@ export const VerificationPending: React.FC = () => {
     setResending(true);
 
     try {
-      await authApi.resendVerificationEmail();
-      const expiryTime = Date.now() + RESEND_INTERVAL * 1000;
+      const res = await authApi.resendVerificationEmail();
+      // Inspect backend response for dynamic cooldown / retry_after
+      const backendCooldown = extractThrottleSeconds(res);
+      const cooldown = backendCooldown && backendCooldown > 0 ? backendCooldown : 60;
+      const expiryTime = Date.now() + cooldown * 1000;
       localStorage.setItem(COUNTDOWN_EXPIRY_KEY, expiryTime.toString());
-      setSecondsLeft(RESEND_INTERVAL);
+      setSecondsLeft(cooldown);
       showNotification('Verification email sent.', 'success');
       setResending(false);
     } catch (err: any) {
       const throttledSec = extractThrottleSeconds(err);
       if (throttledSec || err.response?.status === 429) {
-        const cooldown = throttledSec || RESEND_INTERVAL;
+        const cooldown = throttledSec || 60;
         const expiryTime = Date.now() + cooldown * 1000;
         localStorage.setItem(COUNTDOWN_EXPIRY_KEY, expiryTime.toString());
         setSecondsLeft(cooldown);

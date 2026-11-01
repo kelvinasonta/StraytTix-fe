@@ -1,7 +1,7 @@
 export type AccountType = 'customer' | 'organizer';
 export type OrganizerType = 'individual' | 'organization';
 export type StaffRole = 'owner' | 'admin' | 'manager' | 'staff';
-export type EventStatus = 'Draft' | 'Published' | 'Upcoming' | 'Completed' | 'Cancelled' | 'Archived';
+export type EventStatus = 'Draft' | 'Published' | 'Upcoming' | 'Completed' | 'Cancelled' | 'Archived' | 'Ended';
 export type TicketStatus = 'Upcoming' | 'Used' | 'Cancelled' | 'Expired';
 export type OrderStatus = 'pending' | 'processing' | 'paid' | 'cancelled' | 'refunded' | 'failed' | 'Paid' | 'Pending' | 'Failed' | 'Refunded';
 export type PaymentGateway = 'paystack' | 'stripe' | 'flutterwave' | 'free' | 'offline';

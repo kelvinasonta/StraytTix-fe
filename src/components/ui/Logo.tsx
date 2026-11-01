@@ -19,7 +19,7 @@ export const Logo: React.FC<LogoProps> = ({
   badgeOnly = false,
 }) => {
   const { settings } = useSettings();
-  const displayName = settings?.sitename || 'Eventra';
+  const displayName = settings?.sitename || 'StraytTix';
   const logoUrl = settings?.logo;
 
   const iconSizes = {
