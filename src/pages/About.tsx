@@ -110,7 +110,7 @@ export const About: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1">
@@ -187,7 +187,7 @@ export const About: React.FC = () => {
               </h2>
             </div>
 
-            <div className="md:col-span-7 space-y-6 text-zinc-400 text-sm sm:text-base leading-relaxed">
+            <div className="md:col-span-7 space-y-6 text-zinc-600 dark:text-zinc-400 text-sm sm:text-base leading-relaxed">
               <p className="font-medium text-zinc-200 text-base sm:text-lg leading-relaxed">
                 Whether it is the bass vibrating through your chest in a warehouse in Victoria Island, an intimate jazz performance in Covent Garden, or a keynote speech that changes your career trajectory—live gatherings are the heartbeat of culture.
               </p>

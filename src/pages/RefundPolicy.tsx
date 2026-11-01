@@ -55,7 +55,7 @@ export const RefundPolicy: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between selection:bg-[#E31B23] selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-white flex flex-col justify-between selection:bg-[#E31B23] selection:text-white transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1 py-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 max-w-[1600px] mx-auto w-full space-y-12">
@@ -78,7 +78,7 @@ export const RefundPolicy: React.FC = () => {
           <h2 className="text-xl font-bold text-white tracking-tight">
             Our Commitment to Transparent Ticketing
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+          <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
             At StraytTix, we recognize that live events are unique and unpredictable. We have designed our refund framework to ensure fairness for both attendees who invest in tickets and organizers who commit upfront capital to venues, artists, and production equipment.
           </p>
         </div>
@@ -121,7 +121,7 @@ export const RefundPolicy: React.FC = () => {
               <div key={idx} className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 space-y-3 relative hover:border-white/20 transition-colors">
                 <span className="text-2xl font-mono font-black text-[#E31B23]">{item.step}</span>
                 <h4 className="text-sm font-bold text-white">{item.title}</h4>
-                <p className="text-xs text-zinc-400 leading-relaxed font-normal">{item.desc}</p>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -145,7 +145,7 @@ export const RefundPolicy: React.FC = () => {
             <h3 className="text-base sm:text-lg font-bold text-white">
               Organizer Unresponsive or Suspect an Event Fraud?
             </h3>
-            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal max-w-xl">
+            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal max-w-xl">
               If an event has been cancelled or an organizer has failed to respond to your valid refund inquiry within 5 business days, our Trust & Safety team can intervene and execute an administrative reversal.
             </p>
           </div>

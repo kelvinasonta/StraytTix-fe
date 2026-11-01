@@ -90,7 +90,7 @@ export const Blog: React.FC = () => {
   const featuredArticle = articles.find(a => a.featured) || articles[0];
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between selection:bg-[#E31B23] selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-white flex flex-col justify-between selection:bg-[#E31B23] selection:text-white transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1 py-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 max-w-[1600px] mx-auto w-full space-y-16">
@@ -166,7 +166,7 @@ export const Blog: React.FC = () => {
                       KV
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white">{featuredArticle.author}</p>
+                      <p className="text-xs font-bold text-zinc-950 dark:text-white">{featuredArticle.author}</p>
                       <p className="text-[11px] text-zinc-400">{featuredArticle.authorRole}</p>
                     </div>
                   </div>

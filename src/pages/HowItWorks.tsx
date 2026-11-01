@@ -185,7 +185,7 @@ export const HowItWorks: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1">
@@ -199,7 +199,7 @@ export const HowItWorks: React.FC = () => {
           <div className="max-w-5xl mx-auto text-center space-y-6 relative z-10">
             
             {/* Monospace System Tag */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/15 text-white text-[11px] font-mono tracking-wider font-semibold uppercase">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-200 dark:bg-white/[0.08] border border-zinc-300 dark:border-white/15 text-zinc-800 dark:text-white text-[11px] font-mono tracking-wider font-semibold uppercase">
               <span className="w-1.5 h-1.5 rounded-full bg-[#E31B23] animate-pulse" />
               THE STRAYTTIX ARCHITECTURE
             </div>

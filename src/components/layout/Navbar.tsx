@@ -114,27 +114,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
   const isDashboardView = isDashboard || hideNavLinks || location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/organizer');
   
-  // High-assurance dark public pages list: all these pages share the deep #070709 theme
-  const darkThemeRoutes = [
-    '/',
-    '/discover',
-    '/pricing',
-    '/about',
-    '/how-it-works',
-    '/download',
-    '/app',
-    '/blog',
-    '/api-docs',
-    '/docs',
-    '/report',
-    '/terms',
-    '/privacy',
-    '/refund-policy'
-  ];
-  
-  const isEventDetailPage = location.pathname.startsWith('/events/');
-  const isOrganizerProfilePage = location.pathname.startsWith('/organizers/') || location.pathname.startsWith('/@');
-  const isDarkCanvasPage = isDark || darkThemeRoutes.includes(location.pathname) || isEventDetailPage || isOrganizerProfilePage;
+  const isDarkCanvasPage = isDark;
   const isDarkHeroPage = location.pathname === '/' || location.pathname === '/discover';
   const isTransparentHeroNav = isDarkHeroPage && !isScrolled;
 

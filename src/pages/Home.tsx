@@ -206,7 +206,7 @@ export const Home: React.FC = () => {
         {/* ========================================================================= */}
         {/* 4. THE STRAYTTIX HIGH-ASSURANCE STANDARD: Architectural Bento             */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 sm:pb-24 bg-white">
+        <section className="px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 sm:pb-24 bg-white dark:bg-[#070709] transition-colors duration-300">
           <div className="max-w-6xl mx-auto space-y-14">
             
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -215,10 +215,10 @@ export const Home: React.FC = () => {
                   <ShieldCheck className="w-3.5 h-3.5 text-[#E31B23]" />
                   <span>The StraytTix Standard</span>
                 </div>
-                <h2 className="text-3xl sm:text-5xl font-black text-zinc-950 tracking-[-0.03em] leading-tight">
+                <h2 className="text-3xl sm:text-5xl font-black text-zinc-950 dark:text-white tracking-[-0.03em] leading-tight">
                   Transparent, tamper-proof ticketing.
                 </h2>
-                <p className="text-zinc-600 text-sm sm:text-base font-normal">
+                <p className="text-zinc-600 dark:text-zinc-400 text-sm sm:text-base font-normal">
                   Engineered with cryptographic barcodes so you never have to worry about fake tickets, double-entry, or venue delays.
                 </p>
               </div>
@@ -239,7 +239,7 @@ export const Home: React.FC = () => {
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
                 whileHover={{ y: -8, scale: 1.01 }}
-                className="group rounded-[1.75rem] border border-zinc-200/90 bg-gradient-to-b from-white via-white to-zinc-50/70 p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 hover:shadow-2xl hover:shadow-zinc-200/50 transition-all duration-300 space-y-6"
+                className="group rounded-[1.75rem] border border-zinc-200/90 dark:border-white/10 bg-gradient-to-b from-white via-white to-zinc-50/70 dark:from-white/[0.04] dark:via-white/[0.02] dark:to-transparent p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-white/20 hover:shadow-2xl transition-all duration-300 space-y-6"
               >
                 
                 {/* Visual Header Mockup */}
@@ -284,7 +284,7 @@ export const Home: React.FC = () => {
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
                 whileHover={{ y: -8, scale: 1.01 }}
-                className="group rounded-[1.75rem] border border-zinc-200/90 bg-gradient-to-b from-white via-white to-zinc-50/70 p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 hover:shadow-2xl hover:shadow-zinc-200/50 transition-all duration-300 space-y-6"
+                className="group rounded-[1.75rem] border border-zinc-200/90 dark:border-white/10 bg-gradient-to-b from-white via-white to-zinc-50/70 dark:from-white/[0.04] dark:via-white/[0.02] dark:to-transparent p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-white/20 hover:shadow-2xl transition-all duration-300 space-y-6"
               >
                 
                 {/* Visual Header Mockup */}
@@ -329,7 +329,7 @@ export const Home: React.FC = () => {
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
                 whileHover={{ y: -8, scale: 1.01 }}
-                className="group rounded-[1.75rem] border border-zinc-200/90 bg-gradient-to-b from-white via-white to-zinc-50/70 p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 hover:shadow-2xl hover:shadow-zinc-200/50 transition-all duration-300 space-y-6"
+                className="group rounded-[1.75rem] border border-zinc-200/90 dark:border-white/10 bg-gradient-to-b from-white via-white to-zinc-50/70 dark:from-white/[0.04] dark:via-white/[0.02] dark:to-transparent p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-white/20 hover:shadow-2xl transition-all duration-300 space-y-6"
               >
                 
                 {/* Visual Header Mockup */}
@@ -700,7 +700,7 @@ export const Home: React.FC = () => {
         {/* ========================================================================= */}
         {/* 8. FOR ORGANIZERS: Luxury Creator Monolith Card                            */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-[#070709] border-t border-white/10">
+        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-zinc-100 dark:bg-[#070709] border-t border-zinc-200 dark:border-white/10 transition-colors duration-300">
           <div className="max-w-6xl mx-auto">
             <motion.div 
               initial={{ opacity: 0, scale: 0.97, y: 36 }}

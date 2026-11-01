@@ -369,7 +369,7 @@ export const Discover: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased transition-colors duration-300">
       <Navbar />
 
       {/* ========================================================================= */}
@@ -390,24 +390,24 @@ export const Discover: React.FC = () => {
                 <Flame className="w-3.5 h-3.5 text-[#E31B23]" />
                 <span>Live Event Marketplace</span>
               </div>
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-[-0.035em] leading-[1.12]">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-zinc-950 dark:text-white tracking-[-0.035em] leading-[1.12]">
                 Discover Live Experiences.
               </h1>
-              <p className="text-zinc-400 text-xs sm:text-base font-normal leading-relaxed">
+              <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-base font-normal leading-relaxed">
                 Explore concerts, secret raves, tech summits, and festivals across Nigeria. Verified tickets with instant pass delivery.
               </p>
             </div>
 
             {/* Elevated Search Bar with Country Pill Dropdown */}
             <div className="w-full lg:max-w-xl space-y-2">
-              <div className="p-1.5 sm:p-2 rounded-2xl bg-white/[0.08] border border-white/25 backdrop-blur-2xl shadow-2xl transition-all duration-300 focus-within:border-white focus-within:bg-white/[0.12] focus-within:shadow-[0_0_25px_rgba(255,255,255,0.12)] flex items-center gap-2">
+              <div className="p-1.5 sm:p-2 rounded-2xl bg-white dark:bg-white/[0.08] border border-zinc-300 dark:border-white/25 backdrop-blur-2xl shadow-lg dark:shadow-2xl transition-all duration-300 focus-within:border-zinc-500 dark:focus-within:border-white flex items-center gap-2">
                 
                 {/* Interactive Country Selector Pill on Top of Discover */}
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setCountryDropdownOpen(!countryDropdownOpen)}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold transition-all border border-white/15 cursor-pointer shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 dark:hover:bg-white/20 text-zinc-900 dark:text-white font-mono text-xs font-bold transition-all border border-zinc-300 dark:border-white/15 cursor-pointer shrink-0"
                     title="Filter by country"
                   >
                     <span>{selectedCountry ? selectedCountry.flag : '🌐'}</span>
@@ -545,7 +545,7 @@ export const Discover: React.FC = () => {
       {/* 2. FEATURED EVENTS (Cinema-Scale Interactive Carousel)                    */}
       {/* ========================================================================= */}
       {featuredEvents.length > 0 && !isLoading && (
-        <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-12 sm:py-16 bg-[#0A0A0E] border-b border-white/5 overflow-hidden">
+        <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-12 sm:py-16 bg-white dark:bg-[#0A0A0E] border-b border-zinc-200 dark:border-white/5 overflow-hidden">
           <div className="max-w-[1600px] mx-auto space-y-7">
             
             <div className="flex items-center justify-between">
@@ -555,7 +555,7 @@ export const Discover: React.FC = () => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2.5">
-                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                    <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">
                       Featured Events
                     </h2>
                     <span className="px-2.5 py-0.5 rounded-full bg-[#E31B23]/10 text-[#E31B23] text-[10px] font-mono font-bold uppercase tracking-wider border border-[#E31B23]/25 shadow-xs">

@@ -120,7 +120,7 @@ print(res.json())`
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between selection:bg-[#E31B23] selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-white flex flex-col justify-between selection:bg-[#E31B23] selection:text-white transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1 py-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 max-w-[1600px] mx-auto w-full">
@@ -186,7 +186,7 @@ print(res.json())`
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
                 REST API Documentation
               </h1>
-              <p className="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-3xl font-normal">
+              <p className="text-zinc-600 dark:text-zinc-400 text-sm sm:text-base leading-relaxed max-w-3xl font-normal">
                 Integrate programmatic event discovery, automate ticket tier management, register attendee webhooks, and deploy custom checkout drawers directly into your own applications.
               </p>
             </div>

@@ -32,7 +32,7 @@ export const DownloadApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1">
@@ -49,7 +49,7 @@ export const DownloadApp: React.FC = () => {
             <div className="lg:col-span-7 space-y-6">
               
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/15 text-white text-[11px] font-mono tracking-wider font-semibold uppercase">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-200 dark:bg-white/[0.08] border border-zinc-300 dark:border-white/15 text-zinc-800 dark:text-white text-[11px] font-mono tracking-wider font-semibold uppercase">
                   <Smartphone className="w-3.5 h-3.5 text-[#E31B23]" />
                   NATIVE MOBILE SUITE
                 </div>
@@ -323,7 +323,7 @@ export const DownloadApp: React.FC = () => {
               <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
                 Point your phone camera to download directly.
               </h3>
-              <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-normal">
+              <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm leading-relaxed font-normal">
                 Open your camera app and scan the QR code to open the iOS App Store or Google Play Store instantly on your mobile device.
               </p>
             </div>

@@ -50,7 +50,7 @@ export const Terms: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between selection:bg-[#E31B23] selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-white flex flex-col justify-between selection:bg-[#E31B23] selection:text-white transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1 py-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 max-w-[1600px] mx-auto w-full space-y-12">
@@ -75,7 +75,7 @@ export const Terms: React.FC = () => {
           </div>
           <div className="space-y-1">
             <h3 className="text-sm font-bold text-white">Summary of Key Principles</h3>
-            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
               We provide the secure software engine connecting attendees and event organizers. Organizers own their events and venue operations; buyers receive cryptographically verified digital passes; and fees are transparent with zero hidden surcharges.
             </p>
           </div>
@@ -88,7 +88,7 @@ export const Terms: React.FC = () => {
               <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
                 {sec.title}
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
                 {sec.content}
               </p>
             </section>
