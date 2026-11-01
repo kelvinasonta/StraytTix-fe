@@ -255,7 +255,7 @@ export const Discover: React.FC = () => {
     });
   }, [events, priceRange]);
 
-  // Featured events calculated from featured priority and popularity
+  // Featured events calculated from featured priority and popularity (up to 8 for rich carousel scroll)
   const featuredEvents = useMemo(() => {
     if (events.length === 0) return [];
     const sorted = [...events].sort((a, b) => {
@@ -265,8 +265,17 @@ export const Discover: React.FC = () => {
       const bScore = (b.isFeatured ? 100 : 0) + (bTicketsCount * 10);
       return bScore - aScore;
     });
-    return sorted.slice(0, 5);
+    return sorted.slice(0, 8);
   }, [events]);
+
+  const featuredScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollFeatured = (direction: 'left' | 'right') => {
+    if (featuredScrollRef.current) {
+      const offset = direction === 'left' ? -420 : 420;
+      featuredScrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased">
@@ -354,39 +363,58 @@ export const Discover: React.FC = () => {
       </section>
 
       {/* ========================================================================= */}
-      {/* 2. FEATURED EVENTS (Hot Rail Showcase)                                    */}
+      {/* 2. FEATURED EVENTS (Cinema-Scale Interactive Carousel)                    */}
       {/* ========================================================================= */}
       {featuredEvents.length > 0 && !isLoading && (
-        <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-10 sm:py-14 bg-[#0A0A0E] border-b border-white/5">
+        <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-12 sm:py-16 bg-[#0A0A0E] border-b border-white/5 overflow-hidden">
           <div className="max-w-[1600px] mx-auto space-y-7">
             
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#E31B23]/10 border border-[#E31B23]/25 text-[#E31B23] flex items-center justify-center">
-                  <Sparkles className="w-4 h-4" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#E31B23]/10 border border-[#E31B23]/25 text-[#E31B23] flex items-center justify-center shadow-lg shadow-[#E31B23]/10">
+                  <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  <div className="flex items-center gap-2.5">
+                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                       Featured Events
                     </h2>
-                    <span className="px-2 py-0.5 rounded-md bg-[#E31B23]/10 text-[#E31B23] text-[10px] font-mono font-bold uppercase tracking-wider border border-[#E31B23]/20">
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#E31B23]/10 text-[#E31B23] text-[10px] font-mono font-bold uppercase tracking-wider border border-[#E31B23]/25 shadow-xs">
                       CURATED
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-400 hidden sm:block">
-                    Hand-picked live experiences and premier events happening soon.
+                  <p className="text-xs sm:text-sm text-zinc-400 hidden sm:block">
+                    Hand-picked live experiences, headline concerts, and festivals happening soon.
                   </p>
                 </div>
               </div>
 
-              <span className="text-xs font-mono text-zinc-500 hidden sm:block">
-                UPDATED LIVE
-              </span>
+              {/* Carousel Navigation Arrows */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => scrollFeatured('left')}
+                  className="w-10 h-10 rounded-2xl bg-white/[0.04] hover:bg-white/10 active:scale-95 border border-white/10 hover:border-white/25 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollFeatured('right')}
+                  className="w-10 h-10 rounded-2xl bg-white/[0.04] hover:bg-white/10 active:scale-95 border border-white/10 hover:border-white/25 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
-            {/* Featured Events Cards Rail (Cinema scale with full-bleed image & overlay details) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            {/* Cinema Carousel Track (Horizontal snap scroll with enlarged dimensions) */}
+            <div 
+              ref={featuredScrollRef}
+              className="flex items-stretch gap-6 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scrollbar-none scroll-smooth"
+            >
               {featuredEvents.map((featuredEvent, index) => {
                 const minPrice = featuredEvent.tickets && featuredEvent.tickets.length > 0 
                   ? Math.min(...featuredEvent.tickets.map(t => t.price)) 
@@ -396,23 +424,23 @@ export const Discover: React.FC = () => {
                   <Link
                     key={featuredEvent.id}
                     to={`/events/${featuredEvent.slug || featuredEvent.id}`}
-                    className="group relative rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 h-[380px] sm:h-[420px] flex flex-col justify-between p-5 transition-all duration-500 hover:shadow-2xl hover:shadow-[#E31B23]/10 hover:-translate-y-1.5"
+                    className="group relative rounded-[2rem] overflow-hidden border border-white/10 hover:border-white/30 h-[480px] sm:h-[540px] w-[300px] sm:w-[380px] lg:w-[420px] flex-shrink-0 snap-start flex flex-col justify-between p-6 sm:p-7 transition-all duration-500 hover:shadow-2xl hover:shadow-[#E31B23]/20 hover:-translate-y-2 bg-zinc-950"
                   >
                     {/* Full-bleed Background Image */}
                     <img
-                      src={featuredEvent.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80'}
+                      src={featuredEvent.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80'}
                       alt={featuredEvent.title}
-                      className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.72] contrast-[1.05] group-hover:scale-110 group-hover:brightness-[0.6] transition-all duration-700 pointer-events-none"
+                      className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.72] contrast-[1.08] group-hover:scale-110 group-hover:brightness-[0.6] transition-all duration-700 pointer-events-none"
                     />
 
                     {/* Gradient Cinematic Scrims */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/20 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none" />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent pointer-events-none" />
 
                     {/* Top Overlay Bar: Badge + Category + Price */}
                     <div className="relative z-10 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-mono font-black text-xs backdrop-blur-md border ${
+                        <span className={`w-9 h-9 rounded-xl flex items-center justify-center font-mono font-black text-xs backdrop-blur-md border ${
                           index === 0 
                             ? 'bg-[#E31B23] text-white border-[#E31B23] shadow-lg shadow-[#E31B23]/40' 
                             : index === 1
@@ -423,39 +451,39 @@ export const Discover: React.FC = () => {
                         }`}>
                           #{index + 1}
                         </span>
-                        <span className="px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/15 text-[10px] font-mono uppercase tracking-wider text-zinc-300">
+                        <span className="px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-xs font-mono uppercase tracking-wider text-zinc-200">
                           {featuredEvent.category || 'Event'}
                         </span>
                       </div>
 
-                      <span className="px-2.5 py-1 rounded-full bg-[#E31B23]/90 backdrop-blur-md text-white text-[11px] font-mono font-black shadow-md shadow-[#E31B23]/30">
-                        {minPrice === 0 ? 'FREE' : formatCurrency(minPrice)}
+                      <span className="px-3 py-1.5 rounded-full bg-[#E31B23]/95 backdrop-blur-md text-white text-xs font-mono font-black shadow-lg shadow-[#E31B23]/35">
+                        {minPrice === 0 ? 'FREE RSVP' : formatCurrency(minPrice)}
                       </span>
                     </div>
 
                     {/* Bottom Overlay Content */}
-                    <div className="relative z-10 space-y-3 pt-6">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-300">
-                          <Calendar className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
+                    <div className="relative z-10 space-y-4 pt-10">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
+                          <Calendar className="w-4 h-4 text-[#E31B23] shrink-0" />
                           <span>{formatDate(featuredEvent.startDate)}</span>
                         </div>
-                        <h3 className="text-base sm:text-lg font-black text-white line-clamp-2 leading-snug group-hover:text-red-400 transition-colors drop-shadow-md">
+                        <h3 className="text-xl sm:text-2xl font-black text-white line-clamp-2 leading-tight group-hover:text-red-400 transition-colors drop-shadow-md">
                           {featuredEvent.title}
                         </h3>
                         <div className="flex items-center gap-1.5 text-xs text-zinc-300 font-mono truncate">
-                          <MapPin className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
+                          <MapPin className="w-4 h-4 text-[#E31B23] shrink-0" />
                           <span className="truncate">{featuredEvent.venue || featuredEvent.city || 'Lagos, Nigeria'}</span>
                         </div>
                       </div>
 
                       {/* Quick Access CTA Pill */}
-                      <div className="pt-2 border-t border-white/15 flex items-center justify-between">
-                        <span className="text-xs font-bold text-white group-hover:text-[#E31B23] transition-colors">
+                      <div className="pt-3 border-t border-white/15 flex items-center justify-between">
+                        <span className="text-sm font-bold text-white group-hover:text-[#E31B23] transition-colors">
                           Get Tickets
                         </span>
-                        <div className="w-7 h-7 rounded-full bg-white/10 group-hover:bg-[#E31B23] flex items-center justify-center transition-all duration-300">
-                          <ArrowRight className="w-3.5 h-3.5 text-white transition-transform group-hover:translate-x-0.5" />
+                        <div className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-[#E31B23] flex items-center justify-center transition-all duration-300 shadow-sm">
+                          <ArrowRight className="w-4 h-4 text-white transition-transform group-hover:translate-x-1" />
                         </div>
                       </div>
                     </div>
