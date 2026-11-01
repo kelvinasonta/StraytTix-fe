@@ -700,14 +700,14 @@ export const Home: React.FC = () => {
         {/* ========================================================================= */}
         {/* 8. FOR ORGANIZERS: Luxury Creator Monolith Card                            */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-white">
+        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-[#070709] border-t border-white/10">
           <div className="max-w-6xl mx-auto">
             <motion.div 
               initial={{ opacity: 0, scale: 0.97, y: 36 }}
               whileInView={{ opacity: 1, scale: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="rounded-[2.25rem] bg-[#0A0A0D] text-white p-8 sm:p-14 lg:p-16 flex flex-col lg:flex-row lg:items-center justify-between gap-10 border border-white/10 shadow-2xl relative overflow-hidden"
+              className="rounded-[2.25rem] bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white p-8 sm:p-14 lg:p-16 flex flex-col lg:flex-row lg:items-center justify-between gap-10 border border-white/15 shadow-2xl relative overflow-hidden"
             >
               
               {/* Subtle Ambient Radial Glow */}
@@ -733,14 +733,14 @@ export const Home: React.FC = () => {
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 shrink-0 relative z-10">
                 <Link
                   to="/organizer/events/create"
-                  className="px-8 py-4 bg-[#E31B23] hover:bg-[#C9141B] text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-xl hover:shadow-[0_12px_28px_-4px_rgba(227,27,35,0.6)] hover:-translate-y-0.5 active:scale-95 text-center cursor-pointer flex items-center justify-center gap-2"
+                  className="px-8 py-4 bg-[#E31B23] hover:bg-[#C9141B] text-white text-sm sm:text-base font-bold rounded-2xl transition-all shadow-xl hover:shadow-[0_12px_28px_-4px_rgba(227,27,35,0.6)] hover:-translate-y-0.5 active:scale-95 text-center cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Create an Event</span>
                 </Link>
                 <Link
                   to="/pricing"
-                  className="px-8 py-4 bg-white/10 hover:bg-white/15 text-white text-sm sm:text-base font-semibold rounded-xl transition-all border border-white/15 hover:border-white/30 hover:-translate-y-0.5 text-center cursor-pointer flex items-center justify-center gap-2"
+                  className="px-8 py-4 bg-white/10 hover:bg-white/15 text-white text-sm sm:text-base font-semibold rounded-2xl transition-all border border-white/15 hover:border-white/30 hover:-translate-y-0.5 text-center cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>View Pricing</span>
                   <ArrowUpRight className="w-4 h-4" />
