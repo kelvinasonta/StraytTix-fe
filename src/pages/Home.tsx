@@ -91,22 +91,6 @@ export const Home: React.FC = () => {
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 max-w-4xl mx-auto py-8 sm:py-12 my-auto space-y-6 sm:space-y-7 flex flex-col items-center"
           >
-            
-            {/* Micro Eyebrow Badge (Live Ticket Engine Indicator with interactive hover sparkle) */}
-            <motion.div 
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/15 backdrop-blur-xl shadow-inner text-[11px] sm:text-xs font-semibold text-zinc-200 cursor-default"
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-zinc-300">Live Ticketing Engine</span>
-              <span className="text-zinc-500">•</span>
-              <span className="text-zinc-200">Zero Scalping • Instant Pass Delivery</span>
-            </motion.div>
-
             {/* Headline matching user reference image */}
             <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white tracking-[-0.035em] leading-[1.12] sm:leading-[1.08] text-balance drop-shadow-lg px-2">
               Attending And Creating Events Has Never Been Easier.
