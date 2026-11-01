@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   Bell,
@@ -18,7 +18,11 @@ import {
   ArrowRight,
   User as UserIcon,
   Sun,
-  Moon
+  Moon,
+  Smartphone,
+  BookOpen,
+  Info,
+  Flag
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -35,11 +39,36 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   const { theme, toggleTheme, isDark } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
+  const [moreDropdown, setMoreDropdown] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
 
+  const moreDropdownRef = useRef<HTMLDivElement>(null);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
+
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Close dropdowns on outside click or route change
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(event.target as Node)) {
+        setMoreDropdown(false);
+      }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setUserDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    setMoreDropdown(false);
+    setUserDropdown(false);
+    setIsOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY || document.documentElement.scrollTop;
@@ -119,14 +148,27 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   const isOrganization = isOrganizer && organizer?.type === 'organization';
   const role = resolveOrganizerRole(organizer);
 
-  // 1. Guest Nav Links
-  const guestNavLinks = [
+  // 1. Guest Primary Nav Links
+  const guestPrimaryLinks = [
     { to: '/discover', label: 'Discover' },
     { to: '/how-it-works', label: 'How StraytTix Works' },
     { to: '/pricing', label: 'Pricing' },
-    { to: '/about', label: 'About us' },
-    { to: '/blog', label: 'Blog' },
-    { to: '/download', label: 'Download' },
+  ];
+
+  // Guest "More" Dropdown Links (Download App, Blog, About Us, Report)
+  const guestDropdownLinks = [
+    { to: '/download', label: 'Download App', icon: Smartphone, desc: 'Get StraytTix on iOS & Android' },
+    { to: '/blog', label: 'Blog & Stories', icon: BookOpen, desc: 'Guides, festival tips & releases' },
+    { to: '/about', label: 'About Us', icon: Info, desc: 'Our mission, team & culture' },
+    { to: '/report', label: 'Report an Issue', icon: Flag, desc: 'Security, fraud & scam triage' },
+  ];
+
+  const isMoreDropdownActive = guestDropdownLinks.some((link) => location.pathname === link.to);
+
+  // Fallback combined list for mobile menu or general lookups
+  const guestNavLinks = [
+    ...guestPrimaryLinks,
+    ...guestDropdownLinks.map(d => ({ to: d.to, label: d.label }))
   ];
 
   // 2. Auth Nav Links
@@ -208,26 +250,119 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
         <div className={`hidden lg:flex items-center transition-[gap] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           isPillState ? 'gap-6 xl:gap-7' : 'gap-6 xl:gap-8'
         }`}>
-          {currentNavLinks.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.to === '/' || link.to === '/dashboard' || link.to === '/organizer'}
-              className={({ isActive }) =>
-                `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
-                  isActive
-                    ? isDarkCanvasPage
-                      ? 'text-white font-black'
-                      : 'text-[#E31B23] font-bold'
-                    : isDarkCanvasPage
-                      ? 'text-zinc-400 hover:text-white'
-                      : 'text-zinc-600 hover:text-zinc-950'
-                }`
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
+          {!isDashboardView && !isAuthenticated ? (
+            <>
+              {guestPrimaryLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={({ isActive }) =>
+                    `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+                      isActive
+                        ? isDarkCanvasPage
+                          ? 'text-white font-black'
+                          : 'text-[#E31B23] font-bold'
+                        : isDarkCanvasPage
+                          ? 'text-zinc-400 hover:text-white'
+                          : 'text-zinc-600 hover:text-zinc-950'
+                    }`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+
+              {/* Company / More Dropdown (Download, Blog, About, Report) */}
+              <div className="relative" ref={moreDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setMoreDropdown(!moreDropdown)}
+                  className={`text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1 cursor-pointer select-none ${
+                    isMoreDropdownActive || moreDropdown
+                      ? isDarkCanvasPage
+                        ? 'text-white font-black'
+                        : 'text-[#E31B23] font-bold'
+                      : isDarkCanvasPage
+                        ? 'text-zinc-400 hover:text-white'
+                        : 'text-zinc-600 hover:text-zinc-950'
+                  }`}
+                  aria-expanded={moreDropdown}
+                  aria-haspopup="true"
+                >
+                  <span>More</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${moreDropdown ? 'rotate-180' : ''}`} />
+                </button>
+
+                {moreDropdown && (
+                  <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 w-64 rounded-2xl border p-2 shadow-2xl backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150 z-50 ${
+                    isDarkCanvasPage
+                      ? 'bg-[#0B0B10]/95 border-white/15 text-white shadow-black/80'
+                      : 'bg-white/95 border-zinc-200 text-zinc-900 shadow-zinc-900/15'
+                  }`}>
+                    {guestDropdownLinks.map((item) => {
+                      const Icon = item.icon;
+                      const isItemActive = location.pathname === item.to;
+                      return (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          onClick={() => setMoreDropdown(false)}
+                          className={`flex items-start gap-3 p-2.5 rounded-xl transition-all group ${
+                            isItemActive
+                              ? isDarkCanvasPage
+                                ? 'bg-white/10 text-white'
+                                : 'bg-red-50 text-[#E31B23]'
+                              : isDarkCanvasPage
+                                ? 'hover:bg-white/5 text-zinc-300 hover:text-white'
+                                : 'hover:bg-zinc-50 text-zinc-700 hover:text-zinc-950'
+                          }`}
+                        >
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                            isItemActive
+                              ? 'bg-[#E31B23] text-white'
+                              : isDarkCanvasPage
+                                ? 'bg-white/5 text-zinc-400 group-hover:bg-[#E31B23]/20 group-hover:text-white'
+                                : 'bg-zinc-100 text-zinc-600 group-hover:bg-[#E31B23]/10 group-hover:text-[#E31B23]'
+                          }`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-bold leading-snug">{item.label}</div>
+                            <div className={`text-[10px] leading-tight truncate ${
+                              isDarkCanvasPage ? 'text-zinc-500' : 'text-zinc-500'
+                            }`}>
+                              {item.desc}
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            currentNavLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.to === '/' || link.to === '/dashboard' || link.to === '/organizer'}
+                className={({ isActive }) =>
+                  `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+                    isActive
+                      ? isDarkCanvasPage
+                        ? 'text-white font-black'
+                        : 'text-[#E31B23] font-bold'
+                      : isDarkCanvasPage
+                        ? 'text-zinc-400 hover:text-white'
+                        : 'text-zinc-600 hover:text-zinc-950'
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))
+          )}
         </div>
 
         {/* Right Desktop Actions: Guest vs Auth */}
@@ -491,25 +626,83 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
         }`}>
           {/* Nav links */}
           <div className="flex flex-col gap-1">
-            {currentNavLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                onClick={() => setIsOpen(false)}
-                className={({ isActive }) => 
-                  `text-sm font-bold py-2.5 px-3 rounded-xl transition-colors flex items-center justify-between ${
-                    isActive 
-                      ? 'bg-[#E31B23]/15 text-[#E31B23]' 
-                      : isDarkCanvasPage 
-                        ? 'text-zinc-300 hover:bg-white/10' 
-                        : 'text-slate-800 hover:bg-slate-50'
-                  }`
-                }
-              >
-                <span>{link.label}</span>
-                <ChevronRight className="w-4 h-4 text-zinc-400" />
-              </NavLink>
-            ))}
+            {!isDashboardView && !isAuthenticated ? (
+              <>
+                {guestPrimaryLinks.map((link) => (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setIsOpen(false)}
+                    className={({ isActive }) => 
+                      `text-sm font-bold py-2.5 px-3 rounded-xl transition-colors flex items-center justify-between ${
+                        isActive 
+                          ? 'bg-[#E31B23]/15 text-[#E31B23]' 
+                          : isDarkCanvasPage 
+                            ? 'text-zinc-300 hover:bg-white/10' 
+                            : 'text-slate-800 hover:bg-slate-50'
+                      }`
+                    }
+                  >
+                    <span>{link.label}</span>
+                    <ChevronRight className="w-4 h-4 text-zinc-400" />
+                  </NavLink>
+                ))}
+
+                <div className="pt-2 pb-1 px-3">
+                  <span className={`text-[10px] font-black tracking-widest uppercase ${
+                    isDarkCanvasPage ? 'text-zinc-500' : 'text-zinc-400'
+                  }`}>
+                    More Resources
+                  </span>
+                </div>
+
+                {guestDropdownLinks.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setIsOpen(false)}
+                      className={({ isActive }) => 
+                        `text-sm font-bold py-2.5 px-3 rounded-xl transition-colors flex items-center justify-between ${
+                          isActive 
+                            ? 'bg-[#E31B23]/15 text-[#E31B23]' 
+                            : isDarkCanvasPage 
+                              ? 'text-zinc-300 hover:bg-white/10' 
+                              : 'text-slate-800 hover:bg-slate-50'
+                        }`
+                      }
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Icon className="w-4 h-4 text-zinc-400" />
+                        <span>{item.label}</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-zinc-400" />
+                    </NavLink>
+                  );
+                })}
+              </>
+            ) : (
+              currentNavLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setIsOpen(false)}
+                  className={({ isActive }) => 
+                    `text-sm font-bold py-2.5 px-3 rounded-xl transition-colors flex items-center justify-between ${
+                      isActive 
+                        ? 'bg-[#E31B23]/15 text-[#E31B23]' 
+                        : isDarkCanvasPage 
+                          ? 'text-zinc-300 hover:bg-white/10' 
+                          : 'text-slate-800 hover:bg-slate-50'
+                    }`
+                  }
+                >
+                  <span>{link.label}</span>
+                  <ChevronRight className="w-4 h-4 text-zinc-400" />
+                </NavLink>
+              ))
+            )}
           </div>
 
           <hr className={isDarkCanvasPage ? 'border-white/10 my-1' : 'border-slate-100 my-1'} />
