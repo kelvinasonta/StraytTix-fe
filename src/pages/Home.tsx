@@ -197,74 +197,77 @@ export const Home: React.FC = () => {
         </section>
 
         {/* ========================================================================= */}
-        {/* 4. THE STRAYTTIX HIGH-ASSURANCE STANDARD: Architectural Bento             */}
+        {/* 4. THE STRAYTTIX HIGH-ASSURANCE STANDARD: Jetron Minimalist Bento         */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 sm:pb-24 bg-white">
-          <div className="max-w-6xl mx-auto space-y-14">
+        <section className="px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 sm:pb-24 bg-[#0A0A0E] text-white relative overflow-hidden">
+          {/* Subtle Ambient Radial Lighting */}
+          <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-[#E31B23]/10 blur-[150px] rounded-full pointer-events-none" />
+
+          <div className="max-w-6xl mx-auto space-y-14 relative z-10">
             
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-              <div className="space-y-2 max-w-xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-xs font-bold text-zinc-800">
+              <div className="space-y-2.5 max-w-xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-xs font-mono font-bold text-zinc-300">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#E31B23]" />
                   <span>The StraytTix Standard</span>
                 </div>
-                <h2 className="text-3xl sm:text-5xl font-black text-zinc-950 tracking-[-0.03em] leading-tight">
+                <h2 className="text-3xl sm:text-5xl font-black text-white tracking-[-0.03em] leading-tight">
                   Transparent, tamper-proof ticketing.
                 </h2>
-                <p className="text-zinc-600 text-sm sm:text-base font-normal">
+                <p className="text-zinc-400 text-sm sm:text-base font-normal">
                   Engineered with cryptographic barcodes so you never have to worry about fake tickets, double-entry, or venue delays.
                 </p>
               </div>
 
-              <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-zinc-500 bg-zinc-50 px-3.5 py-1.5 rounded-full border border-zinc-200">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-zinc-400 bg-white/[0.04] px-3.5 py-1.5 rounded-full border border-white/10">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 <span>100% VERIFIED AUTHENTICITY</span>
               </div>
             </div>
 
-            {/* 3 Hardware Bento Cards with Whimsical Hover Spring & Tilt */}
+            {/* 3 Hardware Bento Cards in Jetron Dark Ceramic Finish */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
               
               {/* Bento 1: 100% Verified Tickets */}
               <motion.div 
-                initial={{ opacity: 0, y: 36 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
-                whileHover={{ y: -8, scale: 1.01 }}
-                className="group rounded-[1.75rem] border border-zinc-200/90 bg-gradient-to-b from-white via-white to-zinc-50/70 p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 hover:shadow-2xl hover:shadow-zinc-200/50 transition-all duration-300 space-y-6"
+                whileHover={{ y: -6 }}
+                className="group rounded-[1.75rem] border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-7 sm:p-8 flex flex-col justify-between hover:border-white/25 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300 space-y-6"
               >
                 
                 {/* Visual Header Mockup */}
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-2.5 transition-transform duration-300 group-hover:scale-[1.02]">
+                <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-2.5 transition-transform duration-300 group-hover:scale-[1.02]">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                       <span>DIRECT FROM ORGANIZER</span>
                     </span>
-                    <span className="text-[10px] font-mono text-zinc-400">#ZERO-SCALPING</span>
+                    <span className="text-[10px] font-mono text-zinc-500">#ZERO-SCALPING</span>
                   </div>
                   <div className="flex items-center gap-3 pt-1">
-                    <div className="w-9 h-9 rounded-xl bg-zinc-950 text-white flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-[#E31B23] transition-colors">
+                    <div className="w-9 h-9 rounded-xl bg-white/10 text-white flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-[#E31B23] transition-colors">
                       ✓
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-zinc-950 truncate">Cryptographic Barcode</p>
-                      <p className="text-[10px] text-zinc-500 font-mono truncate">Tamper-Proof Single-Issue ID</p>
+                      <p className="text-xs font-bold text-white truncate">Cryptographic Barcode</p>
+                      <p className="text-[10px] text-zinc-400 font-mono truncate">Tamper-Proof Single-Issue ID</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-xl font-black text-zinc-950 tracking-tight">
+                  <h3 className="text-xl font-black text-white tracking-tight">
                     100% Verified Passes
                   </h3>
-                  <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed font-normal">
+                  <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
                     Every ticket is issued directly by verified promoters. No duplicate passes, no inflated secondary resale markups.
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-zinc-150 flex items-center gap-2 text-xs text-zinc-500 font-medium">
+                <div className="pt-2 border-t border-white/10 flex items-center gap-2 text-xs text-zinc-400 font-medium">
                   <ShieldCheck className="w-4 h-4 text-[#E31B23]" />
                   <span>Full refund guarantee on organizer cancellations</span>
                 </div>
@@ -272,90 +275,90 @@ export const Home: React.FC = () => {
 
               {/* Bento 2: Instant Mobile Passes */}
               <motion.div 
-                initial={{ opacity: 0, y: 36 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-                whileHover={{ y: -8, scale: 1.01 }}
-                className="group rounded-[1.75rem] border border-zinc-200/90 bg-gradient-to-b from-white via-white to-zinc-50/70 p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 hover:shadow-2xl hover:shadow-zinc-200/50 transition-all duration-300 space-y-6"
+                whileHover={{ y: -6 }}
+                className="group rounded-[1.75rem] border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-7 sm:p-8 flex flex-col justify-between hover:border-white/25 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300 space-y-6"
               >
                 
                 {/* Visual Header Mockup */}
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-2.5 transition-transform duration-300 group-hover:scale-[1.02]">
+                <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-2.5 transition-transform duration-300 group-hover:scale-[1.02]">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-800 bg-zinc-200/80 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
-                      <Smartphone className="w-3 h-3 text-zinc-600" />
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-300 bg-white/10 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                      <Smartphone className="w-3 h-3 text-zinc-300" />
                       <span>OFFLINE READY</span>
                     </span>
-                    <span className="text-[10px] font-mono text-emerald-600 font-bold">DELIVERED</span>
+                    <span className="text-[10px] font-mono text-emerald-400 font-bold">DELIVERED</span>
                   </div>
                   <div className="flex items-center gap-3 pt-1">
                     <div className="w-9 h-9 rounded-xl bg-[#E31B23] text-white flex items-center justify-center shrink-0">
                       <QrCode className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-zinc-950 truncate">Apple &amp; Google Wallet Pass</p>
-                      <p className="text-[10px] text-zinc-500 font-mono truncate">One-Tap Gate Presentation</p>
+                      <p className="text-xs font-bold text-white truncate">Apple &amp; Google Wallet Pass</p>
+                      <p className="text-[10px] text-zinc-400 font-mono truncate">One-Tap Gate Presentation</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-xl font-black text-zinc-950 tracking-tight">
+                  <h3 className="text-xl font-black text-white tracking-tight">
                     Instant Mobile Passes
                   </h3>
-                  <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed font-normal">
+                  <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
                     Tickets appear immediately in your account and arrive in your email with offline-cached QR access for zero-reception venues.
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-zinc-150 flex items-center gap-2 text-xs text-zinc-500 font-medium">
-                  <Zap className="w-4 h-4 text-amber-500" />
+                <div className="pt-2 border-t border-white/10 flex items-center gap-2 text-xs text-zinc-400 font-medium">
+                  <Zap className="w-4 h-4 text-amber-400" />
                   <span>Works with zero mobile reception at packed venues</span>
                 </div>
               </motion.div>
 
               {/* Bento 3: Smooth Gate Entry */}
               <motion.div 
-                initial={{ opacity: 0, y: 36 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
-                whileHover={{ y: -8, scale: 1.01 }}
-                className="group rounded-[1.75rem] border border-zinc-200/90 bg-gradient-to-b from-white via-white to-zinc-50/70 p-7 sm:p-8 flex flex-col justify-between hover:border-zinc-300 hover:shadow-2xl hover:shadow-zinc-200/50 transition-all duration-300 space-y-6"
+                whileHover={{ y: -6 }}
+                className="group rounded-[1.75rem] border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-7 sm:p-8 flex flex-col justify-between hover:border-white/25 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300 space-y-6"
               >
                 
                 {/* Visual Header Mockup */}
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-2.5 transition-transform duration-300 group-hover:scale-[1.02]">
+                <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-2.5 transition-transform duration-300 group-hover:scale-[1.02]">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
-                      <Zap className="w-3 h-3 text-emerald-600" />
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                      <Zap className="w-3 h-3 text-emerald-400" />
                       <span>&lt; 0.2s SCAN SPEED</span>
                     </span>
                     <span className="text-[10px] font-mono text-zinc-400">TURNSTILE CLEAR</span>
                   </div>
                   <div className="flex items-center gap-3 pt-1">
-                    <div className="w-9 h-9 rounded-xl bg-zinc-950 text-white flex items-center justify-center shrink-0 group-hover:bg-emerald-600 transition-colors">
+                    <div className="w-9 h-9 rounded-xl bg-white/10 text-white flex items-center justify-center shrink-0 group-hover:bg-emerald-600 transition-colors">
                       <Ticket className="w-4 h-4 text-white" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-zinc-950 truncate">Sub-Second Gate Clearance</p>
-                      <p className="text-[10px] text-zinc-500 font-mono truncate">Free High-Density Check-In App</p>
+                      <p className="text-xs font-bold text-white truncate">Sub-Second Gate Clearance</p>
+                      <p className="text-[10px] text-zinc-400 font-mono truncate">Free High-Density Check-In App</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-xl font-black text-zinc-950 tracking-tight">
+                  <h3 className="text-xl font-black text-white tracking-tight">
                     Sub-Second Door Entry
                   </h3>
-                  <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed font-normal">
+                  <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
                     Show your QR pass on your phone screen at the entrance for immediate check-in using our high-speed gate scanner.
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-zinc-150 flex items-center gap-2 text-xs text-zinc-500 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <div className="pt-2 border-t border-white/10 flex items-center gap-2 text-xs text-zinc-400 font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   <span>Zero physical paper printouts required</span>
                 </div>
               </motion.div>
@@ -369,7 +372,7 @@ export const Home: React.FC = () => {
         {/* 5. TIX & JETRON DELIVERABLE: ALL-IN-ONE POWERFUL CAPABILITIES              */}
         {/*    Structured around what the platform delivers to Creators & Attendees   */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-28 bg-[#090A0E] text-white relative overflow-hidden">
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-28 bg-[#070709] text-white relative overflow-hidden border-t border-white/5">
           {/* Subtle Dynamic Ambient Lighting */}
           <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#E31B23]/10 blur-[160px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none" />
@@ -378,7 +381,7 @@ export const Home: React.FC = () => {
 
             {/* Main Header */}
             <div className="text-center max-w-3xl mx-auto space-y-4">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/15 text-xs font-mono font-bold text-zinc-300">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] border border-white/10 text-xs font-mono font-bold text-zinc-300">
                 <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
                 <span>What We Deliver</span>
               </div>
@@ -390,7 +393,7 @@ export const Home: React.FC = () => {
               </p>
             </div>
 
-            {/* Split Deliverable Grid: Left (Attendees) & Right (Organizers) */}
+            {/* Split Deliverable Grid: Left (Attendees) & Right (Organizers) in Jetron Dark Panels */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               
               {/* Pillar A: For Attendees */}
@@ -399,7 +402,7 @@ export const Home: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="rounded-[2.25rem] bg-white/[0.03] border border-white/10 p-8 sm:p-10 flex flex-col justify-between hover:border-white/20 transition-all duration-300 space-y-8"
+                className="rounded-[2.25rem] bg-[#0E0E12] border border-white/10 p-8 sm:p-10 flex flex-col justify-between hover:border-white/20 transition-all duration-300 space-y-8 shadow-xl"
               >
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -426,13 +429,13 @@ export const Home: React.FC = () => {
                       { title: 'Instant Offline Passes', desc: 'Access your ticket QR code anytime even when venue cellular reception drops.' },
                       { title: 'Anti-Scalp Protection', desc: 'Single-issuance cryptographic barcodes stop fraudulent ticket scalpers cold.' }
                     ].map((item, i) => (
-                      <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                      <div key={i} className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/5">
                         <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
                           <Check className="w-3 h-3" />
                         </div>
                         <div>
                           <p className="text-xs sm:text-sm font-bold text-zinc-200">{item.title}</p>
-                          <p className="text-[11px] sm:text-xs text-zinc-500">{item.desc}</p>
+                          <p className="text-[11px] sm:text-xs text-zinc-400">{item.desc}</p>
                         </div>
                       </div>
                     ))}
@@ -454,7 +457,7 @@ export const Home: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-                className="rounded-[2.25rem] bg-gradient-to-b from-[#E31B23]/10 to-white/[0.02] border border-[#E31B23]/25 p-8 sm:p-10 flex flex-col justify-between hover:border-[#E31B23]/40 transition-all duration-300 space-y-8"
+                className="rounded-[2.25rem] bg-gradient-to-b from-[#E31B23]/10 via-[#0E0E12] to-[#0E0E12] border border-[#E31B23]/30 p-8 sm:p-10 flex flex-col justify-between hover:border-[#E31B23]/50 transition-all duration-300 space-y-8 shadow-xl"
               >
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -481,13 +484,13 @@ export const Home: React.FC = () => {
                       { title: 'High-Density Check-in Scanner', desc: 'Turn any smartphone into a gate terminal scanning passes in under 0.2 seconds.' },
                       { title: 'White-Label Embeds & APIs', desc: 'Embed our checkout directly on your custom website domain with zero code.' }
                     ].map((item, i) => (
-                      <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                      <div key={i} className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/5">
                         <div className="w-5 h-5 rounded-full bg-[#E31B23]/20 text-[#E31B23] flex items-center justify-center shrink-0 mt-0.5">
                           <Check className="w-3 h-3" />
                         </div>
                         <div>
                           <p className="text-xs sm:text-sm font-bold text-zinc-200">{item.title}</p>
-                          <p className="text-[11px] sm:text-xs text-zinc-500">{item.desc}</p>
+                          <p className="text-[11px] sm:text-xs text-zinc-400">{item.desc}</p>
                         </div>
                       </div>
                     ))}
@@ -527,7 +530,7 @@ export const Home: React.FC = () => {
                 <motion.div 
                   whileHover={{ y: -6 }}
                   transition={{ duration: 0.2 }}
-                  className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between space-y-4"
+                  className="p-6 rounded-2xl bg-[#0E0E12] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between space-y-4"
                 >
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E31B23] to-[#B91C1C] flex items-center justify-center text-white shadow-md shadow-[#E31B23]/25">
                     <Layers className="w-5 h-5" />
@@ -547,7 +550,7 @@ export const Home: React.FC = () => {
                 <motion.div 
                   whileHover={{ y: -6 }}
                   transition={{ duration: 0.2 }}
-                  className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between space-y-4"
+                  className="p-6 rounded-2xl bg-[#0E0E12] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between space-y-4"
                 >
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-md shadow-amber-500/25">
                     <Radio className="w-5 h-5" />
@@ -567,7 +570,7 @@ export const Home: React.FC = () => {
                 <motion.div 
                   whileHover={{ y: -6 }}
                   transition={{ duration: 0.2 }}
-                  className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between space-y-4"
+                  className="p-6 rounded-2xl bg-[#0E0E12] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between space-y-4"
                 >
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-md shadow-emerald-500/25">
                     <Code2 className="w-5 h-5" />
@@ -587,7 +590,7 @@ export const Home: React.FC = () => {
                 <motion.div 
                   whileHover={{ y: -6 }}
                   transition={{ duration: 0.2 }}
-                  className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between space-y-4"
+                  className="p-6 rounded-2xl bg-[#0E0E12] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between space-y-4"
                 >
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-purple-500/25">
                     <Users2 className="w-5 h-5" />
@@ -610,34 +613,34 @@ export const Home: React.FC = () => {
         </section>
 
         {/* ========================================================================= */}
-        {/* 6. COMPARISON: WHY CREATORS & ATTENDEES CHOOSE US OVER TRADITIONAL SITES   */}
+        {/* 6. COMPARISON: WHY CREATORS & ATTENDEES CHOOSE US (Jetron Dark Matrix)    */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-24 bg-white border-b border-zinc-100">
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-24 bg-[#090A0E] text-white border-t border-white/5">
           <div className="max-w-6xl mx-auto space-y-14">
             
             <div className="text-center max-w-2xl mx-auto space-y-3">
               <span className="text-xs font-mono uppercase tracking-widest text-[#E31B23] font-bold">
                 Why Switch to StraytTix
               </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-zinc-950 tracking-[-0.03em]">
+              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-[-0.03em]">
                 Built different. By design.
               </h2>
-              <p className="text-zinc-600 text-sm sm:text-base">
+              <p className="text-zinc-400 text-sm sm:text-base">
                 See how we compare against legacy ticketing platforms and manual transfer arrangements.
               </p>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-3xl border border-white/10 bg-[#0E0E12]/80 backdrop-blur-xl p-2 sm:p-4 shadow-2xl">
               <table className="w-full text-left border-collapse min-w-[640px]">
                 <thead>
-                  <tr className="border-b border-zinc-200">
-                    <th className="py-4 px-6 text-sm font-bold text-zinc-500 uppercase tracking-wider font-mono">Platform Feature</th>
-                    <th className="py-4 px-6 text-base font-black text-[#E31B23] bg-red-50/60 rounded-t-2xl">StraytTix</th>
-                    <th className="py-4 px-6 text-sm font-bold text-zinc-500">Traditional Sites</th>
-                    <th className="py-4 px-6 text-sm font-bold text-zinc-500">Manual Transfers</th>
+                  <tr className="border-b border-white/10">
+                    <th className="py-4 px-6 text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">Platform Feature</th>
+                    <th className="py-4 px-6 text-sm font-black text-white bg-[#E31B23]/20 rounded-t-xl border-x border-t border-[#E31B23]/30">StraytTix</th>
+                    <th className="py-4 px-6 text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">Traditional Sites</th>
+                    <th className="py-4 px-6 text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">Manual Transfers</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-150 text-sm">
+                <tbody className="divide-y divide-white/5 text-sm">
                   {[
                     { feature: 'Ticket Scalp & Duplicate Protection', us: '100% Cryptographic QR Locks', them: 'Basic static barcodes', manual: 'Zero protection' },
                     { feature: 'Payout Timeframe', us: 'Instant Automated Bank Transfers', them: '5 - 14 Business Days', manual: 'Messy manual tracking' },
@@ -646,11 +649,11 @@ export const Home: React.FC = () => {
                     { feature: 'Hidden Buyer Checkout Fees', us: 'Zero Surprise Markups', them: '10% - 25% added at payment', manual: 'None (high fraud risk)' },
                     { feature: 'Custom Website Embeds', us: 'Native 2-step Widget & REST API', them: 'Redirects off your website', manual: 'Not possible' }
                   ].map((row, idx) => (
-                    <tr key={idx} className="hover:bg-zinc-50/80 transition-colors">
-                      <td className="py-4 px-6 font-bold text-zinc-900">{row.feature}</td>
-                      <td className="py-4 px-6 font-bold text-[#E31B23] bg-red-50/40">{row.us}</td>
-                      <td className="py-4 px-6 text-zinc-500">{row.them}</td>
-                      <td className="py-4 px-6 text-zinc-400">{row.manual}</td>
+                    <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="py-4 px-6 font-semibold text-zinc-200">{row.feature}</td>
+                      <td className="py-4 px-6 font-bold text-red-400 bg-[#E31B23]/10 border-x border-[#E31B23]/20">{row.us}</td>
+                      <td className="py-4 px-6 text-zinc-400">{row.them}</td>
+                      <td className="py-4 px-6 text-zinc-500">{row.manual}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -663,7 +666,7 @@ export const Home: React.FC = () => {
         {/* ========================================================================= */}
         {/* 7. LIVE SCALE METRICS (Monochrome Authority)                              */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-14 sm:py-18 bg-[#09090C] text-white border-b border-zinc-900">
+        <section className="px-4 sm:px-6 lg:px-8 py-14 sm:py-18 bg-[#070709] text-white border-t border-white/5">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -693,14 +696,14 @@ export const Home: React.FC = () => {
         {/* ========================================================================= */}
         {/* 8. FOR ORGANIZERS: Luxury Creator Monolith Card                            */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-white">
+        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-[#0A0A0E] text-white border-t border-white/5">
           <div className="max-w-6xl mx-auto">
             <motion.div 
               initial={{ opacity: 0, scale: 0.97, y: 36 }}
               whileInView={{ opacity: 1, scale: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="rounded-[2.25rem] bg-[#0A0A0D] text-white p-8 sm:p-14 lg:p-16 flex flex-col lg:flex-row lg:items-center justify-between gap-10 border border-white/10 shadow-2xl relative overflow-hidden"
+              className="rounded-[2.25rem] bg-[#0E0E12] text-white p-8 sm:p-14 lg:p-16 flex flex-col lg:flex-row lg:items-center justify-between gap-10 border border-white/10 shadow-2xl relative overflow-hidden"
             >
               
               {/* Subtle Ambient Radial Glow */}
