@@ -1,8 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
+import { EventCard } from '../components/ui/EventCard';
+import { eventApi, normalizeBackendEvent } from '../api/events';
+import type { Event } from '../types/api';
 import { 
   Search, 
   ArrowRight,
@@ -10,6 +14,8 @@ import {
   ShieldCheck,
   Smartphone,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CheckCircle2,
   QrCode,
   Zap,
@@ -33,13 +39,21 @@ import {
   ScanLine,
   CalendarCheck,
   Coins,
-  BadgePercent
+  BadgePercent,
+  Star,
+  Quote,
+  ShieldAlert,
+  HelpCircle,
+  Clock,
+  Flame,
+  Award
 } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
 
 export const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeShowcaseTab, setActiveShowcaseTab] = useState<'attendee' | 'organizer'>('organizer');
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   
   // Interactive Revenue & Fee Calculator States
   const [calcTicketCount, setCalcTicketCount] = useState<number>(350);
@@ -48,6 +62,26 @@ export const Home: React.FC = () => {
 
   const navigate = useNavigate();
   const searchBarRef = useRef<HTMLElement>(null);
+  const eventsTrackRef = useRef<HTMLDivElement>(null);
+
+  // Live Explore Events Query directly from Backend API
+  const { data: eventsData, isLoading: isEventsLoading } = useQuery({
+    queryKey: ['home', 'explore-events'],
+    queryFn: async () => {
+      const res = await eventApi.getExploreEvents({ limit: 8, per_page: 8 });
+      const rawList = res?.data?.data || (Array.isArray(res?.data) ? res?.data : []);
+      return (rawList as any[]).map(normalizeBackendEvent);
+    },
+    staleTime: 30000,
+  });
+
+  const liveEvents: Event[] = eventsData || [];
+
+  const scrollEventsTrack = (direction: 'left' | 'right') => {
+    if (!eventsTrackRef.current) return;
+    const offset = direction === 'left' ? -380 : 380;
+    eventsTrackRef.current.scrollBy({ left: offset, behavior: 'smooth' });
+  };
 
   // Fee calculation mechanics:
   // StraytTix platform fee: 2.5% + ₦100 flat processing per ticket (capped at ₦2,000 per ticket max)
@@ -229,6 +263,137 @@ export const Home: React.FC = () => {
               </form>
             </div>
           </motion.div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 2.5 TRUST MARQUEE: Verified Promoters, Brands & Global Event Producers     */}
+        {/*     Subtle luxury grayscale ribbon with reduced-motion safety             */}
+        {/* ========================================================================= */}
+        <section className="pt-20 pb-8 px-4 sm:px-6 lg:px-8 bg-white dark:bg-[#070709] border-b border-zinc-150 dark:border-white/5 transition-colors duration-300">
+          <div className="max-w-6xl mx-auto space-y-4">
+            <p className="text-center text-[11px] font-mono uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500 font-semibold">
+              TRUSTED BY LEADING PROMOTERS, FESTIVALS &amp; VENUES ACROSS NIGERIA
+            </p>
+
+            <div className="relative overflow-hidden py-4 [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]">
+              <div className="flex items-center gap-8 sm:gap-14 animate-marquee whitespace-nowrap will-change-transform">
+                {[
+                  'NATIVE SOUND SYSTEM',
+                  'FLYTIME FEST',
+                  'EKO CONVENTION CENTER',
+                  'PALMWINE MUSIC FEST',
+                  'LIVESPOT X FESTIVAL',
+                  'THE BEAT 99.9 FM',
+                  'HOMECOMING LAGOS',
+                  'TERRA KULTURE ARENA',
+                  'AFROCHELLA GLOBAL',
+                  'MAINLAND BLOCKPARTY'
+                ].concat([
+                  'NATIVE SOUND SYSTEM',
+                  'FLYTIME FEST',
+                  'EKO CONVENTION CENTER',
+                  'PALMWINE MUSIC FEST',
+                  'LIVESPOT X FESTIVAL',
+                  'THE BEAT 99.9 FM',
+                  'HOMECOMING LAGOS',
+                  'TERRA KULTURE ARENA',
+                  'AFROCHELLA GLOBAL',
+                  'MAINLAND BLOCKPARTY'
+                ]).map((brand, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono font-bold tracking-wider text-zinc-400/80 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-default select-none"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E31B23]/40" />
+                    {brand}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 3. LIVE UPCOMING EVENTS RAIL: High-Demand Real Drops (Direct from Backend)  */}
+        {/*    Horizontal kinetic carousel directly wired to /explore/events          */}
+        {/* ========================================================================= */}
+        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 bg-zinc-50/60 dark:bg-[#09090D] border-b border-zinc-200/80 dark:border-white/5 transition-colors duration-300">
+          <div className="max-w-6xl mx-auto space-y-8">
+            
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-xs font-mono font-bold text-[#E31B23]">
+                  <Flame className="w-3.5 h-3.5" />
+                  <span>Happening Soon</span>
+                </div>
+                <h2 className="text-2xl sm:text-4xl font-black text-zinc-950 dark:text-white tracking-tight">
+                  Featured Live Events
+                </h2>
+                <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm">
+                  Curated concerts, rave nights, and tech summits on sale now with instant digital pass issuance.
+                </p>
+              </div>
+
+              {/* Navigation Controls & Explore All Link */}
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => scrollEventsTrack('left')}
+                    aria-label="Scroll left"
+                    className="w-9 h-9 rounded-full bg-white dark:bg-white/10 border border-zinc-200 dark:border-white/15 flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/15 transition-all shadow-sm cursor-pointer"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollEventsTrack('right')}
+                    aria-label="Scroll right"
+                    className="w-9 h-9 rounded-full bg-white dark:bg-white/10 border border-zinc-200 dark:border-white/15 flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/15 transition-all shadow-sm cursor-pointer"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <Link
+                  to="/discover"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#E31B23] hover:text-[#C9141B] transition-colors"
+                >
+                  <span>See all events</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Events Track */}
+            {isEventsLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((n) => (
+                  <div key={n} className="rounded-3xl bg-zinc-200/50 dark:bg-white/5 animate-pulse h-96 border border-zinc-200 dark:border-white/10" />
+                ))}
+              </div>
+            ) : liveEvents.length > 0 ? (
+              <div 
+                ref={eventsTrackRef}
+                className="flex gap-6 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scrollbar-none scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0"
+              >
+                {liveEvents.map((event) => (
+                  <div key={event.id} className="min-w-[280px] sm:min-w-[340px] max-w-[340px] snap-start shrink-0">
+                    <EventCard event={event} variant="default" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 rounded-3xl bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 space-y-3">
+                <Ticket className="w-10 h-10 text-zinc-400 mx-auto" />
+                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">No public events listed currently</p>
+                <Link to="/organizer/events/create" className="text-xs font-bold text-[#E31B23] hover:underline inline-block">
+                  Be the first to publish an event &rarr;
+                </Link>
+              </div>
+            )}
+
+          </div>
         </section>
 
         {/* ========================================================================= */}
@@ -1221,6 +1386,204 @@ export const Home: React.FC = () => {
               <p className="text-xs sm:text-sm text-zinc-400 font-medium">Counterfeit Ticket Incidents</p>
             </motion.div>
           </motion.div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 7.5 CURATED REVIEWS & TESTIMONIALS (Attendee & Organizer Trust)           */}
+        {/* ========================================================================= */}
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-28 bg-[#090A0E] text-white border-b border-white/5 relative overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-[#E31B23]/5 blur-[180px] rounded-full pointer-events-none" />
+
+          <div className="max-w-6xl mx-auto space-y-16 relative z-10">
+            <div className="text-center max-w-2xl mx-auto space-y-3">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] border border-white/10 text-xs font-mono font-bold text-zinc-300">
+                <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                <span>Verified Feedback</span>
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                Trusted by 180,000+ fans and creators.
+              </h2>
+              <p className="text-zinc-400 text-sm sm:text-base">
+                Here is why organizers and attendees rely on StraytTix for their biggest nights.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+              {[
+                {
+                  quote: "We scanned over 4,200 attendees at the gate in under 35 minutes using four phones. Zero ticket duplicates or scanner lag. The automated payout landed the exact same evening.",
+                  author: "Chuka Obi",
+                  role: "Head of Operations",
+                  org: "Neon Soundwave Fest",
+                  avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+                  rating: 5,
+                  tag: "ORGANIZER VERIFIED"
+                },
+                {
+                  quote: "Buying tickets on StraytTix is a breath of fresh air. No surprise service fees added at the payment step, Apple Pay worked instantly, and my pass loaded offline inside the stadium.",
+                  author: "Amina Yusuf",
+                  role: "Festival Attendee",
+                  org: "Lagos, Nigeria",
+                  avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80",
+                  rating: 5,
+                  tag: "FAN VERIFIED"
+                },
+                {
+                  quote: "We embedded the StraytTix checkout directly into our conference website. Over 1,200 tech passes sold without attendees ever leaving our branded domain. The developer APIs are top tier.",
+                  author: "David Adeleke",
+                  role: "Convener",
+                  org: "AfroDev Summit 2026",
+                  avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+                  rating: 5,
+                  tag: "ORGANIZER VERIFIED"
+                }
+              ].map((item, idx) => (
+                <motion.div
+                  key={idx}
+                  whileHover={{ y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  className="rounded-3xl bg-white/[0.03] border border-white/10 p-7 sm:p-8 flex flex-col justify-between space-y-6 hover:border-white/20 transition-all"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-amber-400">
+                        {[...Array(item.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-amber-400" />
+                        ))}
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-zinc-300 font-bold">
+                        {item.tag}
+                      </span>
+                    </div>
+                    <p className="text-zinc-300 text-xs sm:text-sm leading-relaxed italic">
+                      &ldquo;{item.quote}&rdquo;
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-4 border-t border-white/5">
+                    <img
+                      src={item.avatar}
+                      alt={item.author}
+                      className="w-10 h-10 rounded-full object-cover border border-white/10"
+                    />
+                    <div>
+                      <p className="text-xs sm:text-sm font-bold text-white leading-snug">{item.author}</p>
+                      <p className="text-[11px] text-zinc-400">{item.role} • {item.org}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 7.6 FAQ ACCORDION: Enterprise Clarity on Security, Payouts & Transfers     */}
+        {/* ========================================================================= */}
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-28 bg-[#070709] text-white border-b border-white/5">
+          <div className="max-w-4xl mx-auto space-y-12">
+            
+            <div className="text-center space-y-3 max-w-xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] border border-white/10 text-xs font-mono font-bold text-zinc-300">
+                <HelpCircle className="w-3.5 h-3.5 text-[#E31B23]" />
+                <span>Frequently Asked Questions</span>
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                Everything you need to know.
+              </h2>
+              <p className="text-zinc-400 text-xs sm:text-sm">
+                Clear answers regarding ticket security, payouts, fees, and turnstile gate entry.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                {
+                  q: 'How fast do organizers receive ticket payouts?',
+                  a: 'Payouts are automated via instant bank settlement. Once verified, sales revenue is transferred directly into your registered Nigerian bank account without waiting 7–14 days like legacy ticket brokers.'
+                },
+                {
+                  q: 'How does StraytTix stop duplicate and scalped tickets?',
+                  a: 'Every ticket contains a single-issue cryptographic barcode verified against our real-time database. When a ticket is scanned at the turnstile, it is immediately marked as redeemed across all gate scanners in under 0.2 seconds, making duplicate entry physically impossible.'
+                },
+                {
+                  q: 'What if cellular reception drops at a packed venue?',
+                  a: 'The StraytTix Companion Gate Terminal features intelligent offline caching. If internet connectivity drops at the venue gates, the app continues scanning and verifying valid attendee QR passes locally and synchronizes automatically once connection restores.'
+                },
+                {
+                  q: 'Are there any hidden fees at attendee checkout?',
+                  a: 'No. Unlike traditional ticketing sites that add 15–25% surprise fees on the final payment screen, StraytTix displays transparent, upfront pricing. Organizers also have the flexibility to absorb platform fees completely.'
+                },
+                {
+                  q: 'Can attendees transfer tickets to friends?',
+                  a: 'Yes. Secure peer-to-peer transfers are supported directly inside the Attendee Dashboard. Transferring a ticket re-encrypts and generates a brand-new barcode for the recipient while permanently voiding the sender’s pass.'
+                },
+                {
+                  q: 'Do I need special turnstile hardware to scan passes?',
+                  a: 'No special hardware is required. You and your security crew can use any standard smartphone running our high-speed gate scanner. You can also assign PIN codes to temporary bouncers so they can scan passes without accessing your financials.'
+                }
+              ].map((faq, idx) => {
+                const isOpen = openFaqIndex === idx;
+                return (
+                  <div
+                    key={idx}
+                    className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden transition-colors hover:border-white/20"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                      className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-white cursor-pointer"
+                    >
+                      <span>{faq.q}</span>
+                      <ChevronDown className={`w-5 h-5 text-zinc-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-white' : ''}`} />
+                    </button>
+                    {isOpen && (
+                      <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal border-t border-white/5">
+                        {faq.a}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 7.7 APP DOWNLOAD BAND: Apple & Google Companion Gateway                    */}
+        {/* ========================================================================= */}
+        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 bg-gradient-to-b from-[#070709] to-[#0A0A0F] text-white border-b border-white/5">
+          <div className="max-w-5xl mx-auto rounded-3xl bg-zinc-950 border border-white/15 p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl relative overflow-hidden">
+            <div className="space-y-3 text-center md:text-left max-w-lg z-10">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-[#E31B23] font-bold">
+                NATIVE MOBILE INFRASTRUCTURE
+              </span>
+              <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+                Take StraytTix anywhere.
+              </h3>
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                Download the attendee ticket wallet and the companion gate scanner terminal for iOS and Android.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 z-10">
+              <Link
+                to="/download"
+                className="px-6 py-3.5 rounded-xl bg-white text-zinc-950 hover:bg-zinc-100 font-bold text-xs sm:text-sm transition-all flex items-center gap-2 shadow-lg"
+              >
+                <Smartphone className="w-4 h-4 text-[#E31B23]" />
+                <span>iOS App Store</span>
+              </Link>
+              <Link
+                to="/download"
+                className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs sm:text-sm transition-all border border-white/15 flex items-center gap-2"
+              >
+                <Smartphone className="w-4 h-4 text-emerald-400" />
+                <span>Google Play Store</span>
+              </Link>
+            </div>
+          </div>
         </section>
 
         {/* ========================================================================= */}
