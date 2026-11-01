@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-
 import { NotificationProvider } from './context/NotificationContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { GuestRoute } from './routes/GuestRoute';
 import { OrganizerRoute } from './routes/OrganizerRoute';
@@ -64,12 +65,13 @@ const OrganizerEditRedirect: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <NotificationProvider>
-      <SettingsProvider>
-        <AuthProvider>
-          <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
+    <ThemeProvider>
+      <NotificationProvider>
+        <SettingsProvider>
+          <AuthProvider>
+            <BrowserRouter>
+            <ScrollToTop />
+            <Routes>
             {/* Public Pages */}
             <Route path="/" element={<Home />} />
             <Route path="/discover" element={<Discover />} />
@@ -306,6 +308,7 @@ export const App: React.FC = () => {
         </AuthProvider>
       </SettingsProvider>
     </NotificationProvider>
+  </ThemeProvider>
   );
 };
 

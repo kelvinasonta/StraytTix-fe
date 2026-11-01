@@ -9,6 +9,7 @@ import { favoritesApi } from '../api/favorites';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../api/client';
 import { formatDate, formatCurrency } from '../utils/format';
+import { countriesApi, type Country, DEFAULT_COUNTRIES } from '../api/countries';
 import type { Event } from '../types/api';
 import { 
   Search, 
@@ -33,7 +34,9 @@ import {
   MapPin,
   ArrowRight,
   Ticket,
-  Flame
+  Flame,
+  Globe,
+  ChevronDown
 } from 'lucide-react';
 
 interface CategoryMeta {
@@ -82,17 +85,43 @@ export const Discover: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
-  // Synchronize country switch event from Navbar
-  useEffect(() => {
-    const handleCountryChange = (e: any) => {
-      const country = e.detail;
-      if (country?.name) {
-        setSearch(country.name);
+  // Country state loaded from backend API
+  const [countries, setCountries] = useState<Country[]>(DEFAULT_COUNTRIES);
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(() => {
+    const saved = localStorage.getItem('strayttix_selected_country');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // Fall back to null (All Countries)
       }
-    };
-    window.addEventListener('strayttix:country_changed', handleCountryChange);
-    return () => window.removeEventListener('strayttix:country_changed', handleCountryChange);
+    }
+    return null;
+  });
+  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+
+  // Fetch backend supported countries
+  useEffect(() => {
+    countriesApi.getCountries()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCountries(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Discover: error loading countries from backend:', err);
+      });
   }, []);
+
+  const handleSelectCountry = (c: Country | null) => {
+    setSelectedCountry(c);
+    setCountryDropdownOpen(false);
+    if (c) {
+      localStorage.setItem('strayttix_selected_country', JSON.stringify(c));
+    } else {
+      localStorage.removeItem('strayttix_selected_country');
+    }
+  };
 
   const { isAuthenticated, user } = useAuth();
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -306,8 +335,16 @@ export const Discover: React.FC = () => {
       });
     }
 
+    // Filter by Selected Country
+    if (selectedCountry) {
+      filtered = filtered.filter((e) => {
+        const countryVal = ((e as any).country || (e as any).eventCountry || e.venue || '').toLowerCase();
+        return countryVal.includes(selectedCountry.name.toLowerCase()) || countryVal.includes(selectedCountry.code.toLowerCase());
+      });
+    }
+
     return filtered;
-  }, [events, priceRange, dateFilter]);
+  }, [events, priceRange, dateFilter, selectedCountry]);
 
   // Featured events calculated from featured priority and popularity (up to 8 for rich carousel scroll)
   const featuredEvents = useMemo(() => {
@@ -361,11 +398,74 @@ export const Discover: React.FC = () => {
               </p>
             </div>
 
-            {/* Elevated Search Bar with High-Contrast White Glass */}
-            <div className="w-full lg:max-w-xl">
-              <div className="p-1.5 sm:p-2 rounded-2xl bg-white/[0.08] border border-white/25 backdrop-blur-2xl shadow-2xl transition-all duration-300 focus-within:border-white focus-within:bg-white/[0.12] focus-within:shadow-[0_0_25px_rgba(255,255,255,0.12)]">
-                <div className="flex items-center gap-3 px-3.5 py-2.5">
-                  <Search className="w-4 h-4 sm:w-5 sm:h-5 text-white/80 shrink-0" />
+            {/* Elevated Search Bar with Country Pill Dropdown */}
+            <div className="w-full lg:max-w-xl space-y-2">
+              <div className="p-1.5 sm:p-2 rounded-2xl bg-white/[0.08] border border-white/25 backdrop-blur-2xl shadow-2xl transition-all duration-300 focus-within:border-white focus-within:bg-white/[0.12] focus-within:shadow-[0_0_25px_rgba(255,255,255,0.12)] flex items-center gap-2">
+                
+                {/* Interactive Country Selector Pill on Top of Discover */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setCountryDropdownOpen(!countryDropdownOpen)}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold transition-all border border-white/15 cursor-pointer shrink-0"
+                    title="Filter by country"
+                  >
+                    <span>{selectedCountry ? selectedCountry.flag : '🌐'}</span>
+                    <span className="uppercase">{selectedCountry ? selectedCountry.code : 'All'}</span>
+                    <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+                  </button>
+
+                  {countryDropdownOpen && (
+                    <div className="absolute left-0 mt-2 w-64 rounded-2xl p-2 bg-[#0E0E14] border border-white/20 text-white shadow-2xl z-50 max-h-80 overflow-y-auto animate-in fade-in zoom-in-95 duration-100">
+                      <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-400 border-b border-white/10 mb-1 flex items-center justify-between">
+                        <span>Select Region</span>
+                        {selectedCountry && (
+                          <button
+                            type="button"
+                            onClick={() => handleSelectCountry(null)}
+                            className="text-[10px] text-[#E31B23] hover:underline cursor-pointer"
+                          >
+                            Reset
+                          </button>
+                        )}
+                      </div>
+                      
+                      <button
+                        type="button"
+                        onClick={() => handleSelectCountry(null)}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                          !selectedCountry ? 'bg-[#E31B23] text-white font-bold' : 'text-zinc-300 hover:bg-white/10'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span>🌐</span>
+                          <span>All Countries & Global</span>
+                        </div>
+                      </button>
+
+                      {countries.map((c) => (
+                        <button
+                          key={c.code}
+                          type="button"
+                          onClick={() => handleSelectCountry(c)}
+                          className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                            selectedCountry?.code === c.code ? 'bg-[#E31B23] text-white font-bold' : 'text-zinc-300 hover:bg-white/10'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 truncate">
+                            <span>{c.flag || '🌐'}</span>
+                            <span className="truncate">{c.name}</span>
+                          </div>
+                          <span className="text-[10px] font-mono opacity-80">{c.code}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Search Input */}
+                <div className="flex items-center gap-2 px-2 flex-1 min-w-0">
+                  <Search className="w-4 h-4 text-white/80 shrink-0" />
                   <input
                     type="text"
                     value={search}
@@ -376,12 +476,13 @@ export const Discover: React.FC = () => {
                   {search && (
                     <button
                       onClick={() => setSearch('')}
-                      className="p-1 rounded-lg hover:bg-white/20 text-zinc-300 hover:text-white transition-colors"
+                      className="p-1 rounded-lg hover:bg-white/20 text-zinc-300 hover:text-white transition-colors cursor-pointer"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   )}
                 </div>
+
               </div>
             </div>
           </div>

@@ -17,9 +17,12 @@ import {
   Users,
   ChevronRight,
   ArrowRight,
-  User as UserIcon
+  User as UserIcon,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { Logo } from '../ui/Logo';
 import { resolveOrganizerRole } from '../../utils/permissions';
 
@@ -30,6 +33,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => {
   const { isAuthenticated, user, organizer, logout } = useAuth();
+  const { theme, toggleTheme, isDark } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -102,7 +106,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   
   const isEventDetailPage = location.pathname.startsWith('/events/');
   const isOrganizerProfilePage = location.pathname.startsWith('/organizers/') || location.pathname.startsWith('/@');
-  const isDarkCanvasPage = darkThemeRoutes.includes(location.pathname) || isEventDetailPage || isOrganizerProfilePage;
+  const isDarkCanvasPage = isDark || darkThemeRoutes.includes(location.pathname) || isEventDetailPage || isOrganizerProfilePage;
   const isDarkHeroPage = location.pathname === '/' || location.pathname === '/discover';
   const isTransparentHeroNav = isDarkHeroPage && !isScrolled;
 
@@ -229,6 +233,21 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
         {/* Right Desktop Actions: Guest vs Auth */}
         <div className="hidden lg:flex items-center gap-2.5 xl:gap-3 shrink-0">
+          {/* Theme Mode Switcher (Default Dark) */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+              isDark
+                ? 'bg-white/5 hover:bg-white/10 text-amber-300 border-white/15'
+                : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
+            }`}
+            title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            aria-label="Toggle theme mode"
+          >
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+
           {isAuthenticated ? (
             /* ================= AUTHENTICATED USER ACTIONS ================= */
             <div className="flex items-center gap-3">
@@ -467,6 +486,20 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
         {/* Mobile Menu Button */}
         <div className="flex items-center gap-2 lg:hidden">
+          {/* Mobile Theme Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors border ${
+              isDark
+                ? 'bg-white/5 text-amber-300 border-white/15'
+                : 'bg-zinc-100 text-zinc-700 border-zinc-200'
+            }`}
+            title="Toggle Theme"
+          >
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+
           <Link
             to="/discover"
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
