@@ -1,7 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import { EventCard } from '../components/ui/EventCard';
@@ -64,18 +63,31 @@ export const Home: React.FC = () => {
   const searchBarRef = useRef<HTMLElement>(null);
   const eventsTrackRef = useRef<HTMLDivElement>(null);
 
-  // Live Explore Events Query directly from Backend API
-  const { data: eventsData, isLoading: isEventsLoading } = useQuery({
-    queryKey: ['home', 'explore-events'],
-    queryFn: async () => {
-      const res = await eventApi.getExploreEvents({ limit: 8, per_page: 8 });
-      const rawList = res?.data?.data || (Array.isArray(res?.data) ? res?.data : []);
-      return (rawList as any[]).map(normalizeBackendEvent);
-    },
-    staleTime: 30000,
-  });
+  // Live Explore Events loaded directly via API client without external QueryClientProvider dependency
+  const [liveEvents, setLiveEvents] = useState<Event[]>([]);
+  const [isEventsLoading, setIsEventsLoading] = useState<boolean>(true);
 
-  const liveEvents: Event[] = eventsData || [];
+  useEffect(() => {
+    let isMounted = true;
+    setIsEventsLoading(true);
+    eventApi.getExploreEvents({ limit: 8, per_page: 8 })
+      .then((res) => {
+        if (!isMounted) return;
+        const rawList = res?.data?.data || (Array.isArray(res?.data) ? res?.data : []);
+        const normalized = (rawList as any[]).map(normalizeBackendEvent);
+        setLiveEvents(normalized);
+      })
+      .catch((err) => {
+        console.warn('Home: error fetching explore events:', err);
+      })
+      .finally(() => {
+        if (isMounted) setIsEventsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const scrollEventsTrack = (direction: 'left' | 'right') => {
     if (!eventsTrackRef.current) return;
