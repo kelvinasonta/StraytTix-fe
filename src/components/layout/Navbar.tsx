@@ -42,10 +42,10 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
     let accumulatedDownScroll = 0;
     let accumulatedUpScroll = 0;
 
-    // Minimum scroll distance downward required before triggering hide
-    const SCROLL_DELTA_THRESHOLD = 80;
-    // Don't start hiding until past the hero top portion
-    const MIN_PAGE_OFFSET = 180;
+    // Require user to scroll at least 240px downward before hiding
+    const SCROLL_DELTA_THRESHOLD = 240;
+    // Keep navbar locked and visible across the entire hero banner (hero is ~100vh)
+    const MIN_PAGE_OFFSET = 450;
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY || document.documentElement.scrollTop;
@@ -162,10 +162,10 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-[transform,opacity,filter,padding,background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      className={`sticky top-0 z-40 transition-[transform,opacity,filter,padding,background-color,border-color,box-shadow] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isVisible 
           ? 'translate-y-0 opacity-100 scale-100 blur-0' 
-          : '-translate-y-6 opacity-0 scale-[0.97] blur-[2px] pointer-events-none'
+          : '-translate-y-6 opacity-0 scale-[0.98] blur-[1px] pointer-events-none'
       } ${
         isDashboardView
           ? isScrolled
