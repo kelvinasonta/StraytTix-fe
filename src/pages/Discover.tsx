@@ -33,9 +33,7 @@ import {
   MapPin,
   ArrowRight,
   Ticket,
-  Video,
-  Flame,
-  TrendingUp
+  Flame
 } from 'lucide-react';
 
 interface CategoryMeta {
@@ -257,22 +255,14 @@ export const Discover: React.FC = () => {
     });
   }, [events, priceRange]);
 
-  // Pick the top featured event for the Editorial Spotlight hero banner
-  const featuredSpotlightEvent = useMemo(() => {
-    if (events.length === 0) return null;
-    // Prefer explicitly featured event or top rated
-    return events.find((e) => e.isFeatured) || events[0];
-  }, [events]);
-
-  // Top 5 trending tickets calculated from event popularity, ticket sales & featured weight
-  const topTrendingTickets = useMemo(() => {
+  // Featured events calculated from featured priority and popularity
+  const featuredEvents = useMemo(() => {
     if (events.length === 0) return [];
-    // Sort by popularity score using available fields: featured priority, ticket tier variety, and ticket quantities
     const sorted = [...events].sort((a, b) => {
       const aTicketsCount = a.tickets?.length || 0;
       const bTicketsCount = b.tickets?.length || 0;
-      const aScore = (a.isFeatured ? 50 : 0) + (aTicketsCount * 10);
-      const bScore = (b.isFeatured ? 50 : 0) + (bTicketsCount * 10);
+      const aScore = (a.isFeatured ? 100 : 0) + (aTicketsCount * 10);
+      const bScore = (b.isFeatured ? 100 : 0) + (bTicketsCount * 10);
       return bScore - aScore;
     });
     return sorted.slice(0, 5);
@@ -334,94 +324,6 @@ export const Discover: React.FC = () => {
           </div>
 
           {/* ======================================================================= */}
-          {/* FEATURED EVENT EDITORIAL SPOTLIGHT CAROUSEL BANNER                      */}
-          {/* ======================================================================= */}
-          {featuredSpotlightEvent && !isLoading && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="relative rounded-[2.25rem] overflow-hidden border border-white/15 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 shadow-2xl group"
-            >
-              <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[340px] sm:min-h-[420px]">
-                
-                {/* Left Content Column */}
-                <div className="lg:col-span-7 p-6 sm:p-12 lg:p-14 flex flex-col justify-between space-y-6 relative z-10 bg-gradient-to-t lg:bg-gradient-to-r from-zinc-950 via-zinc-950/90 to-transparent">
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-3 py-1 rounded-full bg-[#E31B23] text-white text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-[#E31B23]/30">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        SPOTLIGHT
-                      </span>
-                      <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10 text-zinc-300 text-[11px] font-mono">
-                        {featuredSpotlightEvent.category || 'Featured Live'}
-                      </span>
-                      {featuredSpotlightEvent.locationType === 'online' && (
-                        <span className="px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[11px] font-mono flex items-center gap-1">
-                          <Video className="w-3 h-3" /> Virtual
-                        </span>
-                      )}
-                    </div>
-
-                    <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight line-clamp-2">
-                      {featuredSpotlightEvent.title}
-                    </h2>
-
-                    <p className="text-xs sm:text-sm text-zinc-300/90 line-clamp-2 max-w-xl font-normal leading-relaxed">
-                      {featuredSpotlightEvent.description || 'Join thousands of attendees at this premier verified production. Reserve tickets directly with guaranteed gate entry.'}
-                    </p>
-                  </div>
-
-                  <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-white/10">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-xs text-zinc-400 font-mono">
-                        <Calendar className="w-3.5 h-3.5 text-[#E31B23]" />
-                        <span>{formatDate(featuredSpotlightEvent.startDate)}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-zinc-400 font-mono">
-                        <MapPin className="w-3.5 h-3.5 text-zinc-400" />
-                        <span className="truncate max-w-[280px]">
-                          {featuredSpotlightEvent.venue || featuredSpotlightEvent.city || 'Lagos, Nigeria'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="text-[10px] font-mono uppercase text-zinc-400">Starting From</p>
-                        <p className="text-lg sm:text-2xl font-black font-mono text-white">
-                          {featuredSpotlightEvent.tickets && featuredSpotlightEvent.tickets.length > 0 && Math.min(...featuredSpotlightEvent.tickets.map(t => t.price)) === 0
-                            ? 'FREE RSVP'
-                            : formatCurrency(featuredSpotlightEvent.tickets && featuredSpotlightEvent.tickets.length > 0 ? Math.min(...featuredSpotlightEvent.tickets.map(t => t.price)) : 0)}
-                        </p>
-                      </div>
-
-                      <Link
-                        to={`/events/${featuredSpotlightEvent.slug || featuredSpotlightEvent.id}`}
-                        className="px-7 py-3.5 bg-[#E31B23] hover:bg-[#C9141B] text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-[0_12px_28px_-4px_rgba(227,27,35,0.6)] active:scale-95 flex items-center gap-2 shrink-0 cursor-pointer"
-                      >
-                        <span>Get Pass</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Image Spotlight Column */}
-                <div className="lg:col-span-5 relative h-80 lg:h-auto overflow-hidden">
-                  <img
-                    src={featuredSpotlightEvent.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=1200&q=80'}
-                    alt={featuredSpotlightEvent.title}
-                    className="w-full h-full object-cover object-center filter brightness-[0.75] contrast-[1.08] transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent lg:hidden" />
-                </div>
-
-              </div>
-            </motion.div>
-          )}
-
-          {/* ======================================================================= */}
           {/* HORIZONTAL CATEGORY TAXONOMY STRIP (With Icons & Active States)        */}
           {/* ======================================================================= */}
           <div className="pt-2">
@@ -452,28 +354,28 @@ export const Discover: React.FC = () => {
       </section>
 
       {/* ========================================================================= */}
-      {/* 2. TOP 5 TRENDING TICKETS (Jetron / Tix Hot Rail Carousel)                */}
+      {/* 2. FEATURED EVENTS (Hot Rail Showcase)                                    */}
       {/* ========================================================================= */}
-      {topTrendingTickets.length > 0 && !isLoading && (
+      {featuredEvents.length > 0 && !isLoading && (
         <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-10 sm:py-14 bg-[#0A0A0E] border-b border-white/5">
           <div className="max-w-[1600px] mx-auto space-y-7">
             
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-[#E31B23]/10 border border-[#E31B23]/25 text-[#E31B23] flex items-center justify-center">
+                  <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                      Top 5 Trending Tickets
+                      Featured Events
                     </h2>
-                    <span className="px-2 py-0.5 rounded-md bg-amber-400/10 text-amber-400 text-[10px] font-mono font-bold uppercase tracking-wider border border-amber-400/20">
-                      HOT RIGHT NOW
+                    <span className="px-2 py-0.5 rounded-md bg-[#E31B23]/10 text-[#E31B23] text-[10px] font-mono font-bold uppercase tracking-wider border border-[#E31B23]/20">
+                      CURATED
                     </span>
                   </div>
                   <p className="text-xs text-zinc-400 hidden sm:block">
-                    The most in-demand passes experiencing rapid gate checkouts this week.
+                    Hand-picked live experiences and premier events happening soon.
                   </p>
                 </div>
               </div>
@@ -483,23 +385,23 @@ export const Discover: React.FC = () => {
               </span>
             </div>
 
-            {/* Top 5 Trending Cards Scroll Rail (Larger cinema scale with full-bleed image & overlay details) */}
+            {/* Featured Events Cards Rail (Cinema scale with full-bleed image & overlay details) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-              {topTrendingTickets.map((trendEvent, index) => {
-                const minPrice = trendEvent.tickets && trendEvent.tickets.length > 0 
-                  ? Math.min(...trendEvent.tickets.map(t => t.price)) 
+              {featuredEvents.map((featuredEvent, index) => {
+                const minPrice = featuredEvent.tickets && featuredEvent.tickets.length > 0 
+                  ? Math.min(...featuredEvent.tickets.map(t => t.price)) 
                   : 0;
 
                 return (
                   <Link
-                    key={trendEvent.id}
-                    to={`/events/${trendEvent.slug || trendEvent.id}`}
+                    key={featuredEvent.id}
+                    to={`/events/${featuredEvent.slug || featuredEvent.id}`}
                     className="group relative rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 h-[380px] sm:h-[420px] flex flex-col justify-between p-5 transition-all duration-500 hover:shadow-2xl hover:shadow-[#E31B23]/10 hover:-translate-y-1.5"
                   >
                     {/* Full-bleed Background Image */}
                     <img
-                      src={trendEvent.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80'}
-                      alt={trendEvent.title}
+                      src={featuredEvent.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80'}
+                      alt={featuredEvent.title}
                       className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.72] contrast-[1.05] group-hover:scale-110 group-hover:brightness-[0.6] transition-all duration-700 pointer-events-none"
                     />
 
@@ -507,7 +409,7 @@ export const Discover: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/20 pointer-events-none" />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent pointer-events-none" />
 
-                    {/* Top Overlay Bar: Rank Badge + Category + Price */}
+                    {/* Top Overlay Bar: Badge + Category + Price */}
                     <div className="relative z-10 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-mono font-black text-xs backdrop-blur-md border ${
@@ -522,7 +424,7 @@ export const Discover: React.FC = () => {
                           #{index + 1}
                         </span>
                         <span className="px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/15 text-[10px] font-mono uppercase tracking-wider text-zinc-300">
-                          {trendEvent.category || 'Event'}
+                          {featuredEvent.category || 'Event'}
                         </span>
                       </div>
 
@@ -536,14 +438,14 @@ export const Discover: React.FC = () => {
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-300">
                           <Calendar className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
-                          <span>{formatDate(trendEvent.startDate)}</span>
+                          <span>{formatDate(featuredEvent.startDate)}</span>
                         </div>
                         <h3 className="text-base sm:text-lg font-black text-white line-clamp-2 leading-snug group-hover:text-red-400 transition-colors drop-shadow-md">
-                          {trendEvent.title}
+                          {featuredEvent.title}
                         </h3>
                         <div className="flex items-center gap-1.5 text-xs text-zinc-300 font-mono truncate">
                           <MapPin className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
-                          <span className="truncate">{trendEvent.venue || trendEvent.city || 'Lagos, Nigeria'}</span>
+                          <span className="truncate">{featuredEvent.venue || featuredEvent.city || 'Lagos, Nigeria'}</span>
                         </div>
                       </div>
 
