@@ -185,40 +185,43 @@ export const HowItWorks: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1">
         {/* ========================================================================= */}
         {/* 1. HERO HEADER: Human, Editorial, Structured */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 pt-12 pb-16 sm:pt-16 sm:pb-20 border-b border-zinc-100 bg-gradient-to-b from-zinc-50/60 to-white">
-          <div className="max-w-5xl mx-auto text-center space-y-6">
+        <section className="relative px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pt-16 pb-20 sm:pt-24 sm:pb-24 border-b border-white/5 overflow-hidden">
+          {/* Ambient Lighting */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-[#E31B23]/12 blur-[180px] rounded-full pointer-events-none" />
+
+          <div className="max-w-5xl mx-auto text-center space-y-6 relative z-10">
             
             {/* Monospace System Tag */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 text-white text-[11px] font-mono tracking-wider font-semibold uppercase">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-200 dark:bg-white/[0.08] border border-zinc-300 dark:border-white/15 text-zinc-800 dark:text-white text-[11px] font-mono tracking-wider font-semibold uppercase">
               <span className="w-1.5 h-1.5 rounded-full bg-[#E31B23] animate-pulse" />
-              THE EVENTA ARCHITECTURE
+              THE STRAYTTIX ARCHITECTURE
             </div>
 
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-zinc-950 leading-[1.05] text-balance">
-              How Eventa moves you from discovery to the front row.
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.05] text-balance">
+              How StraytTix moves you from discovery to the front row.
             </h1>
 
-            <p className="text-zinc-600 text-base sm:text-xl font-normal max-w-2xl mx-auto leading-relaxed">
-              A modern ticketing and gate entry system engineered for transparent pricing, instant delivery, and zero-headache venue operations.
+            <p className="text-zinc-400 text-base sm:text-xl font-normal max-w-2xl mx-auto leading-relaxed">
+              A high-assurance ticketing and gate entry system engineered for transparent pricing, instant delivery, and zero-headache venue operations.
             </p>
 
             {/* Audience Toggle (Attendee vs Organizer) */}
             <div className="pt-4 flex justify-center w-full">
-              <div className="inline-flex flex-col sm:flex-row w-full sm:w-auto p-1.5 bg-zinc-150/80 rounded-2xl border border-zinc-200/80 shadow-inner gap-1">
+              <div className="inline-flex flex-col sm:flex-row w-full sm:w-auto p-1.5 bg-white/[0.04] rounded-2xl border border-white/10 shadow-xl gap-1">
                 <button
                   type="button"
                   onClick={() => { setActiveAudience('attendee'); setActiveStep(0); }}
-                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                  className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                     activeAudience === 'attendee'
-                      ? 'bg-zinc-950 text-white shadow-md'
-                      : 'text-zinc-600 hover:text-zinc-950 hover:bg-white/50'
+                      ? 'bg-white text-zinc-950 shadow-md font-black'
+                      : 'text-zinc-300 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   <Ticket className="w-4 h-4 text-[#E31B23]" />
@@ -227,10 +230,10 @@ export const HowItWorks: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => { setActiveAudience('organizer'); setActiveStep(0); }}
-                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                  className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                     activeAudience === 'organizer'
-                      ? 'bg-zinc-950 text-white shadow-md'
-                      : 'text-zinc-600 hover:text-zinc-950 hover:bg-white/50'
+                      ? 'bg-white text-zinc-950 shadow-md font-black'
+                      : 'text-zinc-300 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   <Users className="w-4 h-4 text-[#E31B23]" />
@@ -245,8 +248,8 @@ export const HowItWorks: React.FC = () => {
         {/* ========================================================================= */}
         {/* 2. THE 4-STEP PROTOCOL (Interactive Step Journey) */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
+        <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-20 sm:py-28 max-w-[1600px] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-start max-w-6xl mx-auto">
             
             {/* Left Column: Step Navigation List */}
             <div className="lg:col-span-6 space-y-4">
@@ -254,7 +257,7 @@ export const HowItWorks: React.FC = () => {
                 <p className="font-mono text-xs font-bold text-[#E31B23] tracking-widest uppercase">
                   {activeAudience === 'attendee' ? 'ATTENDEE LIFECYCLE' : 'ORGANIZER WORKFLOW'}
                 </p>
-                <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                   {activeAudience === 'attendee' ? 'Four seamless steps to the stage' : 'Launch, sell, and scan in 4 steps'}
                 </h2>
               </div>
@@ -268,13 +271,13 @@ export const HowItWorks: React.FC = () => {
                       onClick={() => setActiveStep(idx)}
                       className={`cursor-pointer text-left p-5 rounded-2xl border transition-all duration-200 ${
                         isSelected 
-                          ? 'bg-zinc-950 text-white border-zinc-950 shadow-xl' 
-                          : 'bg-white text-zinc-800 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/50'
+                          ? 'bg-white/[0.08] text-white border-white/30 shadow-2xl shadow-[#E31B23]/10 translate-x-1' 
+                          : 'bg-white/[0.02] text-zinc-300 border-white/10 hover:border-white/20 hover:bg-white/[0.04]'
                       }`}
                     >
                       <div className="flex items-start gap-4">
                         <div className={`font-mono text-sm font-black px-2.5 py-1 rounded-lg ${
-                          isSelected ? 'bg-[#E31B23] text-white' : 'bg-zinc-100 text-zinc-600'
+                          isSelected ? 'bg-[#E31B23] text-white shadow-md' : 'bg-white text-zinc-950 font-bold'
                         }`}>
                           {step.num}
                         </div>
@@ -282,26 +285,22 @@ export const HowItWorks: React.FC = () => {
                         <div className="flex-1 space-y-1.5">
                           <div className="flex items-center justify-between">
                             <span className={`font-mono text-[10px] tracking-wider uppercase ${
-                              isSelected ? 'text-zinc-400' : 'text-zinc-500'
+                              isSelected ? 'text-zinc-300' : 'text-zinc-500'
                             }`}>
                               {step.tag}
                             </span>
-                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                              isSelected ? 'bg-white/10 text-zinc-300' : 'bg-zinc-100 text-zinc-600'
+                            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                              isSelected ? 'bg-white text-zinc-950 shadow-sm' : 'bg-white/10 text-zinc-300'
                             }`}>
                               {step.badge}
                             </span>
                           </div>
 
-                          <h3 className={`text-base font-bold tracking-tight ${
-                            isSelected ? 'text-white' : 'text-zinc-950'
-                          }`}>
+                          <h3 className="text-base font-bold text-white tracking-tight">
                             {step.title}
                           </h3>
 
-                          <p className={`text-xs leading-relaxed ${
-                            isSelected ? 'text-zinc-300' : 'text-zinc-600'
-                          }`}>
+                          <p className="text-xs leading-relaxed text-zinc-400">
                             {step.description}
                           </p>
 
@@ -310,7 +309,7 @@ export const HowItWorks: React.FC = () => {
                             <ul className="pt-2 space-y-1.5 text-xs text-zinc-300 border-t border-white/10 mt-3">
                               {step.highlights.map((h, hIdx) => (
                                 <li key={hIdx} className="flex items-center gap-2">
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                                   <span>{h}</span>
                                 </li>
                               ))}
@@ -519,30 +518,30 @@ export const HowItWorks: React.FC = () => {
         {/* ========================================================================= */}
         {/* 4. FREQUENTLY ASKED QUESTIONS */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 max-w-4xl mx-auto space-y-12">
+        <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-16 sm:py-24 max-w-5xl mx-auto space-y-12">
           <div className="text-center space-y-3">
             <span className="font-mono text-xs font-bold text-[#E31B23] tracking-widest uppercase">
               CLARITY FIRST
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-950">
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
               Frequently Asked Questions
             </h2>
-            <p className="text-zinc-500 text-sm">
+            <p className="text-zinc-400 text-sm">
               Everything you need to know about purchasing tickets or hosting your first event.
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {faqs.map((faq, idx) => (
               <div 
                 key={idx} 
-                className="bg-white border border-zinc-200 rounded-2xl p-6 space-y-2 hover:border-zinc-300 transition-colors"
+                className="bg-white/[0.03] border border-white/10 rounded-3xl p-7 space-y-3 hover:border-white/25 transition-colors shadow-lg"
               >
-                <h3 className="text-base font-bold text-zinc-950 flex items-start gap-3">
-                  <span className="font-mono text-xs font-bold text-[#E31B23] px-2 py-0.5 bg-red-50 rounded">Q</span>
+                <h3 className="text-base font-bold text-white flex items-start gap-3">
+                  <span className="font-mono text-xs font-bold text-white bg-[#E31B23] px-2 py-0.5 rounded shadow-sm">Q</span>
                   <span>{faq.q}</span>
                 </h3>
-                <p className="text-xs sm:text-sm text-zinc-600 pl-8 leading-relaxed">
+                <p className="text-xs sm:text-sm text-zinc-400 pl-8 leading-relaxed font-normal">
                   {faq.a}
                 </p>
               </div>
@@ -550,9 +549,9 @@ export const HowItWorks: React.FC = () => {
           </div>
 
           <div className="text-center pt-4">
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs font-mono text-zinc-400">
               Have an enterprise inquiry or need custom on-site gate assistance?{' '}
-              <Link to="/about" className="text-[#E31B23] font-bold underline hover:text-red-700">
+              <Link to="/about" className="text-[#E31B23] font-bold underline hover:text-red-400">
                 Contact our support team
               </Link>
             </p>
@@ -562,8 +561,8 @@ export const HowItWorks: React.FC = () => {
         {/* ========================================================================= */}
         {/* 5. DUAL CTA SECTION: Attendee vs Organizer */}
         {/* ========================================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 pb-20 max-w-6xl mx-auto">
-          <div className="bg-gradient-to-br from-zinc-950 to-zinc-900 text-white rounded-3xl p-8 sm:p-12 border border-zinc-800 shadow-2xl relative overflow-hidden">
+        <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pb-24 max-w-6xl mx-auto">
+          <div className="bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white rounded-[2rem] p-8 sm:p-14 border border-white/15 shadow-2xl relative overflow-hidden">
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center relative z-10">
               <div className="space-y-4">
@@ -574,7 +573,7 @@ export const HowItWorks: React.FC = () => {
                   Ready to experience events the way they should be?
                 </h2>
                 <p className="text-zinc-400 text-sm leading-relaxed max-w-md">
-                  Whether you are looking for your next unforgettable weekend or hosting 5,000 fans at your summit, Eventa has you covered.
+                  Whether you are looking for your next unforgettable weekend or hosting 5,000 fans at your summit, StraytTix has you covered.
                 </p>
               </div>
 
@@ -582,7 +581,7 @@ export const HowItWorks: React.FC = () => {
                 <Link to="/discover">
                   <button
                     type="button"
-                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white text-zinc-950 font-bold text-sm hover:bg-zinc-100 transition-colors flex items-center justify-center gap-2 shadow-lg"
+                    className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-white text-zinc-950 font-bold text-sm hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer active:scale-95"
                   >
                     <Compass className="w-4 h-4 text-[#E31B23]" />
                     <span>Explore Upcoming Events</span>
@@ -592,7 +591,7 @@ export const HowItWorks: React.FC = () => {
                 <Link to="/register">
                   <button
                     type="button"
-                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#E31B23] text-white font-bold text-sm hover:bg-red-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-red-950/50"
+                    className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#E31B23] text-white font-bold text-sm hover:bg-[#C9141B] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#E31B23]/30 cursor-pointer active:scale-95"
                   >
                     <span>Host an Event</span>
                     <ArrowRight className="w-4 h-4" />

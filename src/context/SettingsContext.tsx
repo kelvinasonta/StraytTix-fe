@@ -3,7 +3,7 @@ import type { AppSettings } from '../types/api';
 import { settingsApi } from '../api/settings';
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
-  sitename: 'Eventra',
+  sitename: 'StraytTix',
   site_tagline: '',
   favicon: null,
   logo: null,

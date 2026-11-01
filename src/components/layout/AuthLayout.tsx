@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Logo } from '../ui/Logo';
-import { ArrowLeft, CheckCircle2, ShieldCheck, MapPin } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ShieldCheck, MapPin, Sparkles } from 'lucide-react';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -11,52 +12,53 @@ interface AuthLayoutProps {
 
 export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) => {
   return (
-    <div className="min-h-[100dvh] grid grid-cols-1 lg:grid-cols-12 bg-white text-zinc-900">
+    <div className="min-h-[100dvh] lg:h-[100dvh] lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12 bg-white text-zinc-900">
       
-      {/* Left Form Area (5 cols on lg, 6 cols on xl) */}
-      <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-between p-6 sm:p-10 md:p-14 lg:p-12 xl:p-16 bg-white z-10">
-        
-        {/* Header with Logo and Return Link */}
-        <header className="flex items-center justify-between mb-8 sm:mb-10">
-          <Logo to="/" size="md" />
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 transition-colors group"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-            <span>Back to events</span>
-          </Link>
-        </header>
+      {/* Left Form Area (5 cols on lg, 6 cols on xl) - Independently scrollable */}
+      <div className="lg:col-span-6 xl:col-span-5 bg-white z-10 lg:h-full lg:overflow-y-auto">
+        <div className="min-h-full flex flex-col justify-between p-6 sm:p-10 md:p-14 lg:p-12 xl:p-16">
+          {/* Header with Logo and Return Link */}
+          <header className="flex items-center justify-between mb-8 sm:mb-10 shrink-0">
+            <Logo to="/" size="md" />
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 transition-colors group"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+              <span>Back to events</span>
+            </Link>
+          </header>
 
-        {/* Form Container */}
-        <div className="my-auto max-w-md w-full mx-auto space-y-6">
-          <div className="space-y-1.5">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-950">
-              {title}
-            </h1>
-            <p className="text-zinc-500 text-sm font-normal leading-relaxed">
-              {subtitle}
-            </p>
+          {/* Form Container */}
+          <div className="my-auto py-4 max-w-md w-full mx-auto space-y-6">
+            <div className="space-y-1.5">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-950">
+                {title}
+              </h1>
+              <p className="text-zinc-500 text-sm font-normal leading-relaxed">
+                {subtitle}
+              </p>
+            </div>
+
+            {children}
           </div>
 
-          {children}
+          {/* Clean, Legal Footer */}
+          <footer className="mt-10 pt-6 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-400 shrink-0">
+            <span>&copy; {new Date().getFullYear()} Eventa Technologies</span>
+            <div className="flex items-center gap-4">
+              <Link to="/terms" className="hover:text-zinc-600 transition-colors">Terms</Link>
+              <span>•</span>
+              <Link to="/privacy" className="hover:text-zinc-600 transition-colors">Privacy</Link>
+              <span>•</span>
+              <Link to="/about" className="hover:text-zinc-600 transition-colors">Help</Link>
+            </div>
+          </footer>
         </div>
-
-        {/* Clean, Legal Footer */}
-        <footer className="mt-10 pt-6 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-400">
-          <span>&copy; {new Date().getFullYear()} Eventa Technologies</span>
-          <div className="flex items-center gap-4">
-            <Link to="/terms" className="hover:text-zinc-600 transition-colors">Terms</Link>
-            <span>•</span>
-            <Link to="/privacy" className="hover:text-zinc-600 transition-colors">Privacy</Link>
-            <span>•</span>
-            <Link to="/about" className="hover:text-zinc-600 transition-colors">Help</Link>
-          </div>
-        </footer>
       </div>
 
-      {/* Right Visual Area (6 cols on lg, 7 cols on xl) */}
-      <div className="hidden lg:col-span-6 xl:col-span-7 lg:relative lg:flex flex-col justify-between p-12 xl:p-16 overflow-hidden bg-zinc-950 text-white">
+      {/* Right Visual Area (6 cols on lg, 7 cols on xl) - Static container */}
+      <div className="hidden lg:col-span-6 xl:col-span-7 lg:relative lg:flex flex-col justify-between p-12 xl:p-16 overflow-hidden bg-zinc-950 text-white lg:h-full select-none">
         
         {/* Background Atmospheric Event Image */}
         <img
@@ -80,13 +82,26 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
           </span>
         </div>
 
-        {/* Center Floating Pass Preview */}
+        {/* Center Floating Pass Preview with Whimsical Levitation Animation */}
         <div className="relative z-10 my-auto py-8">
-          <div className="max-w-md mx-auto bg-zinc-900/90 backdrop-blur-xl border border-white/15 rounded-3xl p-6 shadow-2xl space-y-4">
+          <motion.div 
+            animate={{ 
+              y: [0, -10, 0],
+              rotate: [0, 0.4, 0]
+            }}
+            transition={{ 
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            whileHover={{ scale: 1.02, y: -4 }}
+            className="max-w-md mx-auto bg-zinc-900/90 backdrop-blur-xl border border-white/15 rounded-3xl p-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] space-y-4 transition-colors"
+          >
             
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-red-400 font-bold">
-                Live Pass Preview
+              <span className="text-[11px] font-mono uppercase tracking-wider text-red-400 font-bold flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E31B23] animate-ping" />
+                <span>Live Pass Preview</span>
               </span>
               <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-800/40">
                 <CheckCircle2 className="w-3 h-3" />
@@ -115,7 +130,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
               </div>
             </div>
 
-          </div>
+          </motion.div>
         </div>
 
         {/* Bottom Testimonial / Social Proof */}

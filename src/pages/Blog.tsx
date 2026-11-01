@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import { Calendar, Clock, ArrowRight, User, Tag, Sparkles, BookOpen } from 'lucide-react';
+import { Clock, ArrowRight, BookOpen } from 'lucide-react';
 
 export const Blog: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('All');
@@ -91,21 +90,21 @@ export const Blog: React.FC = () => {
   const featuredArticle = articles.find(a => a.featured) || articles[0];
 
   return (
-    <div className="min-h-screen bg-brand-bg flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-white flex flex-col justify-between selection:bg-[#E31B23] selection:text-white transition-colors duration-300">
       <Navbar />
 
-      <main className="flex-1 py-16 px-6 max-w-7xl mx-auto w-full space-y-16">
+      <main className="flex-1 py-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 max-w-[1600px] mx-auto w-full space-y-16">
         {/* Header */}
-        <div className="text-center space-y-4 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-50 border border-red-150 text-[#E31B23] text-xs font-bold uppercase tracking-wider">
+        <div className="text-center space-y-4 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#E31B23] text-xs font-bold uppercase tracking-wider backdrop-blur-md">
             <BookOpen className="w-3.5 h-3.5" />
             StraytTix Dispatch & Insights
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-zinc-950 tracking-tight leading-tight">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
             The Event Organizer’s Guide to Scale
           </h1>
-          <p className="text-zinc-600 text-sm font-medium leading-relaxed">
-            Proven playbooks, developer architectures, and growth strategies from the teams building modern live experiences.
+          <p className="text-zinc-400 text-sm sm:text-base font-normal leading-relaxed">
+            Proven playbooks, developer architectures, and high-conversion strategies from the teams engineering modern live experiences.
           </p>
         </div>
 
@@ -115,10 +114,10 @@ export const Blog: React.FC = () => {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 activeCategory === cat
-                  ? 'bg-zinc-950 text-white shadow-sm'
-                  : 'bg-white text-zinc-600 hover:bg-zinc-100 border border-zinc-200'
+                  ? 'bg-white text-zinc-950 shadow-lg shadow-white/10 font-black'
+                  : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border border-white/10'
               }`}
             >
               {cat}
@@ -128,16 +127,17 @@ export const Blog: React.FC = () => {
 
         {/* Hero Featured Article (Shown when "All" or match) */}
         {(activeCategory === 'All' || activeCategory === featuredArticle.category) && (
-          <div className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-sm hover:shadow-md transition-all group">
+          <div className="bg-zinc-950/70 rounded-3xl border border-white/10 overflow-hidden shadow-2xl hover:border-white/20 transition-all group backdrop-blur-sm">
             <div className="grid grid-cols-1 lg:grid-cols-12">
-              <div className="lg:col-span-7 h-72 sm:h-96 lg:h-auto relative overflow-hidden bg-zinc-100">
+              <div className="lg:col-span-7 h-72 sm:h-96 lg:h-auto min-h-[380px] relative overflow-hidden bg-zinc-900">
                 <img
                   src={featuredArticle.image}
                   alt={featuredArticle.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
                 />
-                <div className="absolute top-4 left-4">
-                  <span className="px-3 py-1 bg-white/95 backdrop-blur-md text-zinc-900 text-[11px] font-black uppercase tracking-wider rounded-full shadow-xs">
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent lg:hidden" />
+                <div className="absolute top-5 left-5">
+                  <span className="px-3.5 py-1.5 bg-white text-zinc-950 text-[11px] font-black uppercase tracking-wider rounded-full shadow-lg">
                     Featured Playbook
                   </span>
                 </div>
@@ -146,27 +146,27 @@ export const Blog: React.FC = () => {
               <div className="lg:col-span-5 p-8 sm:p-12 flex flex-col justify-between space-y-6">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 text-xs text-zinc-400 font-semibold">
-                    <span className="text-[#E31B23] font-bold">{featuredArticle.category}</span>
+                    <span className="text-[#E31B23] font-bold uppercase tracking-wider">{featuredArticle.category}</span>
                     <span>•</span>
                     <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {featuredArticle.readTime}</span>
                   </div>
 
-                  <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight leading-snug group-hover:text-[#E31B23] transition-colors">
+                  <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug group-hover:text-[#E31B23] transition-colors">
                     {featuredArticle.title}
                   </h2>
 
-                  <p className="text-zinc-600 text-xs sm:text-sm leading-relaxed font-medium">
+                  <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-normal">
                     {featuredArticle.excerpt}
                   </p>
                 </div>
 
-                <div className="pt-6 border-t border-zinc-100 flex items-center justify-between">
+                <div className="pt-6 border-t border-white/10 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-red-50 text-[#E31B23] font-bold flex items-center justify-center text-xs border border-red-100">
+                    <div className="w-10 h-10 rounded-full bg-[#E31B23]/20 text-[#E31B23] font-black flex items-center justify-center text-xs border border-[#E31B23]/30">
                       KV
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-zinc-900">{featuredArticle.author}</p>
+                      <p className="text-xs font-bold text-zinc-950 dark:text-white">{featuredArticle.author}</p>
                       <p className="text-[11px] text-zinc-400">{featuredArticle.authorRole}</p>
                     </div>
                   </div>
@@ -185,41 +185,41 @@ export const Blog: React.FC = () => {
           {filteredArticles.filter(a => a.id !== (activeCategory === 'All' ? featuredArticle.id : 0)).map((article) => (
             <article
               key={article.id}
-              className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
+              className="bg-zinc-950/60 rounded-3xl border border-white/10 overflow-hidden shadow-lg hover:border-white/25 hover:shadow-2xl transition-all flex flex-col justify-between group cursor-pointer"
             >
               <div className="space-y-4">
-                <div className="h-48 overflow-hidden relative bg-zinc-100">
+                <div className="h-52 overflow-hidden relative bg-zinc-900">
                   <img
                     src={article.image}
                     alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
                   />
                   <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-1 bg-black/70 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider rounded-lg">
+                    <span className="px-3 py-1 bg-zinc-950/80 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg">
                       {article.category}
                     </span>
                   </div>
                 </div>
 
-                <div className="px-6 space-y-2">
+                <div className="px-6 space-y-2.5">
                   <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-medium">
                     <span>{article.date}</span>
                     <span>•</span>
                     <span>{article.readTime}</span>
                   </div>
 
-                  <h3 className="text-base font-bold text-zinc-950 tracking-tight leading-snug group-hover:text-[#E31B23] transition-colors line-clamp-2">
+                  <h3 className="text-base font-bold text-white tracking-tight leading-snug group-hover:text-[#E31B23] transition-colors line-clamp-2">
                     {article.title}
                   </h3>
 
-                  <p className="text-xs text-zinc-500 line-clamp-3 leading-relaxed font-medium">
+                  <p className="text-xs text-zinc-400 line-clamp-3 leading-relaxed font-normal">
                     {article.excerpt}
                   </p>
                 </div>
               </div>
 
-              <div className="p-6 pt-4 mt-4 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-500">
-                <span className="font-semibold text-zinc-800">{article.author}</span>
+              <div className="p-6 pt-4 mt-4 border-t border-white/10 flex items-center justify-between text-xs">
+                <span className="font-semibold text-zinc-300">{article.author}</span>
                 <span className="text-[#E31B23] font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                   Read <ArrowRight className="w-3.5 h-3.5" />
                 </span>
@@ -229,26 +229,26 @@ export const Blog: React.FC = () => {
         </div>
 
         {/* Newsletter Signup Strip */}
-        <div className="bg-zinc-900 text-white rounded-3xl p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="rounded-3xl p-8 sm:p-12 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-white/15 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="space-y-2 max-w-md">
-            <h3 className="text-xl sm:text-2xl font-black tracking-tight">
+            <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
               Get organizer tips straight to your inbox
             </h3>
-            <p className="text-zinc-400 text-xs font-medium">
+            <p className="text-zinc-400 text-xs sm:text-sm font-normal">
               Bi-weekly breakdowns of ticketing economics, high-converting stage schedules, and API updates.
             </p>
           </div>
 
-          <form onSubmit={(e) => { e.preventDefault(); alert('Subscribed to StraytTix Dispatch!'); }} className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <form onSubmit={(e) => { e.preventDefault(); }} className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <input
               type="email"
               placeholder="Enter your email"
               required
-              className="px-4 py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-xs text-white placeholder-zinc-400 focus:outline-none focus:border-[#E31B23] min-w-[260px]"
+              className="px-4 py-3 rounded-2xl bg-white/[0.05] border border-white/15 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#E31B23] min-w-[280px]"
             />
             <button
               type="submit"
-              className="px-5 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl transition-colors cursor-pointer whitespace-nowrap"
+              className="px-6 py-3 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-2xl transition-all cursor-pointer whitespace-nowrap shadow-lg shadow-[#E31B23]/25"
             >
               Subscribe Free
             </button>

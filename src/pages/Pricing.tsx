@@ -105,38 +105,41 @@ export const Pricing: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-brand-bg flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased transition-colors duration-300">
       <Navbar />
 
-      <main className="flex-1 py-16 px-6 max-w-7xl mx-auto w-full space-y-20">
+      <main className="flex-1 py-16 sm:py-24 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 max-w-[1600px] mx-auto w-full space-y-20 relative">
+        {/* Subtle Ambient Red Glow Accent */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-[#E31B23]/10 blur-[180px] rounded-full pointer-events-none" />
+
         {/* Hero Section */}
-        <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-50 border border-red-150 text-[#E31B23] text-xs font-bold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" />
+        <div className="relative z-10 text-center space-y-4 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-200/80 dark:bg-white/[0.08] border border-zinc-300 dark:border-white/15 text-zinc-800 dark:text-white text-xs font-mono font-bold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
             Simple, Transparent SaaS Pricing
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-zinc-950 tracking-tight leading-tight">
+          <h1 className="text-4xl md:text-6xl font-black text-zinc-950 dark:text-white tracking-tight leading-tight">
             Pay only when you sell tickets. <br className="hidden sm:inline" />
             Zero upfront fees.
           </h1>
-          <p className="text-zinc-600 text-base leading-relaxed font-medium">
+          <p className="text-zinc-600 dark:text-zinc-400 text-sm sm:text-base leading-relaxed font-normal">
             Host unlimited free events with zero cost. When selling paid tickets, enjoy industry-leading low rates with lightning-fast next-day payouts.
           </p>
         </div>
 
-        {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+        {/* Pricing Cards Grid (High-Contrast White, Dark & Red) */}
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
           {plans.map((plan, idx) => (
             <div
               key={idx}
-              className={`relative rounded-3xl p-8 flex flex-col justify-between transition-all duration-200 ${
+              className={`relative rounded-3xl p-8 sm:p-9 flex flex-col justify-between transition-all duration-300 ${
                 plan.popular
-                  ? 'bg-white border-2 border-[#E31B23] shadow-xl ring-4 ring-red-500/10'
-                  : 'bg-white border border-zinc-200 shadow-sm hover:border-zinc-300'
+                  ? 'bg-zinc-950/90 border-2 border-[#E31B23] shadow-2xl shadow-[#E31B23]/20 ring-4 ring-[#E31B23]/15'
+                  : 'bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/25 shadow-lg dark:shadow-xl hover:-translate-y-1'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#E31B23] text-white text-xs font-black uppercase tracking-wider px-4 py-1 rounded-full shadow-sm">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#E31B23] text-white text-xs font-mono font-black uppercase tracking-wider px-4 py-1 rounded-full shadow-lg border border-red-400/40">
                   {plan.badge}
                 </div>
               )}
@@ -144,34 +147,34 @@ export const Pricing: React.FC = () => {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-zinc-900">{plan.name}</h3>
+                    <h3 className="text-2xl font-black text-zinc-950 dark:text-white">{plan.name}</h3>
                     {!plan.popular && (
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-600">
+                      <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-zinc-100 dark:bg-white text-zinc-950 shadow-md border border-zinc-200 dark:border-transparent">
                         {plan.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-zinc-500 leading-relaxed min-h-[36px]">
+                  <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed min-h-[36px]">
                     {plan.description}
                   </p>
                 </div>
 
                 {/* Price Display */}
-                <div className="py-4 border-y border-zinc-100 space-y-1">
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-4xl font-black text-zinc-950 tracking-tight">{plan.price}</span>
-                    <span className="text-xs font-semibold text-zinc-500">{plan.period}</span>
+                <div className="py-5 border-y border-zinc-200 dark:border-white/10 space-y-1.5">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl sm:text-5xl font-black font-mono text-zinc-950 dark:text-white tracking-tight">{plan.price}</span>
+                    <span className="text-xs font-mono font-bold text-zinc-500 dark:text-zinc-400">{plan.period}</span>
                   </div>
-                  <p className="text-[11px] text-zinc-400 font-medium">{plan.subtext}</p>
+                  <p className="text-xs font-mono text-zinc-500">{plan.subtext}</p>
                 </div>
 
                 {/* Features List */}
-                <div className="space-y-3">
-                  <p className="text-xs font-bold text-zinc-900 uppercase tracking-wider">Included Features:</p>
-                  <ul className="space-y-2.5">
+                <div className="space-y-3 pt-2">
+                  <p className="text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">Included Features:</p>
+                  <ul className="space-y-3">
                     {plan.features.map((feature, fIdx) => (
-                      <li key={fIdx} className="flex items-start gap-2.5 text-xs text-zinc-600 font-medium">
-                        <div className="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <li key={fIdx} className="flex items-start gap-3 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 font-normal">
+                        <div className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                           <Check className="w-3 h-3 stroke-[2.5]" />
                         </div>
                         <span>{feature}</span>
@@ -187,8 +190,10 @@ export const Pricing: React.FC = () => {
                   <Button
                     variant={plan.ctaVariant}
                     fullWidth
-                    className={`py-3 text-xs font-bold rounded-xl ${
-                      plan.popular ? 'bg-[#E31B23] hover:bg-[#B91C1C] text-white shadow-md' : ''
+                    className={`py-3.5 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer ${
+                      plan.popular 
+                        ? 'bg-[#E31B23] hover:bg-[#C9141B] text-white shadow-lg shadow-[#E31B23]/35 active:scale-95' 
+                        : 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 border-none shadow-md font-black active:scale-95'
                     }`}
                   >
                     {plan.ctaText}
@@ -199,14 +204,14 @@ export const Pricing: React.FC = () => {
           ))}
         </div>
 
-        {/* Interactive Earnings Calculator */}
-        <div className="bg-white rounded-3xl border border-zinc-200 p-8 md:p-12 shadow-sm space-y-8">
-          <div className="max-w-2xl">
-            <span className="text-xs font-bold text-[#E31B23] uppercase tracking-wider">Interactive Estimator</span>
-            <h2 className="text-2xl md:text-3xl font-black text-zinc-950 tracking-tight mt-1">
+        {/* Interactive Earnings Calculator (High Contrast Dark Bento) */}
+        <div className="relative z-10 bg-white dark:bg-white/[0.03] rounded-3xl border border-zinc-200 dark:border-white/10 p-8 md:p-12 shadow-xl dark:shadow-2xl backdrop-blur-xl space-y-8">
+          <div className="max-w-2xl space-y-2">
+            <span className="text-xs font-mono font-bold text-[#E31B23] uppercase tracking-wider">Interactive Estimator</span>
+            <h2 className="text-2xl md:text-4xl font-black text-zinc-950 dark:text-white tracking-tight">
               Calculate your revenue & payouts
             </h2>
-            <p className="text-zinc-500 text-xs font-medium mt-2">
+            <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm leading-relaxed">
               See exactly how much you take home compared to traditional high-fee ticketing legacy providers.
             </p>
           </div>
@@ -214,10 +219,10 @@ export const Pricing: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div className="space-y-6">
               {/* Slider 1: Expected Attendees */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-bold text-zinc-800">
+              <div className="space-y-2.5">
+                <div className="flex justify-between text-xs font-mono font-bold text-zinc-700 dark:text-zinc-200">
                   <span>Estimated Attendees / Tickets</span>
-                  <span className="text-[#E31B23]">{estimatedTickets.toLocaleString()} tickets</span>
+                  <span className="text-[#E31B23] bg-red-500/10 border border-red-500/20 px-2.5 py-1 rounded-lg">{estimatedTickets.toLocaleString()} tickets</span>
                 </div>
                 <input
                   type="range"
@@ -226,9 +231,9 @@ export const Pricing: React.FC = () => {
                   step="50"
                   value={estimatedTickets}
                   onChange={(e) => setEstimatedTickets(Number(e.target.value))}
-                  className="w-full h-2 bg-zinc-100 rounded-lg appearance-none cursor-pointer accent-[#E31B23]"
+                  className="w-full h-2.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#E31B23]"
                 />
-                <div className="flex justify-between text-[11px] text-zinc-400">
+                <div className="flex justify-between text-[11px] font-mono text-zinc-500">
                   <span>50</span>
                   <span>5,000</span>
                   <span>10,000+</span>
@@ -236,10 +241,10 @@ export const Pricing: React.FC = () => {
               </div>
 
               {/* Slider 2: Average Ticket Price */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-bold text-zinc-800">
+              <div className="space-y-2.5">
+                <div className="flex justify-between text-xs font-mono font-bold text-zinc-700 dark:text-zinc-200">
                   <span>Average Ticket Price</span>
-                  <span className="text-[#E31B23]">${averagePrice}</span>
+                  <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg font-mono font-black">${averagePrice}</span>
                 </div>
                 <input
                   type="range"
@@ -248,9 +253,9 @@ export const Pricing: React.FC = () => {
                   step="5"
                   value={averagePrice}
                   onChange={(e) => setAveragePrice(Number(e.target.value))}
-                  className="w-full h-2 bg-zinc-100 rounded-lg appearance-none cursor-pointer accent-[#E31B23]"
+                  className="w-full h-2.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#E31B23]"
                 />
-                <div className="flex justify-between text-[11px] text-zinc-400">
+                <div className="flex justify-between text-[11px] font-mono text-zinc-500">
                   <span>$5</span>
                   <span>$250</span>
                   <span>$500</span>
@@ -259,30 +264,30 @@ export const Pricing: React.FC = () => {
             </div>
 
             {/* Results Card */}
-            <div className="bg-zinc-950 rounded-2xl p-6 md:p-8 text-white space-y-6">
+            <div className="bg-black/60 rounded-2xl p-6 md:p-8 text-white space-y-6 border border-white/10 shadow-2xl">
               <div className="space-y-1">
-                <span className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Estimated Net Organizer Payout</span>
-                <div className="text-3xl md:text-4xl font-black text-emerald-400">
+                <span className="text-zinc-400 text-xs font-mono uppercase tracking-wider">Estimated Net Organizer Payout</span>
+                <div className="text-3xl md:text-5xl font-black font-mono text-emerald-400">
                   ${organizerPayout.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-800 text-xs">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10 text-xs font-mono">
                 <div>
                   <span className="text-zinc-400 block mb-1">Gross Sales Volume</span>
-                  <span className="font-bold text-zinc-100 text-sm">
+                  <span className="font-bold text-white text-base">
                     ${grossVolume.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
                 <div>
                   <span className="text-zinc-400 block mb-1">Platform Fee (2.5% + $0.50)</span>
-                  <span className="font-bold text-zinc-300 text-sm">
+                  <span className="font-bold text-[#E31B23] text-base">
                     ${platformFee.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
               </div>
 
-              <div className="p-3 bg-zinc-900 rounded-xl flex items-center gap-3 text-xs text-zinc-300 border border-zinc-800">
+              <div className="p-3 bg-white/[0.04] rounded-xl flex items-center gap-3 text-xs text-zinc-300 border border-white/10">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span>Next-day bank deposits automatically enabled for all ticket sales.</span>
               </div>
@@ -291,24 +296,24 @@ export const Pricing: React.FC = () => {
         </div>
 
         {/* FAQs */}
-        <div className="space-y-8 max-w-4xl mx-auto">
+        <div className="relative z-10 space-y-8 max-w-4xl mx-auto">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl md:text-3xl font-black text-zinc-950 tracking-tight">
+            <h2 className="text-2xl md:text-4xl font-black text-zinc-950 dark:text-white tracking-tight">
               Frequently Asked Questions
             </h2>
-            <p className="text-zinc-500 text-xs font-medium">
+            <p className="text-zinc-400 text-xs sm:text-sm font-normal">
               Everything you need to know about billing, fees, and payouts.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-2.5">
-                <h4 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+              <div key={idx} className="bg-white/[0.03] p-6 rounded-2xl border border-white/10 shadow-lg space-y-2.5">
+                <h4 className="text-sm font-bold text-white flex items-center gap-2">
                   <HelpCircle className="w-4 h-4 text-[#E31B23] flex-shrink-0" />
                   {faq.q}
                 </h4>
-                <p className="text-xs text-zinc-500 leading-relaxed font-medium pl-6">
+                <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal pl-6">
                   {faq.a}
                 </p>
               </div>
@@ -317,23 +322,23 @@ export const Pricing: React.FC = () => {
         </div>
 
         {/* Bottom SaaS Banner */}
-        <div className="bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 rounded-3xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="relative z-10 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 rounded-3xl p-8 md:p-14 text-white flex flex-col md:flex-row items-center justify-between gap-8 border border-white/15 shadow-2xl">
           <div className="space-y-2 max-w-xl">
             <h3 className="text-2xl md:text-3xl font-black tracking-tight">
               Ready to elevate your event infrastructure?
             </h3>
-            <p className="text-zinc-400 text-xs leading-relaxed font-medium">
+            <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-normal">
               Join thousands of organizers running concerts, hackathons, business summits, and community festivals on StraytTix.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-4">
             <Link to="/organizer/events/create">
-              <Button variant="primary" className="bg-[#E31B23] hover:bg-[#B91C1C] px-6 py-3 text-xs font-bold shadow-lg">
+              <Button variant="primary" className="bg-[#E31B23] hover:bg-[#C9141B] text-white px-7 py-3.5 text-xs sm:text-sm font-bold shadow-lg shadow-[#E31B23]/30 cursor-pointer active:scale-95">
                 Create Event Now
               </Button>
             </Link>
             <Link to="/api-docs">
-              <Button variant="outline" className="text-white border-zinc-700 hover:bg-zinc-800 px-6 py-3 text-xs font-bold">
+              <Button variant="outline" className="bg-white text-zinc-950 hover:bg-zinc-200 border-none px-7 py-3.5 text-xs sm:text-sm font-bold shadow-md cursor-pointer active:scale-95">
                 Read API Docs
               </Button>
             </Link>

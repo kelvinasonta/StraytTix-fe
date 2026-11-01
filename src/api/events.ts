@@ -261,8 +261,22 @@ export const normalizeBackendEvent = (raw: any): Event => {
       slug: raw.organizerSlug || 'organizer'
     },
     popularity: raw.popularity ?? 0,
-    ticketsSold: raw.ticketsSold ?? 0,
-    capacity: raw.capacity ?? 500,
+    ticketsSold: (() => {
+      if (raw.ticketsSold !== undefined && raw.ticketsSold !== null) return Number(raw.ticketsSold);
+      if (raw.tickets_sold !== undefined && raw.tickets_sold !== null) return Number(raw.tickets_sold);
+      if (raw.soldTickets !== undefined && raw.soldTickets !== null) return Number(raw.soldTickets);
+      if (raw.sold_tickets !== undefined && raw.sold_tickets !== null) return Number(raw.sold_tickets);
+      const rawTkts = Array.isArray(raw.tickets) ? raw.tickets : (Array.isArray(raw.ticket_types) ? raw.ticket_types : (Array.isArray(raw.ticketTypes) ? raw.ticketTypes : []));
+      return rawTkts.reduce((sum: number, t: any) => sum + Number(t.soldQuantity ?? t.sold_quantity ?? t.sold ?? 0), 0);
+    })(),
+    capacity: (() => {
+      if (raw.capacity !== undefined && raw.capacity !== null && !isNaN(Number(raw.capacity))) return Number(raw.capacity);
+      if (raw.venueCapacity !== undefined && raw.venueCapacity !== null && !isNaN(Number(raw.venueCapacity))) return Number(raw.venueCapacity);
+      if (raw.totalCapacity !== undefined && raw.totalCapacity !== null && !isNaN(Number(raw.totalCapacity))) return Number(raw.totalCapacity);
+      const rawTkts = Array.isArray(raw.tickets) ? raw.tickets : (Array.isArray(raw.ticket_types) ? raw.ticket_types : (Array.isArray(raw.ticketTypes) ? raw.ticketTypes : []));
+      const calculated = rawTkts.reduce((sum: number, t: any) => sum + Number(t.quantity ?? t.capacity ?? t.totalQuantity ?? t.total_quantity ?? 0), 0);
+      return calculated > 0 ? calculated : undefined;
+    })(),
 
     // Settings relationship and top-level fields
     settings: normalizedSettings,

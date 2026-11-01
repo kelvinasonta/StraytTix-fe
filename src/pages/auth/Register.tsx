@@ -1,10 +1,25 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { AuthLayout } from '../../components/layout/AuthLayout';
 import { PasswordStrengthMeter } from '../../components/auth/PasswordStrengthMeter';
 import { getApiErrorMessage, getValidationErrors } from '../../api/client';
-import { AlertCircle, User, Building, Loader2, Eye, EyeOff, ShieldCheck, Zap } from 'lucide-react';
+import { 
+  AlertCircle, 
+  User, 
+  Building, 
+  Loader2, 
+  Eye, 
+  EyeOff, 
+  ShieldCheck, 
+  Zap, 
+  Sparkles,
+  CheckCircle2,
+  Lock,
+  Mail,
+  ArrowRight
+} from 'lucide-react';
 import { useNotification } from '../../context/NotificationContext';
 
 export const Register: React.FC = () => {
@@ -100,21 +115,30 @@ export const Register: React.FC = () => {
       title="Join Eventa"
       subtitle="Sign up in under 60 seconds — no lengthy forms"
     >
-      {/* Fast Setup Badge */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-emerald-50 border border-emerald-200/80 rounded-xl mb-4 text-[11px] font-semibold text-emerald-800">
+      {/* Fast Setup Badge with Interactive Sparkle Motion */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="flex items-center justify-between px-3.5 py-2 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50/60 border border-emerald-200/90 rounded-2xl mb-4 text-[11px] font-semibold text-emerald-900 shadow-2xs"
+      >
         <span className="flex items-center gap-1.5">
-          <Zap className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
+          <Sparkles className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
           <span>Quick 1-Minute Registration</span>
         </span>
-        <span className="text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md font-bold">Fast-Track</span>
-      </div>
+        <span className="text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider font-mono">
+          Fast-Track
+        </span>
+      </motion.div>
 
-      {/* Social 1-Tap Signups */}
+      {/* Social 1-Tap Signups with Whimsical Micro-bounce */}
       <div className="grid grid-cols-2 gap-3 mb-4">
-        <button
+        <motion.button
+          whileHover={{ y: -2, scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
           type="button"
           onClick={() => handleSocialAuth('Google')}
-          className="w-full py-2.5 px-3 bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-300 rounded-xl text-xs font-bold text-zinc-700 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+          className="w-full py-2.5 px-3 bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-300 rounded-xl text-xs font-bold text-zinc-700 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:shadow-sm"
         >
           <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
             <path
@@ -135,18 +159,20 @@ export const Register: React.FC = () => {
             />
           </svg>
           <span>Google</span>
-        </button>
+        </motion.button>
 
-        <button
+        <motion.button
+          whileHover={{ y: -2, scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
           type="button"
           onClick={() => handleSocialAuth('Apple')}
-          className="w-full py-2.5 px-3 bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-300 rounded-xl text-xs font-bold text-zinc-700 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+          className="w-full py-2.5 px-3 bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-300 rounded-xl text-xs font-bold text-zinc-700 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:shadow-sm"
         >
           <svg className="w-4 h-4 shrink-0 fill-current text-zinc-900" viewBox="0 0 24 24">
             <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.87c.65-.79 1.09-1.89.97-3-.93.04-2.07.62-2.73 1.39-.58.67-1.09 1.76-.95 2.82 1.04.08 2.06-.42 2.71-1.21z" />
           </svg>
           <span>Apple</span>
-        </button>
+        </motion.button>
       </div>
 
       <div className="relative py-2 mb-3 flex items-center justify-center">
@@ -158,41 +184,67 @@ export const Register: React.FC = () => {
         </span>
       </div>
 
-      {/* 1-Tap Account Type Switcher */}
-      <div className="p-1 bg-zinc-100 rounded-2xl flex items-center mb-4">
+      {/* 1-Tap Animated Account Type Switcher with Fluid Indicator Pill */}
+      <div className="relative p-1 bg-zinc-100 rounded-2xl flex items-center mb-4 select-none">
         <button
           type="button"
           onClick={() => setAccountType('customer')}
-          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`relative z-10 flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
             accountType === 'customer'
-              ? 'bg-white text-zinc-950 shadow-xs'
-              : 'text-zinc-600 hover:text-zinc-950'
+              ? 'text-zinc-950 font-black'
+              : 'text-zinc-500 hover:text-zinc-900'
           }`}
         >
-          <User className="w-4 h-4 text-zinc-700" />
-          <span>I'm an Attendee</span>
+          {accountType === 'customer' && (
+            <motion.div
+              layoutId="accountTypePill"
+              className="absolute inset-0 bg-white rounded-xl shadow-xs"
+              transition={{ type: "spring", stiffness: 450, damping: 30 }}
+            />
+          )}
+          <span className="relative z-10 flex items-center gap-2">
+            <User className="w-4 h-4 text-zinc-700" />
+            <span>I'm an Attendee</span>
+          </span>
         </button>
 
         <button
           type="button"
           onClick={() => setAccountType('organizer')}
-          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`relative z-10 flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
             accountType === 'organizer'
-              ? 'bg-white text-zinc-950 shadow-xs'
-              : 'text-zinc-600 hover:text-zinc-950'
+              ? 'text-zinc-950 font-black'
+              : 'text-zinc-500 hover:text-zinc-900'
           }`}
         >
-          <Building className="w-4 h-4 text-[#E31B23]" />
-          <span>I'm an Organizer</span>
+          {accountType === 'organizer' && (
+            <motion.div
+              layoutId="accountTypePill"
+              className="absolute inset-0 bg-white rounded-xl shadow-xs"
+              transition={{ type: "spring", stiffness: 450, damping: 30 }}
+            />
+          )}
+          <span className="relative z-10 flex items-center gap-2">
+            <Building className="w-4 h-4 text-[#E31B23]" />
+            <span>I'm an Organizer</span>
+          </span>
         </button>
       </div>
 
-      {formError && (
-        <div className="p-3.5 bg-red-50 border border-red-200 text-red-900 rounded-xl text-xs flex items-start gap-2.5 mb-4" role="alert">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#E31B23]" />
-          <span className="font-semibold">{formError}</span>
-        </div>
-      )}
+      <AnimatePresence>
+        {formError && (
+          <motion.div 
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            className="p-3.5 bg-red-50 border border-red-200 text-red-900 rounded-xl text-xs flex items-start gap-2.5 mb-4" 
+            role="alert"
+          >
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#E31B23]" />
+            <span className="font-semibold">{formError}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <form onSubmit={handleSubmit} className="space-y-3.5" noValidate>
         {/* Full Name input - 1 input instead of 2 for faster typing */}
@@ -341,24 +393,27 @@ export const Register: React.FC = () => {
           )}
         </div>
 
-        {/* Submit Button */}
-        <button
+        {/* Submit Button with Interactive Spring Bounce */}
+        <motion.button
+          whileHover={{ scale: 1.015, y: -1 }}
+          whileTap={{ scale: 0.985 }}
           type="submit"
           disabled={isLoading}
-          className="w-full mt-2 py-3.5 px-5 bg-zinc-950 hover:bg-zinc-800 text-white text-sm font-bold rounded-xl transition-all shadow-xs hover:shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
+          className="w-full mt-3 py-3.5 px-5 bg-zinc-950 hover:bg-zinc-800 text-white text-sm font-bold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
         >
           {isLoading ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin text-zinc-300" />
               <span>Creating your account...</span>
             </>
           ) : (
             <>
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>Create Account</span>
+              <ArrowRight className="w-4 h-4 text-zinc-400 ml-1" />
             </>
           )}
-        </button>
+        </motion.button>
 
         <p className="text-center text-[11px] text-zinc-400 pt-1">
           By signing up, you agree to our Terms of Service and Privacy Policy.

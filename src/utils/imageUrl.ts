@@ -28,16 +28,19 @@ export const resolveImageUrl = (url?: string | null): string => {
   const backendBase = getApiBaseUrl();
 
   // 2. Fix Laravel default APP_URL without port (e.g. http://localhost/storage/... -> http://127.0.0.1:8000/storage/...)
-  // or http://127.0.0.1/storage/... without port
+  // or http://127.0.0.1/storage/... without port.
+  // Note: MinIO / S3 on port 9000 or custom ports must NOT be rewritten to backendBase!
   if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/.*)?$/i.test(trimmed)) {
     const match = trimmed.match(/^https?:\/\/(localhost|127\.0\.0\.1)(?::(\d+))?(\/.*)?$/i);
     if (match) {
       const port = match[2];
       const path = match[3] || '';
-      // If port is missing or standard (80/443), or if port is different from backend base, normalize to backendBase
+      // Only rewrite if pointing to local /storage or /uploads without a specific storage port
       if (!port || port === '80' || port === '443') {
         return `${backendBase}${path}`;
       }
+      // If port is specified (e.g. 9000 for MinIO, 8080, etc.), leave intact
+      return trimmed;
     }
     return trimmed;
   }

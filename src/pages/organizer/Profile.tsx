@@ -379,7 +379,7 @@ export const Profile: React.FC = () => {
               {/* ACTION BUTTONS: Preview Public Page */}
               <div className="flex items-center gap-2.5 sm:self-end">
                 <Link
-                  to={`/organizers/${slug}`}
+                  to={`/@${slug}`}
                   target="_blank"
                   className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm"
                 >

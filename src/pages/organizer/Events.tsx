@@ -1,8 +1,24 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import OrganizerDashboardLayout from '../../components/layout/OrganizerDashboardLayout';
-import { formatCurrency, formatDate } from '../../utils/format';
-import { PlusCircle, Eye, Edit, Trash2, RefreshCw, Loader2, AlertCircle, Calendar, Search, Filter, Sparkles, Ticket } from 'lucide-react';
+import { formatDate } from '../../utils/format';
+import { 
+  PlusCircle, 
+  Eye, 
+  Edit, 
+  Trash2, 
+  RefreshCw, 
+  AlertCircle, 
+  Calendar, 
+  Search, 
+  Ticket, 
+  QrCode, 
+  LayoutGrid, 
+  List, 
+  MapPin, 
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
 import Badge from '../../components/ui/Badge';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { useNotification } from '../../context/NotificationContext';
@@ -10,8 +26,9 @@ import { useAuth } from '../../context/AuthContext';
 import { eventApi, normalizeBackendEvent } from '../../api/events';
 import { getApiErrorMessage } from '../../api/client';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
-import { QrCode } from 'lucide-react';
 import type { Event } from '../../types/api';
+
+type EventFilterStatus = 'All' | 'Published' | 'Draft' | 'Ended';
 
 export const Events: React.FC = () => {
   const { organizer } = useAuth();
@@ -24,7 +41,26 @@ export const Events: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<'All' | 'Published' | 'Draft' | 'Upcoming'>('All');
+  const [selectedStatus, setSelectedStatus] = useState<EventFilterStatus>('All');
+
+  // View mode switcher: 'grid' or 'list' (persisted in localStorage)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    try {
+      const saved = localStorage.getItem('strayttix_organizer_events_view');
+      return saved === 'grid' || saved === 'list' ? saved : 'list';
+    } catch {
+      return 'list';
+    }
+  });
+
+  const handleViewModeChange = (mode: 'grid' | 'list') => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem('strayttix_organizer_events_view', mode);
+    } catch {
+      // ignore
+    }
+  };
 
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
@@ -37,21 +73,86 @@ export const Events: React.FC = () => {
     message: '',
   });
 
-  const fetchEvents = useCallback(async () => {
+  const [paginationMeta, setPaginationMeta] = useState<{
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+  }>({
+    current_page: 1,
+    last_page: 1,
+    per_page: 10,
+    total: 0,
+    from: null,
+    to: null,
+  });
+
+  const fetchEvents = useCallback(async (targetPage: number = 1) => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await eventApi.getOrganizerEvents(organizer?.id);
-      const rawData = res.data;
-      const rawList: any[] = Array.isArray(rawData)
-        ? rawData
-        : Array.isArray((rawData as any)?.data)
-          ? (rawData as any).data
-          : Array.isArray((rawData as any)?.events)
-            ? (rawData as any).events
-            : [];
+      const params: Record<string, any> = {
+        page: targetPage,
+      };
+      if (searchQuery.trim()) {
+        params.search = searchQuery.trim();
+        params.q = searchQuery.trim();
+      }
+      if (selectedStatus !== 'All') {
+        params.status = selectedStatus.toLowerCase();
+      }
+
+      const res = await eventApi.getOrganizerEvents(organizer?.id, params);
+      const resData = res.data as any;
+
+      // Extract events array directly from whatever structure backend sends
+      const rawList: any[] = Array.isArray(resData?.data)
+        ? resData.data
+        : Array.isArray(resData?.data?.data)
+          ? resData.data.data
+          : Array.isArray(resData)
+            ? resData
+            : Array.isArray(resData?.events)
+              ? resData.events
+              : [];
+
       const items = rawList.map(normalizeBackendEvent);
       setEvents(items);
+
+      // Extract pagination metadata dynamically from backend response
+      const meta = resData?.meta || resData?.pagination || resData?.data?.meta || (resData?.current_page ? resData : resData?.data?.current_page ? resData.data : null);
+      if (meta) {
+        const currentPage = Number(meta.current_page ?? meta.currentPage) || targetPage;
+        const lastPage = Number(meta.last_page ?? meta.lastPage ?? meta.totalPages) || 1;
+        const perPageCount = Number(meta.per_page ?? meta.perPage) || (items.length > 0 ? items.length : 10);
+        const total = Number(meta.total ?? items.length);
+        const from = meta.from !== undefined && meta.from !== null
+          ? Number(meta.from)
+          : (items.length > 0 ? (currentPage - 1) * perPageCount + 1 : null);
+        const to = meta.to !== undefined && meta.to !== null
+          ? Number(meta.to)
+          : (items.length > 0 ? (currentPage - 1) * perPageCount + items.length : null);
+
+        setPaginationMeta({
+          current_page: currentPage,
+          last_page: lastPage,
+          per_page: perPageCount,
+          total: total,
+          from: from,
+          to: to,
+        });
+      } else {
+        setPaginationMeta({
+          current_page: targetPage,
+          last_page: 1,
+          per_page: items.length || 10,
+          total: items.length,
+          from: items.length > 0 ? 1 : null,
+          to: items.length,
+        });
+      }
     } catch (err: any) {
       console.error('Failed to load organizer events:', err);
       setEvents([]);
@@ -59,21 +160,61 @@ export const Events: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [organizer?.id]);
+  }, [organizer?.id, searchQuery, selectedStatus]);
 
   useEffect(() => {
-    fetchEvents();
+    fetchEvents(1);
   }, [fetchEvents]);
 
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'Published': return 'success';
-      case 'Upcoming': return 'info';
-      case 'Draft': return 'default';
-      case 'Cancelled': return 'error';
-      default: return 'default';
-    }
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > paginationMeta.last_page || newPage === paginationMeta.current_page || isLoading) return;
+    fetchEvents(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Determine whether an event has concluded
+  const isEventEnded = useCallback((evt: Event): boolean => {
+    const s = evt.status?.toLowerCase();
+    if (s === 'ended' || s === 'completed' || s === 'past' || s === 'archived') {
+      return true;
+    }
+    const dateStr = evt.endDate || evt.startDate;
+    if (!dateStr) return false;
+
+    try {
+      const timeStr = evt.endTime || evt.startTime || '23:59';
+      const endDateTime = new Date(`${dateStr}T${timeStr.length === 5 ? timeStr + ':00' : timeStr}`);
+      if (!isNaN(endDateTime.getTime())) {
+        return endDateTime.getTime() < Date.now();
+      }
+      const endOnly = new Date(dateStr);
+      if (!isNaN(endOnly.getTime())) {
+        endOnly.setHours(23, 59, 59, 999);
+        return endOnly.getTime() < Date.now();
+      }
+    } catch {
+      return false;
+    }
+    return false;
+  }, []);
+
+  // Compute status display label and color badge
+  const getEventDisplayStatus = useCallback((evt: Event): {
+    label: string;
+    variant: 'default' | 'success' | 'warning' | 'error' | 'info' | 'neutral';
+  } => {
+    if (isEventEnded(evt) && evt.status !== 'Draft') {
+      return { label: 'Ended', variant: 'default' };
+    }
+    switch (evt.status) {
+      case 'Published': return { label: 'Published', variant: 'success' };
+      case 'Upcoming': return { label: 'Upcoming', variant: 'info' };
+      case 'Draft': return { label: 'Draft', variant: 'default' };
+      case 'Cancelled': return { label: 'Cancelled', variant: 'error' };
+      case 'Ended': return { label: 'Ended', variant: 'default' };
+      default: return { label: evt.status || 'Draft', variant: 'default' };
+    }
+  }, [isEventEnded]);
 
   const handleDeletePrompt = (id: string, title: string) => {
     setConfirmDialog({
@@ -104,31 +245,37 @@ export const Events: React.FC = () => {
     }
   };
 
-  const handlePublish = async (eventId: string, title: string, ticketsCount?: number) => {
-    if (ticketsCount !== undefined && ticketsCount === 0) {
-      showNotification('Cannot publish event: You must create at least one ticket tier before publishing live.', 'warning');
-      return;
-    }
-    try {
-      await eventApi.publishEvent(eventId, organizer?.id);
-      showNotification(`"${title}" published successfully.`, 'success');
-      fetchEvents();
-    } catch (err: any) {
-      const errMsg = getApiErrorMessage(err, 'Failed to publish event. Please ensure the event has at least one active ticket tier.');
-      showNotification(errMsg, 'error');
-    }
-  };
+
+  const getStatusCount = useCallback((status: EventFilterStatus) => {
+    if (status === 'All') return paginationMeta.total || events.length;
+    if (status === 'Ended') return events.filter(e => (isEventEnded(e) && e.status !== 'Draft') || e.status === 'Ended' || e.status === 'Completed').length;
+    if (status === 'Draft') return events.filter(e => e.status === 'Draft').length;
+    if (status === 'Published') return events.filter(e => (e.status === 'Published' || e.status === 'Upcoming') && !isEventEnded(e)).length;
+    return 0;
+  }, [events, isEventEnded, paginationMeta.total]);
 
   const filteredEvents = useMemo(() => {
     return events.filter((e) => {
-      const matchStatus = selectedStatus === 'All' || e.status === selectedStatus;
+      const ended = (isEventEnded(e) && e.status !== 'Draft') || e.status === 'Ended' || e.status === 'Completed';
+      let matchStatus = true;
+      if (selectedStatus === 'Ended') {
+        matchStatus = ended;
+      } else if (selectedStatus === 'Draft') {
+        matchStatus = e.status === 'Draft';
+      } else if (selectedStatus === 'Published') {
+        matchStatus = (e.status === 'Published' || e.status === 'Upcoming') && !ended;
+      }
+
       const matchQuery = !searchQuery.trim() ||
         e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (e.venue && e.venue.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (e.category && e.category.toLowerCase().includes(searchQuery.toLowerCase()));
+
       return matchStatus && matchQuery;
     });
-  }, [events, selectedStatus, searchQuery]);
+  }, [events, selectedStatus, searchQuery, isEventEnded]);
+
+
 
   return (
     <OrganizerDashboardLayout>
@@ -156,7 +303,7 @@ export const Events: React.FC = () => {
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
             </button>
             {perms.canCreateEvents && (
-              <Link to="/organizer/events/create">
+              <Link to="/organizer/events/create" className="hidden sm:inline-flex">
                 <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-xl shadow-xs transition-all cursor-pointer">
                   <PlusCircle className="w-5 h-5" /> Create New Event
                 </button>
@@ -165,22 +312,23 @@ export const Events: React.FC = () => {
           </div>
         </div>
 
-        {/* Search and Filter Tabs Toolbar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 bg-zinc-100/80 p-1.5 rounded-2xl border border-zinc-200/80">
-            {(['All', 'Published', 'Upcoming', 'Draft'] as const).map((status) => {
-              const count = status === 'All' ? events.length : events.filter(e => e.status === status).length;
+        {/* Search, Filter Tabs and View Mode Toolbar */}
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+          {/* Status Filter Tabs (including Ended) */}
+          <div className="flex items-center gap-1.5 bg-zinc-100/80 p-1.5 rounded-2xl border border-zinc-200/80 overflow-x-auto no-scrollbar">
+            {(['All', 'Published', 'Draft', 'Ended'] as const).map((status) => {
+              const count = getStatusCount(status);
               const isActive = selectedStatus === status;
               return (
                 <button
                   key={status}
                   onClick={() => setSelectedStatus(status)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${isActive
+                  className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${isActive
                     ? 'bg-white text-zinc-950 shadow-xs border border-zinc-200'
                     : 'text-zinc-500 hover:text-zinc-900'
                     }`}
                 >
-                  {status}
+                  <span>{status}</span>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${isActive ? 'bg-[#E31B23] text-white' : 'bg-zinc-200/80 text-zinc-600'
                     }`}>
                     {count}
@@ -190,15 +338,42 @@ export const Events: React.FC = () => {
             })}
           </div>
 
-          <div className="relative flex-1 sm:max-w-xs">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search by title, venue, genre..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-zinc-200 rounded-xl text-sm font-medium focus:outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all"
-            />
+          {/* Right Toolbar Controls: Search Input + Grid/List View Switcher */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 sm:w-64 md:w-72">
+              <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search title, venue, genre..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm font-medium focus:outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all shadow-2xs"
+              />
+            </div>
+
+            {/* View Mode Switcher (Grid vs List - Matching Discover page) */}
+            <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl border border-zinc-200/70 shrink-0">
+              <button
+                onClick={() => handleViewModeChange('grid')}
+                className={`p-2 rounded-lg transition-all cursor-pointer ${
+                  viewMode === 'grid' ? 'bg-white text-zinc-950 shadow-xs' : 'text-zinc-400 hover:text-zinc-700'
+                }`}
+                title="Grid view"
+                aria-label="Grid view"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleViewModeChange('list')}
+                className={`p-2 rounded-lg transition-all cursor-pointer ${
+                  viewMode === 'list' ? 'bg-white text-zinc-950 shadow-xs' : 'text-zinc-400 hover:text-zinc-700'
+                }`}
+                title="List view"
+                aria-label="List view"
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -218,181 +393,420 @@ export const Events: React.FC = () => {
           </div>
         )}
 
-        {/* Table / List */}
-        <div className="bg-white border border-zinc-150 rounded-2xl overflow-hidden shadow-sm">
-          {isLoading ? (
-            <div className="py-16 flex flex-col items-center justify-center text-zinc-400 gap-3">
-              <Loader2 className="w-8 h-8 animate-spin text-[#E31B23]" />
-              <p className="text-sm font-semibold">Loading your events...</p>
-            </div>
-          ) : filteredEvents.length === 0 ? (
-            <div className="py-16 px-4 text-center flex flex-col items-center justify-center">
-              <div className="w-14 h-14 bg-zinc-100 rounded-2xl flex items-center justify-center text-zinc-400 mb-3">
-                <Calendar className="w-7 h-7" />
-              </div>
-              <h3 className="text-base font-bold text-zinc-900">No events match your criteria</h3>
-              <p className="text-sm text-zinc-500 max-w-sm mt-1 mb-4">
-                {searchQuery ? `No results found for "${searchQuery}". Try clearing filters.` : `You haven't created any events in this tab.`}
-              </p>
-              {searchQuery ? (
-                <button
-                  onClick={() => { setSearchQuery(''); setSelectedStatus('All'); }}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-sm font-bold rounded-xl transition-all cursor-pointer"
-                >
-                  Clear Filters
-                </button>
-              ) : perms.canCreateEvents ? (
-                <Link to="/organizer/events/create">
-                  <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-xl shadow-sm transition-all cursor-pointer">
-                    <PlusCircle className="w-5 h-5" /> Create Your First Event
-                  </button>
-                </Link>
-              ) : null}
+        {/* Events Content: Loading / Empty / Grid / Modern List */}
+        {isLoading ? (
+          viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-3xl p-4 border border-zinc-200 animate-pulse space-y-4 shadow-xs">
+                  <div className="h-48 bg-zinc-100 rounded-2xl w-full" />
+                  <div className="space-y-2 px-1">
+                    <div className="h-5 bg-zinc-100 rounded-md w-3/4" />
+                    <div className="h-4 bg-zinc-100 rounded-md w-1/2" />
+                  </div>
+                  <div className="pt-3 border-t border-zinc-100 flex justify-between items-center px-1">
+                    <div className="h-4 bg-zinc-100 rounded-md w-1/4" />
+                    <div className="h-8 bg-zinc-100 rounded-xl w-24" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm border-collapse">
-                <thead>
-                  <tr className="bg-zinc-50 border-b border-zinc-150 text-zinc-500 font-bold uppercase tracking-wider text-xs">
-                    <th className="p-4">Event Details</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4">Date & Time</th>
-                    <th className="p-4">{role === 'staff' ? 'Capacity' : 'Capacity / Sales'}</th>
-                    {perms.canViewRevenue && <th className="p-4">Revenue</th>}
-                    <th className="p-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100 font-semibold text-zinc-700">
-                  {filteredEvents.map((evt) => {
-                    const eventId = evt.id || (evt as any).uuid;
-                    const sold = evt.ticketsSold || 0;
-                    const totalCap = evt.capacity || (sold > 0 ? Math.round(sold * 1.5) : 100);
-                    const pct = Math.min(100, Math.round((sold / totalCap) * 100));
-
-                    const targetManageUrl = role === 'staff'
-                      ? `/organizer/events/${eventId}?tab=attendees&sub=checkin`
-                      : `/organizer/events/${eventId}`;
-
-                    return (
-                      <tr key={eventId} className="hover:bg-zinc-50/50 transition-all">
-                        <td className="p-4">
-                          <Link
-                            to={targetManageUrl}
-                            className="flex items-center gap-3.5 group cursor-pointer"
-                          >
-                            <img
-                              src={evt.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=400&q=80'}
-                              alt={evt.title}
-                              className="w-14 h-14 object-cover rounded-xl border border-zinc-100 bg-zinc-100 shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform"
-                            />
-                            <div className="min-w-0">
-                              <p className="text-zinc-950 font-black text-base truncate max-w-[240px] group-hover:text-[#E31B23] transition-colors">{evt.title}</p>
-                              <span className="text-xs text-zinc-400 font-medium block truncate max-w-[240px] mt-0.5">
-                                {evt.venue || 'TBD Venue'} • {evt.category || 'Event'}
-                              </span>
-                            </div>
-                          </Link>
-                        </td>
-                        <td className="p-4">
-                          <Badge variant={getStatusVariant(evt.status)}>
-                            {evt.status}
-                          </Badge>
-                        </td>
-                        <td className="p-4 text-zinc-600 font-medium">
-                          <p className="font-bold text-zinc-900 text-sm">{formatDate(evt.startDate) || 'Date TBA'}</p>
-                          {evt.startTime && <span className="text-xs text-zinc-400">{evt.startTime}</span>}
-                        </td>
-                        <td className="p-4">
-                          <div className="space-y-1.5 max-w-[140px]">
-                            <div className="flex justify-between text-xs">
-                              <span className="font-bold text-zinc-900">
-                                {role === 'staff' ? `${totalCap} cap` : `${sold} sold`}
-                              </span>
-                              <span className="text-zinc-400">{pct}%</span>
-                            </div>
-                            <div className="w-full h-2 bg-zinc-100 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-[#E31B23] rounded-full transition-all duration-500"
-                                style={{ width: `${pct}%` }}
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        {perms.canViewRevenue && (
-                          <td className="p-4 text-zinc-950 font-black text-base">
-                            {formatCurrency(evt.revenue || 0)}
-                          </td>
-                        )}
-                        <td className="p-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {role === 'staff' ? (
-                              <Link
-                                to={`/organizer/events/${eventId}?tab=attendees&sub=checkin`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-lg shadow-2xs transition-colors"
-                                title="Open Gate Ticket Scanner"
-                              >
-                                <QrCode className="w-3.5 h-3.5" />
-                                <span>Scan Gate</span>
-                              </Link>
-                            ) : (
-                              <>
-                                {evt.status === 'Draft' && perms.canPublishEvents && (
-                                  <button
-                                    onClick={() => handlePublish(eventId, evt.title, evt.tickets?.length)}
-                                    className="px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-bold cursor-pointer transition-colors"
-                                    title="Publish Event"
-                                  >
-                                    Publish
-                                  </button>
-                                )}
-                                <Link
-                                  to={`/organizer/events/${eventId}`}
-                                  className="p-2.5 text-zinc-400 hover:text-[#E31B23] hover:bg-red-50 rounded-xl transition-colors"
-                                  title="Manage & Edit Event"
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Link>
-                                {perms.canConfigureTickets && (
-                                  <Link
-                                    to={`/organizer/events/${eventId}?tab=tickets`}
-                                    className="p-2.5 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
-                                    title="Configure Ticket Types & Pricing"
-                                  >
-                                    <Ticket className="w-4 h-4" />
-                                  </Link>
-                                )}
-                                {evt.status === 'Published' && (
-                                  <a
-                                    href={`/events/${evt.slug || eventId}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="p-2.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-xl transition-colors"
-                                    title="View Live Event"
-                                  >
-                                    <Eye className="w-4 h-4" />
-                                  </a>
-                                )}
-                                {perms.canDeleteEvents && (
-                                  <button
-                                    onClick={() => handleDeletePrompt(eventId, evt.title)}
-                                    className="p-2.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl cursor-pointer transition-colors"
-                                    title="Delete Listing"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white border border-zinc-200/90 rounded-3xl p-5 shadow-xs animate-pulse flex flex-col md:flex-row gap-5 items-center">
+                  <div className="w-full sm:w-48 h-32 bg-zinc-100 rounded-2xl shrink-0" />
+                  <div className="flex-1 space-y-2.5 w-full">
+                    <div className="h-5 bg-zinc-100 rounded-md w-1/2" />
+                    <div className="h-4 bg-zinc-100 rounded-md w-1/3" />
+                    <div className="h-3 bg-zinc-100 rounded-md w-2/3" />
+                  </div>
+                  <div className="w-full md:w-56 h-20 bg-zinc-100 rounded-2xl shrink-0" />
+                </div>
+              ))}
             </div>
-          )}
-        </div>
+          )
+        ) : filteredEvents.length === 0 ? (
+          <div className="bg-white border border-zinc-150 rounded-2xl shadow-sm py-16 px-4 text-center flex flex-col items-center justify-center">
+            <div className="w-14 h-14 bg-zinc-100 rounded-2xl flex items-center justify-center text-zinc-400 mb-3">
+              <Calendar className="w-7 h-7" />
+            </div>
+            <h3 className="text-base font-bold text-zinc-900">No events match your criteria</h3>
+            <p className="text-sm text-zinc-500 max-w-sm mt-1 mb-4">
+              {searchQuery ? `No results found for "${searchQuery}". Try clearing filters.` : `You haven't created any events in this tab.`}
+            </p>
+            {searchQuery ? (
+              <button
+                onClick={() => { setSearchQuery(''); setSelectedStatus('All'); }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-sm font-bold rounded-xl transition-all cursor-pointer"
+              >
+                Clear Filters
+              </button>
+            ) : perms.canCreateEvents ? (
+              <Link to="/organizer/events/create">
+                <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-xl shadow-sm transition-all cursor-pointer">
+                  <PlusCircle className="w-5 h-5" /> Create Your First Event
+                </button>
+              </Link>
+            ) : null}
+          </div>
+        ) : viewMode === 'grid' ? (
+          /* ========================================================================= */
+          /* GRID VIEW (Matching Discover page aesthetics + organizer management)       */
+          /* ========================================================================= */
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEvents.map((evt) => {
+              const eventId = evt.id || (evt as any).uuid;
+
+              const targetManageUrl = role === 'staff'
+                ? `/organizer/events/${eventId}?tab=attendees&sub=checkin`
+                : `/organizer/events/${eventId}`;
+
+              const displayStatus = getEventDisplayStatus(evt);
+
+              return (
+                <div
+                  key={eventId}
+                  className="group bg-white border border-zinc-200/90 rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-zinc-300 transition-all flex flex-col justify-between"
+                >
+                  {/* Card Top Banner with Cover Image and Badges */}
+                  <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-zinc-100">
+                    <img
+                      src={evt.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=600&q=80'}
+                      alt={evt.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+
+                    {/* Category Tag (Top Left) */}
+                    <span className="absolute top-3.5 left-3.5 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-zinc-800 shadow-xs border border-white/60">
+                      {evt.category || 'Event'}
+                    </span>
+
+                    {/* Status Badge (Top Right) */}
+                    <div className="absolute top-3.5 right-3.5 shadow-xs">
+                      <Badge variant={displayStatus.variant}>
+                        {displayStatus.label}
+                      </Badge>
+                    </div>
+
+                    {/* Date and Event Format (Bottom Overlay on Cover) */}
+                    <div className="absolute bottom-3 left-3.5 right-3.5 flex items-center justify-between text-xs font-semibold text-white">
+                      <span className="flex items-center gap-1.5 drop-shadow-sm truncate">
+                        <Calendar className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                        <span className="truncate">{formatDate(evt.startDate) || 'Date TBA'}</span>
+                        {evt.startTime && <span>• {evt.startTime}</span>}
+                      </span>
+                      {evt.eventFormat && (
+                        <span className="bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/20 text-[10px] uppercase font-mono shrink-0 ml-2">
+                          {evt.eventFormat}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div>
+                      <Link
+                        to={targetManageUrl}
+                        className="block"
+                      >
+                        <h3 className="text-lg font-black text-zinc-950 truncate group-hover:text-[#E31B23] transition-colors" title={evt.title}>
+                          {evt.title}
+                        </h3>
+                      </Link>
+                      <p className="text-xs text-zinc-500 font-medium flex items-center gap-1.5 mt-1.5 truncate">
+                        <MapPin className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
+                        <span className="truncate">
+                          {evt.venue || evt.city || (evt.locationType === 'online' ? 'Virtual / Livestream' : 'Location TBA')}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card Footer Actions */}
+                  <div className="px-5 py-3.5 bg-zinc-50/80 border-t border-zinc-100 flex items-center justify-between gap-2">
+                    {role === 'staff' ? (
+                      <Link
+                        to={`/organizer/events/${eventId}?tab=attendees&sub=checkin`}
+                        className="w-full inline-flex items-center justify-center gap-2 py-2 px-4 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+                      >
+                        <QrCode className="w-4 h-4" />
+                        <span>Scan Gate</span>
+                      </Link>
+                    ) : (
+                      <>
+                        <Link
+                          to={`/organizer/events/${eventId}`}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-zinc-100 border border-zinc-200 hover:border-zinc-300 text-zinc-900 text-xs font-bold rounded-xl transition-all shadow-2xs"
+                        >
+                          <Edit className="w-3.5 h-3.5 text-zinc-500" />
+                          <span>Manage</span>
+                        </Link>
+
+                        <div className="flex items-center gap-1">
+                          {perms.canConfigureTickets && (
+                            <Link
+                              to={`/organizer/events/${eventId}?tab=tickets`}
+                              className="p-2 text-zinc-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
+                              title="Configure Tickets"
+                            >
+                              <Ticket className="w-4 h-4" />
+                            </Link>
+                          )}
+
+                          {evt.status === 'Published' && (
+                            <a
+                              href={`/events/${evt.slug || eventId}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/60 rounded-xl transition-colors"
+                              title="View Public Page"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </a>
+                          )}
+
+                          {perms.canDeleteEvents && (
+                            <button
+                              onClick={() => handleDeletePrompt(eventId, evt.title)}
+                              className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl cursor-pointer transition-colors"
+                              title="Delete Listing"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          /* ========================================================================= */
+          /* MODERN LIST VIEW (Horizontal cards matching Discover page aesthetic)      */
+          /* ========================================================================= */
+          <div className="space-y-4">
+            {filteredEvents.map((evt) => {
+              const eventId = evt.id || (evt as any).uuid;
+
+              const targetManageUrl = role === 'staff'
+                ? `/organizer/events/${eventId}?tab=attendees&sub=checkin`
+                : `/organizer/events/${eventId}`;
+
+              const displayStatus = getEventDisplayStatus(evt);
+
+              return (
+                <div
+                  key={eventId}
+                  className="group bg-white hover:bg-zinc-50/60 border border-zinc-200/90 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-2xs hover:shadow-md hover:border-zinc-300 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-5"
+                >
+                  {/* Left Block: Thumbnail + Title + Meta Details */}
+                  <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 flex-1 min-w-0">
+                    {/* Thumbnail with overlay badges */}
+                    <Link
+                      to={targetManageUrl}
+                      className="relative w-24 h-24 sm:w-48 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 bg-zinc-100 block group/thumb"
+                    >
+                      <img
+                        src={evt.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=500&q=80'}
+                        alt={evt.title}
+                        className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent hidden sm:block" />
+
+                      {/* Category Badge on thumbnail (tablet/desktop) */}
+                      <span className="hidden sm:inline-block absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] font-bold text-zinc-800 shadow-xs border border-white/60">
+                        {evt.category || 'Event'}
+                      </span>
+
+                      {/* Status Badge on thumbnail (tablet/desktop) */}
+                      <div className="hidden sm:block absolute top-2.5 right-2.5 shadow-xs">
+                        <Badge variant={displayStatus.variant} className="text-[10px] px-2 py-0.5">
+                          {displayStatus.label}
+                        </Badge>
+                      </div>
+
+                      {/* Format pill bottom */}
+                      {evt.eventFormat && (
+                        <span className="hidden sm:inline-block absolute bottom-2 left-2.5 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-md text-[9px] uppercase font-mono text-zinc-200 border border-white/20">
+                          {evt.eventFormat}
+                        </span>
+                      )}
+                    </Link>
+
+                    {/* Event Title & Metadata */}
+                    <div className="flex-1 min-w-0 space-y-1 sm:space-y-2">
+                      {/* Mobile Top Badges: Status + Category */}
+                      <div className="flex sm:hidden items-center gap-1.5 flex-wrap">
+                        <Badge variant={displayStatus.variant} className="text-[9px] px-2 py-0.5 font-bold">
+                          {displayStatus.label}
+                        </Badge>
+                        <span className="text-[10px] font-bold text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-full">
+                          {evt.category || 'Event'}
+                        </span>
+                        {evt.eventFormat && (
+                          <span className="text-[9px] font-mono uppercase text-zinc-400 bg-zinc-50 border border-zinc-200/80 px-1.5 py-0.5 rounded">
+                            {evt.eventFormat}
+                          </span>
+                        )}
+                      </div>
+
+                      <Link to={targetManageUrl} className="block group/title">
+                        <h3 className="text-sm sm:text-lg font-black text-zinc-950 line-clamp-2 sm:truncate group-hover/title:text-[#E31B23] transition-colors leading-snug" title={evt.title}>
+                          {evt.title}
+                        </h3>
+                      </Link>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-x-4 sm:gap-y-1.5 text-xs font-semibold text-zinc-500">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
+                          <span className="truncate">{formatDate(evt.startDate) || 'Date TBA'}</span>
+                          {evt.startTime && <span className="text-zinc-400">at {evt.startTime}</span>}
+                        </span>
+
+                        <span className="inline-flex items-center gap-1.5 truncate max-w-[200px] sm:max-w-[260px]">
+                          <MapPin className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                          <span className="truncate">
+                            {evt.venue || evt.city || (evt.locationType === 'online' ? 'Virtual Livestream' : 'Venue TBA')}
+                          </span>
+                        </span>
+                      </div>
+
+                      {/* Description snippet for larger screens */}
+                      {evt.description && (
+                        <p className="hidden md:block text-xs text-zinc-400 line-clamp-1 font-normal max-w-xl">
+                          {evt.description.replace(/<[^>]*>/g, '')}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right Block: Action Buttons */}
+                  <div className="flex items-center justify-between sm:justify-end gap-2 w-full lg:w-auto shrink-0 border-t sm:border-t-0 pt-2.5 sm:pt-0 border-zinc-150">
+                    {role === 'staff' ? (
+                      <Link
+                        to={`/organizer/events/${eventId}?tab=attendees&sub=checkin`}
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+                        title="Open Gate Scanner"
+                      >
+                        <QrCode className="w-3.5 h-3.5" />
+                        <span>Scan Gate</span>
+                      </Link>
+                    ) : (
+                      <>
+                        <Link
+                          to={`/organizer/events/${eventId}`}
+                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+                        >
+                          <Edit className="w-3.5 h-3.5 text-zinc-400" />
+                          <span>Manage</span>
+                        </Link>
+
+                        <div className="flex items-center gap-1">
+                          {perms.canConfigureTickets && (
+                            <Link
+                              to={`/organizer/events/${eventId}?tab=tickets`}
+                              className="p-2 sm:p-2.5 text-zinc-500 hover:text-indigo-600 hover:bg-indigo-50 border border-zinc-200 hover:border-indigo-200 bg-white rounded-xl transition-colors shadow-2xs"
+                              title="Configure Tickets"
+                            >
+                              <Ticket className="w-4 h-4" />
+                            </Link>
+                          )}
+
+                          {evt.status === 'Published' && (
+                            <a
+                              href={`/events/${evt.slug || eventId}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-2 sm:p-2.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 border border-zinc-200 hover:border-zinc-300 bg-white rounded-xl transition-colors shadow-2xs"
+                              title="View Public Page"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </a>
+                          )}
+
+                          {perms.canDeleteEvents && (
+                            <button
+                              onClick={() => handleDeletePrompt(eventId, evt.title)}
+                              className="p-2 sm:p-2.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 border border-zinc-200 hover:border-red-200 bg-white rounded-xl cursor-pointer transition-colors shadow-2xs"
+                              title="Delete Listing"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {!isLoading && (paginationMeta.total > 0 || events.length > 0) && paginationMeta.last_page > 1 && (
+          <div className="bg-white rounded-2xl border border-zinc-200/90 px-5 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+            <div className="text-xs text-zinc-500 font-semibold">
+              Showing <span className="font-bold text-zinc-900">{paginationMeta.from || (filteredEvents.length > 0 ? 1 : 0)}</span> to{' '}
+              <span className="font-bold text-zinc-900">{paginationMeta.to || filteredEvents.length}</span> of{' '}
+              <span className="font-bold text-zinc-900">{paginationMeta.total}</span> events
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Previous Button */}
+              <button
+                onClick={() => handlePageChange(paginationMeta.current_page - 1)}
+                disabled={paginationMeta.current_page <= 1 || isLoading}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Previous</span>
+              </button>
+
+              {/* Page Numbers */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.max(1, paginationMeta.last_page) }, (_, i) => i + 1).map((p) => {
+                  if (paginationMeta.last_page > 7) {
+                    if (p !== 1 && p !== paginationMeta.last_page && Math.abs(p - paginationMeta.current_page) > 1) {
+                      if (p === 2 && paginationMeta.current_page > 3) return <span key={p} className="px-1 text-xs text-zinc-400">...</span>;
+                      if (p === paginationMeta.last_page - 1 && paginationMeta.current_page < paginationMeta.last_page - 2) return <span key={p} className="px-1 text-xs text-zinc-400">...</span>;
+                      return null;
+                    }
+                  }
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => handlePageChange(p)}
+                      disabled={isLoading}
+                      className={`w-9 h-9 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                        p === paginationMeta.current_page
+                          ? 'bg-[#E31B23] text-white shadow-xs scale-105'
+                          : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={() => handlePageChange(paginationMeta.current_page + 1)}
+                disabled={paginationMeta.current_page >= paginationMeta.last_page || isLoading}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Confirmation Modal */}
         <ConfirmDialog
@@ -410,4 +824,3 @@ export const Events: React.FC = () => {
 };
 
 export default Events;
-
