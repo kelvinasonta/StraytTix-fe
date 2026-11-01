@@ -114,8 +114,8 @@ export const Home: React.FC = () => {
               Nigeria&apos;s #1 ticketing platform for discovering events, buying tickets, and creating, promoting, and selling tickets for your own events.
             </p>
 
-            {/* Nested "Island" Action Buttons (Double-bezel hardware styling) */}
-            <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
+            {/* Hero Action Button */}
+            <div className="pt-3 flex items-center justify-center w-full sm:w-auto">
               {/* Primary: Discover Events */}
               <Link
                 to="/discover"
@@ -124,17 +124,6 @@ export const Home: React.FC = () => {
                 <span>Discover Events</span>
                 <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/20 group-hover:bg-black/30 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1.5 shrink-0">
                   <ArrowRight className="w-4 h-4 text-white" />
-                </span>
-              </Link>
-              
-              {/* Secondary: Create Event (Translucent Frosted Glass Pill) */}
-              <Link
-                to="/organizer/events/create"
-                className="w-full sm:w-auto group inline-flex items-center justify-between sm:justify-start gap-3 bg-white/[0.08] hover:bg-white/[0.14] text-white font-bold rounded-full pl-7 pr-2.5 py-2 text-sm sm:text-base border border-white/20 backdrop-blur-2xl transition-all duration-300 hover:border-white/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer shadow-sm"
-              >
-                <span>Create Event</span>
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 group-hover:bg-white/20 flex items-center justify-center transition-transform duration-300 group-hover:rotate-90 shrink-0">
-                  <Plus className="w-4 h-4 text-white" />
                 </span>
               </Link>
             </div>
