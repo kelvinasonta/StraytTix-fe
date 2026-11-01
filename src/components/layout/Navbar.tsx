@@ -39,25 +39,48 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
   useEffect(() => {
     let lastScrollY = window.scrollY || document.documentElement.scrollTop;
+    let accumulatedDownScroll = 0;
+    let accumulatedUpScroll = 0;
+
+    // Minimum scroll distance downward required before triggering hide
+    const SCROLL_DELTA_THRESHOLD = 80;
+    // Don't start hiding until past the hero top portion
+    const MIN_PAGE_OFFSET = 180;
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY || document.documentElement.scrollTop;
+      const delta = currentScrollY - lastScrollY;
 
-      // Detect whether page is past top threshold
-      setIsScrolled(currentScrollY > 16);
+      // Detect whether page is past top threshold for frosted pill styling
+      // Using a higher threshold (120px) gives comfortable room on initial scroll
+      setIsScrolled(currentScrollY > 120);
 
-      // Hide navbar when scrolling down, show when scrolling up
-      if (currentScrollY <= 20) {
+      // Keep visible near the top of the page
+      if (currentScrollY <= MIN_PAGE_OFFSET) {
         setIsVisible(true);
+        accumulatedDownScroll = 0;
+        accumulatedUpScroll = 0;
       } else if (isOpen) {
         // Keep visible if mobile drawer is currently open
         setIsVisible(true);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 60) {
-        // Scrolling down -> hide navbar
-        setIsVisible(false);
-      } else if (currentScrollY < lastScrollY) {
-        // Scrolling up -> show navbar
-        setIsVisible(true);
+      } else if (delta > 0) {
+        // User is scrolling down
+        accumulatedUpScroll = 0;
+        accumulatedDownScroll += delta;
+        
+        // Only hide if user has intentionally scrolled down past threshold
+        if (accumulatedDownScroll >= SCROLL_DELTA_THRESHOLD) {
+          setIsVisible(false);
+        }
+      } else if (delta < 0) {
+        // User is scrolling up
+        accumulatedDownScroll = 0;
+        accumulatedUpScroll += Math.abs(delta);
+        
+        // Restore quickly when intentionally scrolling up
+        if (accumulatedUpScroll >= 20 || currentScrollY <= MIN_PAGE_OFFSET) {
+          setIsVisible(true);
+        }
       }
 
       lastScrollY = currentScrollY <= 0 ? 0 : currentScrollY;
@@ -66,7 +89,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isOpen]);
 
   const isDashboardView = isDashboard || hideNavLinks || location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/organizer');
   const isHomePage = location.pathname === '/';
