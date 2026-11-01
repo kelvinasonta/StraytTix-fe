@@ -93,7 +93,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
   const isDashboardView = isDashboard || hideNavLinks || location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/organizer');
   const isHomePage = location.pathname === '/';
-  const isTransparentHeroNav = isHomePage && !isScrolled;
+  const isDiscoverPage = location.pathname === '/discover';
+  const isDarkHeroPage = isHomePage || isDiscoverPage;
+  const isTransparentHeroNav = isDarkHeroPage && !isScrolled;
 
   const handleLogout = async () => {
     await logout();
