@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import { 
@@ -22,13 +22,41 @@ import {
   Workflow,
   Sparkles,
   Compass,
-  Check
+  Check,
+  Calculator,
+  TrendingUp,
+  CreditCard,
+  Building2,
+  Lock,
+  Sliders,
+  DollarSign,
+  ScanLine,
+  CalendarCheck,
+  Coins,
+  BadgePercent
 } from 'lucide-react';
+import { formatCurrency } from '../utils/format';
 
 export const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeShowcaseTab, setActiveShowcaseTab] = useState<'attendee' | 'organizer'>('organizer');
+  
+  // Interactive Revenue & Fee Calculator States
+  const [calcTicketCount, setCalcTicketCount] = useState<number>(350);
+  const [calcTicketPrice, setCalcTicketPrice] = useState<number>(5000); // ₦5,000 standard ticket
+  const [calcAbsorbFee, setCalcAbsorbFee] = useState<boolean>(false);
+
   const navigate = useNavigate();
   const searchBarRef = useRef<HTMLElement>(null);
+
+  // Fee calculation mechanics:
+  // StraytTix platform fee: 2.5% + ₦100 flat processing per ticket (capped at ₦2,000 per ticket max)
+  const grossRevenue = calcTicketCount * calcTicketPrice;
+  const rawFeePerTicket = (calcTicketPrice * 0.025) + (calcTicketPrice > 0 ? 100 : 0);
+  const cappedFeePerTicket = Math.min(rawFeePerTicket, 2000);
+  const totalPlatformFees = calcTicketCount * cappedFeePerTicket;
+  const organizerTakeHome = calcAbsorbFee ? Math.max(0, grossRevenue - totalPlatformFees) : grossRevenue;
+  const buyerPaysPerTicket = calcAbsorbFee ? calcTicketPrice : calcTicketPrice + cappedFeePerTicket;
 
   // Smooth scroll exit animation: As the search bar scrolls out of view,
   // it gracefully scales down, tilts slightly, and fades out rather than abrupt cutoff
@@ -610,6 +638,504 @@ export const Home: React.FC = () => {
                   </div>
                 </motion.div>
 
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 5.5 INTERACTIVE PRODUCT EXPERIENCE & REVENUE CALCULATOR                   */}
+        {/*     Deep, tactile showcase: Attendee vs Organizer Mockups & Live Earnings  */}
+        {/* ========================================================================= */}
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-28 bg-[#07070A] text-white relative overflow-hidden border-t border-b border-white/5">
+          {/* Subtle Ambient Radial Lighting */}
+          <div className="absolute top-1/4 right-0 w-[550px] h-[550px] bg-[#E31B23]/10 blur-[180px] rounded-full pointer-events-none" />
+          <div className="absolute bottom-10 left-10 w-[500px] h-[500px] bg-red-950/20 blur-[160px] rounded-full pointer-events-none" />
+
+          <div className="max-w-6xl mx-auto space-y-24 relative z-10">
+
+            {/* PART 1: Interactive Product Showcase Tabs (Attendee vs Organizer UI) */}
+            <div className="space-y-12">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="space-y-3 max-w-xl">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] border border-white/10 text-xs font-mono font-bold text-zinc-300">
+                    <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
+                    <span>Tactile Product Architecture</span>
+                  </div>
+                  <h2 className="text-3xl sm:text-5xl font-black text-white tracking-[-0.035em] leading-[1.12]">
+                    Built for the stadium. Refined for your pocket.
+                  </h2>
+                  <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">
+                    Toggle between the attendee pass experience and the high-density organizer terminal to see how StraytTix runs in the field.
+                  </p>
+                </div>
+
+                {/* Tab Switcher Pills */}
+                <div className="p-1 rounded-2xl bg-zinc-900/90 border border-white/10 inline-flex items-center gap-1 self-start md:self-auto shadow-xl">
+                  <button
+                    type="button"
+                    onClick={() => setActiveShowcaseTab('organizer')}
+                    className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                      activeShowcaseTab === 'organizer'
+                        ? 'bg-[#E31B23] text-white shadow-lg shadow-[#E31B23]/30'
+                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Workflow className="w-4 h-4" />
+                    <span>Creator Console</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveShowcaseTab('attendee')}
+                    className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                      activeShowcaseTab === 'attendee'
+                        ? 'bg-[#E31B23] text-white shadow-lg shadow-[#E31B23]/30'
+                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Smartphone className="w-4 h-4" />
+                    <span>Fan Mobile Pass</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Showcase Frame with AnimatePresence */}
+              <AnimatePresence mode="wait">
+                {activeShowcaseTab === 'organizer' ? (
+                  <motion.div
+                    key="organizer-showcase"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                    className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center rounded-3xl bg-zinc-950/80 border border-white/10 p-6 sm:p-10 lg:p-12 shadow-2xl backdrop-blur-xl"
+                  >
+                    {/* Left: Organizer Value & Live Metrics */}
+                    <div className="lg:col-span-5 space-y-6">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono font-bold">
+                        CREATOR CONTROL CENTER
+                      </div>
+                      <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                        Instant sales telemetry with zero settlement wait.
+                      </h3>
+                      <p className="text-sm text-zinc-400 leading-relaxed font-normal">
+                        Every ticket sold reflects instantly across your inventory. Create multiple ticket tiers, manage promotional flash sales, and trigger instant bank payouts straight to your Nigerian account.
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-4 pt-2">
+                        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-1">
+                          <p className="text-xs text-zinc-500 font-mono">AUTOMATED PAYOUT</p>
+                          <p className="text-xl sm:text-2xl font-black text-emerald-400 font-mono">T+0 Days</p>
+                          <p className="text-[11px] text-zinc-400">Direct to Access, GTB, Zenith</p>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-1">
+                          <p className="text-xs text-zinc-500 font-mono">GATE TERMINALS</p>
+                          <p className="text-xl sm:text-2xl font-black text-white font-mono">Unlimited</p>
+                          <p className="text-[11px] text-zinc-400">Multi-staff PIN access</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 flex items-center gap-3">
+                        <Link
+                          to="/organizer/events/create"
+                          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#E31B23] hover:bg-[#C9141B] text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-[#E31B23]/25"
+                        >
+                          <span>Launch An Event</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                        <Link
+                          to="/pricing"
+                          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-bold text-xs sm:text-sm transition-all border border-white/10"
+                        >
+                          <span>Fee Structure</span>
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Right: Realistic Console Window UI Mockup */}
+                    <div className="lg:col-span-7">
+                      <div className="rounded-2xl bg-[#0C0D12] border border-white/15 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden font-sans">
+                        {/* Chrome bar */}
+                        <div className="px-4 py-3 bg-white/[0.04] border-b border-white/10 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
+                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
+                            <span className="ml-2 text-[11px] font-mono text-zinc-400">console.strayttix.com / pulse-festival-2026</span>
+                          </div>
+                          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            LIVE DROP ACTIVE
+                          </span>
+                        </div>
+
+                        {/* Console Body */}
+                        <div className="p-6 space-y-6">
+                          {/* Top Metric Cards */}
+                          <div className="grid grid-cols-3 gap-3">
+                            <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 space-y-1">
+                              <span className="text-[10px] font-mono text-zinc-500 uppercase">Gross Volume</span>
+                              <div className="text-lg sm:text-xl font-bold font-mono text-white">₦14,850,000</div>
+                              <span className="text-[10px] text-emerald-400 flex items-center gap-0.5">
+                                <TrendingUp className="w-3 h-3" /> +38% vs target
+                              </span>
+                            </div>
+                            <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 space-y-1">
+                              <span className="text-[10px] font-mono text-zinc-500 uppercase">Tickets Claimed</span>
+                              <div className="text-lg sm:text-xl font-bold font-mono text-white">1,842 <span className="text-xs text-zinc-500 font-normal">/ 2,000</span></div>
+                              <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mt-1">
+                                <div className="bg-[#E31B23] h-full w-[92%]" />
+                              </div>
+                            </div>
+                            <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 space-y-1">
+                              <span className="text-[10px] font-mono text-zinc-500 uppercase">Gate Scans</span>
+                              <div className="text-lg sm:text-xl font-bold font-mono text-emerald-400">1,210 IN</div>
+                              <span className="text-[10px] text-zinc-400">62% turnout so far</span>
+                            </div>
+                          </div>
+
+                          {/* Active Ticket Tiers Table */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-xs font-mono text-zinc-400 px-1">
+                              <span>ACTIVE TIER INVENTORY</span>
+                              <span>STATUS</span>
+                            </div>
+                            <div className="space-y-2">
+                              {[
+                                { name: 'Early Bird Regular', price: '₦5,000', sold: '500 / 500', status: 'SOLD OUT', color: 'text-zinc-400 bg-white/5' },
+                                { name: 'Main Tier (Phase 1)', price: '₦8,000', sold: '1,042 / 1,200', status: '87% SOLD', color: 'text-amber-400 bg-amber-500/10' },
+                                { name: 'VIP All-Access Backstage', price: '₦35,000', sold: '300 / 300', status: 'SOLD OUT', color: 'text-zinc-400 bg-white/5' }
+                              ].map((tier, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 text-xs">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-7 h-7 rounded-lg bg-[#E31B23]/15 text-[#E31B23] flex items-center justify-center font-bold font-mono">
+                                      T{idx + 1}
+                                    </div>
+                                    <div>
+                                      <p className="font-bold text-white">{tier.name}</p>
+                                      <p className="text-[10px] text-zinc-500 font-mono">{tier.price} per pass</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <span className="font-mono text-zinc-300 text-[11px]">{tier.sold}</span>
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${tier.color}`}>
+                                      {tier.status}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Bottom Payout Status Bar */}
+                          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2 text-emerald-300">
+                              <Building2 className="w-4 h-4 text-emerald-400" />
+                              <span>Direct Payout Route: GTBank •••• 4091</span>
+                            </div>
+                            <span className="font-mono text-emerald-400 font-bold">AUTOMATED SETTLEMENT ACTIVE</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="attendee-showcase"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                    className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center rounded-3xl bg-zinc-950/80 border border-white/10 p-6 sm:p-10 lg:p-12 shadow-2xl backdrop-blur-xl"
+                  >
+                    {/* Left: Fan Mobile Pass Features */}
+                    <div className="lg:col-span-5 space-y-6">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold">
+                        FAN TICKETING COMPANION
+                      </div>
+                      <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                        Zero scalping. Instant offline barcode presentation.
+                      </h3>
+                      <p className="text-sm text-zinc-400 leading-relaxed font-normal">
+                        Your pass is cryptographically bound to your phone. Whether you add it to your Apple Wallet, Google Wallet, or view it offline inside StraytTix, entry takes under 0.2 seconds.
+                      </p>
+
+                      <div className="space-y-3 pt-2">
+                        {[
+                          { title: 'Offline-Cached QR Codes', desc: 'Works with zero cell service or Wi-Fi outside congested arenas.' },
+                          { title: 'One-Tap Apple & Google Wallet', desc: 'Double-click your power button at the gate turnstile for instant admission.' },
+                          { title: 'Peer-to-Peer Transfer Protection', desc: 'Send a ticket to a friend securely — the old QR voids immediately to block duplicates.' }
+                        ].map((item, i) => (
+                          <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                            <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                              <Check className="w-3 h-3" />
+                            </div>
+                            <div>
+                              <p className="text-xs sm:text-sm font-bold text-zinc-200">{item.title}</p>
+                              <p className="text-[11px] sm:text-xs text-zinc-400">{item.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="pt-2 flex items-center gap-3">
+                        <Link
+                          to="/discover"
+                          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#E31B23] hover:bg-[#C9141B] text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-[#E31B23]/25"
+                        >
+                          <span>Discover Events</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                        <Link
+                          to="/download"
+                          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-bold text-xs sm:text-sm transition-all border border-white/10"
+                        >
+                          <span>Get Mobile App</span>
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Right: Luxury Phone Pass Frame Mockup */}
+                    <div className="lg:col-span-7 flex justify-center">
+                      <div className="w-full max-w-sm rounded-[2.5rem] bg-gradient-to-b from-zinc-800 via-zinc-900 to-black p-3.5 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] border border-white/20">
+                        {/* Inner Phone Screen */}
+                        <div className="rounded-[2rem] bg-[#0A0B0E] p-5 space-y-5 border border-white/10 overflow-hidden relative">
+                          {/* Phone Speaker Notch */}
+                          <div className="flex justify-center -mt-1 mb-2">
+                            <span className="w-16 h-1 rounded-full bg-white/20" />
+                          </div>
+
+                          {/* Pass Header */}
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
+                              <span className="font-black tracking-tight text-white">StraytTix PASS</span>
+                            </div>
+                            <span className="text-[10px] font-mono text-zinc-400 bg-white/10 px-2 py-0.5 rounded-full">VIP ACCESS</span>
+                          </div>
+
+                          {/* Event Artwork Preview */}
+                          <div className="relative rounded-2xl overflow-hidden aspect-video border border-white/10">
+                            <img
+                              src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80"
+                              alt="Concert festival pass artwork"
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent p-3 flex flex-col justify-end">
+                              <span className="text-[10px] font-mono uppercase text-amber-400 font-bold">Lagos Mainland • Dec 18</span>
+                              <h4 className="text-base font-black text-white leading-tight">Neon Horizon Live 2026</h4>
+                            </div>
+                          </div>
+
+                          {/* Ticket Meta Grid */}
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/5">
+                              <span className="text-[9px] font-mono text-zinc-400 block">TIER</span>
+                              <span className="font-bold text-white">VIP All-Access</span>
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/5">
+                              <span className="text-[9px] font-mono text-zinc-400 block">SEAT / ZONE</span>
+                              <span className="font-bold text-white">Golden Circle B</span>
+                            </div>
+                          </div>
+
+                          {/* Cryptographic QR Centerpiece */}
+                          <div className="p-4 rounded-2xl bg-white text-zinc-950 flex flex-col items-center justify-center space-y-2 shadow-inner">
+                            <div className="p-2 bg-white rounded-lg border-2 border-dashed border-zinc-300">
+                              <QrCode className="w-28 h-28 text-zinc-950" />
+                            </div>
+                            <span className="text-[9px] font-mono text-zinc-500 tracking-wider font-bold">
+                              PASS ID: #ST-8924-XQ91-2026
+                            </span>
+                            <div className="flex items-center gap-1 text-[10px] text-emerald-700 font-bold">
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>Valid &amp; Ready for Turnstile Scan</span>
+                            </div>
+                          </div>
+
+                          {/* Apple / Google Wallet Sync Button */}
+                          <div className="pt-1">
+                            <div className="w-full py-2.5 rounded-xl bg-zinc-900 border border-white/20 text-white text-xs font-bold flex items-center justify-center gap-2 hover:bg-zinc-800 transition-colors">
+                              <Smartphone className="w-3.5 h-3.5 text-zinc-400" />
+                              <span>Added to Apple Wallet</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* PART 2: Interactive Revenue & Transparent Fee Calculator */}
+            <div className="pt-10 border-t border-white/10">
+              <div className="rounded-[2.5rem] bg-gradient-to-br from-zinc-950 via-[#0B0B10] to-zinc-950 border border-white/10 p-8 sm:p-12 lg:p-14 shadow-2xl relative overflow-hidden">
+                {/* Accent Background Glow */}
+                <div className="absolute top-0 right-1/4 w-[400px] h-[300px] bg-[#E31B23]/10 blur-[130px] rounded-full pointer-events-none" />
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+                  
+                  {/* Left: Calculator Controls & Interactive Sliders */}
+                  <div className="lg:col-span-6 space-y-7">
+                    <div className="space-y-2">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-xs font-mono font-bold text-zinc-300">
+                        <Calculator className="w-3.5 h-3.5 text-[#E31B23]" />
+                        <span>Interactive Earnings Simulator</span>
+                      </div>
+                      <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+                        Calculate your exact ticket earnings.
+                      </h3>
+                      <p className="text-sm text-zinc-400 leading-relaxed">
+                        No hidden gate surcharges. No setup costs. Adjust ticket volume and price to see your instant payout.
+                      </p>
+                    </div>
+
+                    {/* Slider 1: Expected Tickets Sold */}
+                    <div className="space-y-3 p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/5">
+                      <div className="flex items-center justify-between text-xs sm:text-sm">
+                        <span className="font-bold text-zinc-300 flex items-center gap-2">
+                          <Ticket className="w-4 h-4 text-[#E31B23]" />
+                          Expected Attendees / Tickets
+                        </span>
+                        <span className="font-mono font-black text-white text-base">
+                          {calcTicketCount.toLocaleString()} passes
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="20"
+                        max="5000"
+                        step="10"
+                        value={calcTicketCount}
+                        onChange={(e) => setCalcTicketCount(Number(e.target.value))}
+                        aria-label="Expected Attendees or Tickets Sold"
+                        className="w-full accent-[#E31B23] h-2 bg-zinc-800 rounded-lg cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[10px] font-mono text-zinc-500">
+                        <span>20 (Intimate)</span>
+                        <span>1,000 (Club / Hall)</span>
+                        <span>5,000+ (Festival)</span>
+                      </div>
+                    </div>
+
+                    {/* Slider 2: Average Ticket Price */}
+                    <div className="space-y-3 p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/5">
+                      <div className="flex items-center justify-between text-xs sm:text-sm">
+                        <span className="font-bold text-zinc-300 flex items-center gap-2">
+                          <Coins className="w-4 h-4 text-amber-400" />
+                          Average Ticket Price (NGN)
+                        </span>
+                        <span className="font-mono font-black text-white text-base">
+                          {formatCurrency(calcTicketPrice)}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="500"
+                        max="50000"
+                        step="500"
+                        value={calcTicketPrice}
+                        onChange={(e) => setCalcTicketPrice(Number(e.target.value))}
+                        aria-label="Average Ticket Price"
+                        className="w-full accent-[#E31B23] h-2 bg-zinc-800 rounded-lg cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[10px] font-mono text-zinc-500">
+                        <span>₦500 (Student)</span>
+                        <span>₦15,000 (Concert)</span>
+                        <span>₦50,000 (VIP Table)</span>
+                      </div>
+                    </div>
+
+                    {/* Toggle: Who Pays Fees (Pass to buyer vs absorb) */}
+                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <p className="text-xs sm:text-sm font-bold text-zinc-200">Pass fee to attendee?</p>
+                        <p className="text-[11px] text-zinc-500">
+                          {calcAbsorbFee ? 'Organizer absorbs standard 2.5% fee' : 'Attendee covers fee at checkout (Organizer receives 100% of price)'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setCalcAbsorbFee(!calcAbsorbFee)}
+                        className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer p-0.5 ${
+                          !calcAbsorbFee ? 'bg-[#E31B23]' : 'bg-zinc-800'
+                        }`}
+                        title="Toggle Fee Absorption"
+                        aria-label="Toggle fee absorption"
+                      >
+                        <span className={`block w-5 h-5 rounded-full bg-white transition-transform ${
+                          !calcAbsorbFee ? 'translate-x-6' : 'translate-x-0'
+                        }`} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right: Live Calculated Payout Summary Card */}
+                  <div className="lg:col-span-6">
+                    <div className="rounded-3xl bg-zinc-900/90 border border-white/15 p-6 sm:p-8 space-y-6 shadow-2xl">
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
+                          YOUR ESTIMATED TAKE-HOME PAYOUT
+                        </span>
+                        <div className="text-3xl sm:text-5xl font-black font-mono text-emerald-400 tracking-tight">
+                          {formatCurrency(organizerTakeHome)}
+                        </div>
+                        <p className="text-xs text-zinc-400">
+                          Settled directly to your Nigerian bank account with automated T+0 transfers.
+                        </p>
+                      </div>
+
+                      <hr className="border-white/10" />
+
+                      {/* Detailed Fee Breakdown Ledger */}
+                      <div className="space-y-3 text-xs sm:text-sm font-mono">
+                        <div className="flex justify-between items-center text-zinc-400">
+                          <span>Gross Ticket Volume:</span>
+                          <span className="text-white font-bold">{formatCurrency(grossRevenue)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-zinc-400">
+                          <span>StraytTix Standard Fee (2.5% + ₦100):</span>
+                          <span className="text-zinc-300">{formatCurrency(totalPlatformFees)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-zinc-400">
+                          <span>Fee Handler:</span>
+                          <span className={`font-bold ${!calcAbsorbFee ? 'text-emerald-400' : 'text-amber-400'}`}>
+                            {!calcAbsorbFee ? 'Attendee Covers at Checkout' : 'Absorbed by Organizer'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-zinc-400">
+                          <span>Attendee Final Ticket Price:</span>
+                          <span className="text-white font-bold">{formatCurrency(buyerPaysPerTicket)}</span>
+                        </div>
+                      </div>
+
+                      {/* Value Guarantees Box */}
+                      <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 space-y-1.5 text-xs">
+                        <div className="flex items-center gap-2 text-zinc-300 font-bold">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>Includes unlimited gate check-in scanner apps</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-zinc-300 font-bold">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>Zero monthly maintenance or setup contracts</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <Link
+                          to="/organizer/events/create"
+                          className="w-full py-4 rounded-xl bg-[#E31B23] hover:bg-[#C9141B] text-white font-bold text-sm transition-all shadow-xl shadow-[#E31B23]/30 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                        >
+                          <span>Start Selling at These Rates</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
               </div>
             </div>
 
