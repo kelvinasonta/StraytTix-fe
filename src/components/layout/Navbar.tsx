@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
-  Search,
   Bell,
   Menu,
   X,
@@ -251,19 +250,6 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
           {isAuthenticated ? (
             /* ================= AUTHENTICATED USER ACTIONS ================= */
             <div className="flex items-center gap-3">
-              {/* Search Trigger */}
-              <Link
-                to="/discover"
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                  isDarkCanvasPage
-                    ? 'text-zinc-400 hover:text-white hover:bg-white/10'
-                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
-                }`}
-                title="Search events"
-              >
-                <Search className="w-5 h-5" />
-              </Link>
-
               {/* Notification Bell */}
               <button
                 className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
@@ -444,24 +430,6 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
           ) : (
             /* ================= GUEST USER ACTIONS ================= */
             <div className="flex items-center gap-3">
-              <div
-                className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                  isPillState ? 'w-0 opacity-0 -mr-2.5 pointer-events-none' : 'w-10 opacity-100'
-                }`}
-              >
-                <Link
-                  to="/discover"
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                    isDarkCanvasPage
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/10'
-                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
-                  }`}
-                  title="Search events"
-                >
-                  <Search className="w-5 h-5" />
-                </Link>
-              </div>
-
               <Link
                 to="/login"
                 className={`rounded-full font-bold transition-all duration-300 cursor-pointer whitespace-nowrap ${
@@ -500,17 +468,6 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
 
-          <Link
-            to="/discover"
-            className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
-              isDarkCanvasPage
-                ? 'text-zinc-300 hover:text-white hover:bg-white/10'
-                : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
-            }`}
-            title="Search events"
-          >
-            <Search className="w-5 h-5" />
-          </Link>
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`p-2 rounded-xl focus:outline-none transition-colors ${
