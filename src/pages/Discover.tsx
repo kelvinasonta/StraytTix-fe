@@ -285,13 +285,13 @@ export const Discover: React.FC = () => {
       {/* ========================================================================= */}
       {/* 1. EDITORIAL SPOTLIGHT & SEARCH HEADER (Dark Luxury Bento)                */}
       {/* ========================================================================= */}
-      <section className="relative px-4 sm:px-6 lg:px-10 xl:px-12 pt-10 pb-12 sm:pb-16 overflow-hidden border-b border-white/5">
+      <section className="relative px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pt-10 pb-12 sm:pb-16 overflow-hidden border-b border-white/5">
         
         {/* Subtle Ambient Radial Lighting */}
         <div className="absolute top-0 left-1/3 w-[600px] h-[400px] bg-[#E31B23]/15 blur-[160px] rounded-full pointer-events-none" />
         <div className="absolute top-1/2 right-10 w-[450px] h-[350px] bg-purple-600/10 blur-[150px] rounded-full pointer-events-none" />
 
-        <div className="max-w-[1440px] mx-auto space-y-8 relative z-10">
+        <div className="max-w-[1600px] mx-auto space-y-8 relative z-10">
 
           {/* Top Title & Search Island Bar */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
@@ -309,9 +309,9 @@ export const Discover: React.FC = () => {
             </div>
 
             {/* Elevated Search Bar */}
-            <div className="w-full lg:max-w-lg">
-              <div className="p-1 sm:p-2 rounded-2xl bg-white/[0.06] border border-white/15 backdrop-blur-xl shadow-2xl transition-all duration-300 focus-within:border-white/30 focus-within:bg-white/[0.09]">
-                <div className="flex items-center gap-3 px-3 py-2.5">
+            <div className="w-full lg:max-w-xl">
+              <div className="p-1.5 sm:p-2.5 rounded-2xl bg-white/[0.06] border border-white/15 backdrop-blur-xl shadow-2xl transition-all duration-300 focus-within:border-white/30 focus-within:bg-white/[0.09]">
+                <div className="flex items-center gap-3 px-3.5 py-3">
                   <Search className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400 shrink-0" />
                   <input
                     type="text"
@@ -343,10 +343,10 @@ export const Discover: React.FC = () => {
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="relative rounded-[2.25rem] overflow-hidden border border-white/15 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 shadow-2xl group"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[300px] sm:min-h-[380px]">
+              <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[340px] sm:min-h-[420px]">
                 
                 {/* Left Content Column */}
-                <div className="lg:col-span-7 p-6 sm:p-12 flex flex-col justify-between space-y-6 relative z-10 bg-gradient-to-t lg:bg-gradient-to-r from-zinc-950 via-zinc-950/90 to-transparent">
+                <div className="lg:col-span-7 p-6 sm:p-12 lg:p-14 flex flex-col justify-between space-y-6 relative z-10 bg-gradient-to-t lg:bg-gradient-to-r from-zinc-950 via-zinc-950/90 to-transparent">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="px-3 py-1 rounded-full bg-[#E31B23] text-white text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-[#E31B23]/30">
@@ -408,7 +408,7 @@ export const Discover: React.FC = () => {
                 </div>
 
                 {/* Right Image Spotlight Column */}
-                <div className="lg:col-span-5 relative h-72 lg:h-auto overflow-hidden">
+                <div className="lg:col-span-5 relative h-80 lg:h-auto overflow-hidden">
                   <img
                     src={featuredSpotlightEvent.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=1200&q=80'}
                     alt={featuredSpotlightEvent.title}
@@ -455,8 +455,8 @@ export const Discover: React.FC = () => {
       {/* 2. TOP 5 TRENDING TICKETS (Jetron / Tix Hot Rail Carousel)                */}
       {/* ========================================================================= */}
       {topTrendingTickets.length > 0 && !isLoading && (
-        <section className="px-4 sm:px-6 lg:px-10 xl:px-12 py-10 sm:py-12 bg-[#0A0A0E] border-b border-white/5">
-          <div className="max-w-[1440px] mx-auto space-y-6">
+        <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-10 sm:py-14 bg-[#0A0A0E] border-b border-white/5">
+          <div className="max-w-[1600px] mx-auto space-y-7">
             
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -483,8 +483,8 @@ export const Discover: React.FC = () => {
               </span>
             </div>
 
-            {/* Top 5 Trending Cards Scroll Rail (Slightly larger height & padding) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+            {/* Top 5 Trending Cards Scroll Rail (Larger cinema scale with full-bleed image & overlay details) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
               {topTrendingTickets.map((trendEvent, index) => {
                 const minPrice = trendEvent.tickets && trendEvent.tickets.length > 0 
                   ? Math.min(...trendEvent.tickets.map(t => t.price)) 
@@ -494,59 +494,68 @@ export const Discover: React.FC = () => {
                   <Link
                     key={trendEvent.id}
                     to={`/events/${trendEvent.slug || trendEvent.id}`}
-                    className="group relative rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 p-4 flex flex-col justify-between space-y-3.5 transition-all duration-300 hover:shadow-xl hover:shadow-black/40 hover:-translate-y-1"
+                    className="group relative rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 h-[380px] sm:h-[420px] flex flex-col justify-between p-5 transition-all duration-500 hover:shadow-2xl hover:shadow-[#E31B23]/10 hover:-translate-y-1.5"
                   >
-                    {/* Rank Number Badge */}
-                    <div className="flex items-center justify-between">
-                      <span className={`w-7 h-7 rounded-lg flex items-center justify-center font-mono font-black text-xs ${
-                        index === 0 
-                          ? 'bg-[#E31B23] text-white shadow-md shadow-[#E31B23]/30' 
-                          : index === 1
-                          ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
-                          : index === 2
-                          ? 'bg-zinc-200 text-zinc-900 font-black'
-                          : 'bg-white/10 text-zinc-400'
-                      }`}>
-                        #{index + 1}
-                      </span>
-                      <span className="text-[10px] font-mono uppercase text-zinc-400 truncate max-w-[120px]">
-                        {trendEvent.category || 'Event'}
-                      </span>
-                    </div>
+                    {/* Full-bleed Background Image */}
+                    <img
+                      src={trendEvent.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80'}
+                      alt={trendEvent.title}
+                      className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.72] contrast-[1.05] group-hover:scale-110 group-hover:brightness-[0.6] transition-all duration-700 pointer-events-none"
+                    />
 
-                    {/* Thumbnail Image (Slightly taller) */}
-                    <div className="relative h-36 rounded-xl overflow-hidden bg-white/5">
-                      <img
-                        src={trendEvent.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80'}
-                        alt={trendEvent.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                      <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between text-[11px] font-mono text-zinc-300">
-                        <span className="truncate flex items-center gap-1">
-                          <MapPin className="w-3 h-3 text-[#E31B23]" />
-                          {trendEvent.city || 'Lagos'}
+                    {/* Gradient Cinematic Scrims */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/20 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent pointer-events-none" />
+
+                    {/* Top Overlay Bar: Rank Badge + Category + Price */}
+                    <div className="relative z-10 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-mono font-black text-xs backdrop-blur-md border ${
+                          index === 0 
+                            ? 'bg-[#E31B23] text-white border-[#E31B23] shadow-lg shadow-[#E31B23]/40' 
+                            : index === 1
+                            ? 'bg-amber-500 text-white border-amber-400 shadow-lg shadow-amber-500/30'
+                            : index === 2
+                            ? 'bg-white text-zinc-950 border-white font-black'
+                            : 'bg-black/50 text-white border-white/20'
+                        }`}>
+                          #{index + 1}
                         </span>
-                        <span className="text-emerald-400 font-bold shrink-0">
-                          {minPrice === 0 ? 'FREE' : formatCurrency(minPrice)}
+                        <span className="px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/15 text-[10px] font-mono uppercase tracking-wider text-zinc-300">
+                          {trendEvent.category || 'Event'}
                         </span>
                       </div>
+
+                      <span className="px-2.5 py-1 rounded-full bg-[#E31B23]/90 backdrop-blur-md text-white text-[11px] font-mono font-black shadow-md shadow-[#E31B23]/30">
+                        {minPrice === 0 ? 'FREE' : formatCurrency(minPrice)}
+                      </span>
                     </div>
 
-                    {/* Title & Date */}
-                    <div className="space-y-1">
-                      <h3 className="text-sm sm:text-base font-bold text-white line-clamp-1 group-hover:text-[#E31B23] transition-colors">
-                        {trendEvent.title}
-                      </h3>
-                      <p className="text-xs text-zinc-400 font-mono">
-                        {formatDate(trendEvent.startDate)}
-                      </p>
-                    </div>
+                    {/* Bottom Overlay Content */}
+                    <div className="relative z-10 space-y-3 pt-6">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-300">
+                          <Calendar className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
+                          <span>{formatDate(trendEvent.startDate)}</span>
+                        </div>
+                        <h3 className="text-base sm:text-lg font-black text-white line-clamp-2 leading-snug group-hover:text-red-400 transition-colors drop-shadow-md">
+                          {trendEvent.title}
+                        </h3>
+                        <div className="flex items-center gap-1.5 text-xs text-zinc-300 font-mono truncate">
+                          <MapPin className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
+                          <span className="truncate">{trendEvent.venue || trendEvent.city || 'Lagos, Nigeria'}</span>
+                        </div>
+                      </div>
 
-                    {/* Quick Access Action */}
-                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs font-bold text-zinc-400 group-hover:text-white">
-                      <span>Reserve Pass</span>
-                      <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1 text-[#E31B23]" />
+                      {/* Quick Access CTA Pill */}
+                      <div className="pt-2 border-t border-white/15 flex items-center justify-between">
+                        <span className="text-xs font-bold text-white group-hover:text-[#E31B23] transition-colors">
+                          Get Tickets
+                        </span>
+                        <div className="w-7 h-7 rounded-full bg-white/10 group-hover:bg-[#E31B23] flex items-center justify-center transition-all duration-300">
+                          <ArrowRight className="w-3.5 h-3.5 text-white transition-transform group-hover:translate-x-0.5" />
+                        </div>
+                      </div>
                     </div>
                   </Link>
                 );
@@ -560,7 +569,7 @@ export const Discover: React.FC = () => {
       {/* ========================================================================= */}
       {/* 3. MAIN MARKETPLACE CONTENT AREA                                          */}
       {/* ========================================================================= */}
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-12 py-12 space-y-10" ref={resultsRef}>
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-12 sm:py-16 space-y-10" ref={resultsRef}>
         
         {/* Mobile Filter Toggle & Quick Bar */}
         <div className="md:hidden flex items-center justify-between gap-3 bg-white/[0.04] p-3 rounded-2xl border border-white/10">

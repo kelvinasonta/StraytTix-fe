@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Heart, Calendar, MapPin, Clock, Video } from 'lucide-react';
+import { Heart, Calendar, MapPin, Video } from 'lucide-react';
 import type { Event } from '../../types/api';
-import { formatCurrency, formatDate, formatEventDateTime } from '../../utils/format';
+import { formatCurrency, formatDate } from '../../utils/format';
 import { useNotification } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
 import { isEventFavorited, toggleFavoriteEvent, FAVORITES_UPDATED_EVENT } from '../../utils/favorites';
@@ -112,8 +112,6 @@ export const EventCard: React.FC<EventCardProps> = ({
     return `From ${formatCurrency(minPrice)}`;
   };
 
-  const formattedTime = event.startTime ? formatEventDateTime('', event.startTime) : '';
-
   if (variant === 'compact') {
     return (
       <Link 
@@ -138,135 +136,144 @@ export const EventCard: React.FC<EventCardProps> = ({
     return (
       <Link 
         to={`/events/${event.slug || event.id}`} 
-        className="group flex flex-col sm:flex-row gap-5 p-5 bg-white hover:bg-zinc-50/80 border border-zinc-200 rounded-3xl transition-all shadow-xs hover:shadow-md"
+        className="group relative flex flex-col sm:flex-row rounded-3xl overflow-hidden border border-white/10 hover:border-white/25 bg-[#0F0F14] transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
       >
-        <div className="relative w-full sm:w-56 h-40 rounded-2xl overflow-hidden flex-shrink-0">
+        {/* Full-bleed background on mobile, left half on desktop */}
+        <div className="relative w-full sm:w-72 h-52 sm:h-auto min-h-[200px] overflow-hidden flex-shrink-0">
           <img 
-            src={event.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=500&q=80'} 
+            src={event.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=800&q=80'} 
             alt={event.title} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 brightness-[0.8] contrast-[1.05]"
           />
-          <span className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm border border-zinc-200 px-3 py-1 rounded-full text-xs font-bold text-zinc-800 shadow-xs">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent sm:hidden" />
+          <span className="absolute top-3.5 left-3.5 bg-black/60 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full text-xs font-mono font-bold text-white shadow-md">
             {categoryName}
           </span>
         </div>
-        <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
-          <div>
+
+        {/* Content Side */}
+        <div className="flex-1 flex flex-col justify-between p-6 min-w-0 bg-gradient-to-b sm:bg-gradient-to-r from-transparent via-[#0F0F14] to-[#0F0F14]">
+          <div className="space-y-2">
             <div className="flex justify-between items-start gap-3">
-              <h3 className="text-lg font-black text-zinc-950 truncate group-hover:text-[#E31B23] transition-colors">
+              <h3 className="text-xl font-black text-white truncate group-hover:text-[#E31B23] transition-colors">
                 {event.title}
               </h3>
               <button 
                 onClick={handleFavoriteClick}
-                className="p-2 rounded-full bg-zinc-50 border border-zinc-200 text-zinc-400 hover:text-[#E31B23] hover:bg-red-50 transition-all flex-shrink-0 cursor-pointer"
+                className="p-2.5 rounded-full bg-white/10 border border-white/15 text-zinc-300 hover:text-white hover:bg-[#E31B23] transition-all flex-shrink-0 cursor-pointer"
                 title="Save event"
               >
                 <Heart className={`w-4 h-4 ${fav ? 'fill-[#E31B23] text-[#E31B23]' : ''}`} />
               </button>
             </div>
-            <p className="text-sm text-zinc-600 line-clamp-2 mt-1.5 leading-relaxed font-normal">{event.description}</p>
+            <p className="text-sm text-zinc-300 line-clamp-2 leading-relaxed font-normal">{event.description}</p>
           </div>
-          <div className="flex items-center justify-between mt-4 border-t border-zinc-100 pt-3">
-            <div className="flex items-center gap-4 text-sm font-semibold text-zinc-500">
+
+          <div className="flex items-center justify-between mt-5 border-t border-white/10 pt-4">
+            <div className="flex items-center gap-4 text-xs font-mono text-zinc-300">
               <span className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-zinc-400" />
+                <Calendar className="w-3.5 h-3.5 text-[#E31B23]" />
                 {formatDate(event.startDate)}
               </span>
-              <span className="flex items-center gap-1.5 truncate max-w-[160px]">
+              <span className="flex items-center gap-1.5 truncate max-w-[200px]">
                 {isOnline ? (
                   <>
-                    <Video className="w-4 h-4 text-zinc-400" />
-                    Virtual or Online Event
+                    <Video className="w-3.5 h-3.5 text-indigo-400" />
+                    Virtual Event
                   </>
                 ) : (
                   <>
-                    <MapPin className="w-4 h-4 text-zinc-400" />
+                    <MapPin className="w-3.5 h-3.5 text-[#E31B23]" />
                     {event.venue || event.city || 'Venue'}
                   </>
                 )}
               </span>
             </div>
-            <span className="text-base font-black text-[#E31B23]">{getStartingPrice()}</span>
+            <span className="text-lg font-black font-mono text-white">{getStartingPrice()}</span>
           </div>
         </div>
       </Link>
     );
   }
 
-  // Default Grid Card matching the mockup with enlarged write-ups and prominent action button
+  // Default Grid Card: Full-bleed image filling the div with event details layered directly on top for high-end luxury feel
   return (
-    <div className="group bg-white border border-zinc-200/90 rounded-3xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.08)] hover:border-zinc-300 transition-all flex flex-col">
-      {/* Event Image Banner */}
-      <Link to={`/events/${event.slug || event.id}`} className="relative h-48 sm:h-52 w-full overflow-hidden block bg-zinc-100">
-        <img 
-          src={event.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=600&q=80'} 
-          alt={event.title} 
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/15" />
+    <div className="group relative rounded-[2rem] overflow-hidden border border-white/10 hover:border-white/30 h-[440px] sm:h-[480px] flex flex-col justify-between p-6 transition-all duration-500 hover:shadow-2xl hover:shadow-[#E31B23]/15 hover:-translate-y-1.5 bg-zinc-950">
+      {/* Full Bleed Background Event Image */}
+      <img 
+        src={event.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=800&q=80'} 
+        alt={event.title} 
+        className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.72] contrast-[1.08] group-hover:scale-110 group-hover:brightness-[0.6] transition-all duration-700 pointer-events-none"
+      />
 
-        {/* Category Badge on Top-Left */}
-        <span className="absolute top-3.5 left-3.5 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-zinc-800 shadow-xs border border-white/60">
+      {/* Layered Gradient Scrims: Dark gradient from bottom up, subtle top vignette for badge contrast */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent pointer-events-none" />
+
+      {/* Top Floating Bar: Category Pill & Favorite Action Button */}
+      <div className="relative z-10 flex items-center justify-between">
+        <span className="px-3.5 py-1.5 rounded-full bg-black/50 backdrop-blur-xl border border-white/20 text-xs font-mono font-bold text-zinc-100 shadow-md">
           {categoryName}
         </span>
 
-        {/* Favorite Button on Top-Right */}
         <button 
           onClick={handleFavoriteClick}
-          className="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-black/40 backdrop-blur-md border border-white/30 text-white flex items-center justify-center hover:bg-white hover:text-[#E31B23] hover:scale-105 transition-all shadow-sm cursor-pointer"
+          className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-xl border border-white/20 text-white flex items-center justify-center hover:bg-white hover:text-[#E31B23] hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
           title="Save event"
         >
           <Heart className={`w-4 h-4 ${fav ? 'fill-[#E31B23] text-[#E31B23]' : ''}`} />
         </button>
-      </Link>
+      </div>
 
-      {/* Card Body */}
-      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-        <div className="space-y-2">
-          <Link to={`/events/${event.slug || event.id}`}>
-            <h3 className="text-base sm:text-lg font-black text-zinc-950 line-clamp-1 group-hover:text-[#E31B23] transition-colors leading-tight">
-              {event.title}
-            </h3>
-          </Link>
-
-          {/* Location / Format */}
-          <div className="flex items-center gap-2 text-sm text-zinc-600 font-medium">
+      {/* Bottom Floating Details: Date, Location, Title, Price, & Action Button */}
+      <div className="relative z-10 space-y-4 pt-8">
+        
+        {/* Meta badges: Date & Location */}
+        <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-zinc-300">
+          <span className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10">
+            <Calendar className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
+            <span>{formatDate(event.startDate)}</span>
+          </span>
+          <span className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 truncate max-w-[200px]">
             {isOnline ? (
               <>
-                <Video className="w-4 h-4 text-zinc-400 flex-shrink-0" />
-                <span className="truncate">Virtual or Online Event</span>
+                <Video className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <span>Virtual Event</span>
               </>
             ) : (
               <>
-                <MapPin className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
                 <span className="truncate">{event.venue ? `${event.venue}, ${event.city || ''}` : event.city || 'Venue'}</span>
               </>
             )}
-          </div>
-
-          {/* Date & Time */}
-          <div className="flex items-center gap-2 text-sm text-zinc-600 font-medium">
-            <Clock className="w-4 h-4 text-zinc-400 flex-shrink-0" />
-            <span>{formattedTime ? `${formatDate(event.startDate)} • ${formattedTime}` : (formatDate(event.startDate) || 'Date TBA')}</span>
-          </div>
+          </span>
         </div>
 
-        {/* Price & CTA */}
-        <div className="pt-3 border-t border-zinc-100 space-y-3">
-          <div className="flex items-baseline justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Admission</span>
-            <span className="text-base font-black text-[#E31B23]">
+        {/* Title */}
+        <Link to={`/events/${event.slug || event.id}`} className="block">
+          <h3 className="text-xl sm:text-2xl font-black text-white line-clamp-2 leading-tight group-hover:text-red-400 transition-colors drop-shadow-md">
+            {event.title}
+          </h3>
+        </Link>
+
+        {/* Price & Primary CTA */}
+        <div className="pt-3 border-t border-white/15 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Tickets</p>
+            <p className="text-lg sm:text-xl font-black font-mono text-white">
               {getStartingPrice()}
-            </span>
+            </p>
           </div>
 
           <Link 
             to={`/events/${event.slug || event.id}`}
-            className="w-full py-3 px-4 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-black rounded-xl text-center block transition-all shadow-xs hover:shadow-md cursor-pointer active:scale-[0.99]"
+            className="px-5 py-2.5 bg-[#E31B23] hover:bg-[#C9141B] text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-[0_8px_20px_-2px_rgba(227,27,35,0.6)] active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0"
           >
-            Get Tickets
+            <span>Get Pass</span>
+            <span className="text-base leading-none">→</span>
           </Link>
         </div>
+
       </div>
     </div>
   );
