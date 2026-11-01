@@ -279,46 +279,56 @@ export const Home: React.FC = () => {
 
         {/* ========================================================================= */}
         {/* 2.5 TRUST MARQUEE: Verified Promoters, Brands & Global Event Producers     */}
-        {/*     Subtle luxury grayscale ribbon with reduced-motion safety             */}
+        {/*     High-end continuous animated logo stream with subtle grayscale logos  */}
         {/* ========================================================================= */}
-        <section className="pt-20 pb-8 px-4 sm:px-6 lg:px-8 bg-white dark:bg-[#070709] border-b border-zinc-150 dark:border-white/5 transition-colors duration-300">
-          <div className="max-w-6xl mx-auto space-y-4">
-            <p className="text-center text-[11px] font-mono uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500 font-semibold">
-              TRUSTED BY LEADING PROMOTERS, FESTIVALS &amp; VENUES ACROSS NIGERIA
+        <section className="pt-20 pb-10 px-4 sm:px-6 lg:px-8 bg-white dark:bg-[#070709] border-b border-zinc-150 dark:border-white/5 transition-colors duration-300 overflow-hidden">
+          <div className="max-w-6xl mx-auto space-y-6">
+            <p className="text-center text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-500 font-bold">
+              TRUSTED BY LEADING PROMOTERS, FESTIVALS &amp; CULTURAL PRODUCERS
             </p>
 
-            <div className="relative overflow-hidden py-4 [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]">
-              <div className="flex items-center gap-8 sm:gap-14 animate-marquee whitespace-nowrap will-change-transform">
+            <div className="relative w-full overflow-hidden py-2 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+              <div className="animate-marquee items-center gap-6 sm:gap-8 will-change-transform">
                 {[
-                  'NATIVE SOUND SYSTEM',
-                  'FLYTIME FEST',
-                  'EKO CONVENTION CENTER',
-                  'PALMWINE MUSIC FEST',
-                  'LIVESPOT X FESTIVAL',
-                  'THE BEAT 99.9 FM',
-                  'HOMECOMING LAGOS',
-                  'TERRA KULTURE ARENA',
-                  'AFROCHELLA GLOBAL',
-                  'MAINLAND BLOCKPARTY'
+                  { name: 'Native Sound System', symbol: 'NSS', category: 'FESTIVAL' },
+                  { name: 'Flytime Fest', symbol: 'FLY', category: 'PROMOTER' },
+                  { name: 'Eko Convention Center', symbol: 'ECC', category: 'ARENA' },
+                  { name: 'Palmwine Music Fest', symbol: 'PWM', category: 'LIVE MUSIC' },
+                  { name: 'Livespot X Festival', symbol: 'LSX', category: 'EXPERIENCE' },
+                  { name: 'The Beat 99.9 FM', symbol: 'BEAT', category: 'MEDIA' },
+                  { name: 'Homecoming Lagos', symbol: 'HMC', category: 'CULTURE' },
+                  { name: 'Terra Kulture Arena', symbol: 'TKA', category: 'THEATRE' },
+                  { name: 'Afrochella Global', symbol: 'ACG', category: 'FESTIVAL' },
+                  { name: 'Mainland BlockParty', symbol: 'MBP', category: 'NIGHTLIFE' },
                 ].concat([
-                  'NATIVE SOUND SYSTEM',
-                  'FLYTIME FEST',
-                  'EKO CONVENTION CENTER',
-                  'PALMWINE MUSIC FEST',
-                  'LIVESPOT X FESTIVAL',
-                  'THE BEAT 99.9 FM',
-                  'HOMECOMING LAGOS',
-                  'TERRA KULTURE ARENA',
-                  'AFROCHELLA GLOBAL',
-                  'MAINLAND BLOCKPARTY'
+                  { name: 'Native Sound System', symbol: 'NSS', category: 'FESTIVAL' },
+                  { name: 'Flytime Fest', symbol: 'FLY', category: 'PROMOTER' },
+                  { name: 'Eko Convention Center', symbol: 'ECC', category: 'ARENA' },
+                  { name: 'Palmwine Music Fest', symbol: 'PWM', category: 'LIVE MUSIC' },
+                  { name: 'Livespot X Festival', symbol: 'LSX', category: 'EXPERIENCE' },
+                  { name: 'The Beat 99.9 FM', symbol: 'BEAT', category: 'MEDIA' },
+                  { name: 'Homecoming Lagos', symbol: 'HMC', category: 'CULTURE' },
+                  { name: 'Terra Kulture Arena', symbol: 'TKA', category: 'THEATRE' },
+                  { name: 'Afrochella Global', symbol: 'ACG', category: 'FESTIVAL' },
+                  { name: 'Mainland BlockParty', symbol: 'MBP', category: 'NIGHTLIFE' },
                 ]).map((brand, idx) => (
-                  <span
+                  <div
                     key={idx}
-                    className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono font-bold tracking-wider text-zinc-400/80 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-default select-none"
+                    className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-zinc-100/80 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 transition-all cursor-default select-none group shrink-0"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#E31B23]/40" />
-                    {brand}
-                  </span>
+                    {/* Architectural Brand Mark Badge */}
+                    <div className="w-8 h-8 rounded-xl bg-white dark:bg-white/10 border border-zinc-200 dark:border-white/10 flex items-center justify-center font-mono font-black text-xs text-zinc-900 dark:text-white group-hover:bg-[#E31B23] group-hover:text-white group-hover:border-[#E31B23] transition-colors shadow-xs">
+                      {brand.symbol}
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="text-xs sm:text-sm font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-zinc-950 dark:group-hover:text-white transition-colors leading-tight whitespace-nowrap">
+                        {brand.name}
+                      </span>
+                      <span className="text-[9px] font-mono tracking-wider text-zinc-400 dark:text-zinc-500 uppercase leading-tight">
+                        {brand.category}
+                      </span>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
