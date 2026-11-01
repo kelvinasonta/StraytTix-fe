@@ -44,7 +44,7 @@ export const Home: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#08080A] text-zinc-900 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#08080A] text-zinc-900 flex flex-col justify-between selection:bg-zinc-800 selection:text-white antialiased overflow-x-hidden">
       {/* Fixed top Navbar overlay */}
       <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
         <Navbar />
@@ -164,32 +164,34 @@ export const Home: React.FC = () => {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-4xl mx-auto"
           >
-            {/* Outer Clean Elevated Container */}
-            <div className="p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl bg-white shadow-[0_20px_50px_-10px_rgba(0,0,0,0.18)]">
-              {/* Inner Form */}
+            {/* Outer Clean Elevated Container with subtle soft focus glow (No harsh red outlines) */}
+            <div className="p-1 sm:p-2 rounded-full sm:rounded-3xl bg-white shadow-[0_20px_50px_-10px_rgba(0,0,0,0.22)] transition-all duration-300 ring-1 ring-black/5 focus-within:ring-2 focus-within:ring-zinc-950/20 focus-within:shadow-[0_24px_60px_-10px_rgba(0,0,0,0.3)]">
+              {/* Inner Form: Always a single row on mobile and desktop */}
               <form 
                 onSubmit={handleSearchSubmit}
-                className="flex flex-col md:flex-row items-stretch md:items-center gap-2 p-1.5 sm:p-2"
+                className="flex flex-row items-center gap-2 p-1 sm:p-2"
               >
                 {/* Search Keyword Input */}
-                <div className="flex items-center gap-3 px-3 py-2 flex-1 min-w-0">
-                  <Search className="w-5 h-5 text-zinc-400 shrink-0" />
+                <div className="flex items-center gap-2.5 sm:gap-3 px-3 py-1.5 sm:py-2 flex-1 min-w-0">
+                  <Search className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400 shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Find events by name, location, or artist..."
-                    className="w-full bg-transparent text-sm sm:text-base text-zinc-950 placeholder-zinc-400 outline-none font-medium truncate"
+                    placeholder="Find events, artists, venues..."
+                    className="w-full bg-transparent text-xs sm:text-base text-zinc-950 placeholder-zinc-400 outline-none border-none focus:outline-none focus:ring-0 focus:border-transparent font-medium truncate caret-zinc-950 selection:bg-zinc-900 selection:text-white"
                   />
                 </div>
 
-                {/* Execute Button */}
+                {/* Execute Button: Icon-only on mobile, full label on sm+ */}
                 <button
                   type="submit"
-                  className="px-6 sm:px-7 py-3 bg-[#E31B23] hover:bg-[#C9141B] text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2 shrink-0 ml-auto"
+                  aria-label="Search events"
+                  className="w-10 h-10 sm:w-auto sm:h-auto sm:px-7 sm:py-3 bg-[#E31B23] hover:bg-[#C9141B] text-white text-sm sm:text-base font-bold rounded-full sm:rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2 shrink-0 ml-auto"
                 >
-                  <span>Search</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <Search className="w-4 h-4 sm:hidden shrink-0" />
+                  <span className="hidden sm:inline">Search</span>
+                  <ArrowRight className="hidden sm:inline w-4 h-4" />
                 </button>
               </form>
             </div>
