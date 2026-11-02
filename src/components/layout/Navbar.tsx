@@ -22,7 +22,8 @@ import {
   Smartphone,
   BookOpen,
   Info,
-  Flag
+  Flag,
+  Mail
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -135,11 +136,12 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
     { to: '/pricing', label: 'Pricing' },
   ];
 
-  // Guest "More" Dropdown Links (Download App, Blog, About Us, Report)
+  // Guest "More" Dropdown Links (Download App, Blog, About Us, Contact Us, Report)
   const guestDropdownLinks = [
     { to: '/download', label: 'Download App', icon: Smartphone, desc: 'Get StraytTix on iOS & Android' },
     { to: '/blog', label: 'Blog & Stories', icon: BookOpen, desc: 'Guides, festival tips & releases' },
     { to: '/about', label: 'About Us', icon: Info, desc: 'Our mission, team & culture' },
+    { to: '/contact', label: 'Contact Us', icon: Mail, desc: '24/7 concierge, support & inquiries' },
     { to: '/report', label: 'Report an Issue', icon: Flag, desc: 'Security, fraud & scam triage' },
   ];
 
@@ -206,9 +208,11 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
             : 'bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] py-0'
           : isScrolled
             ? 'pt-2.5 sm:pt-3.5 pb-1.5 px-3 sm:px-6 bg-transparent border-b border-transparent pointer-events-none'
-            : isDarkCanvasPage
-              ? 'pt-0 pb-0 px-0 bg-[#070709]/85 backdrop-blur-xl border-b border-white/10 pointer-events-auto'
-              : 'pt-0 pb-0 px-0 bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] pointer-events-auto'
+            : isDarkHeroPage
+              ? 'pt-0 pb-0 px-0 bg-transparent border-b border-white/[0.06] backdrop-blur-[2px] pointer-events-auto'
+              : isDarkCanvasPage
+                ? 'pt-0 pb-0 px-0 bg-[#070709]/85 backdrop-blur-xl border-b border-white/10 pointer-events-auto'
+                : 'pt-0 pb-0 px-0 bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] pointer-events-auto'
       }`}
     >
       <nav
@@ -239,12 +243,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                   className={({ isActive }) =>
                     `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                       isActive
-                        ? isDarkCanvasPage
-                          ? 'text-white font-black'
-                          : 'text-[#E31B23] font-bold'
-                        : isDarkCanvasPage
-                          ? 'text-zinc-400 hover:text-white'
-                          : 'text-zinc-600 hover:text-zinc-950'
+                        ? 'text-[#E31B23] font-bold'
+                        : 'text-zinc-300 hover:text-[#E31B23]'
                     }`
                   }
                 >
@@ -259,12 +259,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                   onClick={() => setMoreDropdown(!moreDropdown)}
                   className={`text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1 cursor-pointer select-none ${
                     isMoreDropdownActive || moreDropdown
-                      ? isDarkCanvasPage
-                        ? 'text-white font-black'
-                        : 'text-[#E31B23] font-bold'
-                      : isDarkCanvasPage
-                        ? 'text-zinc-400 hover:text-white'
-                        : 'text-zinc-600 hover:text-zinc-950'
+                      ? 'text-[#E31B23] font-bold'
+                      : 'text-zinc-300 hover:text-[#E31B23]'
                   }`}
                   aria-expanded={moreDropdown}
                   aria-haspopup="true"
@@ -330,12 +326,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                 className={({ isActive }) =>
                   `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                     isActive
-                      ? isDarkCanvasPage
-                        ? 'text-white font-black'
-                        : 'text-[#E31B23] font-bold'
-                      : isDarkCanvasPage
-                        ? 'text-zinc-400 hover:text-white'
-                        : 'text-zinc-600 hover:text-zinc-950'
+                      ? 'text-[#E31B23] font-bold'
+                      : 'text-zinc-300 hover:text-[#E31B23]'
                   }`
                 }
               >

@@ -24,6 +24,7 @@ import { EventDetails } from './pages/EventDetails';
 import { EventTickets } from './pages/EventTickets';
 import { OrganizerProfile } from './pages/OrganizerProfile';
 import { DownloadApp } from './pages/DownloadApp';
+import { ContactUs } from './pages/ContactUs';
 
 // Auth pages
 import { Login } from './pages/auth/Login';
@@ -86,6 +87,8 @@ export const App: React.FC = () => {
             <Route path="/docs" element={<ApiDocs />} />
             <Route path="/download" element={<DownloadApp />} />
             <Route path="/app" element={<DownloadApp />} />
+            <Route path="/contact" element={<ContactUs />} />
+            <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/report" element={<Report />} />
             <Route path="/events/:slug" element={<EventDetails />} />
             <Route path="/events/:slug/tickets" element={<EventTickets />} />

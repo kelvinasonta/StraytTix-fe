@@ -46,6 +46,32 @@ h1, h2, h3, h4, h5, h6, .font-display {
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
+/* Marquee Keyframes for Continuous Brand Ticker */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+}
+
 /* Monospace code, metadata, tags */
 code, kbd, samp, pre, .font-mono {
   font-family: var(--font-mono);
