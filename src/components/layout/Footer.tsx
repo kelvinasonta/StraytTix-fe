@@ -78,13 +78,13 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-2 space-y-4">
             <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-950 dark:text-white font-bold">Platform</h4>
             <ul className="space-y-3 text-xs sm:text-sm font-medium">
-              <li><Link to="/discover" className="hover:text-zinc-950 dark:hover:text-white transition-colors">Discover Events</Link></li>
-              <li><Link to="/how-it-works" className="hover:text-zinc-950 dark:hover:text-white transition-colors">How It Works</Link></li>
-              <li><Link to="/pricing" className="hover:text-zinc-950 dark:hover:text-white transition-colors">Pricing & Fees</Link></li>
-              <li><Link to="/download" className="hover:text-zinc-950 dark:hover:text-white transition-colors">Mobile App</Link></li>
-              <li><Link to="/blog" className="hover:text-zinc-950 dark:hover:text-white transition-colors">Blog & Guides</Link></li>
+              <li><Link to="/discover" className="hover:text-[#E31B23] transition-colors">Discover Events</Link></li>
+              <li><Link to="/how-it-works" className="hover:text-[#E31B23] transition-colors">How It Works</Link></li>
+              <li><Link to="/pricing" className="hover:text-[#E31B23] transition-colors">Pricing & Fees</Link></li>
+              <li><Link to="/download" className="hover:text-[#E31B23] transition-colors">Mobile App</Link></li>
+              <li><Link to="/blog" className="hover:text-[#E31B23] transition-colors">Blog & Guides</Link></li>
               <li>
-                <Link to="/api-docs" className="hover:text-zinc-950 dark:hover:text-white transition-colors flex items-center gap-2">
+                <Link to="/api-docs" className="hover:text-[#E31B23] transition-colors flex items-center gap-2">
                   <span>Developer API</span>
                   <span className="text-[10px] font-mono bg-zinc-200 dark:bg-white/10 text-zinc-900 dark:text-white font-bold px-1.5 py-0.5 rounded-md border border-zinc-300 dark:border-white/10">v1</span>
                 </Link>
@@ -96,12 +96,12 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-2 space-y-4">
             <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-950 dark:text-white font-bold">Organizers & Trust</h4>
             <ul className="space-y-3 text-xs sm:text-sm font-medium">
-              <li><Link to="/organizer/events/create" className="hover:text-zinc-950 dark:hover:text-white transition-colors">Host an Event</Link></li>
-              <li><Link to="/organizer/events" className="hover:text-zinc-950 dark:hover:text-white transition-colors">Organizer Portal</Link></li>
+              <li><Link to="/organizer/events/create" className="hover:text-[#E31B23] transition-colors">Host an Event</Link></li>
+              <li><Link to="/organizer/events" className="hover:text-[#E31B23] transition-colors">Organizer Portal</Link></li>
               <li><Link to="/report" className="text-amber-500 hover:text-amber-400 font-semibold flex items-center gap-1 transition-colors">Report an Event</Link></li>
-              <li><Link to="/refund-policy" className="hover:text-zinc-950 dark:hover:text-white transition-colors">Refund Policy</Link></li>
-              <li><Link to="/terms" className="hover:text-zinc-950 dark:hover:text-white transition-colors">Terms of Service</Link></li>
-              <li><Link to="/privacy" className="hover:text-zinc-950 dark:hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/refund-policy" className="hover:text-[#E31B23] transition-colors">Refund Policy</Link></li>
+              <li><Link to="/terms" className="hover:text-[#E31B23] transition-colors">Terms of Service</Link></li>
+              <li><Link to="/privacy" className="hover:text-[#E31B23] transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
 
