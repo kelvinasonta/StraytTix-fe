@@ -239,12 +239,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                   className={({ isActive }) =>
                     `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                       isActive
-                        ? isDarkCanvasPage
-                          ? 'text-white font-black'
-                          : 'text-[#E31B23] font-bold'
-                        : isDarkCanvasPage
-                          ? 'text-zinc-400 hover:text-white'
-                          : 'text-zinc-600 hover:text-zinc-950'
+                        ? 'text-[#E31B23] font-bold'
+                        : 'text-zinc-300 hover:text-[#E31B23]'
                     }`
                   }
                 >
@@ -259,12 +255,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                   onClick={() => setMoreDropdown(!moreDropdown)}
                   className={`text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1 cursor-pointer select-none ${
                     isMoreDropdownActive || moreDropdown
-                      ? isDarkCanvasPage
-                        ? 'text-white font-black'
-                        : 'text-[#E31B23] font-bold'
-                      : isDarkCanvasPage
-                        ? 'text-zinc-400 hover:text-white'
-                        : 'text-zinc-600 hover:text-zinc-950'
+                      ? 'text-[#E31B23] font-bold'
+                      : 'text-zinc-300 hover:text-[#E31B23]'
                   }`}
                   aria-expanded={moreDropdown}
                   aria-haspopup="true"
@@ -330,12 +322,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                 className={({ isActive }) =>
                   `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                     isActive
-                      ? isDarkCanvasPage
-                        ? 'text-white font-black'
-                        : 'text-[#E31B23] font-bold'
-                      : isDarkCanvasPage
-                        ? 'text-zinc-400 hover:text-white'
-                        : 'text-zinc-600 hover:text-zinc-950'
+                      ? 'text-[#E31B23] font-bold'
+                      : 'text-zinc-300 hover:text-[#E31B23]'
                   }`
                 }
               >
