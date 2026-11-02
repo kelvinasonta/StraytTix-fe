@@ -98,6 +98,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-3 text-xs sm:text-sm font-medium">
               <li><Link to="/organizer/events/create" className="hover:text-[#E31B23] transition-colors">Host an Event</Link></li>
               <li><Link to="/organizer/events" className="hover:text-[#E31B23] transition-colors">Organizer Portal</Link></li>
+              <li><Link to="/contact" className="hover:text-[#E31B23] transition-colors">Contact Support</Link></li>
               <li><Link to="/report" className="text-amber-500 hover:text-amber-400 font-semibold flex items-center gap-1 transition-colors">Report an Event</Link></li>
               <li><Link to="/refund-policy" className="hover:text-[#E31B23] transition-colors">Refund Policy</Link></li>
               <li><Link to="/terms" className="hover:text-[#E31B23] transition-colors">Terms of Service</Link></li>

@@ -67,15 +67,15 @@ export const Home: React.FC = () => {
               loop
               playsInline
               poster="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=2600&q=80"
-              className="w-full h-full object-cover object-center scale-100 opacity-70"
+              className="w-full h-full object-cover object-center scale-100 opacity-80"
             >
               <source src="/videos/hero-festival.mp4" type="video/mp4" />
               <source src="https://assets.mixkit.co/videos/14088/14088-720.mp4" type="video/mp4" />
             </video>
 
-            {/* Dark Overlay Layer */}
-            <div className="absolute inset-0 bg-black/60 z-[1]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-black/40 to-[#070709]/80 z-[2]" />
+            {/* Dark Overlay Layer - Subtle top fade allowing video to show right through transparent navbar */}
+            <div className="absolute inset-0 bg-black/45 z-[1]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-black/30 to-black/20 z-[2]" />
           </div>
 
           <div className="relative z-10 max-w-4xl mx-auto space-y-8 flex flex-col items-center">
@@ -149,47 +149,170 @@ export const Home: React.FC = () => {
         </section>
 
         {/* ========================================================================= */}
-        {/* 3. TRUSTED MARQUEE: Smooth, subtle moving promoter stream                  */}
+        {/* 3. TRUSTED MARQUEE: Logos-Only Vector Stream                             */}
         {/* ========================================================================= */}
-        <section className="pt-20 pb-12 px-4 sm:px-6 lg:px-8 bg-[#070709] border-b border-white/5 overflow-hidden">
-          <div className="max-w-6xl mx-auto space-y-5">
-            <p className="text-center text-xs font-medium tracking-wider text-zinc-500 uppercase">
+        <section className="pt-20 pb-14 px-4 sm:px-6 lg:px-8 bg-[#070709] border-b border-white/5 overflow-hidden">
+          <div className="max-w-6xl mx-auto space-y-7">
+            <p className="text-center text-xs font-semibold tracking-widest text-zinc-400 uppercase">
               Trusted by leading promoters and venues
             </p>
 
-            <div className="relative w-full overflow-hidden py-1 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-              <div className="animate-marquee items-center gap-8 will-change-transform">
+            <div className="relative w-full overflow-hidden py-3 [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]">
+              <div className="animate-marquee items-center gap-12 sm:gap-16 will-change-transform opacity-75 hover:opacity-100 transition-opacity">
                 {[
-                  'Native Sound System',
-                  'Flytime Promotions',
-                  'Eko Convention Centre',
-                  'Palmwine Music Festival',
-                  'Livespot X',
-                  'Mainland BlockParty',
-                  'Terra Kulture Arena',
-                  'The Beat 99.9 FM',
-                  'Afrochella',
-                  'Hard Rock Live'
+                  // 1. Native Sound System (clean editorial geometric badge)
+                  (
+                    <div key="native" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M8 12h8M12 8v8" />
+                      </svg>
+                      <span className="font-black text-sm tracking-tighter uppercase font-mono">NATIVE</span>
+                    </div>
+                  ),
+                  // 2. Flytime Fest
+                  (
+                    <div key="flytime" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
+                        <polygon points="12,2 22,22 12,17 2,22" />
+                      </svg>
+                      <span className="font-extrabold text-sm tracking-tight uppercase">FLYTIME</span>
+                    </div>
+                  ),
+                  // 3. Eko Convention Centre
+                  (
+                    <div key="eko" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-2">
+                        <rect x="3" y="3" width="18" height="18" rx="3" />
+                        <circle cx="12" cy="12" r="4" />
+                      </svg>
+                      <span className="font-black text-sm tracking-widest uppercase">EKO ARENA</span>
+                    </div>
+                  ),
+                  // 4. Livespot X
+                  (
+                    <div key="livespot" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
+                        <path d="M12 2L2 22h7l3-6 3 6h7z" />
+                      </svg>
+                      <span className="font-black text-sm tracking-tight uppercase">LIVESPOT X</span>
+                    </div>
+                  ),
+                  // 5. Mainland BlockParty
+                  (
+                    <div key="mainland" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-2">
+                        <rect x="2" y="2" width="9" height="9" rx="1.5" />
+                        <rect x="13" y="2" width="9" height="9" rx="1.5" />
+                        <rect x="2" y="13" width="9" height="9" rx="1.5" />
+                        <rect x="13" y="13" width="9" height="9" rx="1.5" fill="currentColor" />
+                      </svg>
+                      <span className="font-extrabold text-sm tracking-tighter uppercase font-mono">BLOCKPARTY</span>
+                    </div>
+                  ),
+                  // 6. Hard Rock Live
+                  (
+                    <div key="hardrock" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-2">
+                        <circle cx="12" cy="12" r="9" />
+                        <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
+                      </svg>
+                      <span className="font-black text-sm tracking-wide uppercase">HARD ROCK</span>
+                    </div>
+                  ),
+                  // 7. Afrochella / AfroFuture
+                  (
+                    <div key="afrochella" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
+                        <path d="M12 2l2.4 7.4h7.6l-6.2 4.5 2.4 7.4-6.2-4.5-6.2 4.5 2.4-7.4-6.2-4.5h7.6z" />
+                      </svg>
+                      <span className="font-black text-sm tracking-tight uppercase">AFROFUTURE</span>
+                    </div>
+                  ),
+                  // 8. Terra Kulture
+                  (
+                    <div key="terra" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,13 2,6" />
+                      </svg>
+                      <span className="font-bold text-sm tracking-wider uppercase">TERRA KULTURE</span>
+                    </div>
+                  )
                 ].concat([
-                  'Native Sound System',
-                  'Flytime Promotions',
-                  'Eko Convention Centre',
-                  'Palmwine Music Festival',
-                  'Livespot X',
-                  'Mainland BlockParty',
-                  'Terra Kulture Arena',
-                  'The Beat 99.9 FM',
-                  'Afrochella',
-                  'Hard Rock Live'
-                ]).map((name, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.02] border border-white/5 text-zinc-300 font-medium text-sm tracking-tight shrink-0 select-none"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-                    <span>{name}</span>
-                  </div>
-                ))}
+                  // Duplicate set for seamless continuous marquee loop
+                  (
+                    <div key="native-2" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M8 12h8M12 8v8" />
+                      </svg>
+                      <span className="font-black text-sm tracking-tighter uppercase font-mono">NATIVE</span>
+                    </div>
+                  ),
+                  (
+                    <div key="flytime-2" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
+                        <polygon points="12,2 22,22 12,17 2,22" />
+                      </svg>
+                      <span className="font-extrabold text-sm tracking-tight uppercase">FLYTIME</span>
+                    </div>
+                  ),
+                  (
+                    <div key="eko-2" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-2">
+                        <rect x="3" y="3" width="18" height="18" rx="3" />
+                        <circle cx="12" cy="12" r="4" />
+                      </svg>
+                      <span className="font-black text-sm tracking-widest uppercase">EKO ARENA</span>
+                    </div>
+                  ),
+                  (
+                    <div key="livespot-2" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
+                        <path d="M12 2L2 22h7l3-6 3 6h7z" />
+                      </svg>
+                      <span className="font-black text-sm tracking-tight uppercase">LIVESPOT X</span>
+                    </div>
+                  ),
+                  (
+                    <div key="mainland-2" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-2">
+                        <rect x="2" y="2" width="9" height="9" rx="1.5" />
+                        <rect x="13" y="2" width="9" height="9" rx="1.5" />
+                        <rect x="2" y="13" width="9" height="9" rx="1.5" />
+                        <rect x="13" y="13" width="9" height="9" rx="1.5" fill="currentColor" />
+                      </svg>
+                      <span className="font-extrabold text-sm tracking-tighter uppercase font-mono">BLOCKPARTY</span>
+                    </div>
+                  ),
+                  (
+                    <div key="hardrock-2" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-2">
+                        <circle cx="12" cy="12" r="9" />
+                        <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
+                      </svg>
+                      <span className="font-black text-sm tracking-wide uppercase">HARD ROCK</span>
+                    </div>
+                  ),
+                  (
+                    <div key="afrochella-2" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
+                        <path d="M12 2l2.4 7.4h7.6l-6.2 4.5 2.4 7.4-6.2-4.5-6.2 4.5 2.4-7.4-6.2-4.5h7.6z" />
+                      </svg>
+                      <span className="font-black text-sm tracking-tight uppercase">AFROFUTURE</span>
+                    </div>
+                  ),
+                  (
+                    <div key="terra-2" className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,13 2,6" />
+                      </svg>
+                      <span className="font-bold text-sm tracking-wider uppercase">TERRA KULTURE</span>
+                    </div>
+                  )
+                ])}
               </div>
             </div>
           </div>

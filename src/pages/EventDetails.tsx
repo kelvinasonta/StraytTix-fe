@@ -238,11 +238,22 @@ export const EventDetails: React.FC = () => {
   const categoryLabel = extractNameOrString(event?.category) || 'General';
 
   const layoutParam = searchParams.get('layout') as 'cinematic' | 'compact' | 'split' | 'bento' | null;
-  const validLayouts = ['cinematic', 'compact', 'split', 'bento'];
-  const bannerStyle: 'cinematic' | 'compact' | 'split' | 'bento' =
+  const validLayouts: ('cinematic' | 'compact' | 'split' | 'bento')[] = ['cinematic', 'compact', 'split', 'bento'];
+  
+  // Layout switch state for testing (isolated so it can be easily removed)
+  const defaultResolvedLayout: 'cinematic' | 'compact' | 'split' | 'bento' =
     (layoutParam && validLayouts.includes(layoutParam))
       ? layoutParam
       : (event?.bannerStyle as any) || (s.bannerStyle as any) || (s.banner_style as any) || (event?.meta?.bannerStyle as any) || 'cinematic';
+
+  const [activeLayoutOverride, setActiveLayoutOverride] = useState<'cinematic' | 'compact' | 'split' | 'bento'>(defaultResolvedLayout);
+  const [layoutSwitcherExpanded, setLayoutSwitcherExpanded] = useState(false);
+
+  useEffect(() => {
+    setActiveLayoutOverride(defaultResolvedLayout);
+  }, [defaultResolvedLayout]);
+
+  const bannerStyle = activeLayoutOverride;
 
   const handleGetTickets = () => {
     if (!event) return;
@@ -1183,7 +1194,11 @@ export const EventDetails: React.FC = () => {
     setOpenFaqIndex,
     handleCopyAddress,
     copiedAddress,
-    setContactModalOpen
+    setContactModalOpen,
+    tickets,
+    selectedTickets,
+    onQtyChange: handleQtyChange,
+    onProceedToCheckout: handleCheckout
   };
 
   return (
@@ -1253,7 +1268,7 @@ export const EventDetails: React.FC = () => {
         })()}
 
         {/* ========================================================================= */}
-        {/* 2. DYNAMIC HERO HEADER SECTION (Cinematic Full | Compact Header | Split Visual) */}
+        {/* 2. DYNAMIC HERO HEADER SECTION (Tix.africa Clean Red Banner & Poster)   */}
         {/* ========================================================================= */}
         <HeroHeader
           layout={bannerStyle}
@@ -1270,129 +1285,6 @@ export const EventDetails: React.FC = () => {
           onToggleFavorite={handleToggleFavorite}
           onSelectTickets={handleGetTickets}
         />
-
-        {/* ========================================================================= */}
-        {/* 3. FOUR-COLUMN KEY TELEMETRY STRIP */}
-        {/* ========================================================================= */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-          <div className={`${telemetryCardClass} p-4 sm:p-5 rounded-2xl shadow-xs flex items-center gap-3.5`}>
-            <div className={`w-11 h-11 rounded-xl ${telemetryIconClass} flex items-center justify-center flex-shrink-0`}>
-              <Calendar className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] font-bold opacity-60 uppercase tracking-wider block">Date & Time</span>
-              <p className="text-xs sm:text-sm font-black truncate">
-                {formatEventDateTime(event.startDate, event.startTime)}
-              </p>
-            </div>
-          </div>
-
-          <div className={`${telemetryCardClass} p-4 sm:p-5 rounded-2xl shadow-xs flex items-center justify-between gap-3`}>
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className={`w-11 h-11 rounded-xl ${telemetryIconClass} flex items-center justify-center flex-shrink-0`}>
-                {isPhysical ? <MapPin className="w-5 h-5" /> : <Video className="w-5 h-5" />}
-              </div>
-              <div className="min-w-0">
-                <span className="text-[10px] font-bold opacity-60 uppercase tracking-wider block">
-                  {isPhysical ? 'Venue' : 'Event Format'}
-                </span>
-                <p className="text-xs sm:text-sm font-black truncate">
-                  {isPhysical ? (event.venue || 'Venue') : 'Virtual or Online Event'}
-                </p>
-              </div>
-            </div>
-
-            {isPhysical && (
-              <a
-                href={directionsUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 rounded-xl bg-red-50 hover:bg-[#E31B23] text-[#E31B23] hover:text-white transition-colors flex-shrink-0 cursor-pointer shadow-2xs"
-                title="Get Directions"
-              >
-                <Navigation className="w-4 h-4" />
-              </a>
-            )}
-          </div>
-
-          <div className={`${telemetryCardClass} p-4 sm:p-5 rounded-2xl shadow-xs flex items-center gap-3.5`}>
-            <div className={`w-11 h-11 rounded-xl ${telemetryIconClass} flex items-center justify-center flex-shrink-0`}>
-              <Users className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] font-bold opacity-60 uppercase tracking-wider block">Audience</span>
-              <p className="text-xs sm:text-sm font-black truncate">
-                {event.capacity ? `${event.capacity}+ Attendees` : 'High Attendance'}
-              </p>
-            </div>
-          </div>
-
-          <div className={`${telemetryCardClass} p-4 sm:p-5 rounded-2xl shadow-xs flex items-center gap-3.5`}>
-            <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] font-bold opacity-60 uppercase tracking-wider block">Box Office</span>
-              <p className="text-xs sm:text-sm font-black truncate">100% Verified Pass</p>
-            </div>
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* 3.5 STICKY HANDSHAKE QUICK NAVIGATION & PASS CONCIERGE BAR */}
-        {/* ========================================================================= */}
-        <div className={`sticky top-16 z-30 backdrop-blur-md border p-2 sm:p-2.5 rounded-2xl sm:rounded-3xl flex items-center justify-between gap-3 overflow-x-auto ${handshakeNavClass}`}>
-          {/* Section Filter Quick Jump Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-shrink-0">
-            {[
-              { id: 'about', label: 'About Experience' },
-              { id: 'schedule', label: 'Lineup & Schedule' },
-              { id: 'location', label: isPhysical ? 'Venue & Directions' : 'Virtual or Online Event' },
-              { id: 'organizer', label: 'Host & Organizer' },
-              ...(event.galleryUrls && event.galleryUrls.length > 0 ? [{ id: 'gallery', label: 'Media & Gallery' }] : []),
-              { id: 'faq', label: 'Guidelines & FAQs' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setActiveTab(tab.id as any);
-                  const el = document.getElementById('details-tab-content');
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }}
-                className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all whitespace-nowrap cursor-pointer ${
-                  activeTab === tab.id
-                    ? handshakePillActiveClass
-                    : 'text-zinc-400 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Handshake Direct Ticket Booking Pod */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {isTicketSalesActive ? (
-              <button
-                type="button"
-                onClick={handleGetTickets}
-                className="px-4 py-2 sm:py-2.5 text-xs font-black rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer transition-all hover:scale-102 active:scale-98 whitespace-nowrap bg-[#E31B23] hover:bg-[#B91C1C] text-white"
-              >
-                <Ticket className="w-3.5 h-3.5" />
-                <span>Get Tickets</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            ) : (
-              <button
-                onClick={handleNativeShare}
-                className="px-3.5 py-2 sm:py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>Share</span>
-              </button>
-            )}
-          </div>
-        </div>
 
         {/* ========================================================================= */}
         {/* 4. DYNAMIC WHOLE-PAGE STRUCTURE & EXPERIENCE LAYOUT SWITCHER */}
@@ -1418,20 +1310,20 @@ export const EventDetails: React.FC = () => {
       {/* 5. MOBILE FLOATING STICKY ACTION BAR (Visible only on < lg screens) */}
       {/* ========================================================================= */}
       {isTicketSalesActive ? (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-xl border-t p-3.5 shadow-2xl bg-white/95 border-zinc-200/80">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-2xl border-t p-3.5 shadow-2xl bg-[#090D16]/95 border-white/10">
           <div className="max-w-md mx-auto flex items-center justify-between gap-4">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wide block text-zinc-400">
                 Tickets From
               </span>
-              <span className="text-base sm:text-lg font-black text-[#E31B23]">
+              <span className="text-base sm:text-lg font-black text-white">
                 {lowestPrice === 0 ? 'Free RSVP' : formatCurrency(lowestPrice)}
               </span>
             </div>
 
             <button
               onClick={handleGetTickets}
-              className="flex-1 py-3 px-5 text-xs sm:text-sm font-black rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-[#E31B23] hover:bg-[#B91C1C] text-white"
+              className="flex-1 py-3 px-5 text-xs sm:text-sm font-black rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-[#E31B23] hover:bg-[#B91C1C] text-white active:scale-98"
             >
               <Ticket className="w-4 h-4" />
               <span>Get Tickets</span>
@@ -1440,7 +1332,7 @@ export const EventDetails: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-xl border-t p-3 shadow-2xl bg-white/95 border-zinc-200/80">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-2xl border-t p-3 shadow-2xl bg-[#090D16]/95 border-white/10">
           <div className="max-w-md mx-auto flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               {statusMessageType === 'pre_sale' ? (
@@ -1612,6 +1504,74 @@ export const EventDetails: React.FC = () => {
         event={event}
         selectedTickets={selectedTickets}
       />
+
+      {/* ========================================================================= */}
+      {/* TEMPORARY TEST CONTROLLER: Event Layout Switcher (Can be easily removed)  */}
+      {/* ========================================================================= */}
+      <aside 
+        aria-label="Layout Tester"
+        className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 flex flex-col items-end gap-2 pointer-events-auto"
+      >
+        {layoutSwitcherExpanded && (
+          <div className="bg-[#0F0F14]/95 backdrop-blur-xl border border-white/20 p-3 rounded-2xl shadow-2xl space-y-2 w-64 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <span className="text-[11px] font-mono uppercase tracking-wider font-bold text-zinc-300">
+                Switch Style
+              </span>
+              <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                Preview Mode
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-1.5">
+              {[
+                { id: 'cinematic', label: '1. Cinematic Full', desc: 'Full-bleed atmospheric hero' },
+                { id: 'compact', label: '2. Compact Header', desc: 'Panoramic letterbox banner' },
+                { id: 'split', label: '3. Split Visual', desc: 'Editorial poster & flyer' },
+                { id: 'bento', label: '4. Modern Bento', desc: 'Modular asymmetrical tiles' }
+              ].map((style) => (
+                <button
+                  key={style.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveLayoutOverride(style.id as any);
+                  }}
+                  className={`w-full text-left p-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
+                    activeLayoutOverride === style.id
+                      ? 'bg-[#E31B23] text-white shadow-md'
+                      : 'bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white'
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold leading-tight truncate">{style.label}</p>
+                    <p className={`text-[10px] leading-tight truncate ${activeLayoutOverride === style.id ? 'text-white/80' : 'text-zinc-500'}`}>
+                      {style.desc}
+                    </p>
+                  </div>
+                  {activeLayoutOverride === style.id && (
+                    <Check className="w-4 h-4 text-white flex-shrink-0" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setLayoutSwitcherExpanded(!layoutSwitcherExpanded)}
+          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-full font-bold text-xs shadow-2xl transition-all cursor-pointer border ${
+            layoutSwitcherExpanded
+              ? 'bg-white text-zinc-950 border-white shadow-white/10'
+              : 'bg-[#0F0F14]/90 backdrop-blur-md text-white border-white/20 hover:border-white/40 hover:bg-[#15151D]'
+          }`}
+          title="Toggle Event Details Style Switcher"
+        >
+          <Sparkles className="w-4 h-4 text-[#E31B23]" />
+          <span className="font-mono text-[11px] uppercase tracking-wider">Style: <strong className="capitalize">{activeLayoutOverride}</strong></span>
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${layoutSwitcherExpanded ? 'rotate-180' : ''}`} />
+        </button>
+      </aside>
 
       <Footer />
     </div>
