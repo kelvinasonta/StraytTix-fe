@@ -28,11 +28,11 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variants = {
     primary: 'bg-[#E31B23] hover:bg-[#B91C1C] text-white shadow-xs hover:shadow-md border border-[#E31B23]',
-    secondary: 'bg-zinc-900 hover:bg-zinc-800 text-white shadow-xs border border-zinc-950',
-    outline: 'bg-transparent border border-zinc-200 text-zinc-900 hover:bg-zinc-50 hover:border-zinc-300',
+    secondary: 'bg-zinc-900 dark:bg-white/10 hover:bg-zinc-800 dark:hover:bg-white/15 text-white shadow-xs border border-zinc-950 dark:border-white/10',
+    outline: 'bg-transparent border border-zinc-200 dark:border-white/10 text-zinc-900 dark:text-white hover:bg-zinc-50 dark:hover:bg-white/5 hover:border-zinc-300 dark:hover:border-white/20',
     danger: 'bg-red-600 hover:bg-red-700 text-white border border-red-700',
     warning: 'bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white border border-amber-600 focus:ring-amber-400',
-    ghost: 'bg-transparent text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100',
+    ghost: 'bg-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5',
   };
 
   const widthStyle = fullWidth ? 'w-full' : '';
