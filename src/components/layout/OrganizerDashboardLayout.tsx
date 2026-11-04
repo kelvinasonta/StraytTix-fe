@@ -5,6 +5,7 @@ import {
   Calendar,
   ShoppingBag,
   Wallet,
+  Coins,
   User,
   Users,
   Settings,
@@ -60,7 +61,10 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
     { to: '/organizer/events', label: role === 'staff' ? 'Assigned Events' : 'My Events', icon: Calendar },
     ...(perms.canViewOrders ? [{ to: '/organizer/orders', label: 'Orders & Sales', icon: ShoppingBag }] : []),
     ...(isOrganization && perms.canManageTeam ? [{ to: '/organizer/team', label: 'Team Members', icon: Users }] : []),
-    ...(perms.canViewFinanceWallet ? [{ to: '/organizer/analytics', label: 'Finance & Wallet', icon: Wallet }] : []),
+    ...(perms.canViewFinanceWallet ? [
+      { to: '/organizer/analytics', label: 'Finance & Wallet', icon: Wallet },
+      { to: '/organizer/credits', label: 'Credits & Billing', icon: Coins }
+    ] : []),
     ...(perms.canEditOrganizerProfile ? [{ to: '/organizer/profile', label: 'Organizer Profile', icon: User }] : []),
     ...(perms.canAccessSettings ? [{ to: '/organizer/settings', label: role === 'staff' ? 'Staff Settings' : 'Settings', icon: Settings }] : []),
   ];

@@ -49,6 +49,7 @@ import { CreateEvent as OrganizerCreateEvent } from './pages/organizer/CreateEve
 import { Orders as OrganizerOrders } from './pages/organizer/Orders';
 import { Attendees as OrganizerAttendees } from './pages/organizer/Attendees';
 import { Analytics as OrganizerAnalytics } from './pages/organizer/Analytics';
+import { Credits as OrganizerCredits } from './pages/organizer/Credits';
 import { Profile as OrganizerProfileSettings } from './pages/organizer/Profile';
 import { Settings as OrganizerSettings } from './pages/organizer/Settings';
 import { TeamMembers as OrganizerTeamMembers } from './pages/organizer/TeamMembers';
@@ -273,6 +274,14 @@ export const App: React.FC = () => {
               element={
                 <OrganizerRoute requiredPermission="canViewRevenue">
                   <OrganizerAnalytics />
+                </OrganizerRoute>
+              }
+            />
+            <Route
+              path="/organizer/credits"
+              element={
+                <OrganizerRoute requiredPermission="canViewRevenue">
+                  <OrganizerCredits />
                 </OrganizerRoute>
               }
             />

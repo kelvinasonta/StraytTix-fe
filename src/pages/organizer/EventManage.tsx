@@ -19,6 +19,8 @@ import FileUploader from '../../components/ui/FileUploader';
 import { uploadApi } from '../../api/upload';
 import HeroHeaderPicker, { type HeroBannerStyle } from '../../components/events/HeroHeaderPicker';
 import CameraQrScannerModal from '../../components/events/CameraQrScannerModal';
+import { CreditCheckPill, CreditTopupModal } from '../../components/credits';
+import { creditsApi } from '../../api/credits';
 import { EVENT_FORMATS, POPULAR_CATEGORY_TAGS, SYSTEM_AVATARS, PRESET_CATEGORIES, PRESET_COVERS } from './CreateEvent';
 import {
   Calendar,
@@ -206,6 +208,25 @@ export const EventManage: React.FC = () => {
   // Gallery & Media State
   const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
   const [newGalleryUrl, setNewGalleryUrl] = useState('');
+
+  // Credits & Broadcast Gate State
+  const [creditsWalletBalance, setCreditsWalletBalance] = useState<number>(() => {
+    return Number(localStorage.getItem('strayttix_organizer_credits') || 500);
+  });
+  const [isTopupModalOpen, setIsTopupModalOpen] = useState(false);
+
+  useEffect(() => {
+    creditsApi.getWallet(organizer?.id)
+      .then(res => {
+        const data = res.data || (res as any);
+        if (typeof data?.available_balance === 'number') {
+          setCreditsWalletBalance(data.available_balance);
+        } else if (typeof data?.balance === 'number') {
+          setCreditsWalletBalance(data.balance - (data.reserved_balance || 0));
+        }
+      })
+      .catch(() => {});
+  }, [organizer?.id]);
 
   // Navigation Dropdowns State
   const [openDropdownTab, setOpenDropdownTab] = useState<MainTab | null>(null);
@@ -5906,23 +5927,36 @@ export const EventManage: React.FC = () => {
                     <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Broadcast Email Marketing</h3>
                     <p className="text-xs text-zinc-500">Send direct promotional and informational emails to your registered audience.</p>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-bold shadow-2xs">
-                    <Coins className="w-4 h-4 text-amber-600" />
-                    <span>StraytTix Credit: <strong>{localStorage.getItem("strayttix_organizer_credits") || "500"} Available</strong></span>
-                    <Link to="/organizer/analytics" className="text-[#E31B23] hover:underline text-[11px] font-black ml-1">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-300 text-xs font-bold shadow-2xs">
+                    <Coins className="w-4 h-4 text-amber-500" />
+                    <span>Credits: <strong>{creditsWalletBalance.toLocaleString()} Available</strong></span>
+                    <button
+                      type="button"
+                      onClick={() => setIsTopupModalOpen(true)}
+                      className="text-[#E31B23] hover:underline text-[11px] font-black ml-1 cursor-pointer"
+                    >
                       Top-Up
-                    </Link>
+                    </button>
                   </div>
                 </div>
 
+                {/* Pre-Flight Consumption Gate Check Pill */}
+                <CreditCheckPill
+                  requiredCredits={attendees.length || 1}
+                  availableCredits={creditsWalletBalance}
+                  featureName="Email Broadcast"
+                  onTopupClick={() => setIsTopupModalOpen(true)}
+                  className="w-full"
+                />
+
                 <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-between gap-4 text-xs">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-red-100 text-[#E31B23] flex items-center justify-center font-bold">
+                    <div className="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-500/15 text-[#E31B23] flex items-center justify-center font-bold">
                       <Mail className="w-4 h-4" />
                     </div>
                     <div>
                       <p className="font-bold text-zinc-900 dark:text-white">Email Marketing Credit Rate</p>
-                      <p className="text-[11px] text-zinc-500">Each attendee recipient consumes 1 StraytTix Credit.</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Each attendee recipient consumes 1 Credit.</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -5956,8 +5990,16 @@ export const EventManage: React.FC = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => showNotification('Announcement email scheduled for delivery.', 'success')}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer"
+                  disabled={creditsWalletBalance < (attendees.length || 1)}
+                  onClick={() => {
+                    if (creditsWalletBalance < (attendees.length || 1)) {
+                      showNotification('Insufficient credits to dispatch this email broadcast. Please top up first.', 'error');
+                      setIsTopupModalOpen(true);
+                      return;
+                    }
+                    showNotification('Announcement email scheduled for delivery.', 'success');
+                  }}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50"
                 >
                   <Send className="w-4 h-4" /> Send Email Broadcast
                 </button>
@@ -6944,6 +6986,21 @@ export const EventManage: React.FC = () => {
         onScan={handleScanTicket}
         onUndo={handleUndoCheckIn}
         title={`Gate Ticket Scanner — ${event?.title || 'Event Check-In'}`}
+      />
+
+      {/* TOP-UP CREDITS MODAL */}
+      <CreditTopupModal
+        isOpen={isTopupModalOpen}
+        onClose={() => setIsTopupModalOpen(false)}
+        onSuccess={() => {
+          creditsApi.getWallet(organizer?.id).then(res => {
+            const data = res.data || (res as any);
+            if (typeof data?.available_balance === 'number') {
+              setCreditsWalletBalance(data.available_balance);
+            }
+          }).catch(() => {});
+        }}
+        organizerUuid={organizer?.id}
       />
 
     </OrganizerDashboardLayout>

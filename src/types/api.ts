@@ -717,3 +717,67 @@ export interface AppSettings {
   currency_id?: string | number | null;
 }
 
+// ============================================================================
+// ORGANIZER CREDITS & DOUBLE-ENTRY AUDIT LEDGER TYPES
+// ============================================================================
+
+export type CreditTxType = 'CREDIT' | 'DEBIT' | 'HOLD' | 'RELEASE';
+
+export type CreditTxReason =
+  | 'TOPUP'
+  | 'EMAIL_BROADCAST'
+  | 'SMS_BROADCAST'
+  | 'CUSTOM_DOMAIN_SUB'
+  | 'SCANNER_PASS'
+  | 'FAILED_DISPATCH_REFUND'
+  | 'ADMIN_ADJUSTMENT'
+  | string;
+
+export interface CreditWallet {
+  id?: string;
+  uuid?: string;
+  organizer_id?: string;
+  balance: number;
+  reserved_balance: number;
+  available_balance: number;
+  currency: string;
+  version: number;
+  updated_at?: string;
+}
+
+export interface CreditLedgerItem {
+  id: string | number;
+  uuid?: string;
+  wallet_id?: string;
+  organizer_id?: string;
+  event_id?: string | null;
+  type: CreditTxType;
+  reason: CreditTxReason;
+  amount: number;
+  balance_before: number;
+  balance_after: number;
+  reference: string;
+  idempotency_key?: string;
+  description: string;
+  metadata?: Record<string, any> | null;
+  created_at: string;
+}
+
+export interface TopupInitializeResponse {
+  reference: string;
+  authorization_url: string;
+  access_code?: string;
+  amount_kobo?: number;
+  amount_credits?: number;
+}
+
+export interface ReconcileWalletResponse {
+  is_valid: boolean;
+  computed_balance: number;
+  recorded_balance: number;
+  difference: number;
+  timestamp: string;
+  status: 'balanced' | 'discrepancy';
+  message?: string;
+}
+
