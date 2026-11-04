@@ -83,12 +83,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
       const currentScrollY = window.scrollY || document.documentElement.scrollTop;
       const delta = currentScrollY - lastScrollY;
 
-      // Smooth threshold with 20px hysteresis to prevent border jitter
-      setIsScrolled((prev) => {
-        if (!prev && currentScrollY > 70) return true;
-        if (prev && currentScrollY < 50) return false;
-        return prev;
-      });
+      // Convert to pill when scrolled past top (activates at >20px)
+      setIsScrolled(currentScrollY > 20);
 
       if (currentScrollY <= MIN_PAGE_OFFSET) {
         setIsVisible(true);
@@ -201,7 +197,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      className={`sticky top-0 z-40 transition-[transform,padding,background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isVisible 
           ? 'translate-y-0' 
           : '-translate-y-full pointer-events-none'
@@ -215,7 +211,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               ? 'bg-white/80 backdrop-blur-xl border-b border-zinc-200/80 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] py-1'
               : 'bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] py-0'
           : isScrolled
-            ? 'pt-2.5 sm:pt-3 pb-1.5 px-3 sm:px-6 bg-transparent border-b border-transparent pointer-events-none'
+            ? 'pt-2.5 sm:pt-3.5 pb-1.5 px-3 sm:px-6 bg-transparent border-b border-transparent pointer-events-none'
             : isDarkHeroPage
               ? 'pt-0 pb-0 px-0 bg-transparent border-b border-white/[0.06] backdrop-blur-[2px] pointer-events-auto'
               : isDarkCanvasPage
@@ -225,7 +221,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
     >
       <nav
         aria-label="Primary Navigation"
-        className={`pointer-events-auto mx-auto flex items-center justify-between transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`pointer-events-auto mx-auto flex items-center justify-between transition-[max-width,height,border-radius,background-color,border-color,box-shadow,padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           isDashboardView
             ? `max-w-7xl px-4 sm:px-6 ${isScrolled ? 'h-14' : 'h-16'}`
             : isScrolled
