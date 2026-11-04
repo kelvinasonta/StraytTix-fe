@@ -2590,7 +2590,7 @@ export const EventManage: React.FC = () => {
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
                       placeholder="e.g. Lagos Tech Summit 2026"
-                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-semibold text-zinc-950 dark:text-white placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white transition-all shadow-2xs"
+                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-semibold text-zinc-950 dark:text-white placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white dark:focus:bg-[#070709] transition-all shadow-2xs"
                     />
                   </div>
 
@@ -3000,7 +3000,7 @@ export const EventManage: React.FC = () => {
                       type="date"
                       value={editStartDate}
                       onChange={(e) => setEditStartDate(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white focus:border-[#E31B23] transition-all"
+                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-[#070709] focus:border-[#E31B23] transition-all"
                     />
                   </div>
                   <div>
@@ -3009,7 +3009,7 @@ export const EventManage: React.FC = () => {
                       type="time"
                       value={editStartTime}
                       onChange={(e) => setEditStartTime(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white focus:border-[#E31B23] transition-all"
+                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-[#070709] focus:border-[#E31B23] transition-all"
                     />
                   </div>
                 </div>
@@ -3022,7 +3022,7 @@ export const EventManage: React.FC = () => {
                       type="date"
                       value={editEndDate}
                       onChange={(e) => setEditEndDate(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white focus:border-[#E31B23] transition-all"
+                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-[#070709] focus:border-[#E31B23] transition-all"
                     />
                   </div>
                   <div>
@@ -3031,7 +3031,7 @@ export const EventManage: React.FC = () => {
                       type="time"
                       value={editEndTime}
                       onChange={(e) => setEditEndTime(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white focus:border-[#E31B23] transition-all"
+                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-[#070709] focus:border-[#E31B23] transition-all"
                     />
                   </div>
                 </div>
@@ -3060,7 +3060,7 @@ export const EventManage: React.FC = () => {
                   </div>
 
                   {editSchedules.length === 0 ? (
-                    <div className="p-6 rounded-2xl border border-dashed border-zinc-200 dark:border-white/10 text-center bg-zinc-50 dark:bg-white/5/50">
+                    <div className="p-6 rounded-2xl border border-dashed border-zinc-200 dark:border-white/10 text-center bg-zinc-50 dark:bg-white/5">
                       <Clock className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
                       <p className="text-xs font-bold text-zinc-600">No sessions or agenda items added yet.</p>
                       <p className="text-[11px] text-zinc-400 mt-0.5">Click "Add Session" above to define tracks or speaking segments.</p>
@@ -3070,7 +3070,7 @@ export const EventManage: React.FC = () => {
                       {editSchedules.map((item, idx) => (
                         <div
                           key={idx}
-                          className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5/70 border border-zinc-200 dark:border-white/10 space-y-3 relative hover:border-zinc-300 transition-colors"
+                          className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-3 relative hover:border-zinc-300 transition-colors"
                         >
                           <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 pb-2">
                             <div className="flex items-center gap-2">
@@ -3262,7 +3262,7 @@ export const EventManage: React.FC = () => {
                   </div>
 
                   {/* Cover Mode Selector */}
-                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100 dark:bg-white/10/80 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-bold">
+                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100 dark:bg-white/10 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-bold">
                     <button
                       type="button"
                       onClick={() => setCoverMode('upload')}
@@ -3494,7 +3494,7 @@ export const EventManage: React.FC = () => {
                           setEditFlyerUrl(e.target.value);
                         }}
                         placeholder="https://images.unsplash.com/..."
-                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-mono text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white transition-all"
+                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-mono text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white dark:focus:bg-[#070709] transition-all"
                       />
                       {editBannerUrl && !editBannerUrl.startsWith('data:image') && (
                         <div className="relative rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 h-32 bg-zinc-100 dark:bg-white/10">
@@ -3594,7 +3594,7 @@ export const EventManage: React.FC = () => {
 
                 <div className="space-y-3">
                   {lineup.length === 0 ? (
-                    <div className="p-8 rounded-2xl border border-dashed border-zinc-200 dark:border-white/10 text-center bg-zinc-50 dark:bg-white/5/50">
+                    <div className="p-8 rounded-2xl border border-dashed border-zinc-200 dark:border-white/10 text-center bg-zinc-50 dark:bg-white/5">
                       <Users className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
                       <p className="text-xs font-bold text-zinc-600">No lineup members added yet.</p>
                       <p className="text-[11px] text-zinc-400 mt-0.5">Add keynote presenters or performers below.</p>
@@ -3631,7 +3631,7 @@ export const EventManage: React.FC = () => {
                                   value={editMemberData.name}
                                   onChange={(e) => setEditMemberData({ ...editMemberData, name: e.target.value })}
                                   placeholder="e.g. Alex Mercer"
-                                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:bg-white transition-colors"
+                                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:bg-white dark:focus:bg-[#070709] transition-colors"
                                 />
                               </div>
 
@@ -3642,7 +3642,7 @@ export const EventManage: React.FC = () => {
                                   value={editMemberData.role || ''}
                                   onChange={(e) => setEditMemberData({ ...editMemberData, role: e.target.value })}
                                   placeholder="e.g. Keynote Speaker"
-                                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:bg-white transition-colors"
+                                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:bg-white dark:focus:bg-[#070709] transition-colors"
                                 />
                               </div>
                             </div>
@@ -3654,12 +3654,12 @@ export const EventManage: React.FC = () => {
                                 value={editMemberData.bio || ''}
                                 onChange={(e) => setEditMemberData({ ...editMemberData, bio: e.target.value })}
                                 placeholder="Brief background or credentials..."
-                                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-800 dark:text-zinc-200 outline-none focus:border-[#E31B23] focus:bg-white transition-colors"
+                                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-800 dark:text-zinc-200 outline-none focus:border-[#E31B23] focus:bg-white dark:focus:bg-[#070709] transition-colors"
                               />
                             </div>
 
                             {/* Avatar & Photo Section */}
-                            <div className="p-3.5 bg-zinc-50 dark:bg-white/5/70 rounded-xl border border-zinc-200 dark:border-white/10 space-y-3">
+                            <div className="p-3.5 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/10 space-y-3">
                               <div className="flex items-center justify-between">
                                 <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
                                   <User className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -4093,7 +4093,7 @@ export const EventManage: React.FC = () => {
                 </div>
 
                 {faqs.length === 0 ? (
-                  <div className="py-12 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5/50 space-y-3">
+                  <div className="py-12 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 space-y-3">
                     <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-white/10 text-zinc-400 flex items-center justify-center mx-auto">
                       <HelpCircle className="w-6 h-6" />
                     </div>
@@ -4190,7 +4190,7 @@ export const EventManage: React.FC = () => {
                 </div>
 
                 {/* Add New Gallery Image */}
-                <div className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5/50 space-y-3">
+                <div className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider block">Add Photo to Gallery</label>
                     <label className={`px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-100 dark:bg-white/10 border border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-zinc-200 text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-2xs ${isUploadingGallery ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
@@ -4619,7 +4619,7 @@ export const EventManage: React.FC = () => {
                     {event.tickets.map((t) => (
                       <div
                         key={t.id || t.name}
-                        className="p-5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                        className="p-5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                       >
                         <div className="space-y-1.5 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -5067,7 +5067,7 @@ export const EventManage: React.FC = () => {
                     { key: 'security', label: 'Licensed Security Personnel On-Site', icon: Shield },
                     { key: 'medical', label: 'First Aid & Medical Station', icon: HeartPulse },
                   ].map(item => (
-                    <label key={item.key} className="flex items-center justify-between p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5/70 cursor-pointer">
+                    <label key={item.key} className="flex items-center justify-between p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 cursor-pointer">
                       <div className="flex items-center gap-3">
                         <item.icon className="w-4 h-4 text-zinc-500" />
                         <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{item.label}</span>
@@ -5895,7 +5895,7 @@ export const EventManage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-bold shadow-2xs">
                     <Coins className="w-4 h-4 text-amber-600" />
-                    <span>Eventa Credit: <strong>{localStorage.getItem("strayttix_organizer_credits") || "500"} Available</strong></span>
+                    <span>StraytTix Credit: <strong>{localStorage.getItem("strayttix_organizer_credits") || "500"} Available</strong></span>
                     <Link to="/organizer/analytics" className="text-[#E31B23] hover:underline text-[11px] font-black ml-1">
                       Top-Up
                     </Link>
@@ -5909,7 +5909,7 @@ export const EventManage: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-bold text-zinc-900 dark:text-white">Email Marketing Credit Rate</p>
-                      <p className="text-[11px] text-zinc-500">Each attendee recipient consumes 1 Eventa Credit.</p>
+                      <p className="text-[11px] text-zinc-500">Each attendee recipient consumes 1 StraytTix Credit.</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -6027,7 +6027,7 @@ export const EventManage: React.FC = () => {
                   <h3 className="text-lg font-bold text-red-600 flex items-center gap-2">
                     <AlertTriangle className="w-5 h-5" /> Danger Zone: Delete Event Listing
                   </h3>
-                  <p className="text-xs text-zinc-500 mt-1">Permanently remove this event and its associated assets from Eventa.</p>
+                  <p className="text-xs text-zinc-500 mt-1">Permanently remove this event and its associated assets from StraytTix.</p>
                 </div>
 
                 <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2">
@@ -6530,7 +6530,7 @@ export const EventManage: React.FC = () => {
           <div className="space-y-1.5">
             <h4 className="text-base font-black text-zinc-950 dark:text-white">Add at least one ticket tier before publishing</h4>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto leading-relaxed">
-              Every live public event requires at least one active ticket tier so attendees can reserve free passes or purchase tickets on Eventa.
+              Every live public event requires at least one active ticket tier so attendees can reserve free passes or purchase tickets on StraytTix.
             </p>
           </div>
           <div className="flex items-center gap-3 pt-2">
