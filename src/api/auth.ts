@@ -56,23 +56,46 @@ export function normalizeSession(sess: any): LoginSession {
     }
   }
 
+  // Populate missing device, os, browser if undefined
   if (!device || !os || !browser) {
     if (/iPad|Tablet/i.test(ua)) {
-      type = 'tablet';
       device = device || 'Tablet Device';
-      os = os || 'iPadOS / Tablet';
+      os = os || 'iPadOS';
       browser = browser || 'Mobile Browser';
-    } else if (/iPhone|Android.*Mobile|Mobile/i.test(ua)) {
-      type = 'mobile';
+    } else if (/iPhone|Android.*Mobile|Mobile|Phone|iOS/i.test(ua)) {
       device = device || (/iPhone/i.test(ua) ? 'iPhone' : 'Smartphone');
       os = os || (/iPhone/i.test(ua) ? 'iOS' : 'Android');
       browser = browser || (/Chrome/i.test(ua) ? 'Chrome Mobile' : 'Mobile Safari');
     } else {
-      type = 'desktop';
       device = device || (/Macintosh|Mac OS X/i.test(ua) ? 'Mac' : /Windows/i.test(ua) ? 'Windows PC' : 'Workstation');
       os = os || (/Macintosh|Mac OS X/i.test(ua) ? 'macOS' : /Windows/i.test(ua) ? 'Windows' : /Linux/i.test(ua) ? 'Linux' : 'Desktop OS');
       browser = browser || (/Chrome/i.test(ua) ? 'Chrome' : /Safari/i.test(ua) ? 'Safari' : /Firefox/i.test(ua) ? 'Firefox' : 'Web Browser');
     }
+  }
+
+  // Determine device type dynamically
+  if (
+    /iPhone|Android.*Mobile|Mobile|Phone|iOS/i.test(ua) ||
+    /iPhone|Android.*Mobile|Mobile|Phone|iOS/i.test(name) ||
+    /iPhone|Android|Mobile|Phone/i.test(device || '') ||
+    /iOS|Android/i.test(os || '')
+  ) {
+    if (!/iPad|Tablet/i.test(ua) && !/iPad|Tablet/i.test(name) && !/iPad|Tablet/i.test(device || '')) {
+      type = 'mobile';
+    }
+  } else if (
+    /iPad|Tablet/i.test(ua) ||
+    /iPad|Tablet/i.test(name) ||
+    /iPad|Tablet/i.test(device || '') ||
+    /iPadOS/i.test(os || '')
+  ) {
+    type = 'tablet';
+  } else if (
+    /Macintosh|Mac OS X|Windows|Linux|Desktop|Workstation/i.test(ua) ||
+    /macOS|Mac|Windows|Linux|PC/i.test(os || '') ||
+    /Mac|Windows|PC|Workstation|Desktop/i.test(device || '')
+  ) {
+    type = 'desktop';
   }
 
   let lastActive = sess.lastActive || sess.last_active;

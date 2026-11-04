@@ -50,20 +50,20 @@ export const ForgotPassword: React.FC = () => {
         subtitle="Password reset instructions are on the way"
       >
         <div className="space-y-6">
-          <div className="p-6 bg-zinc-50 border border-zinc-200 rounded-2xl text-center space-y-3">
-            <div className="w-12 h-12 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto">
+          <div className="p-6 bg-[#0F0F14] border border-white/10 rounded-2xl text-center space-y-3">
+            <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto">
               <Mail className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950">Instructions dispatched</h3>
-            <p className="text-xs text-zinc-600 leading-relaxed font-normal">
-              If an account exists for <strong className="text-zinc-950 font-semibold">{email}</strong>, we have sent a secure password reset link. Please check your spam folder if it doesn't appear in 2 minutes.
+            <h3 className="text-base font-bold text-white">Instructions dispatched</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed font-normal">
+              If an account exists for <strong className="text-white font-semibold">{email}</strong>, we have sent a secure password reset link. Please check your spam folder if it doesn't appear in 2 minutes.
             </p>
           </div>
 
           <div className="pt-2">
             <Link
               to="/login"
-              className="w-full py-3 px-4 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              className="w-full py-3 px-4 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
             >
               <ArrowLeft className="w-4 h-4" /> Return to Sign In
             </Link>
@@ -80,14 +80,14 @@ export const ForgotPassword: React.FC = () => {
     >
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {formError && (
-          <div className="p-3.5 bg-red-50 border border-red-200 text-red-900 rounded-xl text-xs flex items-start gap-2.5" role="alert">
+          <div className="p-3.5 bg-red-500/10 border border-red-500/30 text-red-300 rounded-xl text-xs flex items-start gap-2.5" role="alert">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#E31B23]" />
             <span className="font-semibold">{formError}</span>
           </div>
         )}
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-bold text-zinc-800">
+          <label className="block text-xs font-mono font-bold uppercase tracking-wider text-zinc-300">
             Email address
           </label>
           <input
@@ -98,14 +98,14 @@ export const ForgotPassword: React.FC = () => {
             required
             autoComplete="email"
             disabled={isLoading}
-            className="w-full px-4 py-3 bg-white border border-zinc-200 hover:border-zinc-300 rounded-xl text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all font-medium"
+            className="w-full px-4 py-3 bg-[#0F0F14] border border-white/10 hover:border-white/20 rounded-xl text-sm text-white placeholder-zinc-500 outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all font-medium"
           />
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3.5 px-5 bg-zinc-950 hover:bg-zinc-800 text-white text-sm font-bold rounded-xl transition-all shadow-xs hover:shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
+          className="w-full py-3.5 px-5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-xl transition-all shadow-xs hover:shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
         >
           {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
           <span>{isLoading ? 'Sending reset link...' : 'Send reset link'}</span>
@@ -114,7 +114,7 @@ export const ForgotPassword: React.FC = () => {
         <div className="text-center pt-2">
           <Link
             to="/login"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-950 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to sign in
           </Link>

@@ -97,17 +97,17 @@ export const VerificationPending: React.FC = () => {
       <div className="space-y-6">
         
         {/* Email verification card */}
-        <div className="p-6 bg-zinc-50 border border-zinc-200 rounded-2xl text-center space-y-3">
-          <div className="w-12 h-12 bg-zinc-100 text-zinc-900 border border-zinc-200 rounded-2xl flex items-center justify-center mx-auto">
+        <div className="p-6 bg-[#0F0F14] border border-white/10 rounded-2xl text-center space-y-3">
+          <div className="w-12 h-12 bg-white/5 text-white border border-white/10 rounded-2xl flex items-center justify-center mx-auto">
             <Mail className="w-6 h-6 text-[#E31B23]" />
           </div>
 
           <div className="space-y-1">
-            <h3 className="text-base font-bold text-zinc-950">Verification link sent</h3>
-            <p className="text-xs text-zinc-600 leading-relaxed font-normal">
+            <h3 className="text-base font-bold text-white">Verification link sent</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed font-normal">
               We dispatched an activation link to:
             </p>
-            <div className="font-mono text-xs font-bold text-zinc-900 bg-white py-2 px-3 rounded-xl border border-zinc-200 inline-block max-w-full truncate">
+            <div className="font-mono text-xs font-bold text-white bg-black/40 py-2 px-3 rounded-xl border border-white/10 inline-block max-w-full truncate">
               {user?.email || 'your registered email'}
             </div>
           </div>
@@ -118,14 +118,14 @@ export const VerificationPending: React.FC = () => {
         </div>
 
         {isResentQuery && !errorMsg && secondsLeft === 0 && (
-          <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs flex items-center gap-2">
+          <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs flex items-center gap-2">
             <Send className="w-4 h-4 shrink-0 text-emerald-600" />
             <span>A new verification email has been dispatched.</span>
           </div>
         )}
 
         {errorMsg && (
-          <div className="p-3.5 bg-red-50 border border-red-200 text-red-900 rounded-xl text-xs flex items-start gap-2" role="alert">
+          <div className="p-3.5 bg-red-500/10 border border-red-500/30 text-red-300 rounded-xl text-xs flex items-start gap-2" role="alert">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#E31B23]" />
             <span className="font-semibold">{errorMsg}</span>
           </div>
@@ -134,16 +134,16 @@ export const VerificationPending: React.FC = () => {
         {/* Resend Action */}
         <div>
           {secondsLeft > 0 ? (
-            <div className="w-full py-3 px-4 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 select-none">
+            <div className="w-full py-3 px-4 bg-white/5 border border-white/10 text-zinc-400 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 select-none">
               <Clock className="w-4 h-4 text-zinc-400" />
-              <span>Resend available in <strong className="font-mono text-zinc-800 font-bold">{formatTime(secondsLeft)}</strong></span>
+              <span>Resend available in <strong className="font-mono text-white font-bold">{formatTime(secondsLeft)}</strong></span>
             </div>
           ) : (
             <button
               type="button"
               onClick={handleResend}
               disabled={resending}
-              className="w-full py-3.5 px-5 bg-zinc-950 hover:bg-zinc-800 text-white text-sm font-bold rounded-xl transition-all shadow-xs hover:shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
+              className="w-full py-3.5 px-5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-xl transition-all shadow-xs hover:shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
             >
               {resending && <Loader2 className="w-4 h-4 animate-spin" />}
               <span>{resending ? 'Sending email...' : 'Resend Verification Email'}</span>
@@ -152,18 +152,18 @@ export const VerificationPending: React.FC = () => {
         </div>
 
         {/* Footer controls */}
-        <div className="flex items-center justify-between pt-2 border-t border-zinc-100">
+        <div className="flex items-center justify-between pt-2 border-t border-white/10">
           <button
             type="button"
             onClick={() => navigate('/login')}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-950 cursor-pointer transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-white cursor-pointer transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Sign In
           </button>
           <button
             type="button"
             onClick={logout}
-            className="text-xs font-semibold text-zinc-500 hover:text-red-600 cursor-pointer transition-colors"
+            className="text-xs font-semibold text-zinc-400 hover:text-red-400 cursor-pointer transition-colors"
           >
             Sign Out
           </button>
