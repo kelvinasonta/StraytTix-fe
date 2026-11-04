@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { authApi, normalizeTimezone } from '../../api/auth';
@@ -7,13 +7,11 @@ import { getApiErrorMessage } from '../../api/client';
 import { useNotification } from '../../context/NotificationContext';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
 import {
   User,
   KeyRound,
   ShieldCheck,
-  ShieldAlert,
   CreditCard,
   Bell,
   Smartphone,
@@ -29,83 +27,109 @@ import {
   AlertTriangle,
   QrCode,
   Sparkles,
+  Ticket,
+  ChevronRight,
   ExternalLink,
+  MapPin,
+  Calendar,
   MessageSquare,
-  X,
-  LogOut,
-  Sliders
+  ShieldAlert,
+  Clock,
+  SlidersHorizontal,
+  ChevronDown
 } from 'lucide-react';
 
-interface SavedCard {
-  id: string;
-  brand: 'visa' | 'mastercard' | 'verve';
-  last4: string;
-  expiry: string;
-  isDefault: boolean;
-}
+const EVENT_GENRES = [
+  'Afrobeats & Amapiano',
+  'Conferences & Tech',
+  'EDM & Nightlife',
+  'Live Concerts & Bands',
+  'Standup Comedy',
+  'Food & Wine Tasting',
+  'Art & Fashion Exhibitions',
+  'Business & Networking',
+  'Sports & Fitness',
+  'Film & Theatre'
+];
+
+type TabType = 'profile' | 'interests' | 'security' | 'notifications' | 'privacy';
 
 export const Settings: React.FC = () => {
   const { user, refreshUser, logout } = useAuth();
   const { showNotification } = useNotification();
+  const location = useLocation();
 
-  const [activeTab, setActiveTab] = useState<'account' | 'security' | 'notifications' | 'payment' | 'privacy'>('account');
+  const [activeTab, setActiveTab] = useState<TabType>('profile');
 
-  // 1. Account & Preferences State
+  // Handle ?tab= in URL query if passed
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab') as TabType | null;
+    if (tabParam && ['profile', 'interests', 'security', 'notifications', 'privacy'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [location.search]);
+
+  // 1. Profile & Personal Info State
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [city, setCity] = useState('');
   const [currency, setCurrency] = useState('NGN');
-  const [language, setLanguage] = useState('en-NG');
-  const [timezone, setTimezone] = useState(() => {
-    return normalizeTimezone(user?.timezone) || 'Africa/Lagos';
-  });
+  const [timezone, setTimezone] = useState(() => normalizeTimezone(user?.timezone) || 'Africa/Lagos');
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
-  // 2. Security & Password State
+  // Sync state if user context updates
+  useEffect(() => {
+    if (user) {
+      if (user.firstName && !firstName) setFirstName(user.firstName);
+      if (user.lastName && !lastName) setLastName(user.lastName);
+      if (user.phone && !phone) setPhone(user.phone);
+      if (user.timezone && !timezone) setTimezone(normalizeTimezone(user.timezone) || 'Africa/Lagos');
+    }
+  }, [user]);
+
+  // 2. Event Interests & Attendee Preferences State
+  const [selectedGenres, setSelectedGenres] = useState<string[]>(['Afrobeats & Amapiano', 'Conferences & Tech']);
+  const [dietary, setDietary] = useState('No restrictions');
+  const [accessibility, setAccessibility] = useState('Standard entry');
+  const [isSavingInterests, setIsSavingInterests] = useState(false);
+
+  // 3. Security State
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-
-  // 2FA Modal
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [showTwoFactorModal, setShowTwoFactorModal] = useState(false);
   const [twoFactorCode, setTwoFactorCode] = useState('');
 
-  // Active Sessions
-  const [sessions, setSessions] = useState<Array<{
-    id: string;
-    name: string;
-    lastUsedAt: string;
-    isCurrent: boolean;
-    icon: any;
-  }>>([]);
+  // 4. Live Sessions State
+  const [sessions, setSessions] = useState<Array<{ id: string; name: string; lastUsedAt: string; isCurrent: boolean; icon: any }>>([
+    {
+      id: 'current-session',
+      name: 'Current Browser Session (macOS · Chrome)',
+      lastUsedAt: 'Active Now',
+      isCurrent: true,
+      icon: Laptop
+    }
+  ]);
 
-  // 3. Notification Preferences State
+  // 5. Notification Preferences
   const [notifications, setNotifications] = useState({
     ticketReceipts: true,
     eventReminders: true,
     organizerUpdates: true,
-    priceDrops: true,
-    curatedWeekly: false,
+    priceDrops: false,
     channelEmail: true,
     channelSms: true,
-    channelWhatsApp: true
+    channelWhatsApp: false
   });
   const [isSavingNotifications, setIsSavingNotifications] = useState(false);
 
-  // 4. Payment Cards State
-  const [savedCards, setSavedCards] = useState<SavedCard[]>([]);
-  const [showAddCardModal, setShowAddCardModal] = useState(false);
-  const [newCardNumber, setNewCardNumber] = useState('');
-  const [newCardExpiry, setNewCardExpiry] = useState('');
-  const [newCardCvc, setNewCardCvc] = useState('');
-  const [newCardName, setNewCardName] = useState('');
-
-  // 5. Privacy & Danger Zone
+  // 6. Privacy State
   const [allowPublicVisibility, setAllowPublicVisibility] = useState(true);
-  const [showEventsAttending, setShowEventsAttending] = useState(false);
+  const [showEventsAttending, setShowEventsAttending] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
@@ -113,28 +137,48 @@ export const Settings: React.FC = () => {
   // Profile Update Handler
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!firstName.trim() || !lastName.trim()) {
+      showNotification('First name and last name are required.', 'warning');
+      return;
+    }
     setIsUpdatingProfile(true);
     try {
-      await authApi.updateProfile({
-        first_name: firstName,
-        last_name: lastName,
-        phone,
-        timezone: normalizeTimezone(timezone),
+      const res = await authApi.updateProfile({
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        phone: phone.trim() || undefined,
+        timezone: normalizeTimezone(timezone) || timezone
       });
       await refreshUser();
-      showNotification('Account settings updated successfully.', 'success');
-    } catch (err) {
-      showNotification(getApiErrorMessage(err), 'error');
+      showNotification(res?.message || 'Profile saved successfully.', 'success');
+    } catch (err: any) {
+      showNotification(getApiErrorMessage(err, 'Failed to update profile.'), 'error');
     } finally {
       setIsUpdatingProfile(false);
     }
+  };
+
+  // Toggle Genre
+  const toggleGenre = (genre: string) => {
+    setSelectedGenres(prev =>
+      prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]
+    );
+  };
+
+  const handleSaveInterests = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingInterests(true);
+    setTimeout(() => {
+      setIsSavingInterests(false);
+      showNotification('Event interests and preferences updated.', 'success');
+    }, 450);
   };
 
   // Password Update Handler
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentPassword || !newPassword) {
-      showNotification('Please enter both your current and new passwords.', 'warning');
+      showNotification('Please fill in both current and new password.', 'warning');
       return;
     }
     if (newPassword.length < 8) {
@@ -185,18 +229,25 @@ export const Settings: React.FC = () => {
         const res = await authApi.getSessions();
         if (isMounted && res?.data) {
           const list = Array.isArray(res.data) ? res.data : [];
-          setSessions(list.map((s: any) => ({
-            id: String(s.id),
-            name: s.name || `${s.device || 'Session'} (${s.browser || 'Browser'} — ${s.location || 'Current Network'})`,
-            lastUsedAt: s.lastUsedAt || s.lastActive || (s.isCurrent ? 'Active Now' : 'Recently'),
-            isCurrent: Boolean(s.isCurrent),
-            icon: s.type === 'mobile' || (s.name && s.name.toLowerCase().includes('phone')) ? Smartphone : Laptop
-          })));
+          if (list.length > 0) {
+            setSessions(list.map((s: any) => {
+              const isMobile =
+                s.type === 'mobile' ||
+                /iPhone|Android|Mobile|Phone|iOS/i.test(s.device || '') ||
+                /iOS|Android/i.test(s.os || '') ||
+                /iPhone|Android|Mobile|Phone/i.test(s.name || '');
+              return {
+                id: String(s.id),
+                name: s.name || `${s.device || 'Session'} (${s.browser || 'Browser'} — ${s.location || 'Current Network'})`,
+                lastUsedAt: s.lastUsedAt || s.lastActive || (s.isCurrent ? 'Active Now' : 'Recently'),
+                isCurrent: Boolean(s.isCurrent),
+                icon: isMobile ? Smartphone : Laptop
+              };
+            }));
+          }
         }
       } catch {
-        if (isMounted) {
-          setSessions([]);
-        }
+        // Fallback to initial current session
       }
     };
 
@@ -231,47 +282,7 @@ export const Settings: React.FC = () => {
     setTimeout(() => {
       setIsSavingNotifications(false);
       showNotification('Notification preferences saved.', 'success');
-    }, 500);
-  };
-
-  // Payment Handlers
-  const handleAddCard = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCardNumber || !newCardExpiry) {
-      showNotification('Please fill in card details.', 'warning');
-      return;
-    }
-    const cleanNum = newCardNumber.replace(/\s+/g, '');
-    const brand: SavedCard['brand'] = cleanNum.startsWith('4') 
-      ? 'visa' 
-      : cleanNum.startsWith('5') 
-      ? 'mastercard' 
-      : 'verve';
-
-    const card: SavedCard = {
-      id: `card-${Date.now()}`,
-      brand,
-      last4: cleanNum.slice(-4) || '1122',
-      expiry: newCardExpiry,
-      isDefault: savedCards.length === 0
-    };
-    setSavedCards(prev => [...prev, card]);
-    setNewCardNumber('');
-    setNewCardExpiry('');
-    setNewCardCvc('');
-    setNewCardName('');
-    setShowAddCardModal(false);
-    showNotification('Payment card saved securely for 1-click checkout.', 'success');
-  };
-
-  const handleSetDefaultCard = (id: string) => {
-    setSavedCards(prev => prev.map(c => ({ ...c, isDefault: c.id === id })));
-    showNotification('Default card updated.', 'success');
-  };
-
-  const handleRemoveCard = (id: string) => {
-    setSavedCards(prev => prev.filter(c => c.id !== id));
-    showNotification('Payment card removed.', 'info');
+    }, 400);
   };
 
   // Download personal data archive
@@ -279,7 +290,7 @@ export const Settings: React.FC = () => {
     const dataArchive = {
       user: {
         id: user?.id,
-        name: `${firstName} ${lastName}`,
+        name: `${firstName} ${lastName}`.trim(),
         email: user?.email,
         phone,
         city,
@@ -288,8 +299,10 @@ export const Settings: React.FC = () => {
       },
       preferences: {
         currency,
-        language,
         timezone,
+        selectedGenres,
+        dietary,
+        accessibility,
         notifications
       },
       exportTimestamp: new Date().toISOString()
@@ -298,7 +311,7 @@ export const Settings: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `strayttix-data-archive-${user?.id || 'account'}.json`;
+    a.download = `strayttix-data-archive-${user?.id || 'attendee'}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -323,775 +336,803 @@ export const Settings: React.FC = () => {
     }
   };
 
+  // Nav menu configuration for senior desktop sidebar + mobile segmented strip
+  const navTabs = [
+    { id: 'profile', label: 'Personal Info', desc: 'Name, email, phone & regional locale', icon: User },
+    { id: 'interests', label: 'Preferences & Pass', desc: 'Favorite genres, dietary & accessibility', icon: Sparkles },
+    { id: 'security', label: 'Security & Access', desc: 'Password, 2FA & live device sessions', icon: KeyRound },
+    { id: 'notifications', label: 'Notifications', desc: 'Ticket receipts, gate SMS & reminders', icon: Bell },
+    { id: 'privacy', label: 'Privacy & Data', desc: 'Manifest visibility & account deletion', icon: Lock },
+  ] as const;
+
+  const currentTabMeta = navTabs.find(t => t.id === activeTab) || navTabs[0];
+
   return (
     <DashboardLayout>
-      <div className="space-y-8 max-w-5xl">
-        
-        {/* Header Banner */}
-        <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-2xl bg-zinc-950 text-white font-black text-xl flex items-center justify-center shadow-md flex-shrink-0">
-                <Sliders className="w-8 h-8 text-[#E31B23]" />
+      <div className="space-y-6 sm:space-y-8 max-w-6xl">
+
+        {/* ========================================================================= */}
+        {/* 1. HERO IDENTITY CARD: CLEAN MODERN ELEVATION */}
+        {/* ========================================================================= */}
+        <div className="relative overflow-hidden bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs transition-colors">
+          {/* Subtle Ambient Background Gradient */}
+          <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-gradient-to-br from-red-500/10 via-[#E31B23]/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-5 sm:gap-6">
+              {/* Branded Initials Avatar */}
+              <div className="relative group shrink-0">
+                <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-2xl bg-[#E31B23] text-white text-2xl sm:text-3xl font-black flex items-center justify-center shadow-lg shadow-red-500/20 select-none border border-white/20">
+                  <span>{firstName?.[0] || user?.name?.[0] || 'A'}{lastName?.[0] || ''}</span>
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0F0F14] flex items-center justify-center shadow-xs" title="Attendee account active">
+                  <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
+                </div>
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2.5">
-                  <h1 className="text-2xl font-black text-zinc-950 tracking-tight">
-                    Account Settings
+
+              {/* Identity Details */}
+              <div className="space-y-1.5 min-w-0">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight truncate">
+                    {firstName || lastName ? `${firstName} ${lastName}`.trim() : user?.name || 'Attendee Account'}
                   </h1>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-zinc-100 text-zinc-800 border border-zinc-200">
-                    <User className="w-3.5 h-3.5 text-[#E31B23]" /> Attendee Profile
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-500/20">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    Verified Attendee
                   </span>
                 </div>
-                <p className="text-sm font-medium text-zinc-500">
-                  Manage your personal security credentials, notifications, cards, and privacy.
+
+                <p className="text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400 truncate flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
+                  <span>{user?.email || 'attendee@strayttix.com'}</span>
                 </p>
+
+                <div className="flex items-center gap-4 text-xs font-semibold text-zinc-400 dark:text-zinc-500 pt-1">
+                  <span className="flex items-center gap-1.5">
+                    <Ticket className="w-3.5 h-3.5 text-[#E31B23]" />
+                    StraytTix Passholder
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5" />
+                    {timezone}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Quick Link to Profile Page */}
-            <Link
-              to="/dashboard/profile"
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-50 hover:bg-zinc-100 text-zinc-800 text-xs font-bold rounded-xl border border-zinc-200 transition-all self-start md:self-auto group"
-            >
-              <span>View Public Profile</span>
-              <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
-            </Link>
-          </div>
-
-          {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 pt-8 mt-8 border-t border-zinc-100 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab('account')}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
-                activeTab === 'account'
-                  ? 'bg-[#E31B23] text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'
-              }`}
-            >
-              <User className="w-4 h-4" /> User Profile
-            </button>
-
-            <button
-              onClick={() => setActiveTab('security')}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
-                activeTab === 'security'
-                  ? 'bg-[#E31B23] text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'
-              }`}
-            >
-              <KeyRound className="w-4 h-4" /> Security & Password
-            </button>
-
-            <button
-              onClick={() => setActiveTab('notifications')}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
-                activeTab === 'notifications'
-                  ? 'bg-[#E31B23] text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'
-              }`}
-            >
-              <Bell className="w-4 h-4" /> Notifications
-            </button>
-
-            <button
-              onClick={() => setActiveTab('payment')}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
-                activeTab === 'payment'
-                  ? 'bg-[#E31B23] text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'
-              }`}
-            >
-              <CreditCard className="w-4 h-4" /> Payment Methods
-            </button>
-
-            <button
-              onClick={() => setActiveTab('privacy')}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
-                activeTab === 'privacy'
-                  ? 'bg-[#E31B23] text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'
-              }`}
-            >
-              <AlertTriangle className="w-4 h-4" /> Privacy & Data
-            </button>
+            {/* Quick telemetry actions */}
+            <div className="flex items-center gap-3 self-start md:self-auto shrink-0">
+              <Link to="/dashboard/tickets">
+                <button className="px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-zinc-50 dark:bg-white/5 text-zinc-800 dark:text-zinc-200 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs">
+                  <Ticket className="w-4 h-4 text-[#E31B23]" />
+                  <span>View My Passes</span>
+                </button>
+              </Link>
+              <Link to="/discover">
+                <button className="px-4 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs">
+                  <Sparkles className="w-4 h-4" />
+                  <span>Explore Events</span>
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* TAB 1: ACCOUNT & REGIONAL PREFERENCES */}
+        {/* 2. SENIOR UX TAB NAVIGATION: RESPONSIVE GRID (MOBILE) + PILL STRIP (DESKTOP) */}
         {/* ========================================================================= */}
-        {activeTab === 'account' && (
-          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-            <div className="border-b border-zinc-100 pb-4">
-              <h2 className="text-lg font-black text-zinc-950">User Profile & Personal Information</h2>
-              <p className="text-sm font-medium text-zinc-500 mt-0.5">
-                Update your contact details and default purchasing preferences across StraytTix.
-              </p>
-            </div>
+        <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 shadow-xs transition-colors">
+          <nav
+            aria-label="Settings sections"
+            className="grid grid-cols-2 sm:flex sm:items-center sm:gap-1.5 gap-1.5 w-full"
+          >
+            {navTabs.map((tab, idx) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              const isLastOddOnMobile = idx === navTabs.length - 1 && navTabs.length % 2 !== 0;
 
-            <form onSubmit={handleUpdateProfile} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <Input
-                  label="First Name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="e.g. John"
-                  required
-                />
-                <Input
-                  label="Last Name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder="e.g. Doe"
-                  required
-                />
-              </div>
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as TabType)}
+                  className={`flex items-center justify-center sm:justify-start gap-2 sm:gap-2.5 px-3 py-2.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none ${
+                    isLastOddOnMobile ? 'col-span-2 sm:col-auto' : ''
+                  } ${
+                    isActive
+                      ? 'bg-[#E31B23] text-white shadow-xs font-black'
+                      : 'bg-zinc-50 dark:bg-white/[0.03] sm:bg-transparent sm:dark:bg-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 border border-zinc-200/60 dark:border-white/5 sm:border-transparent sm:dark:border-transparent'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-zinc-400 dark:text-zinc-500'}`} />
+                  <span className="truncate">{tab.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="email"
-                      value={user?.email || ''}
-                      disabled
-                      className="w-full bg-zinc-50 border border-zinc-200 text-zinc-500 text-sm rounded-xl px-4 py-2.5 cursor-not-allowed"
+        {/* ========================================================================= */}
+        {/* 3. ACTIVE TAB PANEL CONTENT */}
+        {/* ========================================================================= */}
+        <div className="w-full space-y-6">
+
+            {/* TAB 1: PERSONAL PROFILE */}
+            {activeTab === 'profile' && (
+              <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 transition-colors">
+                <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
+                  <div className="flex items-center gap-2">
+                    <User className="w-5 h-5 text-[#E31B23]" />
+                    <h2 className="text-lg sm:text-xl font-black text-zinc-950 dark:text-white">
+                      Personal Information & Localization
+                    </h2>
+                  </div>
+                  <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                    Your name and verified phone appear on registered digital ticket stubs and venue door lists.
+                  </p>
+                </div>
+
+                <form onSubmit={handleUpdateProfile} className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <Input
+                      label="First Name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="e.g. John"
+                      required
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      <ShieldCheck className="w-3 h-3" /> Verified
-                    </span>
+                    <Input
+                      label="Last Name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="e.g. Doe"
+                      required
+                    />
                   </div>
-                  <p className="text-[11px] text-zinc-400 mt-1">
-                    Your email is tied to ticket barcode delivery and order receipts.
-                  </p>
-                </div>
 
-                <Input
-                  label="Phone Number"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+234 800 000 0000"
-                  hint="Used for SMS gate check-in reminders & WhatsApp ticket passes."
-                />
-              </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                        Account Email Address
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="email"
+                          value={user?.email || ''}
+                          disabled
+                          className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 text-sm rounded-xl px-4 py-2.5 cursor-not-allowed font-medium"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
+                          <ShieldCheck className="w-3 h-3" /> Verified
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1">
+                        Locked to your primary authentication provider. Contact support to transfer ownership.
+                      </p>
+                    </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-3 border-t border-zinc-100">
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                    Primary City / Location
-                  </label>
-                  <input
-                    type="text"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="e.g. Lagos, Nigeria"
-                    className="w-full bg-white border border-zinc-200 hover:border-zinc-300 focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] text-sm rounded-xl px-4 py-2.5 outline-none transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                    Default Currency
-                  </label>
-                  <select
-                    value={currency}
-                    onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full bg-white border border-zinc-200 hover:border-zinc-300 focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] text-sm rounded-xl px-4 py-2.5 outline-none transition-all"
-                  >
-                    <option value="NGN">NGN (₦) — Nigerian Naira</option>
-                    <option value="USD">USD ($) — US Dollar</option>
-                    <option value="GHS">GHS (₵) — Ghanaian Cedi</option>
-                    <option value="KES">KES (KSh) — Kenyan Shilling</option>
-                    <option value="GBP">GBP (£) — British Pound</option>
-                    <option value="EUR">EUR (€) — Euro</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                    Timezone
-                  </label>
-                  <select
-                    value={normalizeTimezone(timezone) || timezone}
-                    onChange={(e) => setTimezone(normalizeTimezone(e.target.value) || e.target.value)}
-                    className="w-full bg-white border border-zinc-200 hover:border-zinc-300 focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] text-sm rounded-xl px-4 py-2.5 outline-none transition-all"
-                  >
-                    <option value="Africa/Lagos">Africa/Lagos (WAT, GMT+1)</option>
-                    <option value="Africa/Accra">Africa/Accra (GMT)</option>
-                    <option value="Africa/Nairobi">Africa/Nairobi (EAT, GMT+3)</option>
-                    <option value="Africa/Johannesburg">Africa/Johannesburg (SAST, GMT+2)</option>
-                    <option value="Europe/London">Europe/London (BST/GMT)</option>
-                    <option value="America/New_York">America/New_York (EST/EDT)</option>
-                    <option value="UTC">UTC (Universal Coordinated Time)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="pt-4 flex justify-end">
-                <Button
-                  type="submit"
-                  variant="primary"
-                  disabled={isUpdatingProfile}
-                  className="px-6 py-2.5"
-                >
-                  {isUpdatingProfile ? 'Saving Changes...' : 'Save Profile Changes'}
-                </Button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 2: SECURITY & PASSWORD */}
-        {/* ========================================================================= */}
-        {activeTab === 'security' && (
-          <div className="space-y-6">
-            {/* Change Password Card */}
-            <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-              <div className="border-b border-zinc-100 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <div>
-                  <h2 className="text-lg font-black text-zinc-950 flex items-center gap-2">
-                    <KeyRound className="w-5 h-5 text-[#E31B23]" />
-                    Password & Authentication
-                  </h2>
-                  <p className="text-sm font-medium text-zinc-500 mt-0.5">
-                    Update your login credentials. We recommend using a strong password with at least 8 characters.
-                  </p>
-                </div>
-                {user?.password_changed_at && (
-                  <span className="text-xs font-semibold text-zinc-400 shrink-0">
-                    Last changed: {new Date(user.password_changed_at).toLocaleDateString()}
-                  </span>
-                )}
-              </div>
-
-              <form onSubmit={handleUpdatePassword} className="space-y-4 max-w-xl">
-                <Input
-                  label="Current Password"
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  required
-                />
-
-                <Input
-                  label="New Password"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Minimum 8 characters"
-                  required
-                />
-
-                <Input
-                  label="Confirm New Password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Repeat new password"
-                  required
-                />
-
-                <div className="pt-2">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={isUpdatingPassword}
-                    className="px-6 py-2.5"
-                  >
-                    {isUpdatingPassword ? 'Updating Password...' : 'Update Password'}
-                  </Button>
-                </div>
-              </form>
-            </div>
-
-            {/* 2FA Two-Factor Authentication Card */}
-            <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
-                <div>
-                  <h3 className="text-base font-black text-zinc-950 flex items-center gap-2">
-                    <Lock className="w-4 h-4 text-[#E31B23]" />
-                    Two-Factor Authentication (2FA)
-                  </h3>
-                  <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
-                    Secure your account and ticket passes by requiring an authenticator code during login.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                    twoFactorEnabled
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
-                  }`}>
-                    {twoFactorEnabled ? '2FA Enabled' : 'Disabled'}
-                  </span>
-                  <Button
-                    variant={twoFactorEnabled ? 'outline' : 'primary'}
-                    size="sm"
-                    onClick={() => {
-                      if (twoFactorEnabled) {
-                        setTwoFactorEnabled(false);
-                        showNotification('Two-Factor Authentication has been disabled.', 'info');
-                      } else {
-                        setShowTwoFactorModal(true);
-                      }
-                    }}
-                  >
-                    {twoFactorEnabled ? 'Disable' : 'Enable 2FA'}
-                  </Button>
-                </div>
-              </div>
-
-              <p className="text-xs text-zinc-500 leading-relaxed">
-                Compatible with Google Authenticator, 1Password, Authy, and Apple Passwords.
-              </p>
-            </div>
-
-            {/* Active Sessions Card */}
-            <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-4">
-                <div>
-                  <h3 className="text-base font-black text-zinc-950">Active Device Sessions</h3>
-                  <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
-                    Devices where your attendee account is currently signed in.
-                  </p>
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRevokeOtherSessions}
-                  className="text-xs"
-                >
-                  Sign Out Other Devices
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                {sessions.length === 0 ? (
-                  <div className="py-8 text-center bg-zinc-50 border border-zinc-200/80 rounded-2xl space-y-2">
-                    <Laptop className="w-6 h-6 text-zinc-400 mx-auto" />
-                    <p className="text-sm font-bold text-zinc-700">No other active sessions</p>
-                    <p className="text-xs text-zinc-500">Only your current device session is active.</p>
+                    <Input
+                      label="Phone Number"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+234 800 000 0000"
+                      hint="For SMS gate check-in reminders & WhatsApp passes."
+                    />
                   </div>
-                ) : (
-                  sessions.map((sess) => {
-                    const Icon = sess.icon;
-                    return (
-                      <div
-                        key={sess.id}
-                        className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200/80 flex items-center justify-between"
-                      >
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-10 h-10 rounded-xl bg-white border border-zinc-200 flex items-center justify-center text-zinc-700">
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="text-xs sm:text-sm font-bold text-zinc-950 flex items-center gap-2">
-                            <span>{sess.name}</span>
-                            {sess.isCurrent && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                                This Device
-                              </span>
-                            )}
-                          </p>
-                          <p className="text-[11px] text-zinc-400 font-medium">
-                            Last active: {sess.lastUsedAt}
-                          </p>
-                        </div>
+
+                  {/* Regional Localization Section */}
+                  <div className="pt-4 border-t border-zinc-100 dark:border-white/10 space-y-4">
+                    <div>
+                      <h3 className="text-sm font-black text-zinc-900 dark:text-white flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-[#E31B23]" />
+                        Regional Locale & Preferences
+                      </h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        Ensure countdown timers, door opening alerts, and receipt currency display in your local standard.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                          Primary City
+                        </label>
+                        <input
+                          type="text"
+                          value={city}
+                          onChange={(e) => setCity(e.target.value)}
+                          placeholder="e.g. Lagos, Nigeria"
+                          className="w-full bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 text-zinc-900 dark:text-white focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] text-sm rounded-xl px-4 py-2.5 outline-none transition-all shadow-2xs"
+                        />
                       </div>
 
-                      {!sess.isCurrent && (
-                        <span className="text-xs font-semibold text-zinc-500">Authorized</span>
-                      )}
-                    </div>
-                  );
-                }))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 3: NOTIFICATION PREFERENCES */}
-        {/* ========================================================================= */}
-        {activeTab === 'notifications' && (
-          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-            <div className="border-b border-zinc-100 pb-4">
-              <h2 className="text-lg font-black text-zinc-950 flex items-center gap-2">
-                <Bell className="w-5 h-5 text-[#E31B23]" />
-                Notification Channels & Alerts
-              </h2>
-              <p className="text-sm font-medium text-zinc-500 mt-0.5">
-                Customize how and when StraytTix alerts you about ticket passes, countdowns, and host updates.
-              </p>
-            </div>
-
-            <form onSubmit={handleSaveNotifications} className="space-y-6">
-              {/* Event & Ticket Alerts */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400">
-                  Event Alerts & Reminders
-                </h3>
-
-                <div className="divide-y divide-zinc-100 border border-zinc-200 rounded-2xl overflow-hidden">
-                  <div className="p-4 flex items-center justify-between hover:bg-zinc-50/50 transition-colors">
-                    <div>
-                      <p className="text-sm font-bold text-zinc-900">Ticket Purchase Receipts</p>
-                      <p className="text-xs text-zinc-500">Receive instant transaction invoice and entry QR code voucher upon checkout.</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={notifications.ticketReceipts}
-                      disabled
-                      className="w-4 h-4 text-[#E31B23] rounded accent-[#E31B23] cursor-not-allowed"
-                    />
-                  </div>
-
-                  <div className="p-4 flex items-center justify-between hover:bg-zinc-50/50 transition-colors cursor-pointer" onClick={() => handleToggleNotification('eventReminders')}>
-                    <div>
-                      <p className="text-sm font-bold text-zinc-900">Event Countdown & Door Opening</p>
-                      <p className="text-xs text-zinc-500">Receive reminders 24 hours and 2 hours before gate check-in starts.</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={notifications.eventReminders}
-                      onChange={() => handleToggleNotification('eventReminders')}
-                      className="w-4 h-4 text-[#E31B23] rounded accent-[#E31B23] cursor-pointer"
-                    />
-                  </div>
-
-                  <div className="p-4 flex items-center justify-between hover:bg-zinc-50/50 transition-colors cursor-pointer" onClick={() => handleToggleNotification('organizerUpdates')}>
-                    <div>
-                      <p className="text-sm font-bold text-zinc-900">Host Announcements & Schedule Shifts</p>
-                      <p className="text-xs text-zinc-500">Important notices about venue changes, weather advisories, or lineup updates.</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={notifications.organizerUpdates}
-                      onChange={() => handleToggleNotification('organizerUpdates')}
-                      className="w-4 h-4 text-[#E31B23] rounded accent-[#E31B23] cursor-pointer"
-                    />
-                  </div>
-
-                  <div className="p-4 flex items-center justify-between hover:bg-zinc-50/50 transition-colors cursor-pointer" onClick={() => handleToggleNotification('priceDrops')}>
-                    <div>
-                      <p className="text-sm font-bold text-zinc-900">Favorites & Price Drop Alerts</p>
-                      <p className="text-xs text-zinc-500">Get notified when ticket tiers for your saved events are running out or discounted.</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={notifications.priceDrops}
-                      onChange={() => handleToggleNotification('priceDrops')}
-                      className="w-4 h-4 text-[#E31B23] rounded accent-[#E31B23] cursor-pointer"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Delivery Channels */}
-              <div className="space-y-4 pt-2">
-                <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400">
-                  Delivery Channels
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div
-                    onClick={() => handleToggleNotification('channelEmail')}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
-                      notifications.channelEmail
-                        ? 'border-[#E31B23]/40 bg-rose-50/30'
-                        : 'border-zinc-200 bg-zinc-50/50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <Mail className="w-5 h-5 text-[#E31B23]" />
-                      <input
-                        type="checkbox"
-                        checked={notifications.channelEmail}
-                        onChange={() => handleToggleNotification('channelEmail')}
-                        className="w-4 h-4 accent-[#E31B23]"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-zinc-950">Email Dispatch</p>
-                      <p className="text-[11px] text-zinc-500">PDF passes & invoices</p>
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => handleToggleNotification('channelSms')}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
-                      notifications.channelSms
-                        ? 'border-[#E31B23]/40 bg-rose-50/30'
-                        : 'border-zinc-200 bg-zinc-50/50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <Phone className="w-5 h-5 text-[#E31B23]" />
-                      <input
-                        type="checkbox"
-                        checked={notifications.channelSms}
-                        onChange={() => handleToggleNotification('channelSms')}
-                        className="w-4 h-4 accent-[#E31B23]"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-zinc-950">SMS Text Alerts</p>
-                      <p className="text-[11px] text-zinc-500">Direct gate codes</p>
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => handleToggleNotification('channelWhatsApp')}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
-                      notifications.channelWhatsApp
-                        ? 'border-emerald-500/40 bg-emerald-50/30'
-                        : 'border-zinc-200 bg-zinc-50/50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <MessageSquare className="w-5 h-5 text-emerald-600" />
-                      <input
-                        type="checkbox"
-                        checked={notifications.channelWhatsApp}
-                        onChange={() => handleToggleNotification('channelWhatsApp')}
-                        className="w-4 h-4 accent-emerald-600"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-zinc-950">WhatsApp Delivery</p>
-                      <p className="text-[11px] text-zinc-500">Official ticket concierge</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4 flex justify-end">
-                <Button
-                  type="submit"
-                  variant="primary"
-                  disabled={isSavingNotifications}
-                  className="px-6 py-2.5"
-                >
-                  {isSavingNotifications ? 'Saving...' : 'Save Notification Preferences'}
-                </Button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 4: PAYMENT METHODS & BILLING */}
-        {/* ========================================================================= */}
-        {activeTab === 'payment' && (
-          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
-              <div>
-                <h2 className="text-lg font-black text-zinc-950 flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-[#E31B23]" />
-                  Saved Payment Cards
-                </h2>
-                <p className="text-sm font-medium text-zinc-500 mt-0.5">
-                  Manage your tokenized payment cards for fast 1-click checkout via Paystack.
-                </p>
-              </div>
-
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setShowAddCardModal(true)}
-                className="gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Payment Method</span>
-              </Button>
-            </div>
-
-            {/* Cards List */}
-            {savedCards.length === 0 ? (
-              <div className="py-12 text-center bg-zinc-50 border border-zinc-200/80 rounded-2xl space-y-3">
-                <CreditCard className="w-8 h-8 text-zinc-400 mx-auto" />
-                <p className="text-sm font-bold text-zinc-700">No payment methods saved</p>
-                <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-                  Add a card for fast, seamless one-click ticket checkout on future events.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {savedCards.map((card) => (
-                  <div
-                    key={card.id}
-                    className={`p-5 rounded-2xl border transition-all ${
-                      card.isDefault
-                        ? 'border-[#E31B23] bg-gradient-to-br from-rose-50/50 to-white shadow-xs'
-                        : 'border-zinc-200 bg-white hover:border-zinc-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="font-mono font-black text-xs uppercase px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800">
-                        {card.brand}
-                      </span>
-                      {card.isDefault && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-[#E31B23] bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
-                          Default Card
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="font-mono font-bold text-base text-zinc-900 tracking-wider">
-                      •••• •••• •••• {card.last4}
-                    </p>
-                    <p className="text-[11px] font-semibold text-zinc-400 mt-1">
-                      Expires: {card.expiry}
-                    </p>
-
-                    <div className="pt-4 mt-4 border-t border-zinc-100 flex items-center justify-between">
-                      {!card.isDefault ? (
-                        <button
-                          type="button"
-                          onClick={() => handleSetDefaultCard(card.id)}
-                          className="text-xs font-bold text-zinc-600 hover:text-[#E31B23] transition-colors cursor-pointer"
+                      <div>
+                        <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                          Default Currency
+                        </label>
+                        <select
+                          value={currency}
+                          onChange={(e) => setCurrency(e.target.value)}
+                          className="w-full bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 text-zinc-900 dark:text-white focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] text-sm rounded-xl px-4 py-2.5 outline-none transition-all shadow-2xs"
                         >
-                          Set as Default
-                        </button>
-                      ) : (
-                        <span className="text-xs font-bold text-zinc-400">Primary billing card</span>
-                      )}
+                          <option value="NGN">NGN (₦) — Nigerian Naira</option>
+                          <option value="USD">USD ($) — US Dollar</option>
+                          <option value="GHS">GHS (₵) — Ghanaian Cedi</option>
+                          <option value="KES">KES (KSh) — Kenyan Shilling</option>
+                          <option value="GBP">GBP (£) — British Pound</option>
+                          <option value="EUR">EUR (€) — Euro</option>
+                        </select>
+                      </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCard(card.id)}
-                        className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-lg transition-colors cursor-pointer"
-                        title="Remove card"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div>
+                        <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                          Timezone
+                        </label>
+                        <select
+                          value={normalizeTimezone(timezone) || timezone}
+                          onChange={(e) => setTimezone(normalizeTimezone(e.target.value) || e.target.value)}
+                          className="w-full bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 text-zinc-900 dark:text-white focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] text-sm rounded-xl px-4 py-2.5 outline-none transition-all shadow-2xs"
+                        >
+                          <option value="Africa/Lagos">Africa/Lagos (WAT, GMT+1)</option>
+                          <option value="Africa/Accra">Africa/Accra (GMT)</option>
+                          <option value="Africa/Nairobi">Africa/Nairobi (EAT, GMT+3)</option>
+                          <option value="Africa/Johannesburg">Africa/Johannesburg (SAST, GMT+2)</option>
+                          <option value="Europe/London">Europe/London (BST/GMT)</option>
+                          <option value="America/New_York">America/New_York (EST/EDT)</option>
+                          <option value="UTC">UTC (Universal Coordinated Time)</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
-                ))}
+
+                  <div className="pt-4 border-t border-zinc-100 dark:border-white/10 flex justify-end">
+                    <Button
+                      type="submit"
+                      disabled={isUpdatingProfile}
+                      fullWidth={false}
+                      className="px-6 py-2.5 font-bold"
+                    >
+                      {isUpdatingProfile ? 'Saving Changes...' : 'Save Profile Changes'}
+                    </Button>
+                  </div>
+                </form>
               </div>
             )}
 
-            {/* Gateway compliance note */}
-            <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 text-xs text-zinc-600 flex items-start gap-3">
-              <ShieldCheck className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-bold text-zinc-900">PCI-DSS Level 1 Encrypted Storage</p>
-                <p className="text-zinc-500 mt-0.5">
-                  StraytTix never stores raw card CVVs or complete account numbers. Card tokens are securely managed through Paystack.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 5: PRIVACY & DANGER ZONE */}
-        {/* ========================================================================= */}
-        {activeTab === 'privacy' && (
-          <div className="space-y-6">
-            {/* Privacy Controls */}
-            <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-              <div className="border-b border-zinc-100 pb-4">
-                <h2 className="text-lg font-black text-zinc-950">Attendee Privacy Settings</h2>
-                <p className="text-sm font-medium text-zinc-500 mt-0.5">
-                  Control how your profile and event participation details appear across the StraytTix network.
-                </p>
-              </div>
-
-              <div className="divide-y divide-zinc-100 border border-zinc-200 rounded-2xl overflow-hidden">
-                <div
-                  className="p-4 flex items-center justify-between hover:bg-zinc-50/50 transition-colors cursor-pointer"
-                  onClick={() => setAllowPublicVisibility(!allowPublicVisibility)}
-                >
-                  <div>
-                    <p className="text-sm font-bold text-zinc-900">Share Name on Guest Manifest</p>
-                    <p className="text-xs text-zinc-500">Allows event organizers to display your name on VIP door rosters and networking lists.</p>
+            {/* TAB 2: PREFERENCES & PASS CUSTOMIZATIONS */}
+            {activeTab === 'interests' && (
+              <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 transition-colors">
+                <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-[#E31B23]" />
+                    <h2 className="text-lg sm:text-xl font-black text-zinc-950 dark:text-white">
+                      Event Interests & VIP Pass Options
+                    </h2>
                   </div>
-                  <input
-                    type="checkbox"
-                    checked={allowPublicVisibility}
-                    onChange={() => setAllowPublicVisibility(!allowPublicVisibility)}
-                    className="w-4 h-4 accent-[#E31B23]"
-                  />
-                </div>
-
-                <div
-                  className="p-4 flex items-center justify-between hover:bg-zinc-50/50 transition-colors cursor-pointer"
-                  onClick={() => setShowEventsAttending(!showEventsAttending)}
-                >
-                  <div>
-                    <p className="text-sm font-bold text-zinc-900">Public Activity Feed</p>
-                    <p className="text-xs text-zinc-500">Allow friends to discover upcoming public events you plan to attend.</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={showEventsAttending}
-                    onChange={() => setShowEventsAttending(!showEventsAttending)}
-                    className="w-4 h-4 accent-[#E31B23]"
-                  />
-                </div>
-              </div>
-
-              {/* Data Archive Download */}
-              <div className="p-5 rounded-2xl bg-zinc-50 border border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-sm font-bold text-zinc-900">Personal Data Archive</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">
-                    Download a complete copy of all your order records, ticket stubs, and profile data in JSON format.
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDownloadData}
-                  className="gap-2 self-start sm:self-auto"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Download Archive</span>
-                </Button>
-              </div>
-            </div>
-
-            {/* Danger Zone */}
-            <div className="bg-white border border-rose-200 rounded-3xl p-6 md:p-8 shadow-xs space-y-4">
-              <div className="border-b border-rose-100 pb-3">
-                <h3 className="text-base font-black text-rose-700 flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-rose-600" />
-                  Danger Zone
-                </h3>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  Permanent actions regarding your attendee profile and purchase history.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-                <div>
-                  <p className="text-sm font-bold text-zinc-950">Delete Account & Purchase History</p>
-                  <p className="text-xs text-zinc-500 mt-0.5 max-w-xl">
-                    Once deleted, your active ticket vouchers, saved events, and purchase receipts will be permanently removed.
+                  <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                    Select your preferred event genres to train your personalized discovery feed and early-bird alerts.
                   </p>
                 </div>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDeleteModal(true)}
-                  className="text-rose-600 border-rose-200 hover:bg-rose-50 self-start sm:self-auto flex-shrink-0"
-                >
-                  Delete Account
-                </Button>
+                <form onSubmit={handleSaveInterests} className="space-y-6">
+                  <div className="space-y-3">
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                      Favorite Live Genres (Tap to toggle)
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                      {EVENT_GENRES.map((genre) => {
+                        const isSelected = selectedGenres.includes(genre);
+                        return (
+                          <button
+                            key={genre}
+                            type="button"
+                            onClick={() => toggleGenre(genre)}
+                            className={`p-3.5 rounded-2xl text-xs font-bold text-left transition-all border cursor-pointer flex flex-col justify-between h-20 ${
+                              isSelected
+                                ? 'bg-red-50 dark:bg-red-500/10 border-[#E31B23] text-[#E31B23] shadow-xs'
+                                : 'bg-zinc-50 dark:bg-white/5 border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-white/20'
+                            }`}
+                          >
+                            <span className="leading-snug">{genre}</span>
+                            <span className="self-end">
+                              {isSelected ? (
+                                <Check className="w-4 h-4 text-[#E31B23] stroke-[3]" />
+                              ) : (
+                                <Plus className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+                              )}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-zinc-100 dark:border-white/10">
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                        Hospitality & Dietary (Festivals & Dinners)
+                      </label>
+                      <select
+                        value={dietary}
+                        onChange={(e) => setDietary(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium text-zinc-900 dark:text-white focus:outline-none focus:border-[#E31B23]"
+                      >
+                        <option value="No restrictions">No restrictions</option>
+                        <option value="Vegetarian">Vegetarian</option>
+                        <option value="Vegan">Vegan</option>
+                        <option value="Halal">Halal</option>
+                        <option value="Kosher">Kosher</option>
+                        <option value="Gluten-Free">Gluten-Free</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                        Accessibility & Assistance Needs
+                      </label>
+                      <select
+                        value={accessibility}
+                        onChange={(e) => setAccessibility(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium text-zinc-900 dark:text-white focus:outline-none focus:border-[#E31B23]"
+                      >
+                        <option value="Standard entry">Standard entry</option>
+                        <option value="Wheelchair accessibility">Wheelchair accessibility</option>
+                        <option value="Sign language interpreter">Sign language interpreter</option>
+                        <option value="Sensory room / Low stimulation">Sensory room / Low stimulation</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-zinc-100 dark:border-white/10 flex justify-end">
+                    <Button
+                      type="submit"
+                      disabled={isSavingInterests}
+                      fullWidth={false}
+                      className="px-6 py-2.5 font-bold"
+                    >
+                      {isSavingInterests ? 'Saving Preferences...' : 'Save Preferences'}
+                    </Button>
+                  </div>
+                </form>
               </div>
-            </div>
+            )}
+
+            {/* TAB 3: SECURITY & PASSWORD */}
+            {activeTab === 'security' && (
+              <div className="space-y-6">
+                {/* Change Password Card */}
+                <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 transition-colors">
+                  <div className="border-b border-zinc-100 dark:border-white/10 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-black text-zinc-950 dark:text-white flex items-center gap-2">
+                        <KeyRound className="w-5 h-5 text-[#E31B23]" />
+                        Password & Security
+                      </h2>
+                      <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                        Update your login credentials. Use a strong password containing numbers and symbols.
+                      </p>
+                    </div>
+                    {user?.password_changed_at && (
+                      <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 shrink-0">
+                        Changed: {new Date(user.password_changed_at).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+
+                  <form onSubmit={handleUpdatePassword} className="space-y-4 max-w-xl">
+                    <Input
+                      label="Current Password"
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="••••••••••••"
+                      required
+                    />
+
+                    <Input
+                      label="New Password"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Minimum 8 characters"
+                      required
+                    />
+
+                    <Input
+                      label="Confirm New Password"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Repeat new password"
+                      required
+                    />
+
+                    <div className="pt-2">
+                      <Button
+                        type="submit"
+                        disabled={isUpdatingPassword}
+                        fullWidth={false}
+                        className="px-6 py-2.5 font-bold"
+                      >
+                        {isUpdatingPassword ? 'Updating Password...' : 'Update Password'}
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+
+                {/* 2FA Two-Factor Authentication Card */}
+                <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
+                    <div>
+                      <h3 className="text-base font-black text-zinc-950 dark:text-white flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-[#E31B23]" />
+                        Two-Factor Authentication (2FA)
+                      </h3>
+                      <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        Protect your ticket stubs from unauthorized transfers with an authenticator passcode.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                        twoFactorEnabled
+                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
+                          : 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/10'
+                      }`}>
+                        {twoFactorEnabled ? '2FA Enabled' : 'Disabled'}
+                      </span>
+                      <Button
+                        variant={twoFactorEnabled ? 'outline' : 'primary'}
+                        size="sm"
+                        fullWidth={false}
+                        onClick={() => {
+                          if (twoFactorEnabled) {
+                            setTwoFactorEnabled(false);
+                            showNotification('Two-Factor Authentication disabled.', 'info');
+                          } else {
+                            setShowTwoFactorModal(true);
+                          }
+                        }}
+                      >
+                        {twoFactorEnabled ? 'Disable' : 'Enable 2FA'}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
+                    Works seamlessly with Google Authenticator, 1Password, Authy, or Apple Passwords.
+                  </p>
+                </div>
+
+                {/* Active Sessions Card */}
+                <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 dark:border-white/10 pb-4">
+                    <div>
+                      <h3 className="text-base font-black text-zinc-950 dark:text-white">Active Device Sessions</h3>
+                      <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        Devices where your attendee account is currently signed in.
+                      </p>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      fullWidth={false}
+                      onClick={handleRevokeOtherSessions}
+                      className="text-xs"
+                    >
+                      Sign Out Other Devices
+                    </Button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {sessions.map((sess) => {
+                      const Icon = sess.icon;
+                      return (
+                        <div
+                          key={sess.id}
+                          className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-3.5">
+                            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
+                              <Icon className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <p className="text-xs sm:text-sm font-bold text-zinc-950 dark:text-white flex items-center gap-2">
+                                <span>{sess.name}</span>
+                                {sess.isCurrent && (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
+                                    Current Device
+                                  </span>
+                                )}
+                              </p>
+                              <p className="text-[11px] text-zinc-400 dark:text-white mt-0.5">
+                                {sess.lastUsedAt}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 4: NOTIFICATIONS */}
+            {activeTab === 'notifications' && (
+              <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 transition-colors">
+                <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
+                  <div className="flex items-center gap-2">
+                    <Bell className="w-5 h-5 text-[#E31B23]" />
+                    <h2 className="text-lg sm:text-xl font-black text-zinc-950 dark:text-white">
+                      Notification Channels & Alerts
+                    </h2>
+                  </div>
+                  <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                    Configure pass updates, door opening reminders, and direct gate check-in alerts.
+                  </p>
+                </div>
+
+                <form onSubmit={handleSaveNotifications} className="space-y-6">
+                  {/* Event & Ticket Alerts */}
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                      Event Alerts & Reminders
+                    </h3>
+
+                    <div className="divide-y divide-zinc-100 dark:divide-white/10 border border-zinc-200 dark:border-white/10 rounded-2xl overflow-hidden">
+                      <div className="p-4 flex items-center justify-between hover:bg-zinc-50/50 dark:hover:bg-white/5 transition-colors">
+                        <div>
+                          <p className="text-sm font-bold text-zinc-900 dark:text-white">Ticket Purchase Receipts</p>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">Receive instant transaction receipt & entry QR voucher upon checkout.</p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={notifications.ticketReceipts}
+                          disabled
+                          className="w-4 h-4 text-[#E31B23] rounded accent-[#E31B23] cursor-not-allowed"
+                        />
+                      </div>
+
+                      <div className="p-4 flex items-center justify-between hover:bg-zinc-50/50 dark:hover:bg-white/5 transition-colors cursor-pointer" onClick={() => handleToggleNotification('eventReminders')}>
+                        <div>
+                          <p className="text-sm font-bold text-zinc-900 dark:text-white">Event Countdown & Door Opening</p>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">Reminders 24 hours and 2 hours before gate check-in begins.</p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={notifications.eventReminders}
+                          onChange={() => handleToggleNotification('eventReminders')}
+                          className="w-4 h-4 text-[#E31B23] rounded accent-[#E31B23] cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="p-4 flex items-center justify-between hover:bg-zinc-50/50 dark:hover:bg-white/5 transition-colors cursor-pointer" onClick={() => handleToggleNotification('organizerUpdates')}>
+                        <div>
+                          <p className="text-sm font-bold text-zinc-900 dark:text-white">Host Announcements & Schedule Shifts</p>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">Important notices about venue changes or schedule adjustments.</p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={notifications.organizerUpdates}
+                          onChange={() => handleToggleNotification('organizerUpdates')}
+                          className="w-4 h-4 text-[#E31B23] rounded accent-[#E31B23] cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="p-4 flex items-center justify-between hover:bg-zinc-50/50 dark:hover:bg-white/5 transition-colors cursor-pointer" onClick={() => handleToggleNotification('priceDrops')}>
+                        <div>
+                          <p className="text-sm font-bold text-zinc-900 dark:text-white">Favorites & Price Drop Alerts</p>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">Notified when saved events are running out of tiers or discounted.</p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={notifications.priceDrops}
+                          onChange={() => handleToggleNotification('priceDrops')}
+                          className="w-4 h-4 text-[#E31B23] rounded accent-[#E31B23] cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Delivery Channels */}
+                  <div className="space-y-3 pt-2">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                      Delivery Channels
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div
+                        onClick={() => handleToggleNotification('channelEmail')}
+                        className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                          notifications.channelEmail
+                            ? 'border-[#E31B23]/40 bg-red-50/40 dark:bg-red-500/10'
+                            : 'border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-white/5'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <Mail className="w-5 h-5 text-[#E31B23]" />
+                          <input
+                            type="checkbox"
+                            checked={notifications.channelEmail}
+                            onChange={() => handleToggleNotification('channelEmail')}
+                            className="w-4 h-4 accent-[#E31B23]"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-zinc-950 dark:text-white">Email Dispatch</p>
+                          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">PDF passes & receipts</p>
+                        </div>
+                      </div>
+
+                      <div
+                        onClick={() => handleToggleNotification('channelSms')}
+                        className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                          notifications.channelSms
+                            ? 'border-[#E31B23]/40 bg-red-50/40 dark:bg-red-500/10'
+                            : 'border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-white/5'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <Phone className="w-5 h-5 text-[#E31B23]" />
+                          <input
+                            type="checkbox"
+                            checked={notifications.channelSms}
+                            onChange={() => handleToggleNotification('channelSms')}
+                            className="w-4 h-4 accent-[#E31B23]"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-zinc-950 dark:text-white">SMS Gate Alerts</p>
+                          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Direct gate pass codes</p>
+                        </div>
+                      </div>
+
+                      <div
+                        onClick={() => handleToggleNotification('channelWhatsApp')}
+                        className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                          notifications.channelWhatsApp
+                            ? 'border-emerald-500/40 bg-emerald-50/30 dark:bg-emerald-500/10'
+                            : 'border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-white/5'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <MessageSquare className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                          <input
+                            type="checkbox"
+                            checked={notifications.channelWhatsApp}
+                            onChange={() => handleToggleNotification('channelWhatsApp')}
+                            className="w-4 h-4 accent-emerald-600"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-zinc-950 dark:text-white">WhatsApp Delivery</p>
+                          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Live ticket concierge</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-zinc-100 dark:border-white/10 flex justify-end">
+                    <Button
+                      type="submit"
+                      disabled={isSavingNotifications}
+                      fullWidth={false}
+                      className="px-6 py-2.5 font-bold"
+                    >
+                      {isSavingNotifications ? 'Saving Preferences...' : 'Save Notification Preferences'}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* TAB 5: PRIVACY & DATA */}
+            {activeTab === 'privacy' && (
+              <div className="space-y-6">
+                <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 transition-colors">
+                  <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
+                    <h2 className="text-lg sm:text-xl font-black text-zinc-950 dark:text-white">
+                      Attendee Privacy & Visibility
+                    </h2>
+                    <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                      Control how your profile and event participation details appear across the StraytTix ecosystem.
+                    </p>
+                  </div>
+
+                  <div className="divide-y divide-zinc-100 dark:divide-white/10 border border-zinc-200 dark:border-white/10 rounded-2xl overflow-hidden">
+                    <div
+                      className="p-4 flex items-center justify-between hover:bg-zinc-50/50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                      onClick={() => setAllowPublicVisibility(!allowPublicVisibility)}
+                    >
+                      <div>
+                        <p className="text-sm font-bold text-zinc-900 dark:text-white">Share Name on Guest Manifest</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">Allows hosts to display your name on VIP gate check-in rosters and networking lists.</p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={allowPublicVisibility}
+                        onChange={() => setAllowPublicVisibility(!allowPublicVisibility)}
+                        className="w-4 h-4 accent-[#E31B23]"
+                      />
+                    </div>
+
+                    <div
+                      className="p-4 flex items-center justify-between hover:bg-zinc-50/50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                      onClick={() => setShowEventsAttending(!showEventsAttending)}
+                    >
+                      <div>
+                        <p className="text-sm font-bold text-zinc-900 dark:text-white">Public Activity Feed</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">Allow friends to view public festivals and events you plan to attend.</p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={showEventsAttending}
+                        onChange={() => setShowEventsAttending(!showEventsAttending)}
+                        className="w-4 h-4 accent-[#E31B23]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Data Archive Download */}
+                  <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="max-w-md">
+                      <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Personal Data Archive</h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                        Download a machine-readable JSON archive of all your ticket purchases, verified passes, and preferences.
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      fullWidth={false}
+                      onClick={handleDownloadData}
+                      className="gap-2 shrink-0 self-start sm:self-auto text-zinc-800 dark:text-zinc-200 dark:border-white/10 dark:hover:bg-white/5"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Download Archive</span>
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Danger Zone */}
+                <div className="bg-white dark:bg-[#0F0F14] border border-rose-200 dark:border-rose-900/40 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4 transition-colors">
+                  <div className="border-b border-rose-100 dark:border-rose-900/30 pb-3">
+                    <h3 className="text-base font-black text-rose-700 dark:text-rose-400 flex items-center gap-2">
+                      <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                      Danger Zone
+                    </h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      Irreversible actions regarding your attendee profile and ticket history.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+                    <div className="max-w-md">
+                      <p className="text-sm font-bold text-zinc-950 dark:text-white">Delete Attendee Account</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                        Once deleted, your active ticket QR passes, saved events, and receipt history will be permanently wiped.
+                      </p>
+                    </div>
+
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      fullWidth={false}
+                      onClick={() => setShowDeleteModal(true)}
+                      className="shrink-0 self-start sm:self-auto whitespace-nowrap shadow-sm hover:shadow-red-500/20"
+                    >
+                      Delete Account
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
-        )}
 
         {/* ----------------- 2FA SETUP MODAL ----------------- */}
         <Modal
@@ -1100,15 +1141,15 @@ export const Settings: React.FC = () => {
           title="Enable Two-Factor Authentication"
         >
           <div className="space-y-5">
-            <p className="text-xs text-zinc-500 leading-relaxed">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
               Scan this QR code with your authenticator app (Google Authenticator, Authy, or 1Password), then enter the 6-digit verification code.
             </p>
 
-            <div className="p-6 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center justify-center gap-3">
-              <div className="w-40 h-40 bg-white border border-zinc-200 rounded-xl p-3 flex items-center justify-center shadow-xs">
+            <div className="p-6 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center gap-3">
+              <div className="w-40 h-40 bg-white rounded-xl p-3 flex items-center justify-center shadow-xs">
                 <QrCode className="w-32 h-32 text-zinc-900" />
               </div>
-              <span className="font-mono text-xs font-bold text-zinc-600">
+              <span className="font-mono text-xs font-bold text-zinc-600 dark:text-zinc-300">
                 Secret: EVNT-OS26-AUTH-9912
               </span>
             </div>
@@ -1145,85 +1186,6 @@ export const Settings: React.FC = () => {
           </div>
         </Modal>
 
-        {/* ----------------- ADD CARD MODAL ----------------- */}
-        <Modal
-          isOpen={showAddCardModal}
-          onClose={() => setShowAddCardModal(false)}
-          title="Add Payment Card"
-        >
-          <form onSubmit={handleAddCard} className="space-y-4">
-            <Input
-              label="Cardholder Name"
-              type="text"
-              value={newCardName}
-              onChange={(e) => setNewCardName(e.target.value)}
-              placeholder="e.g. Cardholder Name"
-              required
-            />
-
-            <Input
-              label="Card Number"
-              type="text"
-              maxLength={19}
-              value={newCardNumber}
-              onChange={(e) => {
-                const v = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
-                setNewCardNumber(v);
-              }}
-              placeholder="•••• •••• •••• ••••"
-              required
-            />
-
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Expiry Date"
-                type="text"
-                maxLength={5}
-                value={newCardExpiry}
-                onChange={(e) => {
-                  let v = e.target.value.replace(/\D/g, '');
-                  if (v.length > 2) v = `${v.slice(0, 2)}/${v.slice(2, 4)}`;
-                  setNewCardExpiry(v);
-                }}
-                placeholder="MM/YY"
-                required
-              />
-
-              <Input
-                label="CVV / CVC"
-                type="password"
-                maxLength={4}
-                value={newCardCvc}
-                onChange={(e) => setNewCardCvc(e.target.value.replace(/\D/g, ''))}
-                placeholder="123"
-                required
-              />
-            </div>
-
-            <p className="text-[11px] text-zinc-400">
-              A nominal ₦50 pre-authorization may be checked and immediately reversed to verify the card.
-            </p>
-
-            <div className="flex items-center justify-end gap-2 pt-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAddCardModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                size="sm"
-              >
-                Save Payment Card
-              </Button>
-            </div>
-          </form>
-        </Modal>
-
         {/* ----------------- DELETE ACCOUNT MODAL ----------------- */}
         <Modal
           isOpen={showDeleteModal}
@@ -1231,7 +1193,7 @@ export const Settings: React.FC = () => {
           title="Permanently Delete Account"
         >
           <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 space-y-1">
+            <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 text-xs text-rose-800 dark:text-rose-300 space-y-1">
               <p className="font-bold">Warning: This action cannot be undone.</p>
               <p>
                 Deleting your account will forfeit access to any future event passes and erase your purchase history from StraytTix.
@@ -1239,15 +1201,15 @@ export const Settings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-zinc-700 mb-1">
-                Type <span className="font-mono text-rose-600 font-bold">DELETE</span> to confirm:
+              <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+                Type <span className="font-mono text-rose-600 dark:text-rose-400 font-bold">DELETE</span> to confirm:
               </label>
               <input
                 type="text"
                 value={deleteConfirmationText}
                 onChange={(e) => setDeleteConfirmationText(e.target.value)}
                 placeholder="DELETE"
-                className="w-full bg-white border border-zinc-300 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-sm rounded-xl px-4 py-2.5 outline-none font-mono"
+                className="w-full bg-white dark:bg-[#070709] border border-zinc-300 dark:border-white/10 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-sm text-zinc-900 dark:text-white rounded-xl px-4 py-2.5 outline-none font-mono transition-colors"
               />
             </div>
 

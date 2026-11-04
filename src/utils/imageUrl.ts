@@ -81,7 +81,19 @@ export const resolveImageUrl = (url?: string | null): string => {
  */
 export const getOrganizerLogo = (organizer?: any): string => {
   if (!organizer) return '';
-  const raw = organizer.logo || organizer.logo_url || organizer.avatar || organizer.avatar_url || organizer.profile_image || '';
+  const raw =
+    organizer.logo ||
+    organizer.logo_url ||
+    organizer.logoUrl ||
+    organizer.avatar ||
+    organizer.avatar_url ||
+    organizer.avatarUrl ||
+    organizer.profile_image ||
+    organizer.profileImage ||
+    organizer.image ||
+    organizer.image_url ||
+    organizer.imageUrl ||
+    '';
   return resolveImageUrl(raw);
 };
 
@@ -91,6 +103,21 @@ export const getOrganizerLogo = (organizer?: any): string => {
  */
 export const getOrganizerCoverPhoto = (organizer?: any): string => {
   if (!organizer) return '';
-  const raw = organizer.bannerUrl || organizer.banner_url || organizer.cover_image || organizer.cover_photo || organizer.coverImage || organizer.coverPhoto || '';
+  const raw =
+    organizer.bannerUrl ||
+    organizer.banner_url ||
+    organizer.cover_image ||
+    organizer.cover_photo ||
+    organizer.coverImage ||
+    organizer.coverPhoto ||
+    organizer.cover_photo_url ||
+    organizer.cover_image_url ||
+    organizer.coverUrl ||
+    organizer.cover_url ||
+    organizer.banner ||
+    organizer.header_image ||
+    organizer.headerImage ||
+    organizer.header_photo ||
+    '';
   return resolveImageUrl(raw);
 };

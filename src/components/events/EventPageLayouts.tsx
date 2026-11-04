@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import type { Event, FaqItem, TicketType } from '../../types/api';
 import { formatCurrency, formatEventDateTime, formatDate } from '../../utils/format';
-import { resolveImageUrl } from '../../utils/imageUrl';
+import { resolveImageUrl, getOrganizerLogo } from '../../utils/imageUrl';
 
 export interface EventPageLayoutProps {
   event: Event;
@@ -154,6 +154,7 @@ export const HostedBySection: React.FC<{
   const organizerName = event.organizer?.name || 'Event Host';
   const org = event.organizer as any;
   const handleOrRole = org?.handle ? `@${org.handle}` : (org?.email ? `@${org.email.split('@')[0]}` : (org?.slug ? `@${org.slug}` : '@host'));
+  const organizerLogo = getOrganizerLogo(event.organizer);
 
   return (
     <section className="space-y-4 pt-4 border-t border-white/10">
@@ -163,8 +164,8 @@ export const HostedBySection: React.FC<{
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-full bg-zinc-800 border border-white/15 overflow-hidden flex items-center justify-center font-bold text-base text-white flex-shrink-0">
-            {event.organizer?.logo ? (
-              <img src={resolveImageUrl(event.organizer.logo)} alt={organizerName} className="w-full h-full object-cover" />
+            {organizerLogo ? (
+              <img src={organizerLogo} alt={organizerName} className="w-full h-full object-cover" />
             ) : (
               organizerName.charAt(0).toUpperCase()
             )}
@@ -244,13 +245,13 @@ export const DirectionsSection: React.FC<{
       {/* Map with Floating Address Card (Matching Screenshot exactly) */}
       <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 h-72 sm:h-96 w-full shadow-lg bg-zinc-950">
         {/* Floating Google Place Card on Top-Left */}
-        <div className="absolute top-4 left-4 z-10 max-w-[280px] sm:max-w-xs bg-white text-zinc-900 p-3 sm:p-4 rounded-xl shadow-2xl border border-zinc-200">
+        <div className="absolute top-4 left-4 z-10 max-w-[280px] sm:max-w-xs bg-[#0F0F14]/95 text-white p-3 sm:p-4 rounded-xl shadow-2xl border border-white/10 backdrop-blur-md">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h5 className="text-xs sm:text-sm font-bold leading-tight line-clamp-2">
+              <h5 className="text-xs sm:text-sm font-bold leading-tight line-clamp-2 text-white">
                 {event.venue || event.city}
               </h5>
-              <p className="text-[11px] text-zinc-500 mt-1 line-clamp-2">
+              <p className="text-[11px] text-zinc-400 mt-1 line-clamp-2">
                 {event.address ? `${event.address}, ` : ''}{event.city || ''}
               </p>
             </div>
@@ -259,23 +260,23 @@ export const DirectionsSection: React.FC<{
                 href={directionsUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex-shrink-0"
+                className="p-1.5 rounded-lg bg-white/10 text-white hover:bg-white/20 flex-shrink-0"
                 title="Navigate"
               >
-                <Navigation className="w-4 h-4" />
+                <Navigation className="w-4 h-4 text-[#E31B23]" />
               </a>
             )}
           </div>
-          <div className="pt-2 mt-2 border-t border-zinc-100 flex items-center justify-between text-[10px] text-zinc-500">
+          <div className="pt-2 mt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-zinc-400">
             <button
               type="button"
               onClick={handleCopyAddress}
-              className="font-bold text-zinc-700 hover:text-black flex items-center gap-1 cursor-pointer"
+              className="font-bold text-zinc-300 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
             >
-              {copiedAddress ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+              {copiedAddress ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
               <span>{copiedAddress ? 'Address Copied' : 'Copy Address'}</span>
             </button>
-            <span className="font-semibold">★ 4.8</span>
+            <span className="font-semibold text-amber-400">★ 4.8</span>
           </div>
         </div>
 

@@ -496,14 +496,14 @@ export const TeamMembers: React.FC = () => {
       <div className="space-y-8 max-w-6xl mx-auto">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 dark:border-white/10 pb-6">
           <div>
-            <h1 className="text-2xl font-black text-zinc-950 tracking-tight flex items-center gap-2.5">
+            <h1 className="text-2xl font-black text-zinc-950 dark:text-white tracking-tight flex items-center gap-2.5">
               <Users className="w-7 h-7 text-[#E31B23]" /> Team & Staff Management
             </h1>
-            <p className="text-sm text-zinc-500 font-medium mt-1">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium mt-1">
               Invite colleagues, manage roles, and deploy staff to events for{' '}
-              <span className="text-zinc-900 font-bold">{organizer?.name || 'your organization'}</span>.
+              <span className="text-zinc-900 dark:text-white font-bold">{organizer?.name || 'your organization'}</span>.
             </p>
           </div>
           <button
@@ -516,31 +516,31 @@ export const TeamMembers: React.FC = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-xs flex items-center gap-5">
-            <div className="p-3.5 bg-red-50 text-[#E31B23] rounded-2xl"><UserCheck className="w-6 h-6" /></div>
+          <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-2xl p-6 shadow-xs flex items-center gap-5">
+            <div className="p-3.5 bg-red-50 dark:bg-red-500/10 text-[#E31B23] rounded-2xl border border-red-100 dark:border-red-500/20"><UserCheck className="w-6 h-6" /></div>
             <div>
               <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Active Staff</p>
-              <h3 className="text-2xl font-black text-zinc-950">{members.length} Members</h3>
+              <h3 className="text-2xl font-black text-zinc-950 dark:text-white">{members.length} Members</h3>
             </div>
           </div>
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-xs flex items-center gap-5">
-            <div className="p-3.5 bg-amber-50 text-amber-600 rounded-2xl"><Clock className="w-6 h-6" /></div>
+          <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-2xl p-6 shadow-xs flex items-center gap-5">
+            <div className="p-3.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-2xl border border-amber-100 dark:border-amber-500/20"><Clock className="w-6 h-6" /></div>
             <div>
               <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Pending Invites</p>
-              <h3 className="text-2xl font-black text-zinc-950">{invitations.length} Invites</h3>
+              <h3 className="text-2xl font-black text-zinc-950 dark:text-white">{invitations.length} Invites</h3>
             </div>
           </div>
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-xs flex items-center gap-5">
-            <div className="p-3.5 bg-blue-50 text-blue-600 rounded-2xl"><ShieldCheck className="w-6 h-6" /></div>
+          <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-2xl p-6 shadow-xs flex items-center gap-5">
+            <div className="p-3.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl border border-blue-100 dark:border-blue-500/20"><ShieldCheck className="w-6 h-6" /></div>
             <div>
               <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Your Access Level</p>
-              <h3 className="text-2xl font-black text-zinc-950 capitalize">{role}</h3>
+              <h3 className="text-2xl font-black text-zinc-950 dark:text-white capitalize">{role}</h3>
             </div>
           </div>
         </div>
 
         {/* Search & Tabs */}
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
             {[
               { key: 'members', label: `Active Members (${members.length})`, icon: <Users className="w-4 h-4" /> },
@@ -550,7 +550,7 @@ export const TeamMembers: React.FC = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as any)}
-                className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${activeTab === tab.key ? 'bg-zinc-900 text-white shadow-xs' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+                className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${activeTab === tab.key ? 'bg-[#E31B23] text-white shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5'
                   }`}
               >
                 {tab.icon} {tab.label}
@@ -562,7 +562,7 @@ export const TeamMembers: React.FC = () => {
             <input
               type="text" placeholder="Search by name, email, or role..."
               value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm font-medium text-zinc-900 focus:bg-white focus:border-[#E31B23] focus:outline-none transition-all placeholder:text-zinc-400"
+              className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium text-zinc-900 dark:text-white focus:bg-white dark:focus:bg-zinc-900 focus:border-[#E31B23] focus:outline-none transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
             />
           </div>
         </div>
@@ -571,7 +571,7 @@ export const TeamMembers: React.FC = () => {
             TAB 1: ACTIVE MEMBERS
         ===================================================================== */}
         {activeTab === 'members' && (
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl shadow-xs overflow-hidden">
+          <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-2xl shadow-xs overflow-hidden">
             {isLoading ? (
               <div className="p-16 text-center text-zinc-400 text-sm font-semibold flex flex-col items-center gap-3">
                 <RefreshCw className="w-7 h-7 animate-spin text-[#E31B23]" /> Loading team members...
@@ -579,7 +579,7 @@ export const TeamMembers: React.FC = () => {
             ) : filteredMembers.length === 0 ? (
               <div className="p-16 text-center space-y-3">
                 <Users className="w-12 h-12 text-zinc-300 mx-auto" />
-                <h3 className="text-base font-bold text-zinc-800">No team members found</h3>
+                <h3 className="text-base font-bold text-zinc-800 dark:text-zinc-200">No team members found</h3>
                 <p className="text-sm text-zinc-400 max-w-sm mx-auto">
                   {searchQuery ? `No members match "${searchQuery}".` : 'No team members yet.'}
                 </p>
@@ -587,7 +587,7 @@ export const TeamMembers: React.FC = () => {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-bold uppercase tracking-wider text-xs">
+                  <thead className="bg-zinc-50 dark:bg-white/[0.03] border-b border-zinc-200 dark:border-white/10 text-zinc-400 dark:text-zinc-400 font-bold uppercase tracking-wider text-xs">
                     <tr>
                       <th className="px-6 py-4">Team Member</th>
                       <th className="px-6 py-4">Access Role</th>
@@ -595,22 +595,22 @@ export const TeamMembers: React.FC = () => {
                       <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100 font-medium text-zinc-800">
+                  <tbody className="divide-y divide-zinc-100 dark:divide-white/10 font-medium text-zinc-800 dark:text-zinc-200">
                     {filteredMembers.map((member) => {
                       const isCurrentUser = member.email === user?.email;
                       const isOwner = member.role === 'owner';
                       const memberId = member.uuid || member.id;
                       return (
-                        <tr key={memberId} className="hover:bg-zinc-50/70 transition-colors">
+                        <tr key={memberId} className="hover:bg-zinc-50/70 dark:hover:bg-white/[0.02] transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3.5">
-                              <div className="w-11 h-11 rounded-2xl bg-zinc-950 text-white font-black text-sm flex items-center justify-center flex-shrink-0">
+                              <div className="w-11 h-11 rounded-2xl bg-zinc-950 dark:bg-zinc-800 text-white font-black text-sm flex items-center justify-center flex-shrink-0 border border-transparent dark:border-white/10">
                                 {((member.firstName && member.firstName[0]) || (member.email && member.email[0]) || 'M').toUpperCase()}
                               </div>
                               <div>
                                 <div className="flex items-center gap-2">
-                                  <span className="font-bold text-zinc-950 text-base">{member.firstName || ''} {member.lastName || ''}</span>
-                                  {isCurrentUser && <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-50 border border-red-100 text-[#E31B23]">You</span>}
+                                  <span className="font-bold text-zinc-950 dark:text-white text-base">{member.firstName || ''} {member.lastName || ''}</span>
+                                  {isCurrentUser && <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-[#E31B23]">You</span>}
                                 </div>
                                 <span className="text-zinc-400 text-xs font-medium">{member.email || 'No email provided'}</span>
                               </div>
@@ -632,7 +632,7 @@ export const TeamMembers: React.FC = () => {
                                 value={member.role}
                                 disabled={updatingMemberUuid === memberId || !canManageEvents || (member.role === 'admin' && userRole !== 'owner')}
                                 onChange={(e) => handleRoleChange(memberId, e.target.value)}
-                                className="bg-zinc-50 border border-zinc-200 text-xs font-bold rounded-xl px-3 py-1.5 text-zinc-800 focus:border-[#E31B23] focus:outline-none cursor-pointer disabled:opacity-50"
+                                className="bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-xs font-bold rounded-xl px-3 py-1.5 text-zinc-800 dark:text-zinc-200 focus:border-[#E31B23] focus:outline-none cursor-pointer disabled:opacity-50"
                               >
                                 {userRole === 'owner' && <option value="admin">Admin — Full Console</option>}
                                 <option value="manager">Manager — Events & Orders</option>
@@ -649,7 +649,7 @@ export const TeamMembers: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleOpenStaffSettings(member)}
-                                  className="px-3 py-1.5 hover:bg-zinc-100 text-zinc-700 hover:text-zinc-950 border border-zinc-200 rounded-xl transition-colors inline-flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                                  className="px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white border border-zinc-200 dark:border-white/10 rounded-xl transition-colors inline-flex items-center gap-1.5 text-xs font-bold cursor-pointer"
                                   title="Staff Station & Scanner Permissions"
                                 >
                                   <Settings className="w-3.5 h-3.5 text-zinc-500" />
@@ -660,7 +660,7 @@ export const TeamMembers: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => { setActiveTab('staff'); }}
-                                  className="px-3 py-1.5 hover:bg-zinc-100 text-zinc-700 hover:text-zinc-950 border border-zinc-200 rounded-xl transition-colors inline-flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                                  className="px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white border border-zinc-200 dark:border-white/10 rounded-xl transition-colors inline-flex items-center gap-1.5 text-xs font-bold cursor-pointer"
                                   title="Go to Event Staff Assignments"
                                 >
                                   <Calendar className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -671,7 +671,7 @@ export const TeamMembers: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveMember(memberId, `${member.firstName || ''} ${member.lastName || ''}`.trim() || member.email || 'Member')}
-                                  className="p-2 hover:bg-red-50 text-zinc-400 hover:text-red-600 rounded-xl transition-colors cursor-pointer"
+                                  className="p-2 hover:bg-red-50 dark:hover:bg-red-500/10 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 rounded-xl transition-colors cursor-pointer"
                                   title="Remove team member"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -693,7 +693,7 @@ export const TeamMembers: React.FC = () => {
             TAB 2: PENDING INVITATIONS
         ===================================================================== */}
         {activeTab === 'invitations' && (
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl shadow-xs overflow-hidden">
+          <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-2xl shadow-xs overflow-hidden">
             {isLoading ? (
               <div className="p-16 text-center text-zinc-400 text-sm font-semibold flex flex-col items-center gap-3">
                 <RefreshCw className="w-7 h-7 animate-spin text-[#E31B23]" /> Loading invitations...
@@ -701,7 +701,7 @@ export const TeamMembers: React.FC = () => {
             ) : filteredInvitations.length === 0 ? (
               <div className="p-16 text-center space-y-4">
                 <Mail className="w-12 h-12 text-zinc-300 mx-auto" />
-                <h3 className="text-base font-bold text-zinc-800">No pending invitations</h3>
+                <h3 className="text-base font-bold text-zinc-800 dark:text-zinc-200">No pending invitations</h3>
                 <p className="text-sm text-zinc-400 max-w-sm mx-auto">
                   {searchQuery ? `No invites match "${searchQuery}".` : 'All invites have been accepted or none are pending.'}
                 </p>
@@ -712,7 +712,7 @@ export const TeamMembers: React.FC = () => {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-bold uppercase tracking-wider text-xs">
+                  <thead className="bg-zinc-50 dark:bg-white/[0.03] border-b border-zinc-200 dark:border-white/10 text-zinc-400 dark:text-zinc-400 font-bold uppercase tracking-wider text-xs">
                     <tr>
                       <th className="px-6 py-4">Invited Email</th>
                       <th className="px-6 py-4">Assigned Role</th>
@@ -720,26 +720,26 @@ export const TeamMembers: React.FC = () => {
                       <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100 font-medium text-zinc-800">
+                  <tbody className="divide-y divide-zinc-100 dark:divide-white/10 font-medium text-zinc-800 dark:text-zinc-200">
                     {filteredInvitations.map((inv) => {
                       const invId = inv.uuid || inv.id;
                       return (
-                        <tr key={invId} className="hover:bg-zinc-50/70 transition-colors">
+                        <tr key={invId} className="hover:bg-zinc-50/70 dark:hover:bg-white/[0.02] transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl"><Mail className="w-4 h-4" /></div>
-                              <span className="font-bold text-zinc-900">{inv.email}</span>
+                              <span className="font-bold text-zinc-900 dark:text-white">{inv.email}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="capitalize px-3 py-1 bg-zinc-100 rounded-full text-xs font-bold text-zinc-700">{inv.role}</span>
+                            <span className="capitalize px-3 py-1 bg-zinc-100 dark:bg-white/10 rounded-full text-xs font-bold text-zinc-700 dark:text-zinc-300">{inv.role}</span>
                           </td>
                           <td className="px-6 py-4 text-zinc-400 text-xs font-medium">
                             {inv.expiresAt ? new Date(inv.expiresAt).toLocaleDateString() : '—'}
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              <button onClick={() => handleResendInvite(invId, inv.email)} className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-bold rounded-lg transition-colors cursor-pointer">Resend</button>
+                              <button onClick={() => handleResendInvite(invId, inv.email)} className="px-3 py-1.5 bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 text-zinc-700 dark:text-zinc-200 text-xs font-bold rounded-lg transition-colors cursor-pointer">Resend</button>
                               <button onClick={() => handleRevokeInvite(invId, inv.email)} className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" title="Revoke invitation">
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -761,7 +761,7 @@ export const TeamMembers: React.FC = () => {
         {activeTab === 'staff' && (
           <div className="space-y-5">
             {/* Event Selector + Assign Button */}
-            <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-xs">
+            <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-2xl p-5 shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div className="flex-1 space-y-1.5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500">
@@ -778,7 +778,7 @@ export const TeamMembers: React.FC = () => {
                       <select
                         value={selectedStaffEventId}
                         onChange={(e) => setSelectedStaffEventId(e.target.value)}
-                        className="w-full appearance-none bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm font-bold text-zinc-900 focus:outline-none focus:border-[#E31B23] pr-10"
+                        className="w-full appearance-none bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-zinc-900 dark:text-white dark:text-white focus:outline-none focus:border-[#E31B23] pr-10"
                       >
                         {organizerEvents.map((evt) => {
                           const eId = String(evt.id || (evt as any).uuid);
@@ -807,7 +807,7 @@ export const TeamMembers: React.FC = () => {
 
               {/* Event meta strip */}
               {selectedEvent && (
-                <div className="mt-4 pt-4 border-t border-zinc-100 flex flex-wrap items-center gap-4 text-xs font-medium text-zinc-500">
+                <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-white/10 dark:border-white/10 flex flex-wrap items-center gap-4 text-xs font-medium text-zinc-500">
                   <span className="inline-flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-[#E31B23]" />
                     {selectedEvent.startDate ? new Date(selectedEvent.startDate).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Date TBA'}
@@ -827,12 +827,12 @@ export const TeamMembers: React.FC = () => {
             </div>
 
             {/* Staff Roster Table */}
-            <div className="bg-white border border-[#E5E7EB] rounded-2xl shadow-xs overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
-                <h2 className="text-base font-black text-zinc-950 flex items-center gap-2">
+            <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-2xl shadow-xs overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-white/10">
+                <h2 className="text-base font-black text-zinc-950 dark:text-white flex items-center gap-2">
                   <Users className="w-5 h-5 text-[#E31B23]" />
                   Assigned Staff Roster
-                  <span className="ml-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">
+                  <span className="ml-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10">
                     {staffRoster.length}
                   </span>
                 </h2>
@@ -840,7 +840,7 @@ export const TeamMembers: React.FC = () => {
                   type="button"
                   onClick={() => selectedStaffEventId && loadRoster(selectedStaffEventId)}
                   disabled={isLoadingRoster}
-                  className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors disabled:opacity-50 cursor-pointer"
+                  className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors disabled:opacity-50 cursor-pointer"
                   title="Refresh roster"
                 >
                   <RefreshCw className={`w-4 h-4 ${isLoadingRoster ? 'animate-spin text-[#E31B23]' : ''}`} />
@@ -858,7 +858,7 @@ export const TeamMembers: React.FC = () => {
                     <Users className="w-7 h-7" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-zinc-900">No staff assigned to this event yet</p>
+                    <p className="text-sm font-bold text-zinc-900 dark:text-white">No staff assigned to this event yet</p>
                     <p className="text-xs text-zinc-500 max-w-xs mx-auto mt-1">
                       Assign crew members to scan tickets, manage gates, and handle event operations.
                     </p>
@@ -876,7 +876,7 @@ export const TeamMembers: React.FC = () => {
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
-                    <thead className="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-bold uppercase tracking-wider text-xs">
+                    <thead className="bg-zinc-50 dark:bg-white/[0.03] border-b border-zinc-200 dark:border-white/10 text-zinc-400 dark:text-zinc-400 font-bold uppercase tracking-wider text-xs">
                       <tr>
                         <th className="px-6 py-3.5">Staff Member</th>
                         <th className="px-6 py-3.5">Duty / Role</th>
@@ -895,17 +895,17 @@ export const TeamMembers: React.FC = () => {
                                 {(assignment.memberName?.[0] || 'S').toUpperCase()}
                               </div>
                               <div>
-                                <p className="font-bold text-zinc-950">{assignment.memberName}</p>
+                                <p className="font-bold text-zinc-950 dark:text-white">{assignment.memberName}</p>
                                 <p className="text-xs text-zinc-400">{assignment.memberEmail}</p>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-zinc-100 text-zinc-800 border border-zinc-200">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-white/10">
                               {assignment.duty || 'Gate Check-in'}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-xs font-medium text-zinc-700">
+                          <td className="px-6 py-4 text-xs font-medium text-zinc-700 dark:text-zinc-300">
                             {assignment.station || 'Main Entrance'}
                           </td>
                           <td className="px-6 py-4">
@@ -943,9 +943,9 @@ export const TeamMembers: React.FC = () => {
         )}
 
         {/* Role Permissions Matrix */}
-        <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-          <div className="border-b border-zinc-100 pb-4">
-            <h2 className="text-lg font-black text-zinc-950 flex items-center gap-2">
+        <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+          <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
+            <h2 className="text-lg font-black text-zinc-950 dark:text-white flex items-center gap-2">
               <Shield className="w-5 h-5 text-[#E31B23]" /> Role Permissions & Access Levels
             </h2>
             <p className="text-sm font-medium text-zinc-500 mt-0.5">
@@ -959,11 +959,11 @@ export const TeamMembers: React.FC = () => {
               { label: 'Manager', color: 'bg-blue-100 text-blue-800', desc: 'Can draft events, view order rosters, download attendee lists, and monitor live gate check-in counts.' },
               { label: 'Staff', color: 'bg-amber-100 text-amber-800', desc: 'Dedicated gate personnel. Restricted exclusively to scanning tickets via QR code and marking attendees checked in.' },
             ].map((r) => (
-              <div key={r.label} className="p-5 bg-zinc-50 border border-zinc-200 rounded-2xl space-y-3">
+              <div key={r.label} className="p-5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
                   <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${r.color}`}>{r.label}</span>
                 </div>
-                <p className="text-xs text-zinc-600 font-medium leading-relaxed">{r.desc}</p>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">{r.desc}</p>
               </div>
             ))}
           </div>
@@ -976,13 +976,13 @@ export const TeamMembers: React.FC = () => {
         {/* Invite Modal */}
         {showInviteModal && (
           <div className="fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl space-y-6">
-              <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-transparent dark:border-white/10 rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl space-y-6 text-zinc-900 dark:text-white">
+              <div className="flex items-center justify-between border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div>
-                  <h3 className="text-xl font-black text-zinc-950">Invite Team Member</h3>
+                  <h3 className="text-xl font-black text-zinc-950 dark:text-white">Invite Team Member</h3>
                   <p className="text-xs text-zinc-500 font-medium mt-0.5">Send an email invitation with assigned access permissions.</p>
                 </div>
-                <button onClick={() => setShowInviteModal(false)} className="w-8 h-8 rounded-full bg-zinc-100 text-zinc-500 hover:text-zinc-900 flex items-center justify-center cursor-pointer">
+                <button onClick={() => setShowInviteModal(false)} className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center cursor-pointer">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -994,22 +994,22 @@ export const TeamMembers: React.FC = () => {
               <form onSubmit={handleSendInvite} className="space-y-5">
                 <Input label="Colleague Email Address" type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="colleague@yourcompany.com" required />
                 <div className="space-y-2.5">
-                  <label className="block text-sm font-bold text-zinc-900">Assign Operational Role</label>
+                  <label className="block text-sm font-bold text-zinc-900 dark:text-white">Assign Operational Role</label>
                   <div className="space-y-2">
                     {[
                       { role: 'admin', title: 'Admin', desc: 'Full event creation, financial reports, and order management' },
                       { role: 'manager', title: 'Manager', desc: 'Create/edit events and access attendee rosters' },
                       { role: 'staff', title: 'Staff', desc: 'Ticket QR scanning and gate check-in only' },
                     ].map((item) => (
-                      <label key={item.role} className={`p-3.5 border rounded-2xl flex items-start gap-3 cursor-pointer transition-all ${inviteRole === item.role ? 'border-[#E31B23] bg-red-50/50 text-zinc-950' : 'border-zinc-200 hover:bg-zinc-50 text-zinc-700'}`}>
+                      <label key={item.role} className={`p-3.5 border rounded-2xl flex items-start gap-3 cursor-pointer transition-all ${inviteRole === item.role ? 'border-[#E31B23] bg-red-50/50 dark:bg-red-500/10 text-zinc-950 dark:text-white' : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300'}`}>
                         <input type="radio" name="inviteRole" checked={inviteRole === item.role} onChange={() => setInviteRole(item.role as StaffRole)} className="mt-1 accent-[#E31B23]" />
                         <div><p className="text-sm font-bold">{item.title}</p><p className="text-xs text-zinc-500 font-medium">{item.desc}</p></div>
                       </label>
                     ))}
                   </div>
                 </div>
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-100">
-                  <button type="button" onClick={() => setShowInviteModal(false)} className="px-5 py-2.5 text-sm font-bold text-zinc-600 hover:text-zinc-950 cursor-pointer">Cancel</button>
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-white/10">
+                  <button type="button" onClick={() => setShowInviteModal(false)} className="px-5 py-2.5 text-sm font-bold text-zinc-600 hover:text-zinc-950 dark:text-white cursor-pointer">Cancel</button>
                   <Button type="submit" isLoading={isSendingInvite} className="w-auto px-7 py-2.5 text-sm font-bold">
                     <Send className="w-4 h-4 mr-1.5" /> Send Invitation
                   </Button>
@@ -1022,14 +1022,14 @@ export const TeamMembers: React.FC = () => {
         {/* Assign Staff Modal */}
         {isAssignModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs">
-            <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border border-zinc-200 max-h-[90vh] overflow-y-auto space-y-5">
-              <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border border-zinc-200 dark:border-white/10 max-h-[90vh] overflow-y-auto space-y-5 text-zinc-900 dark:text-white">
+              <div className="flex items-center justify-between border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-zinc-900 text-white rounded-xl">
                     <UserPlus className="w-5 h-5 text-[#E31B23]" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-zinc-950">Assign Staff to Event</h3>
+                    <h3 className="text-lg font-black text-zinc-950 dark:text-white">Assign Staff to Event</h3>
                     <p className="text-xs text-zinc-500 font-medium">
                       {selectedEvent ? selectedEvent.title : 'Selected Event'}
                     </p>
@@ -1043,12 +1043,12 @@ export const TeamMembers: React.FC = () => {
               <form onSubmit={handleAssignStaff} className="space-y-4">
                 {/* Team Member Select */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Team Member</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">Team Member</label>
                   <div className="relative">
                     <select
                       value={assignMemberId}
                       onChange={(e) => setAssignMemberId(e.target.value)}
-                      className="w-full appearance-none bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23] pr-10"
+                      className="w-full appearance-none bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23] pr-10"
                       required
                     >
                       <option value="">— Select a member —</option>
@@ -1064,12 +1064,12 @@ export const TeamMembers: React.FC = () => {
 
                 {/* Duty Select */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Event Operational Duty</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">Event Operational Duty</label>
                   <div className="relative">
                     <select
                       value={assignDuty}
                       onChange={(e) => setAssignDuty(e.target.value)}
-                      className="w-full appearance-none bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23] pr-10"
+                      className="w-full appearance-none bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23] pr-10"
                     >
                       {dutyOptions.map((d) => <option key={d} value={d}>{d}</option>)}
                     </select>
@@ -1079,23 +1079,23 @@ export const TeamMembers: React.FC = () => {
 
                 {/* Station */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Assigned Gate / Station</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">Assigned Gate / Station</label>
                   <input
                     type="text"
                     value={assignStation}
                     onChange={(e) => setAssignStation(e.target.value)}
                     placeholder="e.g. Main Entrance Gate A, VIP Turnstile"
-                    className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
+                    className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
                   />
                 </div>
 
                 {/* QR Scan Permission */}
-                <div className="flex items-start gap-3 p-3.5 bg-zinc-50 border border-zinc-200 rounded-xl cursor-pointer" onClick={() => setAssignCanScan(!assignCanScan)}>
-                  <div className={`w-5 h-5 rounded flex-shrink-0 border-2 flex items-center justify-center transition-colors mt-0.5 ${assignCanScan ? 'bg-[#E31B23] border-[#E31B23]' : 'border-zinc-300 bg-white'}`}>
+                <div className="flex items-start gap-3 p-3.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl cursor-pointer" onClick={() => setAssignCanScan(!assignCanScan)}>
+                  <div className={`w-5 h-5 rounded flex-shrink-0 border-2 flex items-center justify-center transition-colors mt-0.5 ${assignCanScan ? 'bg-[#E31B23] border-[#E31B23]' : 'border-zinc-300 dark:border-white/20 bg-white dark:bg-zinc-800'}`}>
                     {assignCanScan && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-zinc-900">Grant Mobile QR Ticket Scanning Permissions</p>
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white">Grant Mobile QR Ticket Scanning Permissions</p>
                     <p className="text-[11px] font-normal text-zinc-500 mt-0.5">
                       Allows this staff member to validate tickets via the StraytTix Check-in Camera App.
                     </p>
@@ -1104,18 +1104,18 @@ export const TeamMembers: React.FC = () => {
 
                 {/* Notes */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Briefing Notes (Optional)</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">Briefing Notes (Optional)</label>
                   <textarea
                     value={assignNotes}
                     onChange={(e) => setAssignNotes(e.target.value)}
                     rows={2}
                     placeholder="e.g. Report to Gate A lead by 4:00 PM for radio briefing"
-                    className="w-full bg-white border border-zinc-200 rounded-xl p-3 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23] resize-none"
+                    className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl p-3 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23] resize-none"
                   />
                 </div>
 
-                <div className="pt-2 flex items-center justify-end gap-3 border-t border-zinc-100">
-                  <button type="button" onClick={() => setIsAssignModalOpen(false)} className="px-5 py-2.5 rounded-xl border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-bold cursor-pointer">
+                <div className="pt-2 flex items-center justify-end gap-3 border-t border-zinc-100 dark:border-white/10">
+                  <button type="button" onClick={() => setIsAssignModalOpen(false)} className="px-5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 text-xs font-bold cursor-pointer">
                     Cancel
                   </button>
                   <Button type="submit" isLoading={isSubmittingAssign} className="bg-[#E31B23] hover:bg-[#c9141b] text-white px-6 py-2.5 text-xs font-bold">
@@ -1132,30 +1132,30 @@ export const TeamMembers: React.FC = () => {
         {/* ========================================================================= */}
         {isStaffSettingsModalOpen && selectedStaffMember && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs">
-            <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-zinc-100 space-y-5 animate-scaleUp max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+            <div className="bg-white dark:bg-[#0F0F14] rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-zinc-100 dark:border-white/10 space-y-5 animate-scaleUp max-h-[90vh] overflow-y-auto text-zinc-900 dark:text-white">
+              <div className="flex items-center justify-between pb-4 border-b border-zinc-100 dark:border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-red-50 text-[#E31B23] flex items-center justify-center border border-red-100 font-bold">
                     <UserCog className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-black text-zinc-950 tracking-tight">Staff Member Settings</h3>
+                    <h3 className="text-base font-black text-zinc-950 dark:text-white tracking-tight">Staff Member Settings</h3>
                     <p className="text-xs text-zinc-500 font-medium">Configure station duties, scanner permissions & shift alerts.</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsStaffSettingsModalOpen(false)}
-                  className="p-1.5 rounded-xl hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 transition-colors"
+                  className="p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-400 hover:text-zinc-700 dark:hover:text-white transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Member Summary Pill */}
-              <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200/70 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-black text-zinc-950">{selectedStaffMember.firstName} {selectedStaffMember.lastName}</p>
+                  <p className="text-xs font-black text-zinc-950 dark:text-white">{selectedStaffMember.firstName} {selectedStaffMember.lastName}</p>
                   <p className="text-[11px] text-zinc-500 font-medium">{selectedStaffMember.email}</p>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-zinc-900 text-white">
@@ -1166,42 +1166,42 @@ export const TeamMembers: React.FC = () => {
               <form onSubmit={handleSaveMemberSettings} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-zinc-700 mb-1">Gate Operational Duty</label>
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Gate Operational Duty</label>
                     <input
                       type="text"
                       value={memberDuty}
                       onChange={(e) => setMemberDuty(e.target.value)}
                       placeholder="e.g. Lead Usher, Gate Scanner"
-                      className="w-full bg-white border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
+                      className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-zinc-700 mb-1">Assigned Station</label>
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Assigned Station</label>
                     <input
                       type="text"
                       value={memberStation}
                       onChange={(e) => setMemberStation(e.target.value)}
                       placeholder="e.g. Main Entrance Gate A"
-                      className="w-full bg-white border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
+                      className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-700 mb-1">Mobile Phone (WhatsApp / SMS Alerts)</label>
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Mobile Phone (WhatsApp / SMS Alerts)</label>
                   <input
                     type="tel"
                     value={memberPhone}
                     onChange={(e) => setMemberPhone(e.target.value)}
                     placeholder="+234 809 555 0192"
-                    className="w-full bg-white border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
+                    className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
                   />
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-zinc-100">
+                <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-white/10">
                   <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Gate Scanner Workstation Permissions</p>
 
-                  <label className="flex items-start gap-3 p-3 rounded-xl bg-zinc-50 border border-zinc-200/70 cursor-pointer">
+                  <label className="flex items-start gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={memberCanScan}
@@ -1209,12 +1209,12 @@ export const TeamMembers: React.FC = () => {
                       className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                     />
                     <div>
-                      <p className="text-xs font-bold text-zinc-900">Authorize Barcode & QR Ticket Scanning</p>
+                      <p className="text-xs font-bold text-zinc-900 dark:text-white">Authorize Barcode & QR Ticket Scanning</p>
                       <p className="text-[11px] text-zinc-500">Allows validating attendee tickets at turnstiles.</p>
                     </div>
                   </label>
 
-                  <label className="flex items-start gap-3 p-3 rounded-xl bg-zinc-50 border border-zinc-200/70 cursor-pointer">
+                  <label className="flex items-start gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={memberOverrideDuplicates}
@@ -1222,13 +1222,13 @@ export const TeamMembers: React.FC = () => {
                       className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                     />
                     <div>
-                      <p className="text-xs font-bold text-zinc-900">Allow Duplicate Ticket Pass Override</p>
+                      <p className="text-xs font-bold text-zinc-900 dark:text-white">Allow Duplicate Ticket Pass Override</p>
                       <p className="text-[11px] text-zinc-500">Enables manual manager override for re-entry wristbands.</p>
                     </div>
                   </label>
 
                   <div className="grid grid-cols-2 gap-3 pt-1">
-                    <label className="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 text-xs font-semibold cursor-pointer">
+                    <label className="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-semibold cursor-pointer text-zinc-800 dark:text-zinc-200">
                       <input
                         type="checkbox"
                         checked={memberScanSound}
@@ -1237,7 +1237,7 @@ export const TeamMembers: React.FC = () => {
                       />
                       <span>Audio Beep On Scan</span>
                     </label>
-                    <label className="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 text-xs font-semibold cursor-pointer">
+                    <label className="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-semibold cursor-pointer text-zinc-800 dark:text-zinc-200">
                       <input
                         type="checkbox"
                         checked={memberHaptic}
@@ -1249,10 +1249,10 @@ export const TeamMembers: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-zinc-100">
+                <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-white/10">
                   <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Shift Notifications</p>
                   <div className="grid grid-cols-2 gap-3">
-                    <label className="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 text-xs font-semibold cursor-pointer">
+                    <label className="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-semibold cursor-pointer text-zinc-800 dark:text-zinc-200">
                       <input
                         type="checkbox"
                         checked={memberSmsAlerts}
@@ -1261,7 +1261,7 @@ export const TeamMembers: React.FC = () => {
                       />
                       <span>SMS Shift Alerts</span>
                     </label>
-                    <label className="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 text-xs font-semibold cursor-pointer">
+                    <label className="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-semibold cursor-pointer text-zinc-800 dark:text-zinc-200">
                       <input
                         type="checkbox"
                         checked={memberWhatsappAlerts}
@@ -1273,11 +1273,11 @@ export const TeamMembers: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="pt-3 flex items-center justify-end gap-3 border-t border-zinc-100">
+                <div className="pt-3 flex items-center justify-end gap-3 border-t border-zinc-100 dark:border-white/10">
                   <button
                     type="button"
                     onClick={() => setIsStaffSettingsModalOpen(false)}
-                    className="px-4 py-2 rounded-xl border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-bold cursor-pointer"
+                    className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 text-xs font-bold cursor-pointer"
                   >
                     Cancel
                   </button>

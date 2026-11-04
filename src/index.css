@@ -104,7 +104,11 @@ code, kbd, samp, pre, .font-mono {
 }
 
 input:focus,
-input:focus-visible {
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
   outline: none;
 }
 
@@ -126,10 +130,4 @@ input:user-invalid,
 select:user-invalid {
   border-color: #ef4444 !important;
   background-color: rgba(239, 68, 68, 0.05) !important;
-}
-
-/* Successful validations get subtle green border styling */
-input:user-valid,
-select:user-valid {
-  border-color: #10b981 !important;
 }

@@ -705,7 +705,7 @@ export const Settings: React.FC = () => {
       <div className="space-y-8 max-w-5xl pb-16">
 
         {/* Page Top Header */}
-        <div className="border-b border-zinc-200/80 pb-5">
+        <div className="border-b border-zinc-200/80 dark:border-white/10 pb-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2.5 mb-1.5">
@@ -714,7 +714,7 @@ export const Settings: React.FC = () => {
                     ? 'bg-amber-50 text-amber-800 border border-amber-200'
                     : isOrganization
                       ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                      : 'bg-zinc-100 text-zinc-700 border border-zinc-200'
+                      : 'bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10'
                 }`}>
                   {role === 'staff' ? 'Gate Staff Workstation' : isOrganization ? 'Organization Workspace' : 'Individual Planner'}
                 </span>
@@ -722,10 +722,10 @@ export const Settings: React.FC = () => {
                   <ShieldCheck className="w-3 h-3 text-emerald-600" /> {role === 'staff' ? 'Terminal Ready' : 'Security Status: Healthy'}
                 </span>
               </div>
-              <h1 className="text-2xl font-black text-zinc-950 tracking-tight">
+              <h1 className="text-2xl font-black text-zinc-950 dark:text-white tracking-tight">
                 {role === 'staff' ? 'Staff Workstation & Scanner Settings' : 'Account & Workspace Settings'}
               </h1>
-              <p className="text-zinc-500 text-xs font-medium mt-1">
+              <p className="text-zinc-500 dark:text-zinc-400 text-xs font-medium mt-1">
                 {role === 'staff'
                   ? 'Configure gate terminal preferences, barcode scanner audio/vibration feedback, security credentials, and shift notifications.'
                   : 'Configure account authentication, active login sessions, security credentials, and audit trails.'}
@@ -743,7 +743,7 @@ export const Settings: React.FC = () => {
                     <div className="text-[10px] font-black uppercase tracking-wider text-emerald-800">
                       Gate Workstation
                     </div>
-                    <div className="text-xs font-black text-zinc-950 flex items-center gap-1.5">
+                    <div className="text-xs font-black text-zinc-950 dark:text-white flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                       <span>{staffStation}</span>
                     </div>
@@ -751,7 +751,7 @@ export const Settings: React.FC = () => {
                 </div>
               ) : (
                 <div className="flex items-center gap-2.5">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-zinc-50 border border-zinc-200 text-zinc-700 shadow-2xs">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 shadow-2xs">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     <span>Workspace Active</span>
                   </span>
@@ -791,15 +791,15 @@ export const Settings: React.FC = () => {
                   onClick={() => setActiveTab(tab.id as SettingsTab)}
                   className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
                     isActive
-                      ? 'bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950/10'
-                      : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100/80 bg-zinc-50/60'
+                      ? 'bg-[#E31B23] text-white shadow-sm ring-1 ring-[#E31B23]/30'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100/80 dark:hover:bg-white/5 bg-zinc-50/60 dark:bg-white/[0.02]'
                   }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-[#E31B23]' : 'text-zinc-500'}`} />
                   <span>{tab.label}</span>
                   {tab.count !== undefined && (
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                      isActive ? 'bg-[#E31B23] text-white' : 'bg-zinc-200/80 text-zinc-700'
+                      isActive ? 'bg-[#E31B23] text-white' : 'bg-zinc-200/80 dark:bg-white/10 text-zinc-700 dark:text-zinc-300'
                     }`}>
                       {tab.count}
                     </span>
@@ -816,8 +816,8 @@ export const Settings: React.FC = () => {
         {activeTab === 'profile' && (
           <div className="space-y-8 animate-fadeIn">
             {/* User Overview Profile Card */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-6">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-6">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-zinc-900 to-zinc-700 text-white flex items-center justify-center text-xl font-black shadow-md border-2 border-white ring-1 ring-zinc-200">
                     {profileFirstName || profileLastName
@@ -826,21 +826,21 @@ export const Settings: React.FC = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-black text-zinc-950 tracking-tight">
+                      <h2 className="text-xl font-black text-zinc-950 dark:text-white tracking-tight">
                         {`${profileFirstName} ${profileLastName}`.trim() || user?.name || 'User Account'}
                       </h2>
                       <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                         <ShieldCheck className="w-3 h-3" /> Verified
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-500 font-medium mt-0.5">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5">
                       {user?.email || 'user@example.com'}
                     </p>
                     <div className="flex items-center gap-2 mt-2">
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
                         role === 'staff'
                           ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                          : 'bg-zinc-100 text-zinc-700 border border-zinc-200'
+                          : 'bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10'
                       }`}>
                         {role === 'staff' ? 'Gate Staff Member' : role === 'owner' ? 'Workspace Owner' : `${role} Member`}
                       </span>
@@ -868,10 +868,10 @@ export const Settings: React.FC = () => {
               {/* Personal Information Form */}
               <form onSubmit={handleUpdateUserProfile} className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-black text-zinc-950 uppercase tracking-wider mb-1">
+                  <h3 className="text-sm font-black text-zinc-950 dark:text-white dark:text-white uppercase tracking-wider mb-1">
                     Personal Information
                   </h3>
-                  <p className="text-xs text-zinc-500 font-medium">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                     Update your personal profile details. These details are associated with your events and team activity.
                   </p>
                 </div>
@@ -903,7 +903,7 @@ export const Settings: React.FC = () => {
                         type="email"
                         value={user?.email || ''}
                         disabled
-                        className="w-full bg-zinc-50 border border-zinc-200 text-zinc-500 text-sm rounded-xl px-4 py-2.5 cursor-not-allowed font-medium"
+                        className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 text-sm rounded-xl px-4 py-2.5 cursor-not-allowed font-medium"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                         <ShieldCheck className="w-3 h-3" /> Confirmed
@@ -924,14 +924,14 @@ export const Settings: React.FC = () => {
                   />
                 </div>
 
-                <div className="pt-2 border-t border-zinc-100">
+                <div className="pt-2 border-t border-zinc-100 dark:border-white/10">
                   <label className="block text-xs font-bold text-zinc-700 mb-1.5">
                     Preferred Timezone
                   </label>
                   <select
                     value={normalizeTimezone(profileTimezone) || profileTimezone}
                     onChange={(e) => setProfileTimezone(normalizeTimezone(e.target.value) || e.target.value)}
-                    className="w-full max-w-md bg-white border border-zinc-200 hover:border-zinc-300 focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] text-sm rounded-xl px-4 py-2.5 outline-none transition-all font-medium"
+                    className="w-full max-w-md bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] text-sm rounded-xl px-4 py-2.5 outline-none transition-all font-medium"
                   >
                     <option value="Africa/Lagos">Africa/Lagos (WAT, GMT+1)</option>
                     <option value="Africa/Accra">Africa/Accra (GMT)</option>
@@ -947,7 +947,7 @@ export const Settings: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="pt-4 flex items-center justify-between border-t border-zinc-100">
+                <div className="pt-4 flex items-center justify-between border-t border-zinc-100 dark:border-white/10">
                   <div className="text-xs text-zinc-500">
                     Changes are automatically saved to your authenticated user account.
                   </div>
@@ -964,14 +964,14 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Quick Security & Credentials Callout */}
-            <div className="bg-gradient-to-r from-zinc-50 to-white border border-zinc-200/80 rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="bg-gradient-to-r from-zinc-50 to-white dark:from-white/5 dark:to-white/[0.02] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-red-50 text-[#E31B23] flex items-center justify-center border border-red-100 flex-shrink-0">
                   <KeyRound className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-black text-zinc-950">Security & Authentication</h4>
-                  <p className="text-xs text-zinc-500 font-medium mt-0.5">
+                  <h4 className="text-sm font-black text-zinc-950 dark:text-white dark:text-white">Security & Authentication</h4>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5">
                     Need to change your password or configure Two-Factor Authentication (2FA)?
                   </p>
                 </div>
@@ -979,7 +979,7 @@ export const Settings: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('security')}
-                className="px-4 py-2 bg-white hover:bg-zinc-50 text-zinc-800 border border-zinc-200 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
+                className="px-4 py-2 bg-white dark:bg-white/10 hover:bg-zinc-50 dark:hover:bg-white/15 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
               >
                 <span>Manage Security</span>
                 <span className="text-[#E31B23]">→</span>
@@ -994,15 +994,15 @@ export const Settings: React.FC = () => {
         {activeTab === 'scanner' && (
           <div className="space-y-8 animate-fadeIn">
             {/* Audio & Haptic Feedback Card */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 flex-shrink-0">
                     <Volume2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-black text-zinc-950 tracking-tight">Scanner Audio & Vibration Cues</h3>
-                    <p className="text-xs text-zinc-500 font-medium">Configure acoustic beeps and tactile haptic vibration for loud concert or stadium environments.</p>
+                    <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Scanner Audio & Vibration Cues</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Configure acoustic beeps and tactile haptic vibration for loud concert or stadium environments.</p>
                   </div>
                 </div>
                 {/* Audio / Vibration Interactive Tester */}
@@ -1027,15 +1027,15 @@ export const Settings: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200/70 flex items-start justify-between gap-4">
+                <div className="p-4 rounded-2xl bg-zinc-50/70 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 flex items-start justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Volume2 className="w-4 h-4 text-emerald-600" />
-                      <label className="text-xs font-bold text-zinc-900 cursor-pointer">
+                      <label className="text-xs font-bold text-zinc-900 dark:text-white cursor-pointer">
                         Valid Ticket Chime
                       </label>
                     </div>
-                    <p className="text-[11px] text-zinc-500 font-medium">
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
                       Plays an audible upbeat sound frequency when a legitimate pass is scanned.
                     </p>
                   </div>
@@ -1047,15 +1047,15 @@ export const Settings: React.FC = () => {
                   />
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200/70 flex items-start justify-between gap-4">
+                <div className="p-4 rounded-2xl bg-zinc-50/70 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 flex items-start justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-red-600" />
-                      <label className="text-xs font-bold text-zinc-900 cursor-pointer">
+                      <label className="text-xs font-bold text-zinc-900 dark:text-white cursor-pointer">
                         Duplicate / Invalid Siren
                       </label>
                     </div>
-                    <p className="text-[11px] text-zinc-500 font-medium">
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
                       Emits a loud warning siren buzzer if a ticket was already used or fraudulent.
                     </p>
                   </div>
@@ -1067,15 +1067,15 @@ export const Settings: React.FC = () => {
                   />
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200/70 flex items-start justify-between gap-4">
+                <div className="p-4 rounded-2xl bg-zinc-50/70 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 flex items-start justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Vibrate className="w-4 h-4 text-indigo-600" />
-                      <label className="text-xs font-bold text-zinc-900 cursor-pointer">
+                      <label className="text-xs font-bold text-zinc-900 dark:text-white cursor-pointer">
                         Haptic Pulse on Scan
                       </label>
                     </div>
-                    <p className="text-[11px] text-zinc-500 font-medium">
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
                       Vibrates mobile devices upon scan confirmation for tactile confidence in loud crowds.
                     </p>
                   </div>
@@ -1087,15 +1087,15 @@ export const Settings: React.FC = () => {
                   />
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200/70 flex items-start justify-between gap-4">
+                <div className="p-4 rounded-2xl bg-zinc-50/70 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 flex items-start justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Zap className="w-4 h-4 text-amber-500" />
-                      <label className="text-xs font-bold text-zinc-900 cursor-pointer">
+                      <label className="text-xs font-bold text-zinc-900 dark:text-white cursor-pointer">
                         Camera Flashlight / Torch
                       </label>
                     </div>
-                    <p className="text-[11px] text-zinc-500 font-medium">
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
                       Activates phone camera torch automatically on dark night gate entrances.
                     </p>
                   </div>
@@ -1110,22 +1110,22 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Camera & Barcode Recognition Card */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex items-center gap-3 border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex items-center gap-3 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 flex-shrink-0">
                   <Camera className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-zinc-950 tracking-tight">Camera & Scanning Flow</h3>
-                  <p className="text-xs text-zinc-500 font-medium">Streamline throughput speed at entry turnstiles and gates.</p>
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Camera & Scanning Flow</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Streamline throughput speed at entry turnstiles and gates.</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200/70 flex items-start justify-between gap-4">
+                <div className="p-4 rounded-2xl bg-zinc-50/70 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 flex items-start justify-between gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-900">Continuous Auto-Scan</label>
-                    <p className="text-[11px] text-zinc-500 font-medium">
+                    <label className="text-xs font-bold text-zinc-900 dark:text-white">Continuous Auto-Scan</label>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
                       Camera viewfinder stays active continuously without requiring you to tap &quot;Scan Next Attendee&quot;.
                     </p>
                   </div>
@@ -1137,10 +1137,10 @@ export const Settings: React.FC = () => {
                   />
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200/70 flex items-start justify-between gap-4">
+                <div className="p-4 rounded-2xl bg-zinc-50/70 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 flex items-start justify-between gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-900">Instant Check-In Mode</label>
-                    <p className="text-[11px] text-zinc-500 font-medium">
+                    <label className="text-xs font-bold text-zinc-900 dark:text-white">Instant Check-In Mode</label>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
                       Instantly marks attendee checked-in on barcode match without prompting a confirmation modal.
                     </p>
                   </div>
@@ -1158,7 +1158,7 @@ export const Settings: React.FC = () => {
                   Default Optical Camera Sensor
                 </label>
                 <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center gap-2 p-3 rounded-xl border border-zinc-200 bg-zinc-50/50 text-xs font-semibold cursor-pointer">
+                  <label className="flex items-center gap-2 p-3 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-white/5 text-xs font-semibold cursor-pointer text-zinc-800 dark:text-zinc-200">
                     <input
                       type="radio"
                       name="cameraFacing"
@@ -1169,7 +1169,7 @@ export const Settings: React.FC = () => {
                     />
                     <span>Rear Camera (Recommended for Barcodes)</span>
                   </label>
-                  <label className="flex items-center gap-2 p-3 rounded-xl border border-zinc-200 bg-zinc-50/50 text-xs font-semibold cursor-pointer">
+                  <label className="flex items-center gap-2 p-3 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-white/5 text-xs font-semibold cursor-pointer text-zinc-800 dark:text-zinc-200">
                     <input
                       type="radio"
                       name="cameraFacing"
@@ -1185,15 +1185,15 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Offline Gate Resilience Card */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 flex-shrink-0">
                     <Radio className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-black text-zinc-950 tracking-tight">Offline Gate Cache & Zero-Downtime</h3>
-                    <p className="text-xs text-zinc-500 font-medium">Keep check-in gates moving even if venue Wi-Fi or cellular networks fail completely.</p>
+                    <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Offline Gate Cache & Zero-Downtime</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Keep check-in gates moving even if venue Wi-Fi or cellular networks fail completely.</p>
                   </div>
                 </div>
                 <button
@@ -1281,14 +1281,14 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Staff Dispatch Information Form */}
-            <form onSubmit={handleSaveStaffProfile} className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex items-center gap-3 border-b border-zinc-100 pb-4">
+            <form onSubmit={handleSaveStaffProfile} className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex items-center gap-3 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div className="w-10 h-10 rounded-2xl bg-red-50 text-[#E31B23] flex items-center justify-center border border-red-100 flex-shrink-0">
                   <UserCheck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-zinc-950 tracking-tight">Staff Contact & Gate Dispatch</h3>
-                  <p className="text-xs text-zinc-500 font-medium">Keep your contact details up to date for event lead emergency coordination.</p>
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Staff Contact & Gate Dispatch</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Keep your contact details up to date for event lead emergency coordination.</p>
                 </div>
               </div>
 
@@ -1342,15 +1342,15 @@ export const Settings: React.FC = () => {
         {activeTab === 'security' && (
           <div className="space-y-8 animate-fadeIn">
             {/* Password Change Card */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-red-50 text-[#E31B23] flex items-center justify-center border border-red-100 flex-shrink-0">
                     <KeyRound className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-black text-zinc-950 tracking-tight">Change Master Password</h3>
-                    <p className="text-xs text-zinc-500 font-medium">Update your account credentials to protect organizer workspace data.</p>
+                    <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Change Master Password</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Update your account credentials to protect organizer workspace data.</p>
                   </div>
                 </div>
                 <span className="text-[11px] font-semibold text-zinc-400">
@@ -1382,7 +1382,7 @@ export const Settings: React.FC = () => {
                   {newPassword && (
                     <div className="space-y-1.5 pt-1">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-zinc-500 font-medium">Strength:</span>
+                        <span className="text-zinc-500 dark:text-zinc-400 font-medium">Strength:</span>
                         <span className="font-bold text-zinc-900">{passwordStrength.label}</span>
                       </div>
                       <div className="w-full h-1.5 bg-zinc-100 rounded-full overflow-hidden">
@@ -1427,15 +1427,15 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Two-Factor Authentication Card */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 flex-shrink-0">
                     <Shield className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-black text-zinc-950 tracking-tight">Two-Factor Authentication (2FA)</h3>
-                    <p className="text-xs text-zinc-500 font-medium">Protect high-stakes organizer payouts and team settings with TOTP authenticator verification.</p>
+                    <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Two-Factor Authentication (2FA)</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Protect high-stakes organizer payouts and team settings with TOTP authenticator verification.</p>
                   </div>
                 </div>
 
@@ -1444,12 +1444,12 @@ export const Settings: React.FC = () => {
                 </Badge>
               </div>
 
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10">
                 <div className="space-y-1">
-                  <h4 className="text-xs font-bold text-zinc-900">
+                  <h4 className="text-xs font-bold text-zinc-900 dark:text-white">
                     {twoFactorEnabled ? 'Authenticator App (TOTP) Protected' : 'Setup Google Authenticator / 1Password'}
                   </h4>
-                  <p className="text-xs text-zinc-500 font-medium leading-relaxed max-w-xl">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed max-w-xl">
                     {twoFactorEnabled
                       ? 'Every login from unrecognized devices will require a 6-digit one-time code from your authenticator application.'
                       : 'Add an extra barrier to safeguard attendee data, financial settlement bank routes, and revenue payouts.'}
@@ -1481,13 +1481,13 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Security Alerts and Safeguards */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
-              <h3 className="text-base font-black text-zinc-950 tracking-tight flex items-center gap-2">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
+              <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight flex items-center gap-2">
                 <Lock className="w-4 h-4 text-[#E31B23]" /> Advanced Security Safeguards
               </h3>
 
               <div className="space-y-3">
-                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white/[0.08] transition-colors">
                   <input
                     type="checkbox"
                     checked={loginAlertsEnabled}
@@ -1498,12 +1498,12 @@ export const Settings: React.FC = () => {
                     className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                   />
                   <div>
-                    <p className="text-xs font-bold text-zinc-900">Immediate New Device Login Alerts</p>
-                    <p className="text-[11px] text-zinc-500 font-medium">Send an instant security push & email whenever your account signs in from a previously unrecorded browser or city.</p>
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white">Immediate New Device Login Alerts</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Send an instant security push & email whenever your account signs in from a previously unrecorded browser or city.</p>
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white/[0.08] transition-colors">
                   <input
                     type="checkbox"
                     checked={requirePinForPayout}
@@ -1514,8 +1514,8 @@ export const Settings: React.FC = () => {
                     className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                   />
                   <div>
-                    <p className="text-xs font-bold text-zinc-900">Require Password to Alter Settlement Bank Account</p>
-                    <p className="text-[11px] text-zinc-500 font-medium">Mandate master password re-entry prior to changing settlement bank accounts or withdrawing event proceeds.</p>
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white">Require Password to Alter Settlement Bank Account</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Mandate master password re-entry prior to changing settlement bank accounts or withdrawing event proceeds.</p>
                   </div>
                 </label>
               </div>
@@ -1529,11 +1529,11 @@ export const Settings: React.FC = () => {
         {activeTab === 'sessions' && (
           <div className="space-y-8 animate-fadeIn">
             {/* Header / Global Action */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div>
-                  <h3 className="text-base font-black text-zinc-950 tracking-tight">Active Devices & Login Sessions</h3>
-                  <p className="text-xs text-zinc-500 font-medium">
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Active Devices & Login Sessions</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                     Review and revoke access across all browsers, mobile apps, and box-office terminals currently logged into this organizer account.
                   </p>
                 </div>
@@ -1554,28 +1554,38 @@ export const Settings: React.FC = () => {
               {/* Sessions List */}
               <div className="space-y-3">
                 {sessions.map((sess) => {
-                  const Icon = sess.type === 'mobile' ? Smartphone : sess.type === 'tablet' ? Monitor : Laptop;
+                  const isMobile =
+                    sess.type === 'mobile' ||
+                    /iPhone|Android|Mobile|Phone|iOS/i.test(sess.device || '') ||
+                    /iOS|Android/i.test(sess.os || '') ||
+                    /iPhone|Mobile/i.test(sess.name || '');
+                  const isTablet =
+                    sess.type === 'tablet' ||
+                    /iPad|Tablet/i.test(sess.device || '') ||
+                    /iPadOS/i.test(sess.os || '') ||
+                    /iPad|Tablet/i.test(sess.name || '');
+                  const Icon = isMobile ? Smartphone : isTablet ? Monitor : Laptop;
                   return (
                     <div
                       key={sess.id}
                       className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                         sess.isCurrent
-                          ? 'bg-emerald-50/40 border-emerald-200 shadow-2xs'
-                          : 'bg-zinc-50/60 border-zinc-200/80 hover:bg-zinc-50'
+                          ? 'bg-emerald-50/40 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 shadow-2xs'
+                          : 'bg-zinc-50/60 dark:bg-white/5 border-zinc-200/80 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/10 text-zinc-600 dark:text-white'
                       }`}
                     >
                       <div className="flex items-start gap-4">
                         <div className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 border ${
                           sess.isCurrent
-                            ? 'bg-emerald-100/70 text-emerald-700 border-emerald-300'
-                            : 'bg-white text-zinc-700 border-zinc-200'
+                            ? 'bg-emerald-100/70 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40'
+                            : 'bg-white dark:bg-white/5 text-zinc-700 dark:text-white border-zinc-200 dark:border-white/10'
                         }`}>
                           <Icon className="w-5 h-5" />
                         </div>
 
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-zinc-950">{sess.device}</span>
+                            <span className="text-sm font-bold text-zinc-950 dark:text-white">{sess.device}</span>
                             {sess.isCurrent && (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-600 text-white uppercase tracking-wider">
                                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
@@ -1584,16 +1594,16 @@ export const Settings: React.FC = () => {
                             )}
                           </div>
 
-                          <p className="text-xs text-zinc-600 font-medium">
-                            {sess.browser} • <span className="text-zinc-500">{sess.os}</span>
+                          <p className="text-xs text-zinc-600 dark:text-white font-medium">
+                            {sess.browser} • <span className="text-zinc-500 dark:text-white">{sess.os}</span>
                           </p>
 
-                          <div className="flex items-center gap-3 text-[11px] text-zinc-400 font-medium pt-0.5">
-                            <span>IP: <strong className="font-mono text-zinc-600">{sess.ip}</strong></span>
+                          <div className="flex items-center gap-3 text-[11px] text-zinc-400 dark:text-white font-medium pt-0.5">
+                            <span>IP: <strong className="font-mono text-zinc-600 dark:text-white">{sess.ip}</strong></span>
                             <span>•</span>
-                            <span>{sess.location}</span>
+                            <span className="text-zinc-500 dark:text-white">{sess.location}</span>
                             <span>•</span>
-                            <span className={sess.isCurrent ? 'text-emerald-700 font-bold' : 'text-zinc-500'}>
+                            <span className={sess.isCurrent ? 'text-emerald-700 dark:text-emerald-400 font-bold' : 'text-zinc-500 dark:text-white'}>
                               {sess.lastActive}
                             </span>
                           </div>
@@ -1602,7 +1612,7 @@ export const Settings: React.FC = () => {
 
                       <div className="flex items-center sm:self-center">
                         {sess.isCurrent ? (
-                          <span className="text-xs font-bold text-emerald-700 px-3 py-1 rounded-xl bg-emerald-100/60">
+                          <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-xl bg-emerald-100/60 dark:bg-emerald-500/20">
                             Current Active
                           </span>
                         ) : (
@@ -1610,7 +1620,7 @@ export const Settings: React.FC = () => {
                             type="button"
                             variant="outline"
                             onClick={() => handleRevokeSession(sess.id, sess.device || 'Personal Device')}
-                            className="text-xs text-red-650 hover:bg-red-50 border-red-200 py-1.5 px-3"
+                            className="text-xs text-red-650 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-900/50 py-1.5 px-3"
                           >
                             <Trash2 className="w-3.5 h-3.5 mr-1" />
                             Revoke
@@ -1624,15 +1634,15 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Login History & Security Access Log Card */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-zinc-100 text-zinc-700 flex items-center justify-center border border-zinc-200 flex-shrink-0">
+                  <div className="w-10 h-10 rounded-2xl bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 flex items-center justify-center border border-zinc-200 dark:border-white/10 flex-shrink-0">
                     <History className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-black text-zinc-950 tracking-tight">Login Attempt History</h3>
-                    <p className="text-xs text-zinc-500 font-medium">Recent authentication attempts, IP origins, and verification status for your account.</p>
+                    <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Login Attempt History</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Recent authentication attempts, IP origins, and verification status for your account.</p>
                   </div>
                 </div>
 
@@ -1644,74 +1654,76 @@ export const Settings: React.FC = () => {
               </div>
 
               {sessionHistory.length === 0 ? (
-                <div className="py-6 text-center text-xs text-zinc-400 font-medium">
+                <div className="py-8 text-center text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                   No previous login attempts recorded on this account yet.
                 </div>
               ) : (
-                <div className="overflow-x-auto -mx-2 sm:mx-0">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-zinc-100 text-[11px] font-black text-zinc-400 uppercase tracking-wider">
-                        <th className="pb-3 pl-2">Device & Browser</th>
-                        <th className="pb-3">IP Address</th>
-                        <th className="pb-3">Location</th>
-                        <th className="pb-3">Status</th>
-                        <th className="pb-3 pr-2 text-right">Timestamp</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-100">
-                      {sessionHistory.map((item) => (
-                        <tr key={item.id} className="hover:bg-zinc-50/70 transition-colors">
-                          <td className="py-3 pl-2 font-bold text-zinc-900">
-                            {item.device || item.browser ? `${item.device || 'Device'} (${item.browser || item.os || 'Web'})` : 'Web Browser'}
-                          </td>
-                          <td className="py-3 font-mono text-zinc-600">
-                            {item.ipAddress || item.ip || item.ip_address || '—'}
-                          </td>
-                          <td className="py-3 text-zinc-600 font-medium">
-                            {item.city && item.country ? `${item.city}, ${item.country}` : (item.city || item.country || 'Local Network')}
-                          </td>
-                          <td className="py-3">
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                              item.status
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : 'bg-red-50 text-red-700 border border-red-200'
-                            }`}>
-                              {item.status ? (
-                                <>
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                  <span>Success</span>
-                                </>
-                              ) : (
-                                <>
-                                  <AlertTriangle className="w-3 h-3 text-red-600" />
-                                  <span>Failed</span>
-                                </>
-                              )}
-                            </span>
-                          </td>
-                          <td className="py-3 pr-2 text-right text-zinc-400 font-medium whitespace-nowrap">
-                            {item.createdAt || item.created_at ? new Date(item.createdAt || item.created_at || '').toLocaleString(undefined, {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            }) : '—'}
-                          </td>
+                <div className="border border-zinc-200/80 dark:border-white/10 rounded-2xl overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-zinc-50 dark:bg-white/[0.03] border-b border-zinc-200/80 dark:border-white/10 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        <tr>
+                          <th className="py-3 px-4">Device & Browser</th>
+                          <th className="py-3 px-4">IP Address</th>
+                          <th className="py-3 px-4">Location</th>
+                          <th className="py-3 px-4">Status</th>
+                          <th className="py-3 px-4 text-right">Timestamp</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
+                        {sessionHistory.map((item) => (
+                          <tr key={item.id} className="hover:bg-zinc-50/70 dark:hover:bg-white/[0.02] transition-colors">
+                            <td className="py-3.5 px-4 font-bold text-zinc-950 dark:text-white">
+                              {item.device || item.browser ? `${item.device || 'Device'} (${item.browser || item.os || 'Web'})` : 'Web Browser'}
+                            </td>
+                            <td className="py-3.5 px-4 font-mono text-zinc-600 dark:text-white">
+                              {item.ipAddress || item.ip || item.ip_address || '—'}
+                            </td>
+                            <td className="py-3.5 px-4 text-zinc-600 dark:text-white font-medium">
+                              {item.city && item.country ? `${item.city}, ${item.country}` : (item.city || item.country || 'Local Network')}
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                item.status
+                                  ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30'
+                                  : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-500/30'
+                              }`}>
+                                {item.status ? (
+                                  <>
+                                    <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                                    <span>Success</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <AlertTriangle className="w-3 h-3 text-red-600 dark:text-red-400" />
+                                    <span>Failed</span>
+                                  </>
+                                )}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 text-right text-zinc-500 dark:text-white font-medium whitespace-nowrap">
+                              {item.createdAt || item.created_at ? new Date(item.createdAt || item.created_at || '').toLocaleString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              }) : '—'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>
 
             {/* Session Policy Card */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
-              <h3 className="text-base font-black text-zinc-950 tracking-tight flex items-center gap-2">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
+              <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight flex items-center gap-2">
                 <Clock className="w-4 h-4 text-zinc-500" /> Inactivity Session Policy
               </h3>
-              <p className="text-xs text-zinc-500 font-medium leading-relaxed max-w-xl">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed max-w-xl">
                 Automatically disconnect sessions and require organizer sign-in if the console is inactive for a prolonged duration.
               </p>
 
@@ -1743,11 +1755,11 @@ export const Settings: React.FC = () => {
           <div className="space-y-6 animate-fadeIn">
             {role === 'staff' ? (
               /* STAFF'S OWN GATE SCAN HISTORY */
-              <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
+              <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
                   <div>
-                    <h3 className="text-base font-black text-zinc-950 tracking-tight">My Gate Scan Activity & History</h3>
-                    <p className="text-xs text-zinc-500 font-medium">
+                    <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">My Gate Scan Activity & History</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                       Real-time log of attendees admitted, turnstile timestamps, and duplicate ticket attempts handled by your terminal.
                     </p>
                   </div>
@@ -1782,9 +1794,9 @@ export const Settings: React.FC = () => {
 
                 {/* Scan Quick Metrics */}
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70">
+                  <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10">
                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Total Scans</p>
-                    <p className="text-xl font-black text-zinc-950 mt-1">{staffScans.length}</p>
+                    <p className="text-xl font-black text-zinc-950 dark:text-white mt-1">{staffScans.length}</p>
                   </div>
                   <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/70">
                     <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Passes Verified</p>
@@ -1801,9 +1813,9 @@ export const Settings: React.FC = () => {
                 </div>
 
                 {/* Table */}
-                <div className="border border-zinc-200/80 rounded-2xl overflow-hidden">
+                <div className="border border-zinc-200/80 dark:border-white/10 rounded-2xl overflow-hidden">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-zinc-50 border-b border-zinc-200/80 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+                    <thead className="bg-zinc-50 dark:bg-white/[0.03] border-b border-zinc-200/80 dark:border-white/10 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
                       <tr>
                         <th className="py-3 px-4">Attendee</th>
                         <th className="py-3 px-4">Ticket Tier</th>
@@ -1816,13 +1828,13 @@ export const Settings: React.FC = () => {
                     <tbody className="divide-y divide-zinc-100 font-medium">
                       {staffScans.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="py-12 text-center text-zinc-500 font-medium">
+                          <td colSpan={6} className="py-12 text-center text-zinc-500 dark:text-zinc-400 font-medium">
                             No gate scans recorded yet. Terminal scans will populate here.
                           </td>
                         </tr>
                       ) : (
                         staffScans.map(scan => (
-                          <tr key={scan.id} className="hover:bg-zinc-50/60 transition-colors">
+                          <tr key={scan.id} className="hover:bg-zinc-50/60 dark:hover:bg-white/[0.02] transition-colors">
                             <td className="py-3 px-4 font-bold text-zinc-900">{scan.attendeeName}</td>
                             <td className="py-3 px-4 text-zinc-600">{scan.ticketType}</td>
                             <td className="py-3 px-4 font-mono text-[11px] text-zinc-500">{scan.barcode}</td>
@@ -1847,11 +1859,11 @@ export const Settings: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
+              <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
                   <div>
-                    <h3 className="text-base font-black text-zinc-950 tracking-tight">Governance & Security Audit Trail</h3>
-                    <p className="text-xs text-zinc-500 font-medium">
+                    <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Governance & Security Audit Trail</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                       Immutable activity log capturing authentication events, role invitations, payout bank adjustments, and critical console actions.
                     </p>
                   </div>
@@ -1876,7 +1888,7 @@ export const Settings: React.FC = () => {
                     value={auditSearchQuery}
                     onChange={(e) => setAuditSearchQuery(e.target.value)}
                     placeholder="Search by action, actor name, or IP address..."
-                    className="w-full pl-9 pr-4 py-2 bg-zinc-50 border border-zinc-200/80 rounded-xl text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#E31B23] transition-colors"
+                    className="w-full pl-9 pr-4 py-2 bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 rounded-xl text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-[#E31B23] transition-colors"
                   />
                 </div>
 
@@ -1932,12 +1944,12 @@ export const Settings: React.FC = () => {
 
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-zinc-950">{log.action}</span>
+                            <span className="font-bold text-zinc-950 dark:text-white">{log.action}</span>
                             <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-zinc-100 text-zinc-700">
                               {log.category}
                             </span>
                           </div>
-                          <p className="text-zinc-600 font-medium leading-relaxed">{log.details}</p>
+                          <p className="text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">{log.details}</p>
                           <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-medium">
                             <span className="text-zinc-700 font-semibold">{log.actorName}</span>
                             <span>({log.actorRole})</span>
@@ -1964,12 +1976,12 @@ export const Settings: React.FC = () => {
         {/* ========================================================================= */}
         {activeTab === 'preferences' && (
           <div className="space-y-6 animate-fadeIn">
-            <form onSubmit={handleSavePreferences} className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="border-b border-zinc-100 pb-4">
-                <h3 className="text-base font-black text-zinc-950 tracking-tight flex items-center gap-2">
+            <form onSubmit={handleSavePreferences} className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
+                <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight flex items-center gap-2">
                   <Globe className="w-4 h-4 text-[#E31B23]" /> Workspace Regional Defaults
                 </h3>
-                <p className="text-xs text-zinc-500 font-medium mt-0.5">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5">
                   Set default financial currency, operational timezone, and ticket pricing tax behaviors.
                 </p>
               </div>
@@ -2025,11 +2037,11 @@ export const Settings: React.FC = () => {
                 />
               </div>
 
-              <div className="pt-4 border-t border-zinc-100 space-y-3">
-                <h4 className="text-xs font-bold text-zinc-950 flex items-center gap-2">
+              <div className="pt-4 border-t border-zinc-100 dark:border-white/10 space-y-3">
+                <h4 className="text-xs font-bold text-zinc-950 dark:text-white flex items-center gap-2">
                   <Lock className="w-4 h-4 text-zinc-500" /> Door & POS Security PIN
                 </h4>
-                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer">
+                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={doorSalesPinRequired}
@@ -2037,8 +2049,8 @@ export const Settings: React.FC = () => {
                     className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                   />
                   <div>
-                    <p className="text-xs font-bold text-zinc-900">Require 4-Digit Security PIN for Box Office Door Sales</p>
-                    <p className="text-[11px] text-zinc-500 font-medium">Ushers issuing cash or POS tickets on event day must input manager PIN before completing ticket issuance.</p>
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white">Require 4-Digit Security PIN for Box Office Door Sales</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Ushers issuing cash or POS tickets on event day must input manager PIN before completing ticket issuance.</p>
                   </div>
                 </label>
               </div>
@@ -2058,18 +2070,18 @@ export const Settings: React.FC = () => {
         {activeTab === 'notifications' && (
           <div className="space-y-6 animate-fadeIn">
             {role === 'staff' ? (
-              <form onSubmit={handleSaveStaffNotifs} className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-                <div className="border-b border-zinc-100 pb-4">
-                  <h3 className="text-base font-black text-zinc-950 tracking-tight flex items-center gap-2">
+              <form onSubmit={handleSaveStaffNotifs} className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+                <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight flex items-center gap-2">
                     <Bell className="w-4 h-4 text-[#E31B23]" /> Shift & Gate Notification Channels
                   </h3>
-                  <p className="text-xs text-zinc-500 font-medium mt-0.5">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5">
                     Configure SMS, WhatsApp, and emergency coordinator dispatches to your mobile device.
                   </p>
                 </div>
 
                 <div className="space-y-3">
-                  <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+                  <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white/[0.08] transition-colors">
                     <input
                       type="checkbox"
                       checked={staffShiftSms}
@@ -2077,12 +2089,12 @@ export const Settings: React.FC = () => {
                       className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                     />
                     <div>
-                      <p className="text-xs font-bold text-zinc-900">SMS Shift Reminders</p>
-                      <p className="text-[11px] text-zinc-500 font-medium">Receive SMS reminders with gate directions and door times 2 hours before your shift begins.</p>
+                      <p className="text-xs font-bold text-zinc-900 dark:text-white">SMS Shift Reminders</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Receive SMS reminders with gate directions and door times 2 hours before your shift begins.</p>
                     </div>
                   </label>
 
-                  <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+                  <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white/[0.08] transition-colors">
                     <input
                       type="checkbox"
                       checked={staffShiftWhatsapp}
@@ -2090,12 +2102,12 @@ export const Settings: React.FC = () => {
                       className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                     />
                     <div>
-                      <p className="text-xs font-bold text-zinc-900">WhatsApp Coordinator Briefing</p>
-                      <p className="text-[11px] text-zinc-500 font-medium">Receive event VIP lists, gate briefing docs, and emergency contacts on WhatsApp.</p>
+                      <p className="text-xs font-bold text-zinc-900 dark:text-white">WhatsApp Coordinator Briefing</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Receive event VIP lists, gate briefing docs, and emergency contacts on WhatsApp.</p>
                     </div>
                   </label>
 
-                  <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+                  <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white/[0.08] transition-colors">
                     <input
                       type="checkbox"
                       checked={staffEmergencyBroadcasts}
@@ -2103,12 +2115,12 @@ export const Settings: React.FC = () => {
                       className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                     />
                     <div>
-                      <p className="text-xs font-bold text-zinc-900">Urgent Gate Broadcasts</p>
-                      <p className="text-[11px] text-zinc-500 font-medium">High-priority alerts sent by event directors during live event hours.</p>
+                      <p className="text-xs font-bold text-zinc-900 dark:text-white">Urgent Gate Broadcasts</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">High-priority alerts sent by event directors during live event hours.</p>
                     </div>
                   </label>
 
-                  <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+                  <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white/[0.08] transition-colors">
                     <input
                       type="checkbox"
                       checked={staffCapacityAlerts}
@@ -2116,8 +2128,8 @@ export const Settings: React.FC = () => {
                       className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                     />
                     <div>
-                      <p className="text-xs font-bold text-zinc-900">Turnstile & Capacity Warnings</p>
-                      <p className="text-[11px] text-zinc-500 font-medium">Alerts when venue halls reach 90% capacity to slow down gate admissions.</p>
+                      <p className="text-xs font-bold text-zinc-900 dark:text-white">Turnstile & Capacity Warnings</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Alerts when venue halls reach 90% capacity to slow down gate admissions.</p>
                     </div>
                   </label>
                 </div>
@@ -2129,18 +2141,18 @@ export const Settings: React.FC = () => {
                 </div>
               </form>
             ) : (
-              <form onSubmit={handleSaveNotifications} className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-                <div className="border-b border-zinc-100 pb-4">
-                  <h3 className="text-base font-black text-zinc-950 tracking-tight flex items-center gap-2">
+              <form onSubmit={handleSaveNotifications} className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+                <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight flex items-center gap-2">
                     <Bell className="w-4 h-4 text-[#E31B23]" /> Notification Rules & Sales Alerts
                   </h3>
-                <p className="text-xs text-zinc-500 font-medium mt-0.5">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5">
                   Choose how and when you receive order notifications, inventory alarms, and executive digests.
                 </p>
               </div>
 
               <div className="space-y-3">
-                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white/[0.08] transition-colors">
                   <input
                     type="checkbox"
                     checked={notifyOnSale}
@@ -2148,12 +2160,12 @@ export const Settings: React.FC = () => {
                     className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                   />
                   <div>
-                    <p className="text-xs font-bold text-zinc-900">Real-Time Order Email Alerts</p>
-                    <p className="text-[11px] text-zinc-500 font-medium">Receive an immediate notification whenever an attendee completes a ticket booking.</p>
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white">Real-Time Order Email Alerts</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Receive an immediate notification whenever an attendee completes a ticket booking.</p>
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white/[0.08] transition-colors">
                   <input
                     type="checkbox"
                     checked={dailyDigest}
@@ -2161,12 +2173,12 @@ export const Settings: React.FC = () => {
                     className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                   />
                   <div>
-                    <p className="text-xs font-bold text-zinc-900">Daily Morning Revenue & Velocity Digest</p>
-                    <p className="text-[11px] text-zinc-500 font-medium">Consolidated 07:00 AM summary detailing yesterday’s net ticket revenue and registrations.</p>
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white">Daily Morning Revenue & Velocity Digest</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Consolidated 07:00 AM summary detailing yesterday’s net ticket revenue and registrations.</p>
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white/[0.08] transition-colors">
                   <input
                     type="checkbox"
                     checked={lowInventoryAlert}
@@ -2174,12 +2186,12 @@ export const Settings: React.FC = () => {
                     className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                   />
                   <div>
-                    <p className="text-xs font-bold text-zinc-900">Low Ticket Inventory Alarms</p>
-                    <p className="text-[11px] text-zinc-500 font-medium">Alert when any limited ticket tier drops below 10% remaining capacity to adjust tiers.</p>
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white">Low Ticket Inventory Alarms</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Alert when any limited ticket tier drops below 10% remaining capacity to adjust tiers.</p>
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white/[0.08] transition-colors">
                   <input
                     type="checkbox"
                     checked={vipOrderSms}
@@ -2187,12 +2199,12 @@ export const Settings: React.FC = () => {
                     className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                   />
                   <div>
-                    <p className="text-xs font-bold text-zinc-900">SMS Notification on High-Value / VIP Table Bookings</p>
-                    <p className="text-[11px] text-zinc-500 font-medium">Receive direct SMS on orders exceeding ₦250,000 to coordinate hospitality staff.</p>
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white">SMS Notification on High-Value / VIP Table Bookings</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Receive direct SMS on orders exceeding ₦250,000 to coordinate hospitality staff.</p>
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white/[0.08] transition-colors">
                   <input
                     type="checkbox"
                     checked={refundAlert}
@@ -2200,12 +2212,12 @@ export const Settings: React.FC = () => {
                     className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                   />
                   <div>
-                    <p className="text-xs font-bold text-zinc-900">Attendee Refund & Chargeback Alerts</p>
-                    <p className="text-[11px] text-zinc-500 font-medium">Get notified within 15 minutes of any customer payment dispute or refund request.</p>
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white">Attendee Refund & Chargeback Alerts</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Get notified within 15 minutes of any customer payment dispute or refund request.</p>
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+                <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white/[0.08] transition-colors">
                   <input
                     type="checkbox"
                     checked={weeklyAnalyticsEmail}
@@ -2213,8 +2225,8 @@ export const Settings: React.FC = () => {
                     className="w-4 h-4 mt-0.5 text-[#E31B23] rounded accent-[#E31B23]"
                   />
                   <div>
-                    <p className="text-xs font-bold text-zinc-900">Weekly Executive Performance Report</p>
-                    <p className="text-[11px] text-zinc-500 font-medium">Comprehensive weekly PDF email breakdown of attendee demographics and traffic channels.</p>
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white">Weekly Executive Performance Report</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Comprehensive weekly PDF email breakdown of attendee demographics and traffic channels.</p>
                   </div>
                 </label>
               </div>
@@ -2235,13 +2247,13 @@ export const Settings: React.FC = () => {
         {activeTab === 'developer' && (
           <div className="space-y-6 animate-fadeIn">
             {/* API Keys */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div>
-                  <h3 className="text-base font-black text-zinc-950 tracking-tight flex items-center gap-2">
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight flex items-center gap-2">
                     <Code2 className="w-4 h-4 text-[#E31B23]" /> Live Public API Keys
                   </h3>
-                  <p className="text-xs text-zinc-500 font-medium">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                     Authenticate custom mobile apps, website ticket embeds, and Zapier automated pipelines.
                   </p>
                 </div>
@@ -2260,7 +2272,7 @@ export const Settings: React.FC = () => {
               <div className="space-y-3">
                 <label className="block text-xs font-bold text-zinc-700">Live Client API Key</label>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-zinc-50 border border-zinc-200/80 rounded-xl px-4 py-2.5 font-mono text-xs text-zinc-900 overflow-x-auto">
+                  <div className="flex-1 bg-zinc-50 dark:bg-[#070709] border border-zinc-200/80 dark:border-white/10 rounded-xl px-4 py-2.5 font-mono text-xs text-zinc-900 dark:text-white overflow-x-auto">
                     {apiKey}
                   </div>
                   <Button
@@ -2278,11 +2290,11 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Webhook Endpoints */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div>
-                  <h3 className="text-base font-black text-zinc-950 tracking-tight">Real-Time Webhook Endpoint</h3>
-                  <p className="text-xs text-zinc-500 font-medium">Receive real-time HTTP POST JSON payloads when tickets are issued, checked in, or refunded.</p>
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Real-Time Webhook Endpoint</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Receive real-time HTTP POST JSON payloads when tickets are issued, checked in, or refunded.</p>
                 </div>
 
                 <Button
@@ -2308,7 +2320,7 @@ export const Settings: React.FC = () => {
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-zinc-700">Webhook HMAC Secret</label>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 bg-zinc-50 border border-zinc-200/80 rounded-xl px-4 py-2.5 font-mono text-xs text-zinc-600 overflow-x-auto">
+                    <div className="flex-1 bg-zinc-50 dark:bg-[#070709] border border-zinc-200/80 dark:border-white/10 rounded-xl px-4 py-2.5 font-mono text-xs text-zinc-600 dark:text-zinc-400 overflow-x-auto">
                       {webhookSecret}
                     </div>
                     <Button
@@ -2323,11 +2335,11 @@ export const Settings: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 space-y-2">
-                  <h4 className="text-xs font-bold text-zinc-900">Supported Event Hooks</h4>
+                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 space-y-2">
+                  <h4 className="text-xs font-bold text-zinc-900 dark:text-white">Supported Event Hooks</h4>
                   <div className="flex flex-wrap gap-2 text-[10px] font-mono font-bold">
                     {['order.created', 'order.paid', 'ticket.checked_in', 'ticket.refunded', 'event.published', 'attendee.registered'].map(hook => (
-                      <span key={hook} className="px-2.5 py-1 rounded-md bg-white border border-zinc-200 text-zinc-700">
+                      <span key={hook} className="px-2.5 py-1 rounded-md bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 text-zinc-700">
                         {hook}
                       </span>
                     ))}
@@ -2344,11 +2356,11 @@ export const Settings: React.FC = () => {
         {perms.canManageLifecycle && activeTab === 'danger' && (
           <div className="space-y-6 animate-fadeIn">
             {/* Export Archive Card */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div>
-                  <h3 className="text-base font-black text-zinc-950 tracking-tight">Export Organization Workspace Archive</h3>
-                  <p className="text-xs text-zinc-500 font-medium">
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Export Organization Workspace Archive</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                     Download a comprehensive JSON/CSV bundle of your events, order histories, attendee data, and audit records.
                   </p>
                 </div>
@@ -2420,14 +2432,14 @@ export const Settings: React.FC = () => {
           size="md"
         >
           <form onSubmit={handleVerifyAndEnable2FA} className="space-y-5">
-            <p className="text-xs text-zinc-600 font-medium leading-relaxed">
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">
               Scan this QR code with your authenticator app (Google Authenticator, Microsoft Authenticator, or 1Password), then enter the generated 6-digit confirmation code.
             </p>
 
             {/* Simulated QR Code Canvas */}
-            <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-3">
-              <div className="w-36 h-36 bg-white p-3 rounded-2xl border-2 border-zinc-900 shadow-sm flex items-center justify-center">
-                <QrCode className="w-28 h-28 text-zinc-950" />
+            <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 space-y-3">
+              <div className="w-36 h-36 bg-white dark:bg-white p-3 rounded-2xl border-2 border-zinc-900 dark:border-white/20 shadow-sm flex items-center justify-center">
+                <QrCode className="w-28 h-28 text-zinc-950 dark:text-white" />
               </div>
               <div className="text-center space-y-1">
                 <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Secret Setup Key</span>
@@ -2447,7 +2459,7 @@ export const Settings: React.FC = () => {
               required
             />
 
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-zinc-100">
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-zinc-100 dark:border-white/10">
               <Button
                 type="button"
                 variant="outline"

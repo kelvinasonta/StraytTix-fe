@@ -16,9 +16,12 @@ import {
   Bell,
   X,
   Menu,
-  ArrowRight
+  ArrowRight,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { Logo } from '../ui/Logo';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
 
@@ -28,6 +31,7 @@ interface AuthenticatedMobileNavProps {
 
 export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ currentMode }) => {
   const { user, organizer, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -72,7 +76,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
       {/* ========================================================================= */}
       {/* 1. SINGLE TOP MOBILE HEADER (Visible only on < md / < lg screens) */}
       {/* ========================================================================= */}
-      <header className="lg:hidden sticky top-0 z-40 h-16 bg-white/90 backdrop-blur-xl border-b border-zinc-200/80 px-4 sm:px-6 flex items-center justify-between shadow-2xs">
+      <header className="lg:hidden sticky top-0 z-40 h-16 bg-white/90 dark:bg-[#070709]/90 backdrop-blur-xl border-b border-zinc-200/80 dark:border-white/10 px-4 sm:px-6 flex items-center justify-between shadow-2xs transition-colors">
         {/* Left: Brand Logo + Mode Badge (NO switcher links) */}
         <div className="flex items-center gap-2.5">
           <Logo to={isOrganizerMode ? '/organizer' : '/dashboard'} size="sm" />
@@ -94,9 +98,24 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
             </Link>
           )}
 
+          {/* Theme Mode Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+              isDark
+                ? 'bg-white/5 hover:bg-white/10 text-amber-300 border-white/15'
+                : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
+            }`}
+            title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            aria-label="Toggle theme mode"
+          >
+            {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+          </button>
+
           {/* Notification Bell */}
           <button
-            className="relative w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition-colors"
+            className="relative w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
             title="Notifications"
           >
             <Bell className="w-4 h-4" />
@@ -106,7 +125,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
           {/* User Avatar */}
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-8 h-8 rounded-full bg-zinc-900 text-white font-black text-xs flex items-center justify-center border border-zinc-200 shadow-2xs hover:scale-105 transition-all cursor-pointer"
+            className="w-8 h-8 rounded-full bg-[#E31B23] text-white font-black text-xs flex items-center justify-center border border-white/20 shadow-2xs hover:scale-105 transition-all cursor-pointer"
             title="Open Account Menu"
           >
             {user?.firstName?.[0] || 'U'}
@@ -115,7 +134,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
           {/* Classic Hamburger Nav Button */}
           <button
             onClick={() => setDrawerOpen(true)}
-            className="p-1.5 rounded-xl text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
             title="Open Navigation Menu"
             aria-label="Open Navigation Menu"
           >
@@ -131,35 +150,35 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
         <div className="fixed inset-0 z-50 lg:hidden animate-in fade-in duration-200">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+            className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
             onClick={() => setDrawerOpen(false)}
           />
 
           {/* Drawer Content */}
-          <aside className="absolute inset-y-0 right-0 max-w-xs w-full bg-white shadow-2xl flex flex-col justify-between p-6 z-50 overflow-y-auto animate-in slide-in-from-right duration-250">
+          <aside className="absolute inset-y-0 right-0 max-w-xs w-full bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-zinc-100 shadow-2xl flex flex-col justify-between p-6 z-50 overflow-y-auto animate-in slide-in-from-right duration-250 border-l border-transparent dark:border-white/10">
             <div className="space-y-6">
               {/* Drawer Top Bar */}
-              <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-white/10">
                 <Logo to={isOrganizerMode ? '/organizer' : '/dashboard'} size="sm" />
                 <button
                   onClick={() => setDrawerOpen(false)}
-                  className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors cursor-pointer"
+                  className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* User Profile Card */}
-              <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-zinc-900 text-white font-black text-sm flex items-center justify-center shadow-2xs flex-shrink-0">
+              <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-[#E31B23] text-white font-black text-sm flex items-center justify-center shadow-2xs flex-shrink-0">
                   {user?.firstName?.[0] || 'U'}
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-sm font-black text-zinc-950 truncate">
+                  <h4 className="text-sm font-black text-zinc-950 dark:text-white truncate">
                     {user?.firstName || 'User'} {user?.lastName || ''}
                   </h4>
                   <p className="text-xs text-zinc-400 truncate">{user?.email}</p>
-                  <span className="inline-block mt-1 text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
+                  <span className="inline-block mt-1 text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
                     {isCustomer
                       ? 'Attendee Account'
                       : (isOrganization ? 'Organization Account' : 'Solo Organizer Account')}
@@ -304,17 +323,6 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                       <span>Saved Experiences</span>
                     </NavLink>
                     <NavLink
-                      to="/dashboard/profile"
-                      onClick={() => setDrawerOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${isActive ? 'bg-[#E31B23] text-white shadow-2xs' : 'text-zinc-700 hover:bg-zinc-50'
-                        }`
-                      }
-                    >
-                      <User className="w-4 h-4" />
-                      <span>Profile</span>
-                    </NavLink>
-                    <NavLink
                       to="/dashboard/settings"
                       onClick={() => setDrawerOpen(false)}
                       className={({ isActive }) =>
@@ -322,8 +330,8 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                         }`
                       }
                     >
-                      <Settings className="w-4 h-4" />
-                      <span>Account Settings</span>
+                      <User className="w-4 h-4" />
+                      <span>Profile & Settings</span>
                     </NavLink>
                   </>
                 )}
@@ -334,7 +342,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                     <Link
                       to="/dashboard"
                       onClick={() => setDrawerOpen(false)}
-                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-zinc-900 bg-red-50/70 border border-red-200/50 hover:bg-red-100/70 transition-colors"
+                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-zinc-900 dark:text-zinc-100 bg-red-50/70 dark:bg-red-500/10 border border-red-200/50 dark:border-red-500/20 hover:bg-red-100/70 dark:hover:bg-red-500/20 transition-colors"
                     >
                       <span className="flex items-center gap-2">
                         <Ticket className="w-4 h-4 text-[#E31B23]" />
@@ -345,12 +353,29 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                   </div>
                 )}
 
+                {/* Theme Mode Toggle Row */}
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={toggleTheme}
+                    className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-zinc-500" />}
+                      <span>{isDark ? 'Light Appearance' : 'Dark Appearance'}</span>
+                    </span>
+                    <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-zinc-200/80 dark:bg-white/10 text-zinc-600 dark:text-zinc-400">
+                      {isDark ? 'Dark' : 'Light'}
+                    </span>
+                  </button>
+                </div>
+
                 {/* Explore Marketplace Link */}
                 <div className="pt-2">
                   <Link
                     to="/discover"
                     onClick={() => setDrawerOpen(false)}
-                    className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 transition-colors"
+                    className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 transition-colors"
                   >
                     <span className="flex items-center gap-2">
                       <Compass className="w-4 h-4 text-[#E31B23]" />
@@ -363,7 +388,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
             </div>
 
             {/* Bottom Actions */}
-            <div className="pt-4 border-t border-zinc-100 space-y-2">
+            <div className="pt-4 border-t border-zinc-100 dark:border-white/10 space-y-2">
               {/* Create New Event: ONLY for Organizers who can create events */}
               {isOrganizerMode && perms.canCreateEvents && (
                 <Link
@@ -378,7 +403,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
 
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
@@ -391,7 +416,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
       {/* ========================================================================= */}
       {/* 3. SINGLE DOCKED MOBILE BOTTOM NAVIGATION BAR */}
       {/* ========================================================================= */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-zinc-200/80 px-2 py-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#070709]/95 backdrop-blur-xl border-t border-zinc-200/80 dark:border-white/10 px-2 py-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.5)] transition-colors">
         <div className="flex items-center justify-around max-w-md mx-auto">
           {bottomTabs.map((tab, idx) => {
             if ((tab as any).isCta) {
@@ -404,7 +429,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                   <div className="w-12 h-12 rounded-full bg-[#E31B23] text-white flex items-center justify-center shadow-lg shadow-red-500/30 hover:scale-105 transition-all">
                     <tab.icon className="w-6 h-6" />
                   </div>
-                  <span className="text-[10px] font-bold text-zinc-900 mt-0.5">
+                  <span className="text-[10px] font-bold text-zinc-900 dark:text-zinc-100 mt-0.5">
                     {tab.label}
                   </span>
                 </Link>
@@ -416,7 +441,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                 <button
                   key={idx}
                   onClick={() => setDrawerOpen(true)}
-                  className="flex-1 flex flex-col items-center justify-center py-1 text-zinc-500 hover:text-zinc-950 transition-colors cursor-pointer"
+                  className="flex-1 flex flex-col items-center justify-center py-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-pointer"
                 >
                   <tab.icon className="w-5 h-5" />
                   <span className="text-[10px] font-semibold mt-0.5">{tab.label}</span>
@@ -432,7 +457,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                 className={({ isActive }) =>
                   `flex-1 flex flex-col items-center justify-center py-1 transition-colors ${isActive
                     ? 'text-[#E31B23] font-bold'
-                    : 'text-zinc-500 hover:text-zinc-900 font-medium'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium'
                   }`
                 }
               >

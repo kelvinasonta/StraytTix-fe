@@ -1319,10 +1319,10 @@ export const CreateEvent: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">
                 {isEditing ? 'Edit Event Studio' : 'Create New Event'}
               </h1>
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-zinc-100 text-zinc-600 border border-zinc-200/80">
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-zinc-100 text-zinc-600 border border-zinc-200 dark:border-white/10/80">
                 Step {step} of 5
               </span>
             </div>
@@ -1350,7 +1350,7 @@ export const CreateEvent: React.FC = () => {
         {/* ========================================================================= */}
         {/* 2. PROGRESS PIPELINE / STEPPER BAR */}
         {/* ========================================================================= */}
-        <div ref={formTopRef} className="scroll-mt-6 bg-white border border-zinc-200/80 rounded-2xl p-2.5 shadow-xs overflow-x-auto scrollbar-none">
+        <div ref={formTopRef} className="scroll-mt-6 bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-2xl p-2.5 shadow-xs overflow-x-auto scrollbar-none">
           <div className="flex items-center min-w-[700px] justify-between gap-1.5">
             {STEPS.map((s, idx) => {
               const Icon = s.icon;
@@ -1365,9 +1365,9 @@ export const CreateEvent: React.FC = () => {
                     className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-left flex-1 ${isCurrent
                       ? 'bg-zinc-950 text-white shadow-sm cursor-default ring-1 ring-zinc-950'
                       : isDone
-                        ? 'bg-zinc-50 hover:bg-zinc-100/90 text-zinc-900 border border-zinc-200/70 cursor-pointer'
+                        ? 'bg-zinc-50 hover:bg-zinc-100/90 text-zinc-900 border border-zinc-200 dark:border-white/10/70 cursor-pointer'
                         : isStepAccessible(s.id)
-                          ? 'text-zinc-600 hover:bg-zinc-50 border border-transparent cursor-pointer'
+                          ? 'text-zinc-600 hover:bg-zinc-50 dark:hover:bg-white/5 border border-transparent cursor-pointer'
                           : 'text-zinc-400 opacity-45 cursor-not-allowed border border-transparent'
                       }`}
                   >
@@ -1408,15 +1408,15 @@ export const CreateEvent: React.FC = () => {
 
           <div
             key={step}
-            className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-9 md:p-10 shadow-xs space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-200"
+            className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-9 md:p-10 shadow-xs space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-200"
           >
 
             {/* STEP 1: ESSENTIALS */}
             {step === 1 && (
               <div className="space-y-7">
-                <div className="border-b border-zinc-100 pb-4">
+                <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
                   <span className="text-[10px] font-black uppercase tracking-wider text-[#E31B23]">Phase 01</span>
-                  <h3 className="text-xl font-black text-zinc-950 tracking-tight mt-0.5">
+                  <h3 className="text-xl font-black text-zinc-950 dark:text-white tracking-tight mt-0.5">
                     Event Essentials & Details
                   </h3>
                   <p className="text-xs text-zinc-500 mt-1 font-medium">
@@ -1439,7 +1439,7 @@ export const CreateEvent: React.FC = () => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g. Lagos Tech Fest 2026, Afro Nation, AI DevCon..."
-                    className="w-full px-4 py-3 bg-zinc-50/80 hover:bg-zinc-50 border border-zinc-200 focus:border-[#E31B23] focus:bg-white rounded-2xl text-sm font-bold text-zinc-950 placeholder-zinc-400 outline-none transition-all shadow-2xs focus:ring-3 focus:ring-red-500/10"
+                    className="w-full px-4 py-3 bg-zinc-50/80 hover:bg-zinc-50 dark:hover:bg-white/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:border-[#E31B23] focus:bg-white rounded-2xl text-sm font-bold text-zinc-950 dark:text-white placeholder-zinc-400 outline-none transition-all shadow-2xs focus:ring-3 focus:ring-red-500/10"
                     required
                   />
                 </div>
@@ -1464,7 +1464,7 @@ export const CreateEvent: React.FC = () => {
                           onClick={() => setEventFormat(fmt)}
                           className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center truncate ${isSelected
                             ? 'bg-zinc-950 text-white border-zinc-950 shadow-xs ring-1 ring-zinc-950'
-                            : 'bg-zinc-50 border-zinc-200 text-zinc-700 hover:bg-zinc-100 hover:border-zinc-300'
+                            : 'bg-zinc-50 border-zinc-200 dark:border-white/10 text-zinc-700 hover:bg-zinc-100 hover:border-zinc-300'
                             }`}
                         >
                           {fmt}
@@ -1487,7 +1487,7 @@ export const CreateEvent: React.FC = () => {
                   </div>
 
                   {/* Active Selected Category Tags */}
-                  <div className="flex flex-wrap gap-2 min-h-[38px] p-2.5 bg-zinc-50 border border-zinc-200 rounded-2xl">
+                  <div className="flex flex-wrap gap-2 min-h-[38px] p-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl">
                     {eventCategories.map((cat) => (
                       <span
                         key={cat}
@@ -1557,7 +1557,7 @@ export const CreateEvent: React.FC = () => {
                             }}
                             className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer ${isAdded
                               ? 'bg-red-50 border-red-200 text-[#E31B23] font-bold'
-                              : 'bg-white border-zinc-200 text-zinc-600 hover:border-zinc-300'
+                              : 'bg-white border-zinc-200 dark:border-white/10 text-zinc-600 hover:border-zinc-300'
                               }`}
                           >
                             {isAdded ? `✓ ${tag}` : `+ ${tag}`}
@@ -1588,7 +1588,7 @@ export const CreateEvent: React.FC = () => {
 
                 {/* Visibility & Spotlight Toggle */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  <div className="p-3.5 rounded-2xl border border-zinc-200 bg-zinc-50/70 space-y-2">
+                  <div className="p-3.5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50/70 space-y-2">
                     <label className="text-xs font-bold text-zinc-800 flex items-center justify-between">
                       <span>Event Visibility</span>
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${visibility === 'public' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-200 text-zinc-700'
@@ -1601,8 +1601,8 @@ export const CreateEvent: React.FC = () => {
                         type="button"
                         onClick={() => setVisibility('public')}
                         className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${visibility === 'public'
-                          ? 'bg-white text-zinc-950 border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
-                          : 'bg-zinc-100/80 border-zinc-200 text-zinc-600 hover:bg-zinc-100'
+                          ? 'bg-white text-zinc-950 dark:text-white border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
+                          : 'bg-zinc-100/80 border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100'
                           }`}
                       >
                         Public
@@ -1611,8 +1611,8 @@ export const CreateEvent: React.FC = () => {
                         type="button"
                         onClick={() => setVisibility('private')}
                         className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${visibility === 'private'
-                          ? 'bg-white text-zinc-950 border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
-                          : 'bg-zinc-100/80 border-zinc-200 text-zinc-600 hover:bg-zinc-100'
+                          ? 'bg-white text-zinc-950 dark:text-white border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
+                          : 'bg-zinc-100/80 border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100'
                           }`}
                       >
                         Private
@@ -1625,7 +1625,7 @@ export const CreateEvent: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl border border-zinc-200 bg-zinc-50/70 space-y-2">
+                  <div className="p-3.5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50/70 space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -1654,8 +1654,8 @@ export const CreateEvent: React.FC = () => {
             {/* STEP 2: LOCATION */}
             {step === 2 && (
               <div className="space-y-6 animate-in fade-in duration-200">
-                <div className="border-b border-zinc-100 pb-4">
-                  <h3 className="text-lg font-black text-zinc-950 tracking-tight">
+                <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
+                  <h3 className="text-lg font-black text-zinc-950 dark:text-white tracking-tight">
                     Event Location
                   </h3>
                 </div>
@@ -1667,11 +1667,11 @@ export const CreateEvent: React.FC = () => {
                     onClick={() => setLocationType('physical')}
                     className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${locationType === 'physical'
                       ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
-                      : 'border-zinc-200 hover:bg-zinc-50'
+                      : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5'
                       }`}
                   >
                     <MapPin className={`w-5 h-5 mb-2 ${locationType === 'physical' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
-                    <h4 className="text-sm font-black text-zinc-950">In-Person Arena</h4>
+                    <h4 className="text-sm font-black text-zinc-950 dark:text-white">In-Person Arena</h4>
                     <p className="text-xs text-zinc-500 mt-0.5">Physical event venue, hall, or outdoor festival.</p>
                   </button>
 
@@ -1680,11 +1680,11 @@ export const CreateEvent: React.FC = () => {
                     onClick={() => setLocationType('online')}
                     className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${locationType === 'online'
                       ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
-                      : 'border-zinc-200 hover:bg-zinc-50'
+                      : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5'
                       }`}
                   >
                     <Radio className={`w-5 h-5 mb-2 ${locationType === 'online' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
-                    <h4 className="text-sm font-black text-zinc-950">Virtual Livestream</h4>
+                    <h4 className="text-sm font-black text-zinc-950 dark:text-white">Virtual Livestream</h4>
                     <p className="text-xs text-zinc-500 mt-0.5">Zoom, YouTube Live, or private streaming webinar.</p>
                   </button>
                 </div>
@@ -1704,7 +1704,7 @@ export const CreateEvent: React.FC = () => {
                         <select
                           value={country}
                           onChange={(e) => handleCountryChange(e.target.value)}
-                          className="w-full pl-4 pr-10 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none cursor-pointer appearance-none transition-all shadow-xs"
+                          className="w-full pl-4 pr-10 py-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none cursor-pointer appearance-none transition-all shadow-xs"
                         >
                           {countriesList.map((c) => (
                             <option key={c.code} value={c.name}>
@@ -1723,9 +1723,9 @@ export const CreateEvent: React.FC = () => {
                     </div>
 
                     {/* 2. Google-Powered Venue & Hall Search (Country-Restricted) */}
-                    <div className="p-4 rounded-2xl bg-gradient-to-r from-red-50/50 via-white to-zinc-50 border border-zinc-200 shadow-xs space-y-2">
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-red-50/50 via-white to-zinc-50 border border-zinc-200 dark:border-white/10 shadow-xs space-y-2">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                        <label className="text-xs font-black text-zinc-950 uppercase tracking-wider flex items-center gap-2">
+                        <label className="text-xs font-black text-zinc-950 dark:text-white uppercase tracking-wider flex items-center gap-2">
                           <div className="w-5 h-5 rounded-lg bg-[#E31B23] flex items-center justify-center text-white shadow-xs">
                             <Search className="w-3 h-3" />
                           </div>
@@ -1774,7 +1774,7 @@ export const CreateEvent: React.FC = () => {
                           value={venue}
                           onChange={(e) => setVenue(e.target.value)}
                           placeholder="e.g. Eko Convention Centre or Crisma Hall"
-                          className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white"
+                          className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white"
                         />
                       </div>
 
@@ -1787,7 +1787,7 @@ export const CreateEvent: React.FC = () => {
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
                           placeholder="Plot 1415 Adetokunbo Ademola Street"
-                          className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white"
+                          className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white"
                         />
                       </div>
                     </div>
@@ -1801,7 +1801,7 @@ export const CreateEvent: React.FC = () => {
                           value={city}
                           onChange={(e) => setCity(e.target.value)}
                           placeholder="e.g. Lagos"
-                          className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none"
+                          className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none"
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -1811,7 +1811,7 @@ export const CreateEvent: React.FC = () => {
                           value={state}
                           onChange={(e) => setState(e.target.value)}
                           placeholder="e.g. Lagos State"
-                          className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none"
+                          className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none"
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -1821,7 +1821,7 @@ export const CreateEvent: React.FC = () => {
                           value={zipCode}
                           onChange={(e) => setZipCode(e.target.value)}
                           placeholder="e.g. 101241"
-                          className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none"
+                          className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none"
                         />
                       </div>
                     </div>
@@ -1836,12 +1836,12 @@ export const CreateEvent: React.FC = () => {
                         value={landmark}
                         onChange={(e) => setLandmark(e.target.value)}
                         placeholder="e.g. Adjacent to Eko Hotel or Opposite City Mall"
-                        className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white"
+                        className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white"
                       />
                     </div>
 
                     {/* Interactive Map Drop Point & Pin Marker Studio */}
-                    <div className="pt-4 border-t border-zinc-150 space-y-4">
+                    <div className="pt-4 border-t border-zinc-150 dark:border-white/10 space-y-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
 
@@ -1923,7 +1923,7 @@ export const CreateEvent: React.FC = () => {
                         <select
                           value={country}
                           onChange={(e) => handleCountryChange(e.target.value)}
-                          className="w-full pl-4 pr-10 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none cursor-pointer appearance-none transition-all shadow-xs"
+                          className="w-full pl-4 pr-10 py-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 focus:border-[#E31B23] focus:bg-white outline-none cursor-pointer appearance-none transition-all shadow-xs"
                         >
                           {countriesList.map((c) => (
                             <option key={c.code} value={c.name}>
@@ -1948,7 +1948,7 @@ export const CreateEvent: React.FC = () => {
                         value={streamingUrl}
                         onChange={(e) => setStreamingUrl(e.target.value)}
                         placeholder="https://zoom.us/j/123456789 or YouTube Live URL"
-                        className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                        className="w-full px-4 py-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
                       />
                     </div>
                   </div>
@@ -1960,8 +1960,8 @@ export const CreateEvent: React.FC = () => {
             {/* STEP 3: SCHEDULE */}
             {step === 3 && (
               <div className="space-y-6 animate-in fade-in duration-200">
-                <div className="border-b border-zinc-100 pb-4">
-                  <h3 className="text-lg font-black text-zinc-950 tracking-tight">
+                <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
+                  <h3 className="text-lg font-black text-zinc-950 dark:text-white tracking-tight">
                     Schedule
                   </h3>
                 </div>
@@ -1973,11 +1973,11 @@ export const CreateEvent: React.FC = () => {
                     onClick={() => setScheduleType('single')}
                     className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${scheduleType === 'single'
                       ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
-                      : 'border-zinc-200 hover:bg-zinc-50'
+                      : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5'
                       }`}
                   >
                     <Calendar className={`w-5 h-5 mb-2 ${scheduleType === 'single' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
-                    <h4 className="text-sm font-black text-zinc-950">Single-Day / Standalone</h4>
+                    <h4 className="text-sm font-black text-zinc-950 dark:text-white">Single-Day / Standalone</h4>
                     <p className="text-xs text-zinc-500 mt-0.5">One-time event or multi-day convention taking place once.</p>
                   </button>
 
@@ -1986,19 +1986,19 @@ export const CreateEvent: React.FC = () => {
                     onClick={() => setScheduleType('recurring')}
                     className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${scheduleType === 'recurring'
                       ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
-                      : 'border-zinc-200 hover:bg-zinc-50'
+                      : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5'
                       }`}
                   >
                     <RefreshCw className={`w-5 h-5 mb-2 ${scheduleType === 'recurring' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
-                    <h4 className="text-sm font-black text-zinc-950">Recurring Series</h4>
+                    <h4 className="text-sm font-black text-zinc-950 dark:text-white">Recurring Series</h4>
                     <p className="text-xs text-zinc-500 mt-0.5">Repeats weekly, daily, or monthly over scheduled occurrences.</p>
                   </button>
                 </div>
 
                 {/* Recurring Configuration Fields */}
                 {scheduleType === 'recurring' && (
-                  <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3">
-                    <div className="flex items-center gap-2 border-b border-zinc-200/80 pb-2.5">
+                  <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-3">
+                    <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-white/10/80 pb-2.5">
                       <RefreshCw className="w-4 h-4 text-[#E31B23]" />
                       <h4 className="text-xs font-black text-zinc-900 uppercase tracking-wider">
                         Recurring Series Parameters
@@ -2011,7 +2011,7 @@ export const CreateEvent: React.FC = () => {
                         <select
                           value={eventFrequency}
                           onChange={(e) => setEventFrequency(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                          className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
                         >
                           <option value="weekly">Weekly</option>
                           <option value="daily">Daily</option>
@@ -2024,7 +2024,7 @@ export const CreateEvent: React.FC = () => {
                         <select
                           value={recurringEndType}
                           onChange={(e) => setRecurringEndType(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                          className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
                         >
                           <option value="after_occurrences">After set number of occurrences</option>
                           <option value="on_date">On specific end date</option>
@@ -2039,7 +2039,7 @@ export const CreateEvent: React.FC = () => {
                           max={52}
                           value={recurringOccurrences}
                           onChange={(e) => setRecurringOccurrences(Math.max(1, parseInt(e.target.value) || 1))}
-                          className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                          className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
                         />
                       </div>
                     </div>
@@ -2089,7 +2089,7 @@ export const CreateEvent: React.FC = () => {
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
+                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
                     />
                   </div>
 
@@ -2099,7 +2099,7 @@ export const CreateEvent: React.FC = () => {
                       type="time"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
+                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
                     />
                   </div>
                 </div>
@@ -2112,7 +2112,7 @@ export const CreateEvent: React.FC = () => {
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
+                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
                     />
                   </div>
 
@@ -2122,16 +2122,16 @@ export const CreateEvent: React.FC = () => {
                       type="time"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
+                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl text-xs sm:text-sm font-bold text-zinc-900 outline-none focus:border-[#E31B23] shadow-2xs"
                     />
                   </div>
                 </div>
 
                 {/* Interactive Schedules / Agenda Studio */}
-                <div className="pt-4 border-t border-zinc-150 space-y-3">
+                <div className="pt-4 border-t border-zinc-150 dark:border-white/10 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-xs font-black text-zinc-950 uppercase tracking-wider flex items-center gap-1.5">
+                      <h4 className="text-xs font-black text-zinc-950 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5 text-[#E31B23]" />
                         <span>Event Agenda & Sessions ({schedules.length})</span>
                       </h4>
@@ -2154,9 +2154,9 @@ export const CreateEvent: React.FC = () => {
                     {schedules.map((item, idx) => (
                       <div
                         key={idx}
-                        className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200 space-y-3 relative hover:border-zinc-300 transition-colors"
+                        className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200 dark:border-white/10 space-y-3 relative hover:border-zinc-300 transition-colors"
                       >
-                        <div className="flex items-center justify-between border-b border-zinc-200/80 pb-2">
+                        <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10/80 pb-2">
                           <div className="flex items-center gap-2">
                             <span className="w-5 h-5 rounded-md bg-zinc-900 text-white flex items-center justify-center text-[10px] font-black">
                               {idx + 1}
@@ -2187,7 +2187,7 @@ export const CreateEvent: React.FC = () => {
                               type="time"
                               value={item.startTime}
                               onChange={(e) => handleScheduleChange(idx, 'startTime', e.target.value)}
-                              className="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                              className="w-full px-3 py-1.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
                             />
                           </div>
                           <div className="space-y-1">
@@ -2196,7 +2196,7 @@ export const CreateEvent: React.FC = () => {
                               type="time"
                               value={item.endTime}
                               onChange={(e) => handleScheduleChange(idx, 'endTime', e.target.value)}
-                              className="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                              className="w-full px-3 py-1.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
                             />
                           </div>
                         </div>
@@ -2208,7 +2208,7 @@ export const CreateEvent: React.FC = () => {
                             value={item.title}
                             onChange={(e) => handleScheduleChange(idx, 'title', e.target.value)}
                             placeholder="e.g. Opening Keynote & Architecture Overview"
-                            className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                            className="w-full px-3 py-2 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
                           />
                         </div>
 
@@ -2219,7 +2219,7 @@ export const CreateEvent: React.FC = () => {
                             value={item.description || ''}
                             onChange={(e) => handleScheduleChange(idx, 'description', e.target.value)}
                             placeholder="Session details, speaker overview, and expected attendee takeaways..."
-                            className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-medium text-zinc-800 outline-none focus:border-[#E31B23]"
+                            className="w-full px-3 py-2 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-800 outline-none focus:border-[#E31B23]"
                           />
                         </div>
                       </div>
@@ -2233,9 +2233,9 @@ export const CreateEvent: React.FC = () => {
             {/* STEP 4: LINEUP & SPEAKERS */}
             {step === 4 && (
               <div className="space-y-6 animate-in fade-in duration-200">
-                <div className="border-b border-zinc-100 pb-4 flex items-center justify-between">
+                <div className="border-b border-zinc-100 dark:border-white/10 pb-4 flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-black text-zinc-950 tracking-tight">
+                    <h3 className="text-lg font-black text-zinc-950 dark:text-white tracking-tight">
                       Featured Lineup & Speakers
                     </h3>
                     <p className="text-xs text-zinc-500 mt-0.5">
@@ -2254,7 +2254,7 @@ export const CreateEvent: React.FC = () => {
                 </div>
 
                 {lineup.length === 0 ? (
-                  <div className="p-8 border-2 border-dashed border-zinc-200 rounded-2xl text-center space-y-2">
+                  <div className="p-8 border-2 border-dashed border-zinc-200 dark:border-white/10 rounded-2xl text-center space-y-2">
                     <Users className="w-8 h-8 text-zinc-300 mx-auto" />
                     <p className="text-xs font-bold text-zinc-600">No speakers or performers added yet</p>
                     <p className="text-[11px] text-zinc-400 max-w-sm mx-auto">
@@ -2274,9 +2274,9 @@ export const CreateEvent: React.FC = () => {
                     {lineup.map((member, mIdx) => (
                       <div
                         key={mIdx}
-                        className="p-5 rounded-2xl bg-zinc-50/70 border border-zinc-200 space-y-3 relative hover:border-zinc-300 transition-colors"
+                        className="p-5 rounded-2xl bg-zinc-50/70 border border-zinc-200 dark:border-white/10 space-y-3 relative hover:border-zinc-300 transition-colors"
                       >
-                        <div className="flex items-center justify-between border-b border-zinc-200/80 pb-3">
+                        <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10/80 pb-3">
                           <div className="flex items-center gap-3">
                             <img
                               src={member.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb'}
@@ -2311,7 +2311,7 @@ export const CreateEvent: React.FC = () => {
                               value={member.name}
                               onChange={(e) => handleLineupChange(mIdx, 'name', e.target.value)}
                               placeholder="e.g. Alex Mercer"
-                              className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                              className="w-full px-3 py-2 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
                             />
                           </div>
 
@@ -2322,13 +2322,13 @@ export const CreateEvent: React.FC = () => {
                               value={member.role}
                               onChange={(e) => handleLineupChange(mIdx, 'role', e.target.value)}
                               placeholder="e.g. Lead Systems Architect"
-                              className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                              className="w-full px-3 py-2 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
                             />
                           </div>
                         </div>
 
                         {/* Avatar & Photo Section */}
-                        <div className="p-3 bg-white rounded-xl border border-zinc-200/80 space-y-3">
+                        <div className="p-3 bg-white rounded-xl border border-zinc-200 dark:border-white/10/80 space-y-3">
                           <div className="flex items-center justify-between">
                             <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
                               <User className="w-3 h-3 text-[#E31B23]" />
@@ -2350,7 +2350,7 @@ export const CreateEvent: React.FC = () => {
                               <img
                                 src={member.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'}
                                 alt={member.name || 'Speaker'}
-                                className="w-12 h-12 rounded-xl object-cover border-2 border-zinc-200 shadow-2xs group-hover:border-[#E31B23] transition-colors"
+                                className="w-12 h-12 rounded-xl object-cover border-2 border-zinc-200 dark:border-white/10 shadow-2xs group-hover:border-[#E31B23] transition-colors"
                               />
                               {member.avatarUrl && (
                                 <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] shadow-xs">
@@ -2408,14 +2408,14 @@ export const CreateEvent: React.FC = () => {
                                 value={member.avatarUrl || ''}
                                 onChange={(e) => handleLineupChange(mIdx, 'avatarUrl', e.target.value)}
                                 placeholder="https://images.unsplash.com/..."
-                                className="w-full px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-mono text-zinc-800 outline-none focus:border-[#E31B23]"
+                                className="w-full px-3 py-1.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-mono text-zinc-800 outline-none focus:border-[#E31B23]"
                               />
                             </div>
                           )}
 
                           {/* System Avatar Selection Grid */}
                           {openAvatarPickerIdx === mIdx && (
-                            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2 animate-in fade-in duration-150">
+                            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 dark:border-white/10 space-y-2 animate-in fade-in duration-150">
                               <div className="flex items-center justify-between">
                                 <span className="text-[11px] font-bold text-zinc-700">Choose a System Avatar</span>
                                 <span className="text-[10px] text-zinc-400">{SYSTEM_AVATARS.length} presets available</span>
@@ -2431,7 +2431,7 @@ export const CreateEvent: React.FC = () => {
                                         handleLineupChange(mIdx, 'avatarUrl', av.url);
                                         setOpenAvatarPickerIdx(null);
                                       }}
-                                      className={`relative group rounded-xl overflow-hidden p-1 border-2 transition-all cursor-pointer aspect-square ${isSelected ? 'border-[#E31B23] bg-red-50 ring-2 ring-[#E31B23]/30' : 'border-zinc-200 hover:border-zinc-400 bg-white'
+                                      className={`relative group rounded-xl overflow-hidden p-1 border-2 transition-all cursor-pointer aspect-square ${isSelected ? 'border-[#E31B23] bg-red-50 ring-2 ring-[#E31B23]/30' : 'border-zinc-200 dark:border-white/10 hover:border-zinc-400 bg-white'
                                         }`}
                                       title={av.name}
                                     >
@@ -2460,12 +2460,12 @@ export const CreateEvent: React.FC = () => {
                             value={member.bio || ''}
                             onChange={(e) => handleLineupChange(mIdx, 'bio', e.target.value)}
                             placeholder="Brief background or credentials..."
-                            className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-medium text-zinc-800 outline-none focus:border-[#E31B23]"
+                            className="w-full px-3 py-2 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-800 outline-none focus:border-[#E31B23]"
                           />
                         </div>
 
                         {/* Social Links Sub-list */}
-                        <div className="space-y-2 pt-1 border-t border-zinc-200/60">
+                        <div className="space-y-2 pt-1 border-t border-zinc-200 dark:border-white/10/60">
                           <div className="flex items-center justify-between">
                             <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
                               Social & Profile Links
@@ -2489,7 +2489,7 @@ export const CreateEvent: React.FC = () => {
                                   nextLinks[lIdx] = { ...nextLinks[lIdx], platform: e.target.value as any };
                                   handleLineupChange(mIdx, 'links', nextLinks);
                                 }}
-                                className="px-2 py-1 bg-white border border-zinc-200 rounded-lg text-xs font-bold text-zinc-800 outline-none"
+                                className="px-2 py-1 bg-white border border-zinc-200 dark:border-white/10 rounded-lg text-xs font-bold text-zinc-800 outline-none"
                               >
                                 <option value="github">GitHub</option>
                                 <option value="twitter">Twitter / X</option>
@@ -2505,7 +2505,7 @@ export const CreateEvent: React.FC = () => {
                                   handleLineupChange(mIdx, 'links', nextLinks);
                                 }}
                                 placeholder="https://..."
-                                className="flex-1 px-2.5 py-1 bg-white border border-zinc-200 rounded-lg text-xs font-mono text-zinc-800 outline-none focus:border-[#E31B23]"
+                                className="flex-1 px-2.5 py-1 bg-white border border-zinc-200 dark:border-white/10 rounded-lg text-xs font-mono text-zinc-800 outline-none focus:border-[#E31B23]"
                               />
                               <button
                                 type="button"
@@ -2527,9 +2527,9 @@ export const CreateEvent: React.FC = () => {
             {/* STEP 5: APPEARANCE & BRANDING */}
             {step === 5 && (
               <div className="space-y-7 animate-in fade-in duration-200">
-                <div className="border-b border-zinc-100 pb-4">
+                <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
                   <span className="text-[10px] font-black uppercase tracking-wider text-[#E31B23]">Phase 05</span>
-                  <h3 className="text-xl font-black text-zinc-950 tracking-tight mt-0.5">
+                  <h3 className="text-xl font-black text-zinc-950 dark:text-white tracking-tight mt-0.5">
                     Appearance, Flyer & Status
                   </h3>
                   <p className="text-xs text-zinc-500 mt-1 font-medium">
@@ -2559,19 +2559,19 @@ export const CreateEvent: React.FC = () => {
                       <label className="text-xs font-bold text-zinc-900 block">Cover Photo & Event Flyer</label>
                       <span className="text-[11px] text-zinc-400">High-res 16:9 banner displayed across event discovery & passes</span>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-full border border-zinc-200">
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-full border border-zinc-200 dark:border-white/10">
                       16:9 Recommended
                     </span>
                   </div>
 
                   {/* Cover Mode Selector */}
-                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100/80 rounded-xl border border-zinc-200/60 text-xs font-bold">
+                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100/80 rounded-xl border border-zinc-200 dark:border-white/10/60 text-xs font-bold">
                     <button
                       type="button"
                       onClick={() => setCoverMode('upload')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'upload'
-                        ? 'bg-white text-zinc-950 shadow-2xs font-extrabold'
-                        : 'text-zinc-600 hover:text-zinc-950'
+                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
                         }`}
                     >
                       <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -2581,8 +2581,8 @@ export const CreateEvent: React.FC = () => {
                       type="button"
                       onClick={() => setCoverMode('preset')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'preset'
-                        ? 'bg-white text-zinc-950 shadow-2xs font-extrabold'
-                        : 'text-zinc-600 hover:text-zinc-950'
+                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
                         }`}
                     >
                       <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -2592,8 +2592,8 @@ export const CreateEvent: React.FC = () => {
                       type="button"
                       onClick={() => setCoverMode('url')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'url'
-                        ? 'bg-white text-zinc-950 shadow-2xs font-extrabold'
-                        : 'text-zinc-600 hover:text-zinc-950'
+                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
                         }`}
                     >
                       <ExternalLink className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -2616,13 +2616,13 @@ export const CreateEvent: React.FC = () => {
                       />
 
                       {imageUrl && (coverFileName || imageUrl.startsWith('data:image') || imageUrl.includes('/storage/events/banners/')) ? (
-                        <div className="relative rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-900 group shadow-xs">
+                        <div className="relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-900 group shadow-xs">
                           <img src={imageUrl} alt="Uploaded Event Flyer" className="w-full h-44 sm:h-52 object-cover" />
                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 p-4">
                             <button
                               type="button"
                               onClick={() => coverFileInputRef.current?.click()}
-                              className="px-3.5 py-2 bg-white text-zinc-950 text-xs font-bold rounded-xl shadow-md hover:bg-zinc-100 transition-all flex items-center gap-1.5 cursor-pointer"
+                              className="px-3.5 py-2 bg-white text-zinc-950 dark:text-white text-xs font-bold rounded-xl shadow-md hover:bg-zinc-100 transition-all flex items-center gap-1.5 cursor-pointer"
                             >
                               <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
                               <span>Replace Flyer</span>
@@ -2658,7 +2658,7 @@ export const CreateEvent: React.FC = () => {
                           onClick={() => coverFileInputRef.current?.click()}
                           className={`h-44 sm:h-48 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all ${isDraggingCover
                             ? 'border-[#E31B23] bg-red-50/40 ring-4 ring-red-100'
-                            : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/70 bg-zinc-50/40'
+                            : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5/70 bg-zinc-50/40'
                             }`}
                         >
                           {isUploadingCover ? (
@@ -2688,7 +2688,7 @@ export const CreateEvent: React.FC = () => {
 
                   {/* TAB 2: PRESET GALLERY (50 CURATED PRESETS) */}
                   {coverMode === 'preset' && (
-                    <div className="space-y-3 bg-zinc-50/60 p-3.5 rounded-2xl border border-zinc-200/80">
+                    <div className="space-y-3 bg-zinc-50/60 p-3.5 rounded-2xl border border-zinc-200 dark:border-white/10/80">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-black text-zinc-900">
@@ -2707,7 +2707,7 @@ export const CreateEvent: React.FC = () => {
                             value={presetSearchQuery}
                             onChange={(e) => setPresetSearchQuery(e.target.value)}
                             placeholder="Filter presets..."
-                            className="w-full pl-8 pr-7 py-1.5 bg-white border border-zinc-200 rounded-xl text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:border-[#E31B23]"
+                            className="w-full pl-8 pr-7 py-1.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:border-[#E31B23]"
                           />
                           {presetSearchQuery && (
                             <button
@@ -2736,7 +2736,7 @@ export const CreateEvent: React.FC = () => {
                               onClick={() => setPresetCategoryFilter(cat)}
                               className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer ${isSelected
                                 ? 'bg-zinc-900 text-white shadow-2xs'
-                                : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-100'
+                                : 'bg-white border border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100'
                                 }`}
                             >
                               {cat} ({count})
@@ -2792,10 +2792,10 @@ export const CreateEvent: React.FC = () => {
                         value={imageUrl}
                         onChange={(e) => setImageUrl(e.target.value)}
                         placeholder="https://images.unsplash.com/..."
-                        className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-mono text-zinc-800 placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white transition-all"
+                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-mono text-zinc-800 placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white transition-all"
                       />
                       {imageUrl && !imageUrl.startsWith('data:image') && (
-                        <div className="relative rounded-xl overflow-hidden border border-zinc-200 h-32 bg-zinc-100">
+                        <div className="relative rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 h-32 bg-zinc-100">
                           <img src={imageUrl} alt="Cover Preview" className="w-full h-full object-cover" />
                         </div>
                       )}
@@ -2804,7 +2804,7 @@ export const CreateEvent: React.FC = () => {
                 </div>
 
                 {/* Hero Header Layout Selection */}
-                <div className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-2xs">
+                <div className="p-5 rounded-2xl bg-white border border-zinc-200 dark:border-white/10 shadow-2xs">
                   <HeroHeaderPicker
                     value={bannerStyle}
                     onChange={(s) => setBannerStyle(s)}
@@ -2818,14 +2818,14 @@ export const CreateEvent: React.FC = () => {
                 </div>
 
                 {/* Custom URL Slug Preview */}
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-2">
+                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-2">
                   <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
                     <Globe className="w-3.5 h-3.5 text-[#E31B23]" />
                     <span>Custom Event URL</span>
                   </label>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-zinc-500 bg-white px-3 py-2 rounded-xl border border-zinc-200 flex-1 truncate">
-                      https://eventa.live/events/<span className="text-zinc-950 font-bold">{slug}</span>
+                    <span className="text-xs font-mono text-zinc-500 bg-white px-3 py-2 rounded-xl border border-zinc-200 dark:border-white/10 flex-1 truncate">
+                      https://eventa.live/events/<span className="text-zinc-950 dark:text-white font-bold">{slug}</span>
                     </span>
                     <button
                       type="button"
@@ -2839,9 +2839,9 @@ export const CreateEvent: React.FC = () => {
                 </div>
 
                 {/* EVENT STATUS MESSAGE CARD */}
-                <div className="p-5 rounded-2xl bg-white border border-zinc-200 space-y-4 shadow-2xs">
+                <div className="p-5 rounded-2xl bg-white border border-zinc-200 dark:border-white/10 space-y-4 shadow-2xs">
                   <div>
-                    <h4 className="text-sm font-black text-zinc-950">Event status message</h4>
+                    <h4 className="text-sm font-black text-zinc-950 dark:text-white">Event status message</h4>
                     <p className="text-xs text-zinc-500 mt-0.5">
                       You can use this feature to put up your event page before you’re ready to start sales or display a custom message after sales have ended.
                     </p>
@@ -2859,7 +2859,7 @@ export const CreateEvent: React.FC = () => {
                         onClick={() => setStatusMessageType('none')}
                         className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${statusMessageType === 'none'
                           ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                          : 'border-zinc-200 hover:border-zinc-300 bg-zinc-50/50'
+                          : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-zinc-50/50'
                           }`}
                       >
                         <div className="flex items-center justify-between w-full">
@@ -2884,7 +2884,7 @@ export const CreateEvent: React.FC = () => {
                         onClick={() => setStatusMessageType('pre_sale')}
                         className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${statusMessageType === 'pre_sale'
                           ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                          : 'border-zinc-200 hover:border-zinc-300 bg-zinc-50/50'
+                          : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-zinc-50/50'
                           }`}
                       >
                         <div className="flex items-center justify-between w-full">
@@ -2909,7 +2909,7 @@ export const CreateEvent: React.FC = () => {
                         onClick={() => setStatusMessageType('post_sales')}
                         className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${statusMessageType === 'post_sales'
                           ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                          : 'border-zinc-200 hover:border-zinc-300 bg-zinc-50/50'
+                          : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-zinc-50/50'
                           }`}
                       >
                         <div className="flex items-center justify-between w-full">
@@ -3069,12 +3069,12 @@ export const CreateEvent: React.FC = () => {
             )}
 
             {/* Stepper Navigation Buttons */}
-            <div className="flex justify-between items-center border-t border-zinc-100 pt-6 mt-2">
+            <div className="flex justify-between items-center border-t border-zinc-100 dark:border-white/10 pt-6 mt-2">
               {step > 1 ? (
                 <button
                   type="button"
                   onClick={() => setStep(prev => prev - 1)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 transition-all cursor-pointer shadow-2xs active:scale-[0.99]"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-white text-xs font-bold text-zinc-700 hover:bg-zinc-50 dark:hover:bg-white/5 hover:border-zinc-300 transition-all cursor-pointer shadow-2xs active:scale-[0.99]"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 text-zinc-500" />
                   <span>Back</span>
@@ -3098,7 +3098,7 @@ export const CreateEvent: React.FC = () => {
                     onClick={handleProceedNext}
                     disabled={isLoading || (step === 1 && !isStep1Complete)}
                     className={`inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl transition-all ${step === 1 && !isStep1Complete
-                      ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed border border-zinc-200 shadow-none'
+                      ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed border border-zinc-200 dark:border-white/10 shadow-none'
                       : 'bg-zinc-950 hover:bg-zinc-800 text-white cursor-pointer shadow-sm hover:shadow active:scale-[0.99]'
                       }`}
                   >

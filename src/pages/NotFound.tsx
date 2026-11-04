@@ -5,14 +5,14 @@ import { Button } from '../components/ui/Button';
 
 export const NotFound: React.FC = () => {
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 flex flex-col justify-between relative overflow-hidden">
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#070709] text-zinc-900 dark:text-white flex flex-col justify-between relative overflow-hidden transition-colors duration-300">
       {/* Header */}
-      <header className="px-6 py-4 flex items-center justify-between bg-white border-b border-zinc-150 shadow-xs">
+      <header className="px-6 py-4 flex items-center justify-between bg-white dark:bg-[#0F0F14] border-b border-zinc-150 dark:border-white/10 shadow-xs">
         <Link to="/" className="flex items-center gap-2">
           <div className="p-1.5 bg-brand-accent rounded-lg text-white">
             <Calendar className="w-5 h-5" />
           </div>
-          <span className="text-lg font-black tracking-tight text-zinc-950">
+          <span className="text-lg font-black tracking-tight text-zinc-950 dark:text-white">
             events<span className="text-brand-accent">Os</span>
           </span>
         </Link>
@@ -22,12 +22,12 @@ export const NotFound: React.FC = () => {
       <main className="flex-1 flex items-center justify-center px-6 py-16 text-center">
         <div className="max-w-md space-y-6">
           <div className="flex flex-col items-center gap-4">
-            <div className="p-4 bg-white border border-zinc-200 text-brand-accent rounded-full shadow-sm animate-pulse">
+            <div className="p-4 bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 text-brand-accent rounded-full shadow-sm animate-pulse">
               <HelpCircle className="w-12 h-12" />
             </div>
-            <h1 className="text-6xl font-black text-zinc-950 tracking-wider leading-none">404</h1>
-            <h2 className="text-lg font-bold text-zinc-800 leading-snug">Page not found</h2>
-            <p className="text-zinc-500 text-xs font-semibold max-w-xs leading-relaxed mx-auto">
+            <h1 className="text-6xl font-black text-zinc-950 dark:text-white tracking-wider leading-none">404</h1>
+            <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 leading-snug">Page not found</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 text-xs font-semibold max-w-xs leading-relaxed mx-auto">
               The page you are looking for doesn't exist or has been moved to a different URL route.
             </p>
           </div>
@@ -43,7 +43,7 @@ export const NotFound: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 text-center text-xs text-zinc-400 font-semibold bg-white border-t border-zinc-150">
+      <footer className="py-6 text-center text-xs text-zinc-400 font-semibold bg-white dark:bg-[#0F0F14] border-t border-zinc-150 dark:border-white/10 text-zinc-400 dark:text-zinc-500">
         &copy; {new Date().getFullYear()} StraytTix Technologies. All rights reserved.
       </footer>
     </div>
