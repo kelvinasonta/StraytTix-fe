@@ -2270,7 +2270,7 @@ export const EventManage: React.FC = () => {
         </div>
 
         {/* HERO EVENT MANAGEMENT BANNER */}
-        <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs relative overflow-hidden">
+        <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs relative overflow-hidden">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
 
             <div className="flex items-start sm:items-center gap-5">
@@ -2391,7 +2391,7 @@ export const EventManage: React.FC = () => {
         <div className={`grid grid-cols-1 sm:grid-cols-2 ${perms.canViewRevenue ? 'lg:grid-cols-4' : (isStaffOnly ? 'lg:grid-cols-1 max-w-sm' : 'lg:grid-cols-3')} gap-4`}>
           {/* 1. Gross Revenue - ONLY for Owner & Admin */}
           {perms.canViewRevenue && (
-            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Gross Revenue</span>
                 <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -2411,7 +2411,7 @@ export const EventManage: React.FC = () => {
 
           {/* 2. Tickets Sold - Only if not staff and can view orders */}
           {!isStaffOnly && perms.canViewOrders && (
-            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Tickets Sold</span>
                 <div className="w-9 h-9 rounded-xl bg-red-50 text-[#E31B23] flex items-center justify-center">
@@ -2445,7 +2445,7 @@ export const EventManage: React.FC = () => {
           )}
 
           {/* 3. Check-In Rate / Gate Progress */}
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
                 {isStaffOnly ? 'Gate Check-in Progress' : 'Check-In Rate'}
@@ -2474,7 +2474,7 @@ export const EventManage: React.FC = () => {
 
           {/* 4. Community Saves - Only for non-staff */}
           {!isStaffOnly && (
-            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Community Saves</span>
                 <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
@@ -2495,7 +2495,7 @@ export const EventManage: React.FC = () => {
 
 
         {/* PRIMARY NAVIGATION DROPDOWNS (Matches user-specified layout: 2-col grid on mobile, flex row on desktop) */}
-        <div className="relative z-30 pt-2 pb-4 mt-2 border-b border-zinc-200 dark:border-white/10 dark:border-white/10/80">
+        <div className="relative z-30 pt-2 pb-4 mt-2 border-b border-zinc-200 dark:border-white/10 dark:border-white/10">
           <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-6 sm:overflow-x-auto sm:no-scrollbar py-1">
             {navSections.map(tab => {
               const isActive = activeTab === tab.id;
@@ -2511,7 +2511,7 @@ export const EventManage: React.FC = () => {
                       ? 'text-[#E31B23] border border-[#E31B23] bg-white'
                       : isDropdownOpen
                         ? 'text-zinc-950 dark:text-white bg-zinc-100/80 border border-zinc-200 dark:border-white/10'
-                        : 'text-zinc-800 hover:text-zinc-950 dark:text-white border border-zinc-200 dark:border-white/10/60 sm:border-transparent hover:border-zinc-200 dark:border-white/10'
+                        : 'text-zinc-800 hover:text-zinc-950 dark:text-white border border-zinc-200 dark:border-white/10 sm:border-transparent hover:border-zinc-200 dark:border-white/10'
                       }`}
                   >
                     <span>{tab.label}</span>
@@ -2536,7 +2536,7 @@ export const EventManage: React.FC = () => {
               left: dropdownCoords.left,
               zIndex: 9999,
             }}
-            className="w-56 bg-white rounded-xl shadow-xl border border-zinc-200 dark:border-white/10/90 py-1.5 animate-in fade-in zoom-in-95 duration-100 select-none"
+            className="w-56 bg-white rounded-xl shadow-xl border border-zinc-200 dark:border-white/10 py-1.5 animate-in fade-in zoom-in-95 duration-100 select-none"
           >
             <div className="space-y-0.5">
               {navSections
@@ -2566,7 +2566,7 @@ export const EventManage: React.FC = () => {
         {/* TAB 1: EVENT SETUP */}
         {/* ========================================================================= */}
         {perms.canCreateEvents && !isStaffOnly && activeTab === 'setup' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-8 mt-2">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-8 mt-2">
 
             {/* EDIT DETAILS */}
             {setupSubtab === 'edit' && (
@@ -2867,7 +2867,7 @@ export const EventManage: React.FC = () => {
                 {/* Recurring Configuration Fields */}
                 {editScheduleType === 'recurring' && (
                   <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-3">
-                    <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-white/10 dark:border-white/10/80 pb-2.5">
+                    <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-white/10 dark:border-white/10 pb-2.5">
                       <RefreshCw className="w-4 h-4 text-[#E31B23]" />
                       <h4 className="text-xs font-black text-zinc-900 uppercase tracking-wider">
                         Recurring Series Parameters
@@ -3054,7 +3054,7 @@ export const EventManage: React.FC = () => {
                           key={idx}
                           className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200 dark:border-white/10 space-y-3 relative hover:border-zinc-300 transition-colors"
                         >
-                          <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 dark:border-white/10/80 pb-2">
+                          <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 dark:border-white/10 pb-2">
                             <div className="flex items-center gap-2">
                               <span className="w-5 h-5 rounded-md bg-zinc-900 text-white flex items-center justify-center text-[10px] font-black">
                                 {idx + 1}
@@ -3244,7 +3244,7 @@ export const EventManage: React.FC = () => {
                   </div>
 
                   {/* Cover Mode Selector */}
-                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100/80 rounded-xl border border-zinc-200 dark:border-white/10/60 text-xs font-bold">
+                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100/80 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-bold">
                     <button
                       type="button"
                       onClick={() => setCoverMode('upload')}
@@ -3368,7 +3368,7 @@ export const EventManage: React.FC = () => {
 
                   {/* TAB 2: PRESET GALLERY (50 CURATED PRESETS) */}
                   {coverMode === 'preset' && (
-                    <div className="space-y-3 bg-zinc-50/60 p-3.5 rounded-2xl border border-zinc-200 dark:border-white/10/80">
+                    <div className="space-y-3 bg-zinc-50/60 p-3.5 rounded-2xl border border-zinc-200 dark:border-white/10">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-black text-zinc-900">
@@ -4101,7 +4101,7 @@ export const EventManage: React.FC = () => {
                     {faqs.map((faq, idx) => (
                       <div
                         key={idx}
-                        className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10/90 bg-white hover:border-zinc-300 shadow-2xs transition-all space-y-2"
+                        className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white hover:border-zinc-300 shadow-2xs transition-all space-y-2"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-2.5">
@@ -4550,7 +4550,7 @@ export const EventManage: React.FC = () => {
         {/* TAB 2: TICKETS */}
         {/* ========================================================================= */}
         {perms.canConfigureTickets && activeTab === 'tickets' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
 
             {/* TICKET TIERS */}
             {ticketsSubtab === 'edit' && (
@@ -4601,7 +4601,7 @@ export const EventManage: React.FC = () => {
                     {event.tickets.map((t) => (
                       <div
                         key={t.id || t.name}
-                        className="p-5 rounded-2xl border border-zinc-200 dark:border-white/10/80 bg-zinc-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                        className="p-5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                       >
                         <div className="space-y-1.5 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -4880,7 +4880,7 @@ export const EventManage: React.FC = () => {
         {/* TAB 3: POLICIES & RULES (User requested: create policies here) */}
         {/* ========================================================================= */}
         {!isStaffOnly && perms.canIssueRefunds && activeTab === 'policies' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
 
             {/* REFUND POLICY */}
             {policiesSubtab === 'refund' && perms.canIssueRefunds && (
@@ -5082,7 +5082,7 @@ export const EventManage: React.FC = () => {
         {/* TAB 4: ATTENDEES */}
         {/* ========================================================================= */}
         {activeTab === 'attendees' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
 
             {/* VIEW ATTENDEES */}
             {attendeesSubtab === 'view' && perms.canDownloadAttendees && (
@@ -5095,7 +5095,7 @@ export const EventManage: React.FC = () => {
                 </div>
 
                 {attendees.length === 0 ? (
-                  <div className="py-14 text-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10/80 rounded-2xl space-y-3">
+                  <div className="py-14 text-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl space-y-3">
                     <Users className="w-8 h-8 text-zinc-400 mx-auto" />
                     <p className="text-sm font-bold text-zinc-700">No attendees registered yet</p>
                     <p className="text-xs text-zinc-500 max-w-sm mx-auto">
@@ -5270,7 +5270,7 @@ export const EventManage: React.FC = () => {
 
                 {/* Attendees Check-In List */}
                 {attendees.length === 0 ? (
-                  <div className="py-14 text-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10/80 rounded-2xl space-y-3">
+                  <div className="py-14 text-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl space-y-3">
                     <QrCode className="w-8 h-8 text-zinc-400 mx-auto" />
                     <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Check-in roster is empty</p>
                     <p className="text-xs text-zinc-500 max-w-sm mx-auto">
@@ -5335,7 +5335,7 @@ export const EventManage: React.FC = () => {
                 </div>
 
                 {inviteApplicants.length === 0 ? (
-                  <div className="py-14 text-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10/80 rounded-2xl space-y-3">
+                  <div className="py-14 text-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl space-y-3">
                     <UserCheck className="w-8 h-8 text-zinc-400 mx-auto" />
                     <p className="text-sm font-bold text-zinc-700">No pending guest applications</p>
                     <p className="text-xs text-zinc-500 max-w-sm mx-auto">
@@ -5427,13 +5427,13 @@ export const EventManage: React.FC = () => {
 
                 {/* KPI Metrics */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-2xl bg-[#F8F9FB] border border-zinc-200 dark:border-white/10/80 space-y-1">
+                  <div className="p-4 rounded-2xl bg-[#F8F9FB] border border-zinc-200 dark:border-white/10 space-y-1">
                     <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Assigned Event Crew</p>
                     <p className="text-2xl font-black text-zinc-950 dark:text-white">{eventStaff.length}</p>
                     <p className="text-[11px] text-zinc-500 font-medium">On-duty staff & managers</p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#F8F9FB] border border-zinc-200 dark:border-white/10/80 space-y-1">
+                  <div className="p-4 rounded-2xl bg-[#F8F9FB] border border-zinc-200 dark:border-white/10 space-y-1">
                     <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Active Gate Scanners</p>
                     <div className="flex items-center gap-2">
                       <p className="text-2xl font-black text-emerald-600">
@@ -5444,7 +5444,7 @@ export const EventManage: React.FC = () => {
                     <p className="text-[11px] text-zinc-500 font-medium">Authorized to validate QR codes</p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#F8F9FB] border border-zinc-200 dark:border-white/10/80 space-y-1">
+                  <div className="p-4 rounded-2xl bg-[#F8F9FB] border border-zinc-200 dark:border-white/10 space-y-1">
                     <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Organization Roster</p>
                     <p className="text-2xl font-black text-zinc-950 dark:text-white">{orgTeamMembers.length}</p>
                     <p className="text-[11px] text-zinc-500 font-medium">Available team members</p>
@@ -5626,7 +5626,7 @@ export const EventManage: React.FC = () => {
         {/* TAB 5: FINANCE */}
         {/* ========================================================================= */}
         {perms.canViewRevenue && activeTab === 'finance' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
             {financeSubtab === 'sales' && (
               <div className="space-y-6">
                 <div>
@@ -5683,7 +5683,7 @@ export const EventManage: React.FC = () => {
         {/* TAB 6: MARKETING */}
         {/* ========================================================================= */}
         {perms.canAccessMarketing && activeTab === 'marketing' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
             {marketingSubtab === 'widget' && (
               <div className="space-y-6">
                 <div>
@@ -5884,7 +5884,7 @@ export const EventManage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10/80 flex items-center justify-between gap-4 text-xs">
+                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-between gap-4 text-xs">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-red-100 text-[#E31B23] flex items-center justify-center font-bold">
                       <Mail className="w-4 h-4" />
@@ -5972,7 +5972,7 @@ export const EventManage: React.FC = () => {
         {/* TAB 7: SETTINGS */}
         {/* ========================================================================= */}
         {perms.canAccessSettings && activeTab === 'settings' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
             {settingsSubtab === 'duplicate' && (
               <div className="space-y-4">
                 <div>
@@ -6419,7 +6419,7 @@ export const EventManage: React.FC = () => {
                 </label>
 
                 {isInviteOnly && (
-                  <div className="pl-7 pt-2 space-y-3 border-t border-zinc-200 dark:border-white/10 dark:border-white/10/80">
+                  <div className="pl-7 pt-2 space-y-3 border-t border-zinc-200 dark:border-white/10 dark:border-white/10">
                     <div>
                       <label className="text-xs font-bold text-zinc-700 block mb-1">Access Passcode</label>
                       <input
