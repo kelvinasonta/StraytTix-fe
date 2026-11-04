@@ -2648,7 +2648,7 @@ export const EventManage: React.FC = () => {
                         return (
                           <span
                             key={cat}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-zinc-300 text-zinc-900 dark:text-white rounded-xl text-xs font-bold shadow-2xs"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-white/10 border border-zinc-300 dark:border-white/20 text-zinc-900 dark:text-white rounded-xl text-xs font-bold shadow-2xs"
                           >
                             <span>{cat}</span>
                             <button
@@ -2765,7 +2765,7 @@ export const EventManage: React.FC = () => {
                             type="button"
                             onClick={() => setVisibility('public')}
                             className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${visibility === 'public'
-                              ? 'bg-white text-zinc-950 dark:text-white border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
+                              ? 'bg-white dark:bg-white/20 text-zinc-950 dark:text-white border-zinc-900 dark:border-white/30 shadow-2xs ring-1 ring-zinc-900 dark:ring-white/30'
                               : 'bg-zinc-100 dark:bg-white/10/80 border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100 dark:bg-white/10'
                               }`}
                           >
@@ -2775,7 +2775,7 @@ export const EventManage: React.FC = () => {
                             type="button"
                             onClick={() => setVisibility('private')}
                             className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${visibility === 'private'
-                              ? 'bg-white text-zinc-950 dark:text-white border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
+                              ? 'bg-white dark:bg-white/20 text-zinc-950 dark:text-white border-zinc-900 dark:border-white/30 shadow-2xs ring-1 ring-zinc-900 dark:ring-white/30'
                               : 'bg-zinc-100 dark:bg-white/10/80 border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100 dark:bg-white/10'
                               }`}
                           >
@@ -3257,7 +3257,7 @@ export const EventManage: React.FC = () => {
                       type="button"
                       onClick={() => setCoverMode('upload')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'upload'
-                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        ? 'bg-white dark:bg-white/20 text-zinc-950 dark:text-white shadow-2xs font-extrabold'
                         : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
                         }`}
                     >
@@ -3268,7 +3268,7 @@ export const EventManage: React.FC = () => {
                       type="button"
                       onClick={() => setCoverMode('preset')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'preset'
-                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        ? 'bg-white dark:bg-white/20 text-zinc-950 dark:text-white shadow-2xs font-extrabold'
                         : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
                         }`}
                     >
@@ -3279,7 +3279,7 @@ export const EventManage: React.FC = () => {
                       type="button"
                       onClick={() => setCoverMode('url')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'url'
-                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        ? 'bg-white dark:bg-white/20 text-zinc-950 dark:text-white shadow-2xs font-extrabold'
                         : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
                         }`}
                     >
@@ -3595,7 +3595,7 @@ export const EventManage: React.FC = () => {
 
                       if (isEditing) {
                         return (
-                          <div key={idx} className="p-5 rounded-2xl bg-white border-2 border-[#E31B23] shadow-xs space-y-4 animate-in fade-in duration-150">
+                          <div key={idx} className="p-5 rounded-2xl bg-white dark:bg-[#0F0F14] border-2 border-[#E31B23] shadow-xs space-y-4 animate-in fade-in duration-150">
                             <div className="flex items-center justify-between border-b border-zinc-100 dark:border-white/10 pb-2.5">
                               <div className="flex items-center gap-2">
                                 <Edit3 className="w-4 h-4 text-[#E31B23]" />
@@ -3721,7 +3721,7 @@ export const EventManage: React.FC = () => {
 
                               {/* System Avatar Grid */}
                               {isEditMemberAvatarOpen && (
-                                <div className="p-3 bg-white rounded-xl border border-zinc-200 dark:border-white/10 space-y-2 animate-in fade-in duration-150">
+                                <div className="p-3 bg-white dark:bg-[#070709] rounded-xl border border-zinc-200 dark:border-white/10 space-y-2 animate-in fade-in duration-150">
                                   <div className="flex items-center justify-between">
                                     <span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300">Choose a System Avatar</span>
                                     <span className="text-[10px] text-zinc-400">{SYSTEM_AVATARS.length} presets</span>
@@ -3919,7 +3919,7 @@ export const EventManage: React.FC = () => {
                   />
 
                   {/* Avatar Picker for New Member */}
-                  <div className="p-3.5 bg-white rounded-xl border border-zinc-200 dark:border-white/10 space-y-3">
+                  <div className="p-3.5 bg-white dark:bg-[#070709] rounded-xl border border-zinc-200 dark:border-white/10 space-y-3">
                     <div className="flex items-center justify-between">
                       <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
                         <User className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -4007,7 +4007,7 @@ export const EventManage: React.FC = () => {
                                   setNewPerformerAvatar(av.url);
                                   setIsNewPerformerAvatarOpen(false);
                                 }}
-                                className={`relative rounded-xl overflow-hidden p-1 border-2 transition-all cursor-pointer aspect-square ${isSelected ? 'border-[#E31B23] bg-red-50 ring-2 ring-[#E31B23]/30' : 'border-zinc-200 dark:border-white/10 hover:border-zinc-400 bg-white'
+                                className={`relative rounded-xl overflow-hidden p-1 border-2 transition-all cursor-pointer aspect-square ${isSelected ? 'border-[#E31B23] bg-red-50 ring-2 ring-[#E31B23]/30' : 'border-zinc-200 dark:border-white/10 hover:border-zinc-400 bg-white dark:bg-[#070709]'
                                   }`}
                                 title={av.name}
                               >
@@ -4109,7 +4109,7 @@ export const EventManage: React.FC = () => {
                     {faqs.map((faq, idx) => (
                       <div
                         key={idx}
-                        className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white hover:border-zinc-300 shadow-2xs transition-all space-y-2"
+                        className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0F0F14] hover:border-zinc-300 dark:hover:border-white/20 shadow-2xs transition-all space-y-2"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-2.5">
@@ -4310,7 +4310,7 @@ export const EventManage: React.FC = () => {
                       }}
                       className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${statusMessageType === 'none'
                         ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-white'
+                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-white dark:bg-[#0F0F14]'
                         }`}
                     >
                       <div className="flex items-start justify-between w-full">
@@ -4318,7 +4318,7 @@ export const EventManage: React.FC = () => {
                           }`}>
                           <MinusCircle className="w-4 h-4" />
                         </div>
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'none' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'none' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 dark:border-white/20 bg-white dark:bg-[#070709]'
                           }`}>
                           {statusMessageType === 'none' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
@@ -4340,7 +4340,7 @@ export const EventManage: React.FC = () => {
                       }}
                       className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${statusMessageType === 'pre_sale'
                         ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-white'
+                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-white dark:bg-[#0F0F14]'
                         }`}
                     >
                       <div className="flex items-start justify-between w-full">
@@ -4348,7 +4348,7 @@ export const EventManage: React.FC = () => {
                           }`}>
                           <Clock className="w-4 h-4" />
                         </div>
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'pre_sale' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'pre_sale' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 dark:border-white/20 bg-white dark:bg-[#070709]'
                           }`}>
                           {statusMessageType === 'pre_sale' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
@@ -4370,7 +4370,7 @@ export const EventManage: React.FC = () => {
                       }}
                       className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${statusMessageType === 'post_sales'
                         ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-white'
+                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-white dark:bg-[#0F0F14]'
                         }`}
                     >
                       <div className="flex items-start justify-between w-full">
@@ -4378,7 +4378,7 @@ export const EventManage: React.FC = () => {
                           }`}>
                           <AlertCircle className="w-4 h-4" />
                         </div>
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'post_sales' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'post_sales' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 dark:border-white/20 bg-white dark:bg-[#070709]'
                           }`}>
                           {statusMessageType === 'post_sales' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
@@ -4414,7 +4414,7 @@ export const EventManage: React.FC = () => {
                         setStatusMessage(e.target.value);
                       }}
                       placeholder="e.g. Tickets will go on sale on Friday at 10:00 AM. Join the waitlist to get early access!"
-                      className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-amber-500 shadow-2xs leading-relaxed"
+                      className="w-full px-4 py-3 bg-white dark:bg-amber-950/20 border border-amber-200 dark:border-amber-500/30 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-amber-500 shadow-2xs leading-relaxed"
                     />
 
                     {/* Quick suggestion pills */}
@@ -4433,7 +4433,7 @@ export const EventManage: React.FC = () => {
                               setPreSaleMessage(suggestion);
                               setStatusMessage(suggestion);
                             }}
-                            className="px-2.5 py-1 bg-white border border-amber-200 hover:border-amber-400 rounded-lg text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 hover:text-amber-800 transition-colors cursor-pointer"
+                            className="px-2.5 py-1 bg-white dark:bg-amber-950/30 border border-amber-200 dark:border-amber-500/30 hover:border-amber-400 rounded-lg text-[11px] font-semibold text-zinc-700 dark:text-amber-300 hover:text-amber-800 transition-colors cursor-pointer"
                           >
                             + {suggestion}
                           </button>
@@ -4476,7 +4476,7 @@ export const EventManage: React.FC = () => {
                         setStatusMessage(e.target.value);
                       }}
                       placeholder="e.g. Ticket sales have officially ended. Thank you for your support, and we look forward to seeing you at the event!"
-                      className="w-full px-4 py-3 bg-white border border-rose-200 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-rose-500 shadow-2xs leading-relaxed"
+                      className="w-full px-4 py-3 bg-white dark:bg-rose-950/20 border border-rose-200 dark:border-rose-500/30 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-rose-500 shadow-2xs leading-relaxed"
                     />
 
                     {/* Quick suggestion pills */}
@@ -4495,7 +4495,7 @@ export const EventManage: React.FC = () => {
                               setPostSaleMessage(suggestion);
                               setStatusMessage(suggestion);
                             }}
-                            className="px-2.5 py-1 bg-white border border-rose-200 hover:border-rose-400 rounded-lg text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 hover:text-rose-800 transition-colors cursor-pointer"
+                            className="px-2.5 py-1 bg-white dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/30 hover:border-rose-400 rounded-lg text-[11px] font-semibold text-zinc-700 dark:text-rose-300 hover:text-rose-800 transition-colors cursor-pointer"
                           >
                             + {suggestion}
                           </button>
@@ -5364,7 +5364,7 @@ export const EventManage: React.FC = () => {
                             </span>
                           </div>
                           <p className="text-xs text-zinc-500">{app.email} • Applied on {app.date}</p>
-                          <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-white p-2.5 rounded-xl border border-zinc-150 dark:border-white/10 mt-2">
+                          <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-[#070709] p-2.5 rounded-xl border border-zinc-150 dark:border-white/10 mt-2">
                             "{app.reason}"
                           </p>
                         </div>
