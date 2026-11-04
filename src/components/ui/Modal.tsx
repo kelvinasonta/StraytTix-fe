@@ -66,20 +66,20 @@ export const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ type: 'spring', duration: 0.4 }}
-            className={`relative bg-white border border-zinc-100 rounded-2xl w-full ${sizes[size]} shadow-2xl p-6 z-10`}
+            className={`relative bg-white dark:bg-[#0F0F14] border border-zinc-100 dark:border-white/10 rounded-2xl w-full ${sizes[size]} shadow-2xl p-6 z-10 transition-colors`}
             role="dialog"
             aria-modal="true"
           >
             {/* Header */}
-            <div className="flex items-center justify-between mb-4 border-b border-zinc-100 pb-3">
+            <div className="flex items-center justify-between mb-4 border-b border-zinc-100 dark:border-white/10 pb-3">
               {title ? (
-                <h3 className="text-lg font-bold text-zinc-900 tracking-tight">{title}</h3>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight">{title}</h3>
               ) : (
                 <div />
               )}
               <button
                 onClick={onClose}
-                className="p-1 rounded-full text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-all focus:outline-none"
+                className="p-1.5 rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all focus:outline-none cursor-pointer"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5" />

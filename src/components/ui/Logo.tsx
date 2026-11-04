@@ -60,7 +60,7 @@ export const Logo: React.FC<LogoProps> = ({
       {!badgeOnly && (
         <span
           className={`${textSizes[size]} font-extrabold tracking-tight ${
-            variant === 'light' ? 'text-white' : 'text-[#111827]'
+            variant === 'light' ? 'text-white' : 'text-zinc-900 dark:text-white'
           }`}
         >
           {displayName.toLowerCase()}

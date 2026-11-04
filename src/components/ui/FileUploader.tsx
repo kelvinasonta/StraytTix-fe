@@ -145,7 +145,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
-      {label && <span className="text-sm font-semibold text-zinc-800">{label}</span>}
+      {label && <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{label}</span>}
 
       <div
         onClick={triggerSelect}
@@ -159,7 +159,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
             ? 'border-[#E31B23] bg-red-50/30 ring-2 ring-red-100'
             : error
             ? 'border-red-300 bg-red-50/15'
-            : 'border-zinc-200 bg-zinc-50 hover:bg-zinc-100/70 hover:border-zinc-300'
+            : 'border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-[#070709] hover:bg-zinc-100/70 dark:hover:bg-white/[0.04] hover:border-zinc-300 dark:hover:border-white/20'
         } ${aspectStyles[aspectRatio]} flex flex-col items-center justify-center p-4`}
       >
         <input
@@ -196,13 +196,13 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         ) : (
           !isUploading && (
             <div className="text-center flex flex-col items-center gap-1.5 p-3 pointer-events-none">
-              <div className="w-10 h-10 rounded-xl bg-white border border-zinc-200 shadow-2xs flex items-center justify-center text-zinc-400 group-hover:text-zinc-600">
-                <Upload className="w-5 h-5 text-zinc-500" />
+              <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 shadow-2xs flex items-center justify-center text-zinc-400 dark:text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300">
+                <Upload className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
               </div>
-              <span className="text-xs font-bold text-zinc-800">
+              <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
                 {isDragOver ? 'Drop image to upload' : 'Click or drag & drop to upload'}
               </span>
-              <span className="text-[10px] text-zinc-400 font-medium">
+              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">
                 {helperText || hint || `Up to ${effectiveMaxSize}MB (JPG, PNG, WebP)`}
               </span>
             </div>
@@ -211,16 +211,16 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 
         {/* Real Upload Progress Loader */}
         {isUploading && (
-          <div className="absolute inset-0 bg-white/95 backdrop-blur-xs flex flex-col items-center justify-center p-4 z-10">
+          <div className="absolute inset-0 bg-white/95 dark:bg-[#0F0F14]/95 backdrop-blur-xs flex flex-col items-center justify-center p-4 z-10">
             <Loader2 className="w-7 h-7 text-[#E31B23] animate-spin mb-2.5" />
-            <span className="text-xs font-bold text-zinc-800 mb-1.5">Sanitizing & Uploading...</span>
+            <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-1.5">Sanitizing & Uploading...</span>
             <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden max-w-[140px] border border-zinc-200">
               <div
                 className="bg-[#E31B23] h-full transition-all duration-300 rounded-full"
                 style={{ width: `${progress ?? 0}%` }}
               />
             </div>
-            <span className="text-[11px] font-bold text-zinc-500 mt-1.5">{progress ?? 0}%</span>
+            <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 mt-1.5">{progress ?? 0}%</span>
           </div>
         )}
       </div>
