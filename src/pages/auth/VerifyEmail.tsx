@@ -186,28 +186,28 @@ export const VerifyEmail: React.FC = () => {
     >
       <div className="space-y-6 text-center">
         {status === 'verifying' && (
-          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
+          <div className="p-8 bg-[#0F0F14] border border-white/10 rounded-2xl flex flex-col items-center gap-3">
             <RefreshCw className="w-8 h-8 text-[#E31B23] animate-spin" />
-            <h3 className="text-base font-bold text-zinc-950">Verifying your token...</h3>
-            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
+            <h3 className="text-base font-bold text-white">Verifying your token...</h3>
+            <p className="text-zinc-400 text-xs leading-relaxed max-w-xs font-normal">
               Communicating with the security verification cluster.
             </p>
           </div>
         )}
 
         {status === 'success' && (
-          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
-            <div className="w-12 h-12 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl flex items-center justify-center">
+          <div className="p-8 bg-[#0F0F14] border border-white/10 rounded-2xl flex flex-col items-center gap-3">
+            <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center">
               <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950">Email verified successfully</h3>
-            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
+            <h3 className="text-base font-bold text-white">Email verified successfully</h3>
+            <p className="text-zinc-400 text-xs leading-relaxed max-w-xs font-normal">
               Your account is now activated. Redirecting you to your console...
             </p>
             <button
               type="button"
               onClick={handleContinue}
-              className="mt-2 w-full py-3 px-4 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              className="mt-2 w-full py-3 px-4 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
             >
               <span>Continue to Console</span>
               <ArrowRight className="w-4 h-4" />
@@ -216,18 +216,18 @@ export const VerifyEmail: React.FC = () => {
         )}
 
         {status === 'already-verified' && (
-          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
-            <div className="w-12 h-12 bg-blue-50 border border-blue-200 text-blue-600 rounded-2xl flex items-center justify-center">
+          <div className="p-8 bg-[#0F0F14] border border-white/10 rounded-2xl flex flex-col items-center gap-3">
+            <div className="w-12 h-12 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center">
               <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950">Email already verified</h3>
-            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
+            <h3 className="text-base font-bold text-white">Email already verified</h3>
+            <p className="text-zinc-400 text-xs leading-relaxed max-w-xs font-normal">
               Your email was already confirmed previously.
             </p>
             <button
               type="button"
               onClick={handleContinue}
-              className="mt-2 w-full py-3 px-4 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              className="mt-2 w-full py-3 px-4 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
             >
               <span>Go to Console</span>
               <ArrowRight className="w-4 h-4" />
@@ -236,19 +236,19 @@ export const VerifyEmail: React.FC = () => {
         )}
 
         {status === 'expired' && (
-          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
-            <div className="w-12 h-12 bg-amber-50 border border-amber-200 text-amber-600 rounded-2xl flex items-center justify-center">
+          <div className="p-8 bg-[#0F0F14] border border-white/10 rounded-2xl flex flex-col items-center gap-3">
+            <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center">
               <AlertTriangle className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950">Verification link expired</h3>
-            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
+            <h3 className="text-base font-bold text-white">Verification link expired</h3>
+            <p className="text-zinc-400 text-xs leading-relaxed max-w-xs font-normal">
               The verification token has expired. Security tokens are only active for a limited time.
             </p>
             <button
               type="button"
               onClick={handleResend}
               disabled={resending}
-              className="mt-2 w-full py-3 px-4 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-50"
+              className="mt-2 w-full py-3 px-4 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-50"
             >
               {resending && <Loader2 className="w-4 h-4 animate-spin" />}
               <span>Request New Verification Email</span>
@@ -257,12 +257,12 @@ export const VerifyEmail: React.FC = () => {
         )}
 
         {status === 'invalid' && (
-          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
+          <div className="p-8 bg-[#0F0F14] border border-white/10 rounded-2xl flex flex-col items-center gap-3">
             <div className="w-12 h-12 bg-red-50 border border-red-200 text-[#E31B23] rounded-2xl flex items-center justify-center">
               <AlertCircle className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950">Invalid link</h3>
-            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
+            <h3 className="text-base font-bold text-white">Invalid link</h3>
+            <p className="text-zinc-400 text-xs leading-relaxed max-w-xs font-normal">
               {errorMessage || 'The verification link provided is invalid or malformed.'}
             </p>
             <Link
@@ -275,12 +275,12 @@ export const VerifyEmail: React.FC = () => {
         )}
 
         {status === 'throttled' && (
-          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
-            <div className="w-12 h-12 bg-amber-50 border border-amber-200 text-amber-600 rounded-2xl flex items-center justify-center">
+          <div className="p-8 bg-[#0F0F14] border border-white/10 rounded-2xl flex flex-col items-center gap-3">
+            <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center">
               <Clock className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950">Rate limit active</h3>
-            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
+            <h3 className="text-base font-bold text-white">Rate limit active</h3>
+            <p className="text-zinc-400 text-xs leading-relaxed max-w-xs font-normal">
               Please wait{' '}
               <span className="font-bold text-zinc-900 font-mono">
                 {formatTime(throttleSeconds)}
@@ -297,12 +297,12 @@ export const VerifyEmail: React.FC = () => {
         )}
 
         {status === 'error' && (
-          <div className="p-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col items-center gap-3">
+          <div className="p-8 bg-[#0F0F14] border border-white/10 rounded-2xl flex flex-col items-center gap-3">
             <div className="w-12 h-12 bg-red-50 border border-red-200 text-[#E31B23] rounded-2xl flex items-center justify-center">
               <AlertCircle className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950">Verification failed</h3>
-            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs font-normal">
+            <h3 className="text-base font-bold text-white">Verification failed</h3>
+            <p className="text-zinc-400 text-xs leading-relaxed max-w-xs font-normal">
               {errorMessage || 'An error occurred during token verification.'}
             </p>
             <div className="flex flex-col gap-2 w-full mt-2">

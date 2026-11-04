@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Logo } from '../ui/Logo';
-import { ArrowLeft, CheckCircle2, ShieldCheck, MapPin, Sparkles } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ShieldCheck, MapPin } from 'lucide-react';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -12,17 +12,17 @@ interface AuthLayoutProps {
 
 export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) => {
   return (
-    <div className="min-h-[100dvh] lg:h-[100dvh] lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12 bg-white text-zinc-900">
+    <div className="min-h-[100dvh] lg:h-[100dvh] lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12 bg-[#070709] text-white selection:bg-[#E31B23] selection:text-white antialiased">
       
-      {/* Left Form Area (5 cols on lg, 6 cols on xl) - Independently scrollable */}
-      <div className="lg:col-span-6 xl:col-span-5 bg-white z-10 lg:h-full lg:overflow-y-auto">
+      {/* Left Form Area (5 cols on lg, 6 cols on xl) - Dark Cinema aesthetic */}
+      <div className="lg:col-span-6 xl:col-span-5 bg-[#070709] z-10 lg:h-full lg:overflow-y-auto border-r border-white/10">
         <div className="min-h-full flex flex-col justify-between p-6 sm:p-10 md:p-14 lg:p-12 xl:p-16">
           {/* Header with Logo and Return Link */}
           <header className="flex items-center justify-between mb-8 sm:mb-10 shrink-0">
-            <Logo to="/" size="md" />
+            <Logo to="/" size="md" variant="light" />
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 transition-colors group"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-white transition-colors group"
             >
               <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
               <span>Back to events</span>
@@ -32,10 +32,10 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
           {/* Form Container */}
           <div className="my-auto py-4 max-w-md w-full mx-auto space-y-6">
             <div className="space-y-1.5">
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-950">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
                 {title}
               </h1>
-              <p className="text-zinc-500 text-sm font-normal leading-relaxed">
+              <p className="text-zinc-400 text-sm font-normal leading-relaxed">
                 {subtitle}
               </p>
             </div>
@@ -43,32 +43,32 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
             {children}
           </div>
 
-          {/* Clean, Legal Footer */}
-          <footer className="mt-10 pt-6 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-400 shrink-0">
-            <span>&copy; {new Date().getFullYear()} Eventa Technologies</span>
+          {/* Clean Legal Footer */}
+          <footer className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-500 shrink-0">
+            <span>&copy; {new Date().getFullYear()} StraytTix Technologies</span>
             <div className="flex items-center gap-4">
-              <Link to="/terms" className="hover:text-zinc-600 transition-colors">Terms</Link>
+              <Link to="/terms" className="hover:text-zinc-300 transition-colors">Terms</Link>
               <span>•</span>
-              <Link to="/privacy" className="hover:text-zinc-600 transition-colors">Privacy</Link>
+              <Link to="/privacy" className="hover:text-zinc-300 transition-colors">Privacy</Link>
               <span>•</span>
-              <Link to="/about" className="hover:text-zinc-600 transition-colors">Help</Link>
+              <Link to="/contact" className="hover:text-zinc-300 transition-colors">Help</Link>
             </div>
           </footer>
         </div>
       </div>
 
       {/* Right Visual Area (6 cols on lg, 7 cols on xl) - Static container */}
-      <div className="hidden lg:col-span-6 xl:col-span-7 lg:relative lg:flex flex-col justify-between p-12 xl:p-16 overflow-hidden bg-zinc-950 text-white lg:h-full select-none">
+      <div className="hidden lg:col-span-6 xl:col-span-7 lg:relative lg:flex flex-col justify-between p-12 xl:p-16 overflow-hidden bg-black text-white lg:h-full select-none">
         
         {/* Background Atmospheric Event Image */}
         <img
           src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1600&q=85"
           alt="Concert stage atmosphere"
-          className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity"
+          className="absolute inset-0 w-full h-full object-cover opacity-35 mix-blend-luminosity brightness-90"
         />
         
         {/* Deep, natural vignetting overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-zinc-950/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-black/60 to-[#070709]/80" />
 
         {/* Top Tagline */}
         <div className="relative z-10 flex items-center justify-between">
@@ -95,9 +95,8 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
               ease: "easeInOut"
             }}
             whileHover={{ scale: 1.02, y: -4 }}
-            className="max-w-md mx-auto bg-zinc-900/90 backdrop-blur-xl border border-white/15 rounded-3xl p-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] space-y-4 transition-colors"
+            className="max-w-md mx-auto bg-[#0F0F14]/90 backdrop-blur-xl border border-white/15 rounded-3xl p-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)] space-y-4 transition-colors"
           >
-            
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-mono uppercase tracking-wider text-red-400 font-bold flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#E31B23] animate-ping" />
@@ -129,14 +128,13 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
                 <span className="font-bold text-zinc-200">Oct 24 • Doors 19:00</span>
               </div>
             </div>
-
           </motion.div>
         </div>
 
         {/* Bottom Testimonial / Social Proof */}
         <div className="relative z-10 max-w-lg space-y-3">
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed font-normal italic">
-            "Over 15,000 attendees checked in across our 3 festival stages without a single line bottleneck. Eventa is the most reliable live event infrastructure we've ever operated."
+            &ldquo;Over 15,000 attendees checked in across our 3 festival stages without a single line bottleneck. StraytTix is the most reliable live event infrastructure we&apos;ve ever operated.&rdquo;
           </p>
           <div className="flex items-center gap-3 pt-1">
             <img
