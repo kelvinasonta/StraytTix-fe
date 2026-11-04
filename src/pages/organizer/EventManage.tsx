@@ -4171,29 +4171,32 @@ export const EventManage: React.FC = () => {
               <div className="space-y-6">
                 <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
                   <h3 className="text-xl font-black text-zinc-950 dark:text-white tracking-tight">Gallery & Media Showcase</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">Showcase high-resolution photos of past editions, venue amenities, and stage production.</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Showcase high-resolution photos of past editions, venue amenities, and stage production.</p>
                 </div>
 
                 {/* Main Hero Banner Preview */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider block">Main Event Banner</label>
-                  <div className="relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 aspect-[21/9] max-h-56 bg-zinc-100 dark:bg-white/10">
+                  <div className="relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 aspect-[21/9] max-h-56 bg-zinc-100 dark:bg-[#070709]">
                     <img
                       src={editBannerUrl || event.bannerUrl || event.imageUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'}
                       alt="Banner Preview"
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4">
-                      <span className="text-white text-xs font-bold">Featured Main Flyer / Hero Cover</span>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
+                      <span className="text-white text-xs font-bold flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#E31B23]"></span>
+                        Featured Main Flyer / Hero Cover
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Add New Gallery Image */}
-                <div className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 space-y-3">
-                  <div className="flex items-center justify-between">
+                <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.03] space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider block">Add Photo to Gallery</label>
-                    <label className={`px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-100 dark:bg-white/10 border border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-zinc-200 text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-2xs ${isUploadingGallery ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
+                    <label className={`px-3.5 py-1.5 rounded-xl bg-white hover:bg-zinc-100 dark:bg-white/10 dark:hover:bg-white/15 border border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-zinc-200 text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-2xs self-start sm:self-auto ${isUploadingGallery ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
                       {isUploadingGallery ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E31B23]" /> : <Upload className="w-3.5 h-3.5 text-[#E31B23]" />}
                       <span>{isUploadingGallery ? 'Uploading...' : 'Upload Image File'}</span>
                       <input
@@ -4226,7 +4229,7 @@ export const EventManage: React.FC = () => {
                       value={newGalleryUrl}
                       onChange={(e) => setNewGalleryUrl(e.target.value)}
                       placeholder="Or enter direct image URL (https://...)"
-                      className="w-full flex-1 px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
+                      className="w-full flex-1 px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-colors"
                     />
                     <button
                       type="button"
@@ -4238,7 +4241,7 @@ export const EventManage: React.FC = () => {
                         setNewGalleryUrl('');
                         await saveEventToBackend({ galleryUrls: updated }, {}, 'Photo added to gallery!');
                       }}
-                      className="w-full sm:w-auto px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 whitespace-nowrap"
+                      className="w-full sm:w-auto px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 whitespace-nowrap shadow-sm"
                     >
                       {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                       <span>Add URL</span>
@@ -4247,32 +4250,32 @@ export const EventManage: React.FC = () => {
                 </div>
 
                 {/* Gallery Grid */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
                       Event Photos ({galleryUrls.length})
                     </label>
                     {galleryUrls.length > 0 && (
-                      <span className="text-[11px] text-zinc-400">Click trash icon to remove photo</span>
+                      <span className="text-[11px] text-zinc-400 dark:text-zinc-500">Click trash icon to remove photo</span>
                     )}
                   </div>
 
                   {galleryUrls.length === 0 ? (
-                    <div className="py-10 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5/40 space-y-2">
-                      <ImageIcon className="w-8 h-8 text-zinc-300 mx-auto" />
-                      <p className="text-xs font-bold text-zinc-600">No gallery photos added</p>
-                      <p className="text-[11px] text-zinc-400">Add URLs above to showcase images in the attendee public gallery.</p>
+                    <div className="py-12 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.02] space-y-2">
+                      <ImageIcon className="w-8 h-8 text-zinc-300 dark:text-zinc-600 mx-auto" />
+                      <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300">No gallery photos added yet</p>
+                      <p className="text-[11px] text-zinc-400 dark:text-zinc-500">Upload or add URLs above to showcase images in your public event gallery.</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                       {galleryUrls.map((url, gIdx) => (
-                        <div key={gIdx} className="relative group rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 aspect-video bg-zinc-100 dark:bg-white/10">
+                        <div key={gIdx} className="relative group rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 aspect-video bg-zinc-100 dark:bg-[#070709] hover:border-zinc-400 dark:hover:border-white/30 transition-all">
                           <img
                             src={url}
                             alt={`Gallery photo ${gIdx + 1}`}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                             <button
                               type="button"
                               onClick={async () => {
@@ -4280,10 +4283,10 @@ export const EventManage: React.FC = () => {
                                 setGalleryUrls(updated);
                                 await saveEventToBackend({ galleryUrls: updated }, {}, 'Photo removed from gallery');
                               }}
-                              className="p-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors shadow-xs cursor-pointer"
+                              className="p-2 rounded-lg bg-[#E31B23] text-white hover:bg-[#B91C1C] transition-colors shadow-xs cursor-pointer"
                               title="Delete photo"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
