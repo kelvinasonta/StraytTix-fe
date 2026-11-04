@@ -47,12 +47,9 @@ export const Home: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-[#070709] text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased overflow-x-hidden">
-      {/* Fixed top Navbar overlay */}
-      <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
-        <Navbar />
-      </div>
+      <Navbar />
 
-      <main className="flex-1">
+      <main className="flex-1 -mt-16">
         {/* ========================================================================= */}
         {/* 1. CINEMATIC HERO: Authentic Photography, Quiet Editorial Typographic Lockup */}
         {/*    Google / Stripe / Jetron Caliber: Clean, confident, 0 gimmicks         */}
@@ -60,14 +57,14 @@ export const Home: React.FC = () => {
         <section className="relative min-h-[90dvh] w-full flex flex-col justify-center items-center text-center px-4 sm:px-6 lg:px-8 pt-32 pb-24 overflow-hidden border-b border-white/5">
           {/* High-Fidelity Cinematic Background Video */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {/* Background Video with Poster Fallback */}
+            {/* Background Video with Instant Black Surface Fallback (No Unsplash Flash) */}
             <video
               autoPlay
               muted
               loop
               playsInline
-              poster="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=2600&q=80"
-              className="w-full h-full object-cover object-center scale-100 opacity-80"
+              preload="auto"
+              className="w-full h-full object-cover object-center scale-100 opacity-80 transition-opacity duration-700 bg-[#070709]"
             >
               <source src="/videos/hero-festival.mp4" type="video/mp4" />
               <source src="https://assets.mixkit.co/videos/14088/14088-720.mp4" type="video/mp4" />

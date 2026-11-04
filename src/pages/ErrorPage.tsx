@@ -9,7 +9,7 @@ interface ErrorPageProps {
 
 export const ErrorPage: React.FC<ErrorPageProps> = ({ error, resetErrorBoundary }) => {
   return (
-    <div className="min-h-screen bg-brand-bg text-brand-text flex flex-col justify-between relative overflow-hidden">
+    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between relative overflow-hidden antialiased">
       {/* Background ambient light */}
       <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-red-500/5 rounded-full filter blur-3xl"></div>
 
@@ -34,11 +34,11 @@ export const ErrorPage: React.FC<ErrorPageProps> = ({ error, resetErrorBoundary 
             </div>
             <h1 className="text-4xl font-black text-white tracking-tight leading-none">Application Error</h1>
             <h2 className="text-lg font-semibold text-gray-300">An unexpected system error occurred</h2>
-            <p className="text-brand-muted text-sm max-w-xs leading-relaxed mx-auto">
+            <p className="text-zinc-400 text-sm max-w-xs leading-relaxed mx-auto">
               We were unable to complete your request. No sensitive data was compromised.
             </p>
             {error && (
-              <div className="w-full text-left p-3 bg-brand-surface/40 border border-brand-surface-light/10 rounded-lg max-h-40 overflow-y-auto">
+              <div className="w-full text-left p-3 bg-[#0F0F14] border border-white/10 rounded-xl max-h-40 overflow-y-auto">
                 <span className="text-[10px] text-brand-muted uppercase font-semibold">Technical diagnostic</span>
                 <p className="text-[11px] font-mono text-red-300 mt-1 break-all select-all">
                   {error.message || 'Unknown application exception.'}

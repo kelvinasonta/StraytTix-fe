@@ -240,24 +240,19 @@ export const EventDetails: React.FC = () => {
   const layoutParam = searchParams.get('layout') as 'cinematic' | 'compact' | 'split' | 'bento' | null;
   const validLayouts: ('cinematic' | 'compact' | 'split' | 'bento')[] = ['cinematic', 'compact', 'split', 'bento'];
   
-  // Layout switch state for testing (isolated so it can be easily removed)
-  const defaultResolvedLayout: 'cinematic' | 'compact' | 'split' | 'bento' =
+  // Layout resolution
+  const bannerStyle: 'cinematic' | 'compact' | 'split' | 'bento' =
     (layoutParam && validLayouts.includes(layoutParam))
       ? layoutParam
-      : (event?.bannerStyle as any) || (s.bannerStyle as any) || (s.banner_style as any) || (event?.meta?.bannerStyle as any) || 'cinematic';
-
-  const [activeLayoutOverride, setActiveLayoutOverride] = useState<'cinematic' | 'compact' | 'split' | 'bento'>(defaultResolvedLayout);
-  const [layoutSwitcherExpanded, setLayoutSwitcherExpanded] = useState(false);
-
-  useEffect(() => {
-    setActiveLayoutOverride(defaultResolvedLayout);
-  }, [defaultResolvedLayout]);
-
-  const bannerStyle = activeLayoutOverride;
+      : (event?.bannerStyle as any) || (s.bannerStyle as any) || (s.banner_style as any) || (event?.meta?.bannerStyle as any) || 'split';
 
   const handleGetTickets = () => {
-    if (!event) return;
-    navigate(`/events/${event.slug || event.id}/tickets`);
+    const ticketsEl = document.getElementById('tickets-section');
+    if (ticketsEl) {
+      ticketsEl.scrollIntoView({ behavior: 'smooth' });
+    } else if (event) {
+      navigate(`/events/${event.slug || event.id}/tickets`);
+    }
   };
 
   const pageBgClass = 'bg-[#070709] text-white';
@@ -363,8 +358,8 @@ export const EventDetails: React.FC = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: event?.title || 'Event on Eventa',
-          text: `Check out ${event?.title} on Eventa!`,
+          title: event?.title || 'Event on StraytTix',
+          text: `Check out ${event?.title} on StraytTix!`,
           url: window.location.href
         });
       } catch {
@@ -379,7 +374,7 @@ export const EventDetails: React.FC = () => {
   const generateGoogleCalendarUrl = () => {
     if (!event) return '#';
     const title = encodeURIComponent(event.title);
-    const details = encodeURIComponent(`${event.description}\n\nBooked via Eventa: ${window.location.href}`);
+    const details = encodeURIComponent(`${event.description || ''}\n\nBooked via StraytTix: ${window.location.href}`);
     const locationStr = encodeURIComponent(
       isPhysical
         ? `${event.venue || 'Venue'}, ${event.address || event.city || ''}`
@@ -398,11 +393,11 @@ export const EventDetails: React.FC = () => {
     const icsData = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//Eventa//Event Experience//EN',
+      'PRODID:-//StraytTix//Event Experience//EN',
       'CALSCALE:GREGORIAN',
       'METHOD:PUBLISH',
       'BEGIN:VEVENT',
-      `UID:${event.id || 'event'}@eventa.app`,
+      `UID:${event.id || 'event'}@strayttix.com`,
       `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
       `DTSTART:${event.startDate.replace(/-/g, '')}T${(event.startTime || '18:00').replace(/:/g, '')}00Z`,
       `DTEND:${(event.endDate || event.startDate).replace(/-/g, '')}T${(event.endTime || '23:00').replace(/:/g, '')}00Z`,
@@ -1360,46 +1355,46 @@ export const EventDetails: React.FC = () => {
       {/* ========================================================================= */}
       {shareModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setShareModalOpen(false)} />
-          <div className="relative z-10 max-w-sm w-full bg-white rounded-3xl p-6 shadow-2xl space-y-5 border border-zinc-150">
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-              <h4 className="text-base font-black text-zinc-950">Share Experience</h4>
-              <button onClick={() => setShareModalOpen(false)} className="p-1 rounded-full text-zinc-400 hover:text-zinc-900 cursor-pointer">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-xs" onClick={() => setShareModalOpen(false)} />
+          <div className="relative z-10 max-w-sm w-full bg-[#0F0F14] text-white rounded-3xl p-6 shadow-2xl space-y-5 border border-white/10">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h4 className="text-base font-black text-white">Share Experience</h4>
+              <button onClick={() => setShareModalOpen(false)} className="p-1 rounded-full text-zinc-400 hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-zinc-500 font-medium">Invite friends or share {event.title} across your network.</p>
+            <p className="text-xs text-zinc-400 font-medium">Invite friends or share {event.title} across your network.</p>
 
             <div className="grid grid-cols-2 gap-3">
               <a
-                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${event.title} on Eventa: ${window.location.href}`)}`}
+                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${event.title} on StraytTix: ${window.location.href}`)}`}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-bold text-center transition-colors"
+                className="p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold text-center transition-colors"
               >
                 WhatsApp
               </a>
               <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I'm attending ${event.title}! Get tickets on Eventa: ${window.location.href}`)}`}
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I'm attending ${event.title}! Get tickets on StraytTix: ${window.location.href}`)}`}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-800 text-xs font-bold text-center transition-colors"
+                className="p-3 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 text-xs font-bold text-center transition-colors"
               >
                 Twitter / X
               </a>
             </div>
 
-            <div className="flex items-center gap-2 p-2 rounded-xl bg-zinc-50 border border-zinc-200">
+            <div className="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/10">
               <input 
                 type="text" 
                 readOnly 
                 value={window.location.href} 
-                className="w-full bg-transparent text-xs text-zinc-700 outline-none truncate font-medium pl-2"
+                className="w-full bg-transparent text-xs text-zinc-200 outline-none truncate font-medium pl-2"
               />
               <button
                 onClick={handleCopyLink}
-                className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer flex-shrink-0 flex items-center gap-1"
+                className="px-3 py-1.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer flex-shrink-0 flex items-center gap-1"
               >
                 {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedLink ? 'Copied' : 'Copy'}</span>
@@ -1414,16 +1409,16 @@ export const EventDetails: React.FC = () => {
       {/* ========================================================================= */}
       {calendarModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setCalendarModalOpen(false)} />
-          <div className="relative z-10 max-w-sm w-full bg-white rounded-3xl p-6 shadow-2xl space-y-5 border border-zinc-150">
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-              <h4 className="text-base font-black text-zinc-950">Add to Calendar</h4>
-              <button onClick={() => setCalendarModalOpen(false)} className="p-1 rounded-full text-zinc-400 hover:text-zinc-900 cursor-pointer">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-xs" onClick={() => setCalendarModalOpen(false)} />
+          <div className="relative z-10 max-w-sm w-full bg-[#0F0F14] text-white rounded-3xl p-6 shadow-2xl space-y-5 border border-white/10">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h4 className="text-base font-black text-white">Add to Calendar</h4>
+              <button onClick={() => setCalendarModalOpen(false)} className="p-1 rounded-full text-zinc-400 hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-zinc-500 font-medium">Never miss {event.title}. Add the schedule directly into your favorite calendar app.</p>
+            <p className="text-xs text-zinc-400 font-medium">Never miss {event.title}. Add the schedule directly into your favorite calendar app.</p>
 
             <div className="space-y-2.5">
               <a
@@ -1431,7 +1426,7 @@ export const EventDetails: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => setCalendarModalOpen(false)}
-                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-bold text-zinc-900 transition-colors"
+                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white transition-colors"
               >
                 <span className="flex items-center gap-2.5">
                   <Calendar className="w-4 h-4 text-[#E31B23]" />
@@ -1442,7 +1437,7 @@ export const EventDetails: React.FC = () => {
 
               <button
                 onClick={downloadIcsFile}
-                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-bold text-zinc-900 transition-colors cursor-pointer"
+                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white transition-colors cursor-pointer"
               >
                 <span className="flex items-center gap-2.5">
                   <Download className="w-4 h-4 text-[#E31B23]" />
@@ -1460,20 +1455,20 @@ export const EventDetails: React.FC = () => {
       {/* ========================================================================= */}
       {contactModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setContactModalOpen(false)} />
-          <form onSubmit={handleSendMessage} className="relative z-10 max-w-md w-full bg-white rounded-3xl p-6 shadow-2xl space-y-4 border border-zinc-150">
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-xs" onClick={() => setContactModalOpen(false)} />
+          <form onSubmit={handleSendMessage} className="relative z-10 max-w-md w-full bg-[#0F0F14] text-white rounded-3xl p-6 shadow-2xl space-y-4 border border-white/10">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-[#E31B23]" />
-                <h4 className="text-base font-black text-zinc-950">Contact Event Host</h4>
+                <h4 className="text-base font-black text-white">Contact Event Host</h4>
               </div>
-              <button type="button" onClick={() => setContactModalOpen(false)} className="p-1 rounded-full text-zinc-400 hover:text-zinc-900 cursor-pointer">
+              <button type="button" onClick={() => setContactModalOpen(false)} className="p-1 rounded-full text-zinc-400 hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-zinc-500 font-medium">
-              Have questions regarding {event.title}? Send a direct inquiry to <strong>{event.organizer?.name}</strong>.
+            <p className="text-xs text-zinc-400 font-medium">
+              Have questions regarding {event.title}? Send a direct inquiry to <strong className="text-white">{event.organizer?.name}</strong>.
             </p>
 
             <textarea
@@ -1482,7 +1477,7 @@ export const EventDetails: React.FC = () => {
               placeholder="Type your question or request here (e.g., VIP parking details, accessibility accommodations)..."
               rows={4}
               required
-              className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl p-3.5 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:border-[#E31B23] transition-all resize-none font-medium"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl p-3.5 text-xs text-white placeholder-zinc-500 outline-none focus:border-[#E31B23] transition-all resize-none font-medium"
             />
 
             <button
@@ -1504,74 +1499,6 @@ export const EventDetails: React.FC = () => {
         event={event}
         selectedTickets={selectedTickets}
       />
-
-      {/* ========================================================================= */}
-      {/* TEMPORARY TEST CONTROLLER: Event Layout Switcher (Can be easily removed)  */}
-      {/* ========================================================================= */}
-      <aside 
-        aria-label="Layout Tester"
-        className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 flex flex-col items-end gap-2 pointer-events-auto"
-      >
-        {layoutSwitcherExpanded && (
-          <div className="bg-[#0F0F14]/95 backdrop-blur-xl border border-white/20 p-3 rounded-2xl shadow-2xl space-y-2 w-64 animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <span className="text-[11px] font-mono uppercase tracking-wider font-bold text-zinc-300">
-                Switch Style
-              </span>
-              <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                Preview Mode
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 gap-1.5">
-              {[
-                { id: 'cinematic', label: '1. Cinematic Full', desc: 'Full-bleed atmospheric hero' },
-                { id: 'compact', label: '2. Compact Header', desc: 'Panoramic letterbox banner' },
-                { id: 'split', label: '3. Split Visual', desc: 'Editorial poster & flyer' },
-                { id: 'bento', label: '4. Modern Bento', desc: 'Modular asymmetrical tiles' }
-              ].map((style) => (
-                <button
-                  key={style.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveLayoutOverride(style.id as any);
-                  }}
-                  className={`w-full text-left p-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
-                    activeLayoutOverride === style.id
-                      ? 'bg-[#E31B23] text-white shadow-md'
-                      : 'bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white'
-                  }`}
-                >
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold leading-tight truncate">{style.label}</p>
-                    <p className={`text-[10px] leading-tight truncate ${activeLayoutOverride === style.id ? 'text-white/80' : 'text-zinc-500'}`}>
-                      {style.desc}
-                    </p>
-                  </div>
-                  {activeLayoutOverride === style.id && (
-                    <Check className="w-4 h-4 text-white flex-shrink-0" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={() => setLayoutSwitcherExpanded(!layoutSwitcherExpanded)}
-          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-full font-bold text-xs shadow-2xl transition-all cursor-pointer border ${
-            layoutSwitcherExpanded
-              ? 'bg-white text-zinc-950 border-white shadow-white/10'
-              : 'bg-[#0F0F14]/90 backdrop-blur-md text-white border-white/20 hover:border-white/40 hover:bg-[#15151D]'
-          }`}
-          title="Toggle Event Details Style Switcher"
-        >
-          <Sparkles className="w-4 h-4 text-[#E31B23]" />
-          <span className="font-mono text-[11px] uppercase tracking-wider">Style: <strong className="capitalize">{activeLayoutOverride}</strong></span>
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${layoutSwitcherExpanded ? 'rotate-180' : ''}`} />
-        </button>
-      </aside>
 
       <Footer />
     </div>
