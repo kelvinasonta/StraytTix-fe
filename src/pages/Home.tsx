@@ -46,7 +46,7 @@ export const Home: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#070709] text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#070709] text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased">
       <Navbar />
 
       <main className="flex-1 -mt-16">
