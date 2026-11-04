@@ -62,21 +62,21 @@ export const PaymentCallback: React.FC = () => {
   }, [reference]);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB] flex flex-col justify-center items-center p-4 sm:p-6 text-zinc-900">
-      <div className="w-full max-w-lg bg-white rounded-3xl border border-zinc-200 shadow-xl overflow-hidden p-6 sm:p-8">
+    <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#070709] flex flex-col justify-center items-center p-4 sm:p-6 text-zinc-900 dark:text-white transition-colors duration-300">
+      <div className="w-full max-w-lg bg-white dark:bg-[#0F0F14] rounded-3xl border border-zinc-200 dark:border-white/10 shadow-xl overflow-hidden p-6 sm:p-8">
         
         {/* VERIFYING STATE */}
         {status === 'verifying' && (
           <div className="text-center py-10 space-y-4">
             <Loader2 className="w-12 h-12 text-[#E31B23] animate-spin mx-auto" />
             <div className="space-y-1">
-              <h2 className="text-xl font-black text-zinc-950">Verifying Payment...</h2>
-              <p className="text-xs text-zinc-500 max-w-xs mx-auto">
+              <h2 className="text-xl font-black text-zinc-950 dark:text-white">Verifying Payment...</h2>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-xs mx-auto">
                 Confirming your transaction with the payment gateway. Please do not close or refresh this window.
               </p>
             </div>
             {reference && (
-              <span className="inline-block text-[11px] font-mono text-zinc-400 bg-zinc-100 px-2.5 py-1 rounded-md">
+              <span className="inline-block text-[11px] font-mono text-zinc-400 bg-zinc-100 dark:bg-white/5 dark:text-zinc-400 px-2.5 py-1 rounded-md">
                 Ref: {reference}
               </span>
             )}
@@ -99,7 +99,7 @@ export const PaymentCallback: React.FC = () => {
               </h2>
               <p className="text-xs sm:text-sm text-zinc-500">
                 Your ticket vouchers have been generated and sent to{' '}
-                <strong className="text-zinc-900 font-bold">{order?.customerEmail}</strong>.
+                <strong className="text-zinc-900 dark:text-white font-bold">{order?.customerEmail}</strong>.
               </p>
             </div>
 

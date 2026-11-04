@@ -76,14 +76,19 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
     let accumulatedDownScroll = 0;
     let accumulatedUpScroll = 0;
 
-    const SCROLL_DELTA_THRESHOLD = 240;
-    const MIN_PAGE_OFFSET = 450;
+    const SCROLL_DELTA_THRESHOLD = 180;
+    const MIN_PAGE_OFFSET = 350;
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY || document.documentElement.scrollTop;
       const delta = currentScrollY - lastScrollY;
 
-      setIsScrolled(currentScrollY > 120);
+      // Smooth threshold with 20px hysteresis to prevent border jitter
+      setIsScrolled((prev) => {
+        if (!prev && currentScrollY > 70) return true;
+        if (prev && currentScrollY < 50) return false;
+        return prev;
+      });
 
       if (currentScrollY <= MIN_PAGE_OFFSET) {
         setIsVisible(true);
@@ -100,7 +105,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
       } else if (delta < 0) {
         accumulatedDownScroll = 0;
         accumulatedUpScroll += Math.abs(delta);
-        if (accumulatedUpScroll >= 20 || currentScrollY <= MIN_PAGE_OFFSET) {
+        if (accumulatedUpScroll >= 16 || currentScrollY <= MIN_PAGE_OFFSET) {
           setIsVisible(true);
         }
       }
@@ -117,7 +122,6 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   
   const isDarkCanvasPage = isDark;
   const isDarkHeroPage = location.pathname === '/' || location.pathname === '/discover';
-  const isTransparentHeroNav = isDarkHeroPage && !isScrolled;
 
   const handleLogout = async () => {
     await logout();
@@ -203,11 +207,15 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
           : '-translate-y-full pointer-events-none'
       } ${
         isDashboardView
-          ? isScrolled
-            ? 'bg-white/80 backdrop-blur-xl border-b border-zinc-200/80 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] py-1'
-            : 'bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] py-0'
+          ? isDarkCanvasPage
+            ? isScrolled
+              ? 'bg-[#070709]/85 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.5)] py-1'
+              : 'bg-[#070709]/95 backdrop-blur-md border-b border-white/10 py-0'
+            : isScrolled
+              ? 'bg-white/80 backdrop-blur-xl border-b border-zinc-200/80 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] py-1'
+              : 'bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] py-0'
           : isScrolled
-            ? 'pt-2.5 sm:pt-3.5 pb-1.5 px-3 sm:px-6 bg-transparent border-b border-transparent pointer-events-none'
+            ? 'pt-2.5 sm:pt-3 pb-1.5 px-3 sm:px-6 bg-transparent border-b border-transparent pointer-events-none'
             : isDarkHeroPage
               ? 'pt-0 pb-0 px-0 bg-transparent border-b border-white/[0.06] backdrop-blur-[2px] pointer-events-auto'
               : isDarkCanvasPage
@@ -217,13 +225,13 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
     >
       <nav
         aria-label="Primary Navigation"
-        className={`pointer-events-auto mx-auto flex items-center justify-between transition-[max-width,height,border-radius,background-color,border-color,box-shadow,padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`pointer-events-auto mx-auto flex items-center justify-between transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           isDashboardView
             ? `max-w-7xl px-4 sm:px-6 ${isScrolled ? 'h-14' : 'h-16'}`
             : isScrolled
               ? isDarkCanvasPage
-                ? 'max-w-5xl h-14 px-4 sm:px-6 rounded-full bg-zinc-950/90 backdrop-blur-2xl border border-white/15 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.7)]'
-                : 'max-w-5xl h-14 px-4 sm:px-6 rounded-full bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_12px_36px_-8px_rgba(15,23,42,0.12)]'
+                ? 'max-w-5xl h-13 px-4 sm:px-6 rounded-full bg-[#0F0F14]/90 backdrop-blur-2xl border border-white/15 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.7)]'
+                : 'max-w-5xl h-13 px-4 sm:px-6 rounded-full bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_12px_36px_-8px_rgba(15,23,42,0.12)]'
               : 'max-w-[1600px] h-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 rounded-none bg-transparent border border-transparent shadow-none'
         }`}
       >
@@ -327,7 +335,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                   `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                     isActive
                       ? 'text-[#E31B23] font-bold'
-                      : 'text-zinc-300 hover:text-[#E31B23]'
+                      : isDarkCanvasPage
+                        ? 'text-zinc-300 hover:text-[#E31B23]'
+                        : 'text-zinc-700 hover:text-[#E31B23]'
                   }`
                 }
               >
@@ -404,7 +414,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                     isDarkCanvasPage ? 'hover:bg-white/10' : 'hover:bg-zinc-100'
                   }`}
                 >
-                  <div className="w-9 h-9 rounded-full bg-white text-zinc-950 font-black text-xs flex items-center justify-center border border-white/20 shadow-md">
+                  <div className="w-9 h-9 rounded-full bg-[#E31B23] text-white font-black text-xs flex items-center justify-center border border-white/20 shadow-md">
                     {user?.firstName?.[0] || 'U'}
                   </div>
                   <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
@@ -418,32 +428,32 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                   }`}>
                     {isOrganizer ? (
                       <>
-                        <div className="px-4 py-2.5 border-b border-white/10">
-                          <p className="text-xs font-bold text-white truncate">
+                        <div className="px-4 py-2.5 border-b border-zinc-150 dark:border-white/10">
+                          <p className="text-xs font-bold text-zinc-900 dark:text-white truncate">
                             {user?.firstName} {user?.lastName}
                           </p>
-                          <p className="text-[10px] text-zinc-400 truncate">{user?.email}</p>
+                          <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate">{user?.email}</p>
                         </div>
 
                         <div className="py-1">
                           <Link
                             to="/organizer"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-950 dark:hover:text-white transition-colors"
                           >
                             <LayoutDashboard className="w-3.5 h-3.5 text-zinc-400" /> Organizer Console
                           </Link>
                           <Link
                             to="/organizer/events"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-950 dark:hover:text-white transition-colors"
                           >
                             <Calendar className="w-3.5 h-3.5 text-zinc-400" /> My Events
                           </Link>
                           <Link
                             to="/organizer/orders"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-950 dark:hover:text-white transition-colors"
                           >
                             <Ticket className="w-3.5 h-3.5 text-zinc-400" /> Sales & Orders
                           </Link>
@@ -451,7 +461,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                             <Link
                               to="/organizer/team"
                               onClick={() => setUserDropdown(false)}
-                              className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                              className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-950 dark:hover:text-white transition-colors"
                             >
                               <Users className="w-3.5 h-3.5 text-zinc-400" /> Team Members
                             </Link>
@@ -460,7 +470,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                             <Link
                               to="/organizer/profile"
                               onClick={() => setUserDropdown(false)}
-                              className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                              className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-950 dark:hover:text-white transition-colors"
                             >
                               <UserIcon className="w-3.5 h-3.5 text-zinc-400" /> Organizer Profile
                             </Link>
@@ -468,7 +478,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                           <Link
                             to="/organizer/settings"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-950 dark:hover:text-white transition-colors"
                           >
                             <Settings className="w-3.5 h-3.5 text-zinc-400" /> {role === 'staff' ? 'Staff Settings' : 'Organization Settings'}
                           </Link>
@@ -476,12 +486,12 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                       </>
                     ) : (
                       <>
-                        <div className="px-4 py-2.5 border-b border-white/10">
-                          <p className="text-xs font-bold text-white truncate">
+                        <div className="px-4 py-2.5 border-b border-zinc-150 dark:border-white/10">
+                          <p className="text-xs font-bold text-zinc-900 dark:text-white truncate">
                             {user?.firstName} {user?.lastName}
                           </p>
-                          <p className="text-[10px] text-zinc-400 truncate">{user?.email}</p>
-                          <span className="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-white/10 text-zinc-300">
+                          <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate">{user?.email}</p>
+                          <span className="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300">
                             Attendee Account
                           </span>
                         </div>
@@ -490,42 +500,42 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                           <Link
                             to="/dashboard"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-950 dark:hover:text-white transition-colors"
                           >
                             <LayoutDashboard className="w-3.5 h-3.5 text-zinc-400" /> Attendee Dashboard
                           </Link>
                           <Link
                             to="/dashboard/tickets"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-950 dark:hover:text-white transition-colors"
                           >
                             <Ticket className="w-3.5 h-3.5 text-zinc-400" /> My Tickets
                           </Link>
                           <Link
                             to="/dashboard/favorites"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-950 dark:hover:text-white transition-colors"
                           >
                             <Heart className="w-3.5 h-3.5 text-zinc-400" /> Favorites
                           </Link>
                           <Link
                             to="/dashboard/settings"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-950 dark:hover:text-white transition-colors"
                           >
-                            <Settings className="w-3.5 h-3.5 text-zinc-400" /> Account Settings
+                            <UserIcon className="w-3.5 h-3.5 text-zinc-400" /> Profile & Settings
                           </Link>
                         </div>
                       </>
                     )}
 
-                    <div className="border-t border-white/10 pt-1">
+                    <div className="border-t border-zinc-150 dark:border-white/10 pt-1">
                       <button
                         onClick={() => {
                           setUserDropdown(false);
                           handleLogout();
                         }}
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors text-left cursor-pointer"
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-red-500 hover:bg-red-500/10 transition-colors text-left cursor-pointer"
                       >
                         <LogOut className="w-3.5 h-3.5" /> Sign Out
                       </button>
@@ -610,8 +620,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                         isActive 
                           ? 'bg-[#E31B23]/15 text-[#E31B23]' 
                           : isDarkCanvasPage 
-                            ? 'text-zinc-300 hover:bg-white/10' 
-                            : 'text-slate-800 hover:bg-slate-50'
+                            ? 'text-zinc-200 hover:bg-white/10' 
+                            : 'text-zinc-800 hover:bg-zinc-100'
                       }`
                     }
                   >
@@ -622,7 +632,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
                 <div className="pt-2 pb-1 px-3">
                   <span className={`text-[10px] font-black tracking-widest uppercase ${
-                    isDarkCanvasPage ? 'text-zinc-500' : 'text-zinc-400'
+                    isDarkCanvasPage ? 'text-zinc-400' : 'text-zinc-500'
                   }`}>
                     More Resources
                   </span>
@@ -640,8 +650,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                           isActive 
                             ? 'bg-[#E31B23]/15 text-[#E31B23]' 
                             : isDarkCanvasPage 
-                              ? 'text-zinc-300 hover:bg-white/10' 
-                              : 'text-slate-800 hover:bg-slate-50'
+                              ? 'text-zinc-200 hover:bg-white/10' 
+                              : 'text-zinc-800 hover:bg-zinc-100'
                         }`
                       }
                     >
@@ -665,8 +675,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                       isActive 
                         ? 'bg-[#E31B23]/15 text-[#E31B23]' 
                         : isDarkCanvasPage 
-                          ? 'text-zinc-300 hover:bg-white/10' 
-                          : 'text-slate-800 hover:bg-slate-50'
+                          ? 'text-zinc-200 hover:bg-white/10' 
+                          : 'text-zinc-800 hover:bg-zinc-100'
                     }`
                   }
                 >

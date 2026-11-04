@@ -468,7 +468,7 @@ export const Discover: React.FC = () => {
               onClick={() => openModal('region')}
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
                 selectedCountry
-                  ? 'bg-white text-zinc-950 border-white font-semibold shadow-xs'
+                  ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
                   : 'bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border-white/10'
               }`}
               title="Select Region"
@@ -512,7 +512,7 @@ export const Discover: React.FC = () => {
                   onClick={() => setCategory(cat)}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer shrink-0 border ${
                     isActive
-                      ? 'bg-white text-zinc-950 border-white font-semibold shadow-xs'
+                      ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
                       : 'bg-white/[0.03] text-zinc-400 hover:text-white hover:bg-white/[0.08] border-white/10'
                   }`}
                 >
@@ -540,7 +540,7 @@ export const Discover: React.FC = () => {
               onClick={() => openModal('price')}
               className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors border cursor-pointer shrink-0 ${
                 isPriceCustomized
-                  ? 'bg-white text-zinc-950 border-white font-semibold shadow-xs'
+                  ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
                   : 'bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] border-white/10'
               }`}
             >
@@ -555,7 +555,7 @@ export const Discover: React.FC = () => {
               onClick={() => openModal('date')}
               className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors border cursor-pointer shrink-0 ${
                 dateFilter !== 'all'
-                  ? 'bg-white text-zinc-950 border-white font-semibold shadow-xs'
+                  ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
                   : 'bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] border-white/10'
               }`}
             >
@@ -570,7 +570,7 @@ export const Discover: React.FC = () => {
               onClick={() => openModal('format')}
               className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors border cursor-pointer shrink-0 ${
                 formatFilter !== 'All'
-                  ? 'bg-white text-zinc-950 border-white font-semibold shadow-xs'
+                  ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
                   : 'bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] border-white/10'
               }`}
             >
@@ -709,7 +709,7 @@ export const Discover: React.FC = () => {
                         Minimum amount (NGN)
                       </label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-zinc-500">₦</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-zinc-500 dark:text-zinc-400">₦</span>
                         <input
                           type="number"
                           min="0"
@@ -728,7 +728,7 @@ export const Discover: React.FC = () => {
                         Maximum amount (NGN)
                       </label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-zinc-500">₦</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-zinc-500 dark:text-zinc-400">₦</span>
                         <input
                           type="number"
                           min={tempMinPrice}
@@ -754,7 +754,7 @@ export const Discover: React.FC = () => {
                       aria-label="Maximum price slider"
                       className="w-full accent-[#E31B23] h-2 bg-zinc-800 rounded-lg cursor-pointer"
                     />
-                    <div className="flex justify-between text-[11px] font-mono text-zinc-500">
+                    <div className="flex justify-between text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
                       <span>₦0</span>
                       <span>₦50,000</span>
                       <span>₦100,000+</span>
@@ -822,7 +822,7 @@ export const Discover: React.FC = () => {
                         onClick={() => setTempDateFilter(d.id as any)}
                         className={`w-full text-left px-4 py-3 rounded-2xl text-xs sm:text-sm font-medium transition-colors cursor-pointer flex items-center justify-between border ${
                           tempDateFilter === d.id
-                            ? 'bg-white text-zinc-950 border-white font-semibold shadow-xs'
+                            ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
                             : 'bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.06] border-white/10'
                         }`}
                       >
@@ -863,7 +863,7 @@ export const Discover: React.FC = () => {
                         onClick={() => setTempFormatFilter(fmt.id as any)}
                         className={`w-full text-left px-4 py-3 rounded-2xl text-xs sm:text-sm font-medium transition-colors cursor-pointer flex items-center justify-between border ${
                           tempFormatFilter === fmt.id
-                            ? 'bg-white text-zinc-950 border-white font-semibold shadow-xs'
+                            ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
                             : 'bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.06] border-white/10'
                         }`}
                       >
@@ -901,7 +901,7 @@ export const Discover: React.FC = () => {
                     onClick={() => handleSelectCountry(null)}
                     className={`w-full text-left px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-medium transition-colors cursor-pointer flex items-center justify-between border ${
                       !selectedCountry
-                        ? 'bg-white text-zinc-950 border-white font-semibold shadow-xs'
+                        ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
                         : 'bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.06] border-white/10'
                     }`}
                   >
@@ -919,7 +919,7 @@ export const Discover: React.FC = () => {
                       onClick={() => handleSelectCountry(c)}
                       className={`w-full text-left px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-medium transition-colors cursor-pointer flex items-center justify-between border ${
                         selectedCountry?.code === c.code
-                          ? 'bg-white text-zinc-950 border-white font-semibold shadow-xs'
+                          ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
                           : 'bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.06] border-white/10'
                       }`}
                     >
@@ -927,7 +927,7 @@ export const Discover: React.FC = () => {
                         <span>{c.flag || '🌐'}</span>
                         <span className="truncate">{c.name}</span>
                       </div>
-                      <span className="text-[10px] font-mono text-zinc-500">{c.code}</span>
+                      <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400">{c.code}</span>
                     </button>
                   ))}
                 </div>

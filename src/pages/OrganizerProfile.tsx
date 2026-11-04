@@ -376,7 +376,7 @@ export const OrganizerProfile: React.FC = () => {
                         <Globe className="w-3.5 h-3.5 text-[#E31B23]" />
                         <span className="underline font-medium">{orgWebsite.replace(/^https?:\/\//, '')}</span>
                       </a>
-                      <span className="text-zinc-600">•</span>
+                      <span className="text-zinc-600 dark:text-zinc-300">•</span>
                     </>
                   )}
                   {orgEmail && (
@@ -422,14 +422,14 @@ export const OrganizerProfile: React.FC = () => {
       {/* 2. FLOATING CREDIBILITY TELEMETRY BRIDGE CARD */}
       {/* ========================================================================= */}
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
-        <div className="bg-white rounded-3xl p-4 sm:p-6 border border-zinc-200/90 shadow-[0_12px_40px_rgba(0,0,0,0.06)] grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-zinc-100">
+        <div className="bg-white dark:bg-[#0F0F14] rounded-3xl p-4 sm:p-6 border border-zinc-200/90 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.06)] grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-zinc-100 dark:divide-white/10">
           <div className="p-2 sm:px-4 space-y-1">
             <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold uppercase tracking-wider">
               <Calendar className="w-3.5 h-3.5 text-[#E31B23]" />
               <span>Events Hosted</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">24+</p>
-            <p className="text-[11px] text-zinc-500 font-medium">100% On-Time Execution</p>
+            <p className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">24+</p>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">100% On-Time Execution</p>
           </div>
 
           <div className="p-2 sm:px-4 space-y-1">
@@ -437,8 +437,8 @@ export const OrganizerProfile: React.FC = () => {
               <Users className="w-3.5 h-3.5 text-[#E31B23]" />
               <span>Total Attendees</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">48,500+</p>
-            <p className="text-[11px] text-zinc-500 font-medium">Across 6 Global Metros</p>
+            <p className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">48,500+</p>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Across 6 Global Metros</p>
           </div>
 
           <div className="p-2 sm:px-4 space-y-1">
@@ -446,10 +446,10 @@ export const OrganizerProfile: React.FC = () => {
               <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
               <span>Host Rating</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight flex items-center gap-1.5">
+            <p className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight flex items-center gap-1.5">
               4.9 <span className="text-amber-500 text-xl font-bold">★</span>
             </p>
-            <p className="text-[11px] text-zinc-500 font-medium">98% 5-Star Reviews</p>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">98% 5-Star Reviews</p>
           </div>
 
           <div className="p-2 sm:px-4 space-y-1">
@@ -458,7 +458,7 @@ export const OrganizerProfile: React.FC = () => {
               <span>Gate Scan Uptime</span>
             </div>
             <p className="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight">99.98%</p>
-            <p className="text-[11px] text-zinc-500 font-medium">Zero Queue Latency</p>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Zero Queue Latency</p>
           </div>
         </div>
       </div>
@@ -469,7 +469,7 @@ export const OrganizerProfile: React.FC = () => {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-12 space-y-8">
         
         {/* Navigation Tabs Bar */}
-        <div className="flex items-center justify-between border-b border-zinc-200/90 pb-3 flex-wrap gap-3">
+        <div className="flex items-center justify-between border-b border-zinc-200/90 dark:border-white/10 pb-3 flex-wrap gap-3">
           <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
             {[
               { id: 'upcoming', label: 'Upcoming Experiences', count: events.length },
@@ -484,13 +484,13 @@ export const OrganizerProfile: React.FC = () => {
                 className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === tab.id 
                     ? 'bg-zinc-950 text-white shadow-xs' 
-                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+                    : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 hover:bg-zinc-100'
                 }`}
               >
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
                   <span className={`text-[11px] px-2 py-0.2 rounded-full font-bold ${
-                    activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-zinc-200/80 text-zinc-700'
+                    activeTab === tab.id ? 'bg-[#E31B23] text-white' : 'bg-zinc-200/80 dark:bg-white/10 text-zinc-700 dark:text-zinc-300'
                   }`}>
                     {tab.count}
                   </span>
@@ -504,7 +504,7 @@ export const OrganizerProfile: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-zinc-500 font-bold">
+          <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 font-bold">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>Ticket Checkout Live</span>
           </div>
@@ -517,7 +517,7 @@ export const OrganizerProfile: React.FC = () => {
           <div className="space-y-6">
             
             {/* Search & Filter Controls Toolbar */}
-            <div className="bg-white border border-zinc-200/90 rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col md:flex-row items-center justify-between gap-3">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/90 dark:border-white/10 rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col md:flex-row items-center justify-between gap-3">
               
               {/* Search Bar */}
               <div className="relative w-full md:w-80">
@@ -527,12 +527,12 @@ export const OrganizerProfile: React.FC = () => {
                   placeholder="Search events by title or venue..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23] transition-all"
+                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23] transition-all"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-300"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -554,7 +554,7 @@ export const OrganizerProfile: React.FC = () => {
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         filterType === f.id
                           ? 'bg-[#E31B23] text-white shadow-xs'
-                          : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70'
+                          : 'bg-zinc-100 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/70'
                       }`}
                     >
                       {f.label}
@@ -562,11 +562,11 @@ export const OrganizerProfile: React.FC = () => {
                   ))}
                 </div>
 
-                <div className="flex items-center gap-1 p-1 bg-zinc-100 rounded-lg border border-zinc-200/60">
+                <div className="flex items-center gap-1 p-1 bg-zinc-100 dark:bg-white/5 rounded-lg border border-zinc-200/60 dark:border-white/10">
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`p-1.5 rounded-md transition-all cursor-pointer ${
-                      viewMode === 'grid' ? 'bg-white shadow-xs text-zinc-950' : 'text-zinc-500 hover:text-zinc-800'
+                      viewMode === 'grid' ? 'bg-white dark:bg-white/15 shadow-xs text-zinc-950 dark:text-white' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white'
                     }`}
                     title="Grid View"
                   >
@@ -575,7 +575,7 @@ export const OrganizerProfile: React.FC = () => {
                   <button
                     onClick={() => setViewMode('list')}
                     className={`p-1.5 rounded-md transition-all cursor-pointer ${
-                      viewMode === 'list' ? 'bg-white shadow-xs text-zinc-950' : 'text-zinc-500 hover:text-zinc-800'
+                      viewMode === 'list' ? 'bg-white dark:bg-white/15 shadow-xs text-zinc-950 dark:text-white' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white'
                     }`}
                     title="List View"
                   >
@@ -620,13 +620,13 @@ export const OrganizerProfile: React.FC = () => {
 
             {/* Zero State */}
             {!isLoadingEvents && filteredEvents.length === 0 && (
-              <div className="bg-white border border-zinc-200 rounded-3xl p-12 text-center space-y-4 max-w-md mx-auto shadow-xs">
+              <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-12 text-center space-y-4 max-w-md mx-auto shadow-xs">
                 <div className="w-14 h-14 rounded-2xl bg-red-50 text-[#E31B23] flex items-center justify-center mx-auto">
                   <Ticket className="w-7 h-7" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-lg font-black text-zinc-900">No events matched your search</h3>
-                  <p className="text-xs text-zinc-500">
+                  <h3 className="text-lg font-black text-zinc-900 dark:text-white">No events matched your search</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     Try adjusting your filters or search query to see other experiences hosted by {orgName}.
                   </p>
                 </div>
@@ -648,10 +648,10 @@ export const OrganizerProfile: React.FC = () => {
         {activeTab === 'past' && (
           <div className="space-y-6">
             {pastEvents.length === 0 ? (
-              <div className="py-16 text-center bg-white border border-zinc-200/90 rounded-3xl p-8 space-y-3">
+              <div className="py-16 text-center bg-white dark:bg-[#0F0F14] border border-zinc-200/90 dark:border-white/10 rounded-3xl p-8 space-y-3">
                 <Calendar className="w-10 h-10 text-zinc-300 mx-auto" />
-                <h3 className="text-base font-bold text-zinc-800">No Past Productions</h3>
-                <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+                <h3 className="text-base font-bold text-zinc-800 dark:text-zinc-200">No Past Productions</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
                   Completed events and past productions by {orgName} will be archived here.
                 </p>
               </div>
@@ -661,7 +661,7 @@ export const OrganizerProfile: React.FC = () => {
                   <Link 
                     to={`/events/${prod.slug || prod.id}`}
                     key={prod.id} 
-                    className="bg-white border border-zinc-200/90 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row gap-4 sm:gap-5 hover:border-zinc-300 transition-all group"
+                    className="bg-white dark:bg-[#0F0F14] border border-zinc-200/90 dark:border-white/10 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row gap-4 sm:gap-5 hover:border-zinc-300 dark:hover:border-white/20 transition-all group"
                   >
                     <div className="relative sm:w-48 h-44 rounded-2xl overflow-hidden flex-shrink-0 bg-zinc-100">
                       {prod.bannerUrl || (prod as any).imageUrl ? (
@@ -688,17 +688,17 @@ export const OrganizerProfile: React.FC = () => {
                             {prod.startDate ? formatDate(prod.startDate) : 'Past Event'}
                           </span>
                         </div>
-                        <h3 className="text-base sm:text-lg font-black text-zinc-950 group-hover:text-[#E31B23] transition-colors leading-snug">
+                        <h3 className="text-base sm:text-lg font-black text-zinc-950 dark:text-white group-hover:text-[#E31B23] transition-colors leading-snug">
                           {prod.title}
                         </h3>
-                        <p className="text-xs text-zinc-500 font-medium flex items-center gap-1">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium flex items-center gap-1">
                           <MapPin className="w-3 h-3 text-zinc-400 flex-shrink-0" />
                           <span>{prod.venue || prod.venueName || (prod.locationType === 'online' ? 'Online Event' : 'Venue TBA')}</span>
                         </p>
                       </div>
 
                       <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-xs font-bold text-zinc-700">
-                        <span className="text-zinc-500 font-medium text-xs">
+                        <span className="text-zinc-500 dark:text-zinc-400 font-medium text-xs">
                           {prod.category || 'General'}
                         </span>
                         <span className="text-[#E31B23] font-black text-[11px]">
@@ -720,14 +720,14 @@ export const OrganizerProfile: React.FC = () => {
           <div className="space-y-8">
             
             {/* Story & Vision */}
-            <div className="bg-white border border-zinc-200/90 rounded-3xl p-6 sm:p-10 shadow-xs space-y-5">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/90 dark:border-white/10 rounded-3xl p-6 sm:p-10 shadow-xs space-y-5">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-[#E31B23] text-xs font-black uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5" /> About {orgName}
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">
                 Architects of High-Impact Live & Virtual Experiences
               </h2>
-              <div className="space-y-4 text-sm text-zinc-600 leading-relaxed max-w-3xl">
+              <div className="space-y-4 text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed max-w-3xl">
                 <p>
                   Founded with a vision to redefine live event production across Africa and international stages, 
                   <strong> {orgName}</strong> blends bleeding-edge sound engineering, immersive visuals, and white-glove 
@@ -745,32 +745,32 @@ export const OrganizerProfile: React.FC = () => {
 
               {/* Pillars Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-zinc-150">
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1.5">
+                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-1.5">
                   <div className="w-9 h-9 rounded-xl bg-red-50 text-[#E31B23] flex items-center justify-center font-bold">
                     <Award className="w-5 h-5" />
                   </div>
-                  <h4 className="text-sm font-black text-zinc-900">World-Class Sound</h4>
-                  <p className="text-xs text-zinc-500">
+                  <h4 className="text-sm font-black text-zinc-900 dark:text-white">World-Class Sound</h4>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     Dolby Atmos calibrated audio systems and arena-grade lighting rigs.
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1.5">
+                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-1.5">
                   <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
                     <ShieldCheck className="w-5 h-5" />
                   </div>
-                  <h4 className="text-sm font-black text-zinc-900">100% Verified Entry</h4>
-                  <p className="text-xs text-zinc-500">
+                  <h4 className="text-sm font-black text-zinc-900 dark:text-white">100% Verified Entry</h4>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     Contactless laser and mobile QR scanning with 0.2s check-in gate latency.
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1.5">
+                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-1.5">
                   <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
                     <Star className="w-5 h-5" />
                   </div>
-                  <h4 className="text-sm font-black text-zinc-900">VIP Concierge</h4>
-                  <p className="text-xs text-zinc-500">
+                  <h4 className="text-sm font-black text-zinc-900 dark:text-white">VIP Concierge</h4>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     Dedicated table hosts, priority fast-track gates, and private backstage lounges.
                   </p>
                 </div>
@@ -778,28 +778,28 @@ export const OrganizerProfile: React.FC = () => {
             </div>
 
             {/* Production Team & Leadership */}
-            <div className="bg-white border border-zinc-200/90 rounded-3xl p-6 sm:p-10 shadow-xs space-y-6">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/90 dark:border-white/10 rounded-3xl p-6 sm:p-10 shadow-xs space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-black text-zinc-950 tracking-tight">Executive Team</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">The creative minds and technical leads steering {orgName}.</p>
+                  <h3 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white tracking-tight">Executive Team</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">The creative minds and technical leads steering {orgName}.</p>
                 </div>
                 <button
                   onClick={() => setShowContactModal(true)}
-                  className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 text-zinc-800 dark:text-zinc-200 text-xs font-bold rounded-xl transition-colors cursor-pointer"
                 >
                   Join Production Crew
                 </button>
               </div>
 
-              <div className="p-6 rounded-2xl border border-zinc-200 bg-zinc-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="p-6 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-white border border-zinc-200 flex items-center justify-center text-zinc-600 flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-600 dark:text-zinc-300 flex-shrink-0">
                     <Users className="w-6 h-6 text-[#E31B23]" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-zinc-950">Verified Operations & Production Team</h4>
-                    <p className="text-xs text-zinc-500 mt-0.5">
+                    <h4 className="text-sm font-bold text-zinc-950 dark:text-white">Verified Operations & Production Team</h4>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
                       Event logistics, ticketing, and on-site gate check-in are managed directly by authorized {orgName} staff.
                     </p>
                   </div>
@@ -814,14 +814,14 @@ export const OrganizerProfile: React.FC = () => {
             </div>
 
             {/* Office & Operations Details */}
-            <div className="bg-white border border-zinc-200/90 rounded-3xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/90 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-700 flex-shrink-0">
                   <Building2 className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-base font-black text-zinc-950">Corporate Booking & Inquiries</h4>
-                  <p className="text-xs text-zinc-500">
+                  <h4 className="text-base font-black text-zinc-950 dark:text-white">Corporate Booking & Inquiries</h4>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     {orgLocation} • {orgEmail || `contact@${orgHandle}.live`}
                   </p>
                 </div>
@@ -843,10 +843,10 @@ export const OrganizerProfile: React.FC = () => {
         {/* ========================================================================= */}
         {activeTab === 'reviews' && (
           <div className="space-y-6">
-            <div className="bg-white border border-zinc-200/90 rounded-3xl p-12 text-center space-y-3">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/90 dark:border-white/10 rounded-3xl p-12 text-center space-y-3">
               <Star className="w-10 h-10 text-zinc-300 mx-auto" />
-              <h3 className="text-base font-bold text-zinc-800">No Reviews Yet</h3>
-              <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+              <h3 className="text-base font-bold text-zinc-800 dark:text-zinc-200">No Reviews Yet</h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
                 Verified ticket holders receive an automated prompt to rate and review their experience after attending an event.
               </p>
             </div>
@@ -857,16 +857,16 @@ export const OrganizerProfile: React.FC = () => {
         {/* TAB 5: DEVELOPER & EMBED SDK (Modern SaaS Integration) */}
         {/* ========================================================================= */}
         {activeTab === 'developer' && (
-          <div className="bg-white border border-zinc-200/90 rounded-3xl p-6 sm:p-10 shadow-xs space-y-8">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/90 dark:border-white/10 rounded-3xl p-6 sm:p-10 shadow-xs space-y-8">
             
             <div className="space-y-2 max-w-2xl">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-[#E31B23] text-xs font-black uppercase tracking-wider">
                 <Code2 className="w-3.5 h-3.5" /> Developer Ecosystem
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">
                 Integrate {orgName} Passes on Any Web Experience
               </h2>
-              <p className="text-sm text-zinc-600 leading-relaxed font-normal">
+              <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed font-normal">
                 Seamlessly sell tickets and display event schedules on your WordPress, Webflow, Shopify, or custom React applications using our luxury drop-in widget or headless REST APIs.
               </p>
             </div>
@@ -874,15 +874,15 @@ export const OrganizerProfile: React.FC = () => {
             {/* Live Interactive Embed Preview */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-wider text-zinc-800 flex items-center gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#E31B23]" /> Live Widget Interactive Preview
                 </span>
-                <span className="text-xs text-zinc-500 font-medium">Auto-responsive & Dual Theme Support</span>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Auto-responsive & Dual Theme Support</span>
               </div>
 
               {/* The Live Iframe Container */}
-              <div className="rounded-3xl border border-zinc-200/90 p-4 bg-zinc-50 overflow-hidden shadow-inner">
-                <div className="max-w-xl mx-auto rounded-2xl overflow-hidden shadow-xl border border-zinc-200 bg-white">
+              <div className="rounded-3xl border border-zinc-200/90 dark:border-white/10 p-4 bg-zinc-50 dark:bg-white/5 overflow-hidden shadow-inner">
+                <div className="max-w-xl mx-auto rounded-2xl overflow-hidden shadow-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0F0F14]">
                   <iframe
                     src={`${window.location.origin}/events/${events[0]?.slug || 'global-tech-virtual'}?embed=true`}
                     width="100%"
@@ -925,18 +925,18 @@ export const OrganizerProfile: React.FC = () => {
             </div>
 
             {/* REST API Endpoints Preview */}
-            <div className="p-6 rounded-2xl bg-[#F8F9FB] border border-zinc-200 space-y-3">
+            <div className="p-6 rounded-2xl bg-[#F8F9FB] dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-3">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2.5">
                   <span className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-mono text-xs font-bold">GET</span>
-                  <span className="font-mono text-xs sm:text-sm font-bold text-zinc-900">/api/v1/organizers/{orgHandle}/events</span>
+                  <span className="font-mono text-xs sm:text-sm font-bold text-zinc-900 dark:text-white">/api/v1/organizers/{orgHandle}/events</span>
                 </div>
                 <Link to="/api-docs" className="text-xs font-bold text-[#E31B23] hover:underline flex items-center gap-1">
                   <span>View API Documentation</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </Link>
               </div>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 Returns live JSON payload containing active ticket tiers, seat capacity, pricing, and checkout availability for this organizer.
               </p>
             </div>
@@ -951,12 +951,12 @@ export const OrganizerProfile: React.FC = () => {
       {/* ========================================================================= */}
       {showContactModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl border border-zinc-150 space-y-5 animate-in zoom-in-95 duration-150">
+          <div className="bg-white dark:bg-[#0F0F14] w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl border border-zinc-150 dark:border-white/10 space-y-5 animate-in zoom-in-95 duration-150 text-zinc-900 dark:text-white">
             
             <div className="flex items-center justify-between border-b border-zinc-150 pb-3">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#E31B23]" />
-                <h3 className="text-base font-black text-zinc-950">Inquire with {orgName}</h3>
+                <h3 className="text-base font-black text-zinc-950 dark:text-white">Inquire with {orgName}</h3>
               </div>
               <button 
                 onClick={() => setShowContactModal(false)} 
@@ -972,7 +972,7 @@ export const OrganizerProfile: React.FC = () => {
                 <select
                   value={contactSubject}
                   onChange={(e) => setContactSubject(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23]"
+                  className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23]"
                 >
                   <option value="VIP Table & Guestlist Inquiry">VIP Table & Guestlist Inquiry</option>
                   <option value="Brand Sponsorship & Partnerships">Brand Sponsorship & Partnerships</option>
@@ -991,7 +991,7 @@ export const OrganizerProfile: React.FC = () => {
                     placeholder="e.g. Alex Morgan"
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23]"
+                    className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23]"
                   />
                 </div>
                 <div>
@@ -1002,7 +1002,7 @@ export const OrganizerProfile: React.FC = () => {
                     placeholder="alex@example.com"
                     value={contactEmail}
                     onChange={(e) => setContactEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23]"
+                    className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23]"
                   />
                 </div>
               </div>
@@ -1015,7 +1015,7 @@ export const OrganizerProfile: React.FC = () => {
                   placeholder="Provide any specific details, estimated party size, or sponsorship proposal..."
                   value={contactMessage}
                   onChange={(e) => setContactMessage(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23]"
+                  className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23]"
                 />
               </div>
 
@@ -1023,7 +1023,7 @@ export const OrganizerProfile: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowContactModal(false)}
-                  className="flex-1 py-3 border border-zinc-200 rounded-xl text-xs sm:text-sm font-bold text-zinc-700 hover:bg-zinc-50 transition-colors cursor-pointer"
+                  className="flex-1 py-3 border border-zinc-200 dark:border-white/10 rounded-xl text-xs sm:text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>

@@ -372,12 +372,12 @@ export const CheckoutPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FB] flex flex-col justify-between">
+      <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#070709] text-zinc-900 dark:text-white flex flex-col justify-between transition-colors duration-300">
         <Navbar />
         <div className="max-w-xl mx-auto w-full px-4 py-24 text-center space-y-4">
           <Loader2 className="w-10 h-10 text-[#E31B23] animate-spin mx-auto" />
-          <h2 className="text-xl font-black text-zinc-950">Preparing Secure Checkout...</h2>
-          <p className="text-xs text-zinc-500 font-medium">Securing ticket reservation hold with host venue.</p>
+          <h2 className="text-xl font-black text-zinc-950 dark:text-white dark:text-white">Preparing Secure Checkout...</h2>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Securing ticket reservation hold with host venue.</p>
         </div>
         <Footer />
       </div>
@@ -386,12 +386,12 @@ export const CheckoutPage: React.FC = () => {
 
   if (error || !event || selectedItems.length === 0) {
     return (
-      <div className="min-h-screen bg-[#F8F9FB] flex flex-col justify-between">
+      <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#070709] text-zinc-900 dark:text-white flex flex-col justify-between transition-colors duration-300">
         <Navbar />
         <div className="max-w-md mx-auto w-full px-4 py-24 text-center space-y-4">
           <AlertCircle className="w-12 h-12 text-[#E31B23] mx-auto" />
-          <h2 className="text-xl font-black text-zinc-950">Checkout Session Expired</h2>
-          <p className="text-xs text-zinc-500 leading-relaxed font-medium">
+          <h2 className="text-xl font-black text-zinc-950 dark:text-white dark:text-white">Checkout Session Expired</h2>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
             {error || 'No tickets were selected. Please select your passes from the event page to proceed.'}
           </p>
           <div className="pt-2">
@@ -410,18 +410,18 @@ export const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB] text-zinc-900 flex flex-col justify-between font-sans">
+    <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#070709] text-zinc-900 dark:text-white flex flex-col justify-between font-sans transition-colors duration-300">
       <Navbar />
 
       <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1">
         
         {/* Top Progress & Reservation Hold Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-200 dark:border-white/10">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <Link
                 to={`/events/${event.slug || event.id}/tickets`}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-950 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back to Tickets</span>
@@ -429,7 +429,7 @@ export const CheckoutPage: React.FC = () => {
               <span className="text-zinc-300">•</span>
               <span className="text-xs font-bold text-zinc-400">Step {step} of 3</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight flex items-center gap-2.5">
+            <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white dark:text-white tracking-tight flex items-center gap-2.5">
               <span>{step === 3 ? 'Booking Confirmed' : 'Secure Checkout'}</span>
               <ShieldCheck className="w-6 h-6 text-emerald-500" />
             </h1>
@@ -437,11 +437,11 @@ export const CheckoutPage: React.FC = () => {
 
           {step < 3 && (
             <div className="flex items-center gap-3">
-              <div className="px-3.5 py-2 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-900 flex items-center gap-2 shadow-2xs">
+              <div className="px-3.5 py-2 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/20 text-amber-900 dark:text-amber-400 flex items-center gap-2 shadow-2xs">
                 <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
                 <div className="text-xs">
-                  <span className="font-medium text-amber-700">Tickets Reserved: </span>
-                  <strong className="font-mono font-bold text-amber-950">{formatTimer(timeLeft)}</strong>
+                  <span className="font-medium text-amber-700 dark:text-amber-300">Tickets Reserved: </span>
+                  <strong className="font-mono font-bold text-amber-950 dark:text-amber-200">{formatTimer(timeLeft)}</strong>
                 </div>
               </div>
             </div>
@@ -452,8 +452,8 @@ export const CheckoutPage: React.FC = () => {
         {/* STEP 3: SUCCESS / BOOKING CONFIRMED */}
         {/* ========================================================================= */}
         {step === 3 ? (
-          <div className="max-w-xl mx-auto bg-white rounded-3xl border border-zinc-200/90 shadow-xl p-7 sm:p-10 text-center space-y-6">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto shadow-xs border border-emerald-100">
+          <div className="max-w-xl mx-auto bg-white dark:bg-[#0F0F14] rounded-3xl border border-zinc-200/90 dark:border-white/10 shadow-xl p-7 sm:p-10 text-center space-y-6">
+            <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs border border-emerald-100 dark:border-emerald-500/20">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
@@ -461,18 +461,18 @@ export const CheckoutPage: React.FC = () => {
               <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full">
                 Tickets Issued
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">You're Going!</h2>
-              <p className="text-xs sm:text-sm text-zinc-500">
-                Your passes have been booked and dispatched to <strong className="text-zinc-900 font-bold">{email}</strong>.
+              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">You're Going!</h2>
+              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+                Your passes have been booked and dispatched to <strong className="text-zinc-900 dark:text-white font-bold">{email}</strong>.
               </p>
             </div>
 
             {/* Digital Pass Card */}
-            <div className="bg-[#F8F9FB] border border-zinc-200 rounded-2xl p-5 text-left space-y-4 shadow-xs relative overflow-hidden">
-              <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+            <div className="bg-[#F8F9FB] dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 text-left space-y-4 shadow-xs relative overflow-hidden">
+              <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 pb-3">
                 <div>
                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wide">Order Number</span>
-                  <p className="text-xs font-black text-zinc-900 font-mono mt-0.5">{orderNumber}</p>
+                  <p className="text-xs font-black text-zinc-900 dark:text-white font-mono mt-0.5">{orderNumber}</p>
                 </div>
                 <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase">
                   Verified
@@ -480,11 +480,11 @@ export const CheckoutPage: React.FC = () => {
               </div>
 
               <div className="flex gap-4 items-center">
-                <div className="w-20 h-20 bg-white p-2.5 rounded-xl border border-zinc-200 flex items-center justify-center shadow-xs flex-shrink-0">
-                  <QrCode className="w-16 h-16 text-zinc-900" />
+                <div className="w-20 h-20 bg-white dark:bg-zinc-900 p-2.5 rounded-xl border border-zinc-200 dark:border-white/10 flex items-center justify-center shadow-xs flex-shrink-0">
+                  <QrCode className="w-16 h-16 text-zinc-900 dark:text-white" />
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-sm font-bold text-zinc-950 truncate">{event.title}</h4>
+                  <h4 className="text-sm font-bold text-zinc-950 dark:text-white truncate">{event.title}</h4>
                   <p className="text-xs text-zinc-500 mt-1">
                     {formatDate(event.startDate)} • {(event.locationType === 'online' || (event as any).eventType === 'virtual') ? 'Online Event' : (event.venue || event.city || 'Venue')}
                   </p>
@@ -508,14 +508,14 @@ export const CheckoutPage: React.FC = () => {
               {isAuthenticated ? (
                 <Link
                   to="/dashboard/tickets"
-                  className="w-full py-3.5 px-4 rounded-xl border border-zinc-200 text-zinc-800 hover:bg-zinc-50 text-xs font-bold text-center flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-full py-3.5 px-4 rounded-xl border border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/5 text-xs font-bold text-center flex items-center justify-center transition-colors cursor-pointer"
                 >
                   Go to My Ticket Locker
                 </Link>
               ) : (
                 <Link
                   to={`/register?email=${encodeURIComponent(email)}`}
-                  className="w-full py-3.5 px-4 rounded-xl border border-zinc-200 text-zinc-800 hover:bg-zinc-50 text-xs font-bold text-center flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-full py-3.5 px-4 rounded-xl border border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/5 text-xs font-bold text-center flex items-center justify-center transition-colors cursor-pointer"
                 >
                   Create Account to Save Pass
                 </Link>
@@ -539,25 +539,25 @@ export const CheckoutPage: React.FC = () => {
               
               {/* STEP 1: ATTENDEE CONTACT & CUSTOM QUESTIONS */}
               {step === 1 && (
-                <form onSubmit={handleProceedToReview} className="bg-white rounded-3xl border border-zinc-200/90 p-6 sm:p-8 shadow-xs space-y-6">
+                <form onSubmit={handleProceedToReview} className="bg-white dark:bg-[#0F0F14] rounded-3xl border border-zinc-200/90 dark:border-white/10 p-6 sm:p-8 shadow-xs space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
-                      <h2 className="text-lg font-black text-zinc-950 flex items-center gap-2">
+                      <h2 className="text-lg font-black text-zinc-950 dark:text-white dark:text-white flex items-center gap-2">
                         <User className="w-4 h-4 text-[#E31B23]" />
                         <span>Attendee Contact Details</span>
                       </h2>
-                      <p className="text-xs text-zinc-500 font-medium mt-0.5">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5">
                         No account required. Your tickets and receipt will be sent directly to your email.
                       </p>
                     </div>
 
                     {!isAuthenticated ? (
-                      <span className="self-start sm:self-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 inline-flex items-center gap-1">
+                      <span className="self-start sm:self-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 inline-flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                         <span>Guest Checkout Active</span>
                       </span>
                     ) : (
-                      <span className="self-start sm:self-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">
+                      <span className="self-start sm:self-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10">
                         Signed In as {user?.firstName}
                       </span>
                     )}
@@ -565,7 +565,7 @@ export const CheckoutPage: React.FC = () => {
 
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-zinc-800">
+                      <label className="block text-xs font-bold text-zinc-800 dark:text-zinc-200">
                         Full Name <span className="text-[#E31B23]">*</span>
                       </label>
                       <input
@@ -574,12 +574,12 @@ export const CheckoutPage: React.FC = () => {
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="e.g. Alex Vance"
                         required
-                        className="w-full px-4 py-3 bg-white border border-zinc-200 hover:border-zinc-300 rounded-xl text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all font-medium"
+                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 rounded-xl text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all font-medium"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-zinc-800">
+                      <label className="block text-xs font-bold text-zinc-800 dark:text-zinc-200">
                         Email Address <span className="text-[#E31B23]">*</span>
                       </label>
                       <input
@@ -588,35 +588,35 @@ export const CheckoutPage: React.FC = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="alex@example.com"
                         required
-                        className="w-full px-4 py-3 bg-white border border-zinc-200 hover:border-zinc-300 rounded-xl text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all font-medium"
+                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 rounded-xl text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all font-medium"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-zinc-800">Phone Number (Optional)</label>
+                      <label className="block text-xs font-bold text-zinc-800 dark:text-zinc-200">Phone Number (Optional)</label>
                       <input
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+234 800 000 0000"
-                        className="w-full px-4 py-3 bg-white border border-zinc-200 hover:border-zinc-300 rounded-xl text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all font-medium"
+                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 rounded-xl text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all font-medium"
                       />
                     </div>
                   </div>
 
                   {/* Custom Questions if Event Organizer Configured */}
                   {event.customQuestions && event.customQuestions.length > 0 && (
-                    <div className="pt-4 border-t border-zinc-100 space-y-4">
+                    <div className="pt-4 border-t border-zinc-100 dark:border-white/10 space-y-4">
                       <div>
-                        <h3 className="text-sm font-black text-zinc-950">Event Registration Questions</h3>
-                        <p className="text-xs text-zinc-500 font-medium mt-0.5">Required by event organizer for check-in credentials.</p>
+                        <h3 className="text-sm font-black text-zinc-950 dark:text-white dark:text-white">Event Registration Questions</h3>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5">Required by event organizer for check-in credentials.</p>
                       </div>
 
                       {event.customQuestions.map((q: any) => {
                         const qKey = q.id || q.uuid || q.question;
                         return (
                           <div key={qKey} className="space-y-1.5">
-                            <label className="block text-xs font-bold text-zinc-800">
+                            <label className="block text-xs font-bold text-zinc-800 dark:text-zinc-200">
                               {q.question} {(q.isRequired || q.is_required) && <span className="text-[#E31B23]">*</span>}
                             </label>
 
@@ -625,7 +625,7 @@ export const CheckoutPage: React.FC = () => {
                                 value={answers[qKey] || ''}
                                 onChange={(e) => setAnswers({ ...answers, [qKey]: e.target.value })}
                                 required={q.isRequired || q.is_required}
-                                className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900 outline-none focus:border-zinc-900 font-medium cursor-pointer"
+                                className="w-full px-4 py-3 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] font-medium cursor-pointer"
                               >
                                 <option value="">Select an option...</option>
                                 {q.options.map((opt: string, optIdx: number) => (
@@ -641,7 +641,7 @@ export const CheckoutPage: React.FC = () => {
                                 onChange={(e) => setAnswers({ ...answers, [qKey]: e.target.value })}
                                 required={q.isRequired || q.is_required}
                                 placeholder="Your answer..."
-                                className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900 outline-none focus:border-zinc-900 font-medium"
+                                className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] font-medium"
                               />
                             )}
                           </div>
@@ -665,14 +665,14 @@ export const CheckoutPage: React.FC = () => {
 
               {/* STEP 2: PAYMENT REVIEW & GATEWAY REDIRECT */}
               {step === 2 && (
-                <div className="bg-white rounded-3xl border border-zinc-200/90 p-6 sm:p-8 shadow-xs space-y-6">
-                  <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                <div className="bg-white dark:bg-[#0F0F14] rounded-3xl border border-zinc-200/90 dark:border-white/10 p-6 sm:p-8 shadow-xs space-y-6">
+                  <div className="flex items-center justify-between border-b border-zinc-100 dark:border-white/10 pb-4">
                     <div>
-                      <h2 className="text-lg font-black text-zinc-950 flex items-center gap-2">
+                      <h2 className="text-lg font-black text-zinc-950 dark:text-white dark:text-white flex items-center gap-2">
                         <CreditCard className="w-4 h-4 text-[#E31B23]" />
                         <span>Payment Method</span>
                       </h2>
-                      <p className="text-xs text-zinc-500 font-medium mt-0.5">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5">
                         Transactions are securely processed through Paystack.
                       </p>
                     </div>
@@ -687,9 +687,9 @@ export const CheckoutPage: React.FC = () => {
                   </div>
 
                   {/* Summary of Attendee Details */}
-                  <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 text-xs space-y-1">
-                    <p className="text-zinc-500">Attendee Name: <strong className="text-zinc-900">{fullName}</strong></p>
-                    <p className="text-zinc-500">Receipt Email: <strong className="text-zinc-900">{email}</strong></p>
+                  <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 text-xs space-y-1">
+                    <p className="text-zinc-500">Attendee Name: <strong className="text-zinc-900 dark:text-white">{fullName}</strong></p>
+                    <p className="text-zinc-500">Receipt Email: <strong className="text-zinc-900 dark:text-white">{email}</strong></p>
                   </div>
 
                   {/* Payment Gateway Option Card */}
@@ -698,13 +698,13 @@ export const CheckoutPage: React.FC = () => {
                       Select Payment Gateway
                     </label>
 
-                    <div className="p-4 rounded-2xl border-2 border-[#E31B23] bg-red-50/20 flex items-center justify-between">
+                    <div className="p-4 rounded-2xl border-2 border-[#E31B23] bg-red-50/20 dark:bg-red-500/10 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-white border border-zinc-200 flex items-center justify-center shadow-2xs">
+                        <div className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 flex items-center justify-center shadow-2xs">
                           <CreditCard className="w-5 h-5 text-[#E31B23]" />
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-zinc-900">Paystack Checkout (Debit Card, Transfer & USSD)</p>
+                          <p className="text-sm font-bold text-zinc-900 dark:text-white dark:text-white">Paystack Checkout (Debit Card, Transfer & USSD)</p>
                           <p className="text-xs text-zinc-500">Accepts Visa, Mastercard, Verve, Bank Transfer & Apple Pay</p>
                         </div>
                       </div>
@@ -717,7 +717,7 @@ export const CheckoutPage: React.FC = () => {
                       type="button"
                       onClick={handleConfirmPurchase}
                       disabled={isProcessing}
-                      className="w-full py-4 px-6 bg-zinc-950 hover:bg-zinc-800 text-white text-sm font-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
+                      className="w-full py-4 px-6 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
                     >
                       {isProcessing ? (
                         <>
@@ -741,17 +741,17 @@ export const CheckoutPage: React.FC = () => {
 
             {/* Right Column: Sticky Event & Order Summary (5 cols) */}
             <div className="lg:col-span-5 sticky top-24 space-y-4">
-              <div className="bg-white border border-zinc-200/90 rounded-3xl p-6 sm:p-7 shadow-lg space-y-5">
+              <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/90 dark:border-white/10 rounded-3xl p-6 sm:p-7 shadow-lg space-y-5">
                 
                 {/* Event Compact Header */}
-                <div className="flex items-center gap-3.5 pb-4 border-b border-zinc-100">
+                <div className="flex items-center gap-3.5 pb-4 border-b border-zinc-100 dark:border-white/10">
                   <img
                     src={event.bannerUrl || event.imageUrl}
                     alt={event.title}
-                    className="w-16 h-16 rounded-2xl object-cover border border-zinc-200 flex-shrink-0"
+                    className="w-16 h-16 rounded-2xl object-cover border border-zinc-200 dark:border-white/10 flex-shrink-0"
                   />
                   <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-zinc-950 truncate">{event.title}</h3>
+                    <h3 className="text-sm font-bold text-zinc-950 dark:text-white truncate">{event.title}</h3>
                     <p className="text-xs text-zinc-500 mt-0.5 truncate flex items-center gap-1">
                       <Clock className="w-3 h-3 text-[#E31B23]" />
                       <span>{formatDate(event.startDate)}</span>
@@ -769,14 +769,14 @@ export const CheckoutPage: React.FC = () => {
                     Tickets Selected ({totalQuantity})
                   </label>
                   {selectedItems.map(({ tier, quantity, subtotal: tierSubtotal }) => (
-                    <div key={tier.id} className="flex items-center justify-between p-3.5 rounded-xl bg-zinc-50 border border-zinc-150 text-xs font-medium">
+                    <div key={tier.id} className="flex items-center justify-between p-3.5 rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-150 dark:border-white/10 text-xs font-medium">
                       <div>
-                        <p className="font-bold text-zinc-900">{tier.name}</p>
+                        <p className="font-bold text-zinc-900 dark:text-white dark:text-white">{tier.name}</p>
                         <p className="text-[11px] text-zinc-400 mt-0.5">
                           {quantity} × {tier.price === 0 ? 'Free' : formatCurrency(tier.price)}
                         </p>
                       </div>
-                      <span className="font-bold text-zinc-950">
+                      <span className="font-bold text-zinc-950 dark:text-white">
                         {tier.price === 0 ? 'FREE' : formatCurrency(tierSubtotal)}
                       </span>
                     </div>
@@ -791,12 +791,12 @@ export const CheckoutPage: React.FC = () => {
                       value={promoCodeInput}
                       onChange={(e) => setPromoCodeInput(e.target.value)}
                       placeholder="Discount / Promo code"
-                      className="flex-1 px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs uppercase tracking-wider font-bold outline-none focus:border-zinc-900"
+                      className="flex-1 px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs uppercase tracking-wider font-bold outline-none focus:border-[#E31B23] dark:text-white"
                     />
                     <button
                       type="button"
                       onClick={handleApplyPromo}
-                      className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                      className="px-4 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
                     >
                       Apply
                     </button>
@@ -810,10 +810,10 @@ export const CheckoutPage: React.FC = () => {
                 </div>
 
                 {/* Pricing Breakdown */}
-                <div className="pt-4 border-t border-zinc-100 space-y-2 text-xs">
-                  <div className="flex justify-between text-zinc-600">
+                <div className="pt-4 border-t border-zinc-100 dark:border-white/10 space-y-2 text-xs">
+                  <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
                     <span>Subtotal</span>
-                    <span className="font-bold text-zinc-900">{formatCurrency(subtotal)}</span>
+                    <span className="font-bold text-zinc-900 dark:text-white">{formatCurrency(subtotal)}</span>
                   </div>
 
                   {discountAmount > 0 && (
@@ -823,20 +823,20 @@ export const CheckoutPage: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="flex justify-between text-zinc-600">
+                  <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
                     <span>Platform & Processing Fee</span>
                     <span>{serviceFee === 0 ? 'FREE' : formatCurrency(serviceFee)}</span>
                   </div>
 
-                  <div className="pt-3 border-t border-zinc-100 flex justify-between items-baseline text-sm">
-                    <span className="font-black text-zinc-950">Total Due</span>
+                  <div className="pt-3 border-t border-zinc-100 dark:border-white/10 flex justify-between items-baseline text-sm">
+                    <span className="font-black text-zinc-950 dark:text-white">Total Due</span>
                     <span className="text-xl font-black text-[#E31B23]">
                       {isFree ? 'FREE' : formatCurrency(totalAmount)}
                     </span>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-zinc-100 flex items-center justify-center gap-2 text-[11px] font-bold text-zinc-400">
+                <div className="pt-3 border-t border-zinc-100 dark:border-white/10 flex items-center justify-center gap-2 text-[11px] font-bold text-zinc-400">
                   <Lock className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Secured by 256-bit Encryption</span>
                 </div>
