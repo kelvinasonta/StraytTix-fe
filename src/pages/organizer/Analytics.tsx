@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
+import { useSettings } from '../../context/SettingsContext';
 import { eventApi } from '../../api/events';
 import { ordersApi } from '../../api/orders';
 import { paymentApi } from '../../api/payments';
@@ -110,6 +111,8 @@ interface BankAccountInfo {
 export const Analytics: React.FC = () => {
   const { organizer, user } = useAuth();
   const { showNotification } = useNotification();
+  const { settings } = useSettings();
+  const sitename = settings?.sitename || 'StraytTix';
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
 
@@ -643,7 +646,7 @@ export const Analytics: React.FC = () => {
             { id: 'analytics', label: 'Sales & Velocity', icon: <BarChart3 className="w-4 h-4" /> },
             { id: 'events', label: 'Revenue by Event', icon: <Receipt className="w-4 h-4" /> },
             { id: 'ledger', label: 'Transaction Ledger', icon: <FileText className="w-4 h-4" /> },
-            { id: 'credits', label: 'Email Marketing & Credits', icon: <Coins className="w-4 h-4 text-amber-500" /> }
+            { id: 'credits', label: `${sitename} Credits`, icon: <Coins className="w-4 h-4 text-amber-500" /> }
           ].map(tab => (
             <button
               key={tab.id}
@@ -1270,7 +1273,7 @@ export const Analytics: React.FC = () => {
               <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-2">
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-black uppercase tracking-wider border border-amber-500/30">
-                    <Sparkles className="w-3 h-3 text-amber-400" /> Eventa Email Marketing & Credits Wallet
+                    <Sparkles className="w-3 h-3 text-amber-400" /> {sitename} Credits Wallet
                   </div>
                   <div className="flex items-baseline gap-3">
                     <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
@@ -1279,7 +1282,7 @@ export const Analytics: React.FC = () => {
                     <span className="text-sm sm:text-base font-semibold text-zinc-400">Credits Available</span>
                   </div>
                   <p className="text-xs sm:text-sm text-zinc-300 max-w-xl font-medium leading-relaxed">
-                    Eventa Credits directly power email marketing broadcasts, newsletter campaigns, ticket reminders, and attendee promotional mail drops. 1 Credit sends 1 marketing email.
+                    {sitename} Credits directly power email marketing broadcasts, newsletter campaigns, ticket reminders, and attendee promotional mail drops. 1 Credit sends 1 marketing email.
                   </p>
                 </div>
 
@@ -1300,7 +1303,7 @@ export const Analytics: React.FC = () => {
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
                   <span>Estimated Value: <strong>₦{(creditsBalance * 50).toLocaleString()}</strong></span>
                 </div>
-                <div>1 Eventa Credit = ₦50.00 NGN flat rate</div>
+                <div>1 {sitename} Credit = ₦50.00 NGN flat rate</div>
               </div>
             </div>
 
@@ -1360,7 +1363,7 @@ export const Analytics: React.FC = () => {
                   },
                   {
                     title: 'Custom White-Label Sender Domain',
-                    description: 'Send order confirmations, tickets, and receipts from your custom domain (e.g. tickets@yourcompany.com) instead of Eventa.',
+                    description: `Send order confirmations, tickets, and receipts from your custom domain (e.g. tickets@yourcompany.com) instead of ${sitename}.`,
                     cost: 100,
                     unit: 'credits / mo',
                     icon: Mail,
@@ -1474,7 +1477,7 @@ export const Analytics: React.FC = () => {
         <Modal
           isOpen={isTopUpModalOpen}
           onClose={() => setIsTopUpModalOpen(false)}
-          title="Top-Up Eventa Marketing Credits"
+          title={`Top-Up ${sitename} Marketing Credits`}
           size="lg"
         >
           <form onSubmit={handleCompleteTopUp} className="space-y-6">
