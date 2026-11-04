@@ -1463,8 +1463,8 @@ export const CreateEvent: React.FC = () => {
                           type="button"
                           onClick={() => setEventFormat(fmt)}
                           className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center truncate ${isSelected
-                            ? 'bg-zinc-950 text-white border-zinc-950 shadow-xs ring-1 ring-zinc-950'
-                            : 'bg-zinc-50 border-zinc-200 dark:border-white/10 text-zinc-700 hover:bg-zinc-100 hover:border-zinc-300'
+                            ? 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-zinc-950 dark:border-white shadow-xs ring-1 ring-zinc-950 dark:ring-white'
+                            : 'bg-zinc-50 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:border-zinc-300 dark:hover:border-white/20'
                             }`}
                         >
                           {fmt}

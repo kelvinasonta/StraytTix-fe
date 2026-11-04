@@ -2281,9 +2281,14 @@ export const EventManage: React.FC = () => {
               />
               <div className="space-y-1.5 min-w-0">
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <span className="text-xs font-bold px-3 py-0.5 rounded-full bg-zinc-100 text-zinc-700">
+                  <span className="text-xs font-bold px-3 py-0.5 rounded-full bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300">
                     {extractNameOrString(event.category) || 'General'}
                   </span>
+                  {event.eventFormat && (
+                    <span className="text-xs font-bold px-3 py-0.5 rounded-full bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-white/10">
+                      {event.eventFormat}
+                    </span>
+                  )}
                   <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-0.5 rounded-full border ${statusBadgeStyle}`}>
                     <span className={`w-2 h-2 rounded-full ${statusDotStyle}`} />
                     {event.status}
@@ -2592,11 +2597,14 @@ export const EventManage: React.FC = () => {
                   {/* Event Format Selector */}
                   <div className="space-y-3 pt-3 border-t border-zinc-100 dark:border-white/10">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
                         <Layers className="w-3.5 h-3.5 text-[#E31B23]" />
-                        <span>Event Format *</span>
+                        <span>Event Format</span>
+                        <span className="text-[#E31B23] font-bold">*</span>
                       </label>
-                      <span className="text-[11px] font-semibold text-zinc-400">Selected: {editFormat}</span>
+                      <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                        Selected: <strong className="text-zinc-950 dark:text-white font-bold">{editFormat}</strong>
+                      </span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                       {availableFormats.map((fmtItem) => {
@@ -2609,8 +2617,8 @@ export const EventManage: React.FC = () => {
                             type="button"
                             onClick={() => setEditFormat(fmt)}
                             className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center truncate ${isSelected
-                              ? 'bg-zinc-950 text-white border-zinc-950 shadow-xs ring-1 ring-zinc-950'
-                              : 'bg-zinc-50 border-zinc-200 dark:border-white/10 text-zinc-700 hover:bg-zinc-100 hover:border-zinc-300'
+                              ? 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-zinc-950 dark:border-white shadow-xs ring-1 ring-zinc-950 dark:ring-white'
+                              : 'bg-zinc-50 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:border-zinc-300 dark:hover:border-white/20'
                               }`}
                           >
                             {fmt}
