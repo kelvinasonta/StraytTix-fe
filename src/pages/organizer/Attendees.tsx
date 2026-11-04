@@ -11,14 +11,13 @@ import { useNotification } from '../../context/NotificationContext';
 import { eventApi } from '../../api/events';
 import { attendeesApi } from '../../api/attendees';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
-import type { Event, TicketAttendee } from '../../types/api';
+import type { Event, TicketAttendee, CheckInStats } from '../../types/api';
+import CameraQrScannerModal from '../../components/events/CameraQrScannerModal';
 import { 
   Search, 
   UserCheck, 
   Users, 
   QrCode, 
-  Camera, 
-  CameraOff, 
   Download, 
   CheckCircle2, 
   AlertTriangle, 
@@ -37,7 +36,8 @@ import {
   Loader2,
   ScanLine,
   User,
-  ArrowRight
+  ArrowRight,
+  RotateCcw
 } from 'lucide-react';
 
 interface AttendeeRecord {
@@ -78,22 +78,13 @@ export const Attendees: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'Checked In' | 'Pending'>('all');
   const [ticketTierFilter, setTicketTierFilter] = useState<string>('all');
 
-  // Scanner Modal & Camera State
+  // Scanner Modal & Gate Stats State
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [cameraActive, setCameraActive] = useState(false);
-  const [cameraError, setCameraError] = useState<string | null>(null);
-  const [manualCodeInput, setManualCodeInput] = useState('');
-  const [scanResult, setScanResult] = useState<{
-    status: 'success' | 'already_checked' | 'not_found';
-    attendee?: AttendeeRecord;
-    message: string;
-  } | null>(null);
+  const [gateStats, setGateStats] = useState<CheckInStats | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
 
   // Guest Detail Modal
   const [selectedAttendee, setSelectedAttendee] = useState<AttendeeRecord | null>(null);
-
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
 
   // Load Attendees & Events
   const loadData = async (isManual = false) => {
@@ -115,6 +106,17 @@ export const Attendees: React.FC = () => {
         } catch {
           const fallbackRes = await eventApi.getAttendees(targetEventId, organizer.id).catch(() => ({ data: [] }));
           rawList = Array.isArray(fallbackRes.data) ? fallbackRes.data : (fallbackRes.data as any)?.data || [];
+        }
+
+        // Fetch gate stats if specific event selected
+        try {
+          setIsLoadingStats(true);
+          const stats = await attendeesApi.getGateStats(organizer.id, targetEventId);
+          setGateStats(stats);
+        } catch {
+          // stats not critical
+        } finally {
+          setIsLoadingStats(false);
         }
       } else {
         const fallbackRes = await eventApi.getAttendees(undefined, organizer?.id).catch(() => ({ data: [] }));
@@ -171,15 +173,51 @@ export const Attendees: React.FC = () => {
   };
 
   // Toggle Check-In status
-  const handleToggleCheckIn = (id: string) => {
+  const handleToggleCheckIn = async (id: string) => {
+    const targetAttendee = attendees.find(a => a.id === id);
+    if (!targetAttendee) return;
+
+    const targetEventId = selectedEventId !== 'all' ? selectedEventId : (events[0]?.id || '');
+    const isCurrentlyCheckedIn = targetAttendee.checkInStatus === 'Checked In';
+    const identifier = targetAttendee.ticketCode || targetAttendee.orderId || targetAttendee.id;
+
+    if (organizer?.id && targetEventId) {
+      try {
+        if (isCurrentlyCheckedIn) {
+          await attendeesApi.undoCheckInAttendee(organizer.id, targetEventId, identifier);
+          showNotification(`${targetAttendee.name}: Check-in reversed.`, 'info');
+        } else {
+          await attendeesApi.checkInAttendee(organizer.id, targetEventId, identifier);
+          showNotification(`${targetAttendee.name}: Gate entry verified!`, 'success');
+        }
+
+        const now = new Date().toISOString();
+        const updated = attendees.map(att => {
+          if (att.id === id) {
+            return {
+              ...att,
+              checkInStatus: (isCurrentlyCheckedIn ? 'Pending' : 'Checked In') as 'Checked In' | 'Pending',
+              checkedInAt: isCurrentlyCheckedIn ? undefined : now,
+              checkedInBy: isCurrentlyCheckedIn ? undefined : currentStaffName
+            };
+          }
+          return att;
+        });
+
+        saveAttendees(updated);
+        // Refresh gate stats
+        attendeesApi.getGateStats(organizer.id, targetEventId).then(setGateStats).catch(() => {});
+        return;
+      } catch (err: any) {
+        showNotification(err?.response?.data?.message || err?.message || 'Failed to update check-in status.', 'error');
+        return;
+      }
+    }
+
+    const nextStatus = targetAttendee.checkInStatus === 'Checked In' ? 'Pending' : 'Checked In';
+    const now = new Date().toISOString();
     const updated = attendees.map(att => {
       if (att.id === id) {
-        const nextStatus = att.checkInStatus === 'Checked In' ? 'Pending' : 'Checked In';
-        const now = new Date().toISOString();
-        showNotification(
-          `${att.name} (${att.ticketType}) ${nextStatus === 'Checked In' ? 'granted entry at gate' : 'check-in revoked'}.`,
-          nextStatus === 'Checked In' ? 'success' : 'info'
-        );
         return {
           ...att,
           checkInStatus: nextStatus as 'Checked In' | 'Pending',
@@ -191,126 +229,68 @@ export const Attendees: React.FC = () => {
     });
 
     saveAttendees(updated);
-
-    if (selectedAttendee?.id === id) {
-      const match = updated.find(a => a.id === id);
-      if (match) setSelectedAttendee(match);
-    }
   };
 
-  // Start Camera Stream
-  const startCamera = async () => {
-    setCameraError(null);
-    try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setCameraError('Camera access not supported on this device/browser.');
-        return;
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-      });
-
-      mediaStreamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play().catch(() => {});
-      }
-      setCameraActive(true);
-    } catch (err: any) {
-      console.warn('Camera stream error:', err);
-      setCameraError('Could not access camera. Please check browser permissions or use manual code entry.');
-      setCameraActive(false);
-    }
-  };
-
-  // Stop Camera Stream
-  const stopCamera = () => {
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach(track => track.stop());
-      mediaStreamRef.current = null;
-    }
-    setCameraActive(false);
-  };
-
-  // Open Scanner Modal
-  const handleOpenScanner = () => {
-    setIsScannerOpen(true);
-    setScanResult(null);
-    setManualCodeInput('');
-    startCamera();
-  };
-
-  // Close Scanner Modal
-  const handleCloseScanner = () => {
-    stopCamera();
-    setIsScannerOpen(false);
-    setScanResult(null);
-  };
-
-  // Process a scanned or typed ticket code
-  const handleVerifyTicketCode = async (codeToVerify: string) => {
-    const cleanCode = codeToVerify.trim().toUpperCase();
-    if (!cleanCode) return;
-
-    // Optional call to backend API check-in
+  // QR Modal Scan Handler
+  const handleScanTicket = async (identifier: string): Promise<TicketAttendee> => {
     const targetEventId = selectedEventId !== 'all' ? selectedEventId : (events[0]?.id || '');
-    if (organizer?.id && targetEventId) {
-      try {
-        await attendeesApi.checkInAttendee(organizer.id, targetEventId, cleanCode);
-      } catch (err: any) {
-        console.warn('Backend check-in notice:', err?.response?.data?.message || err?.message);
-      }
+    if (!organizer?.id || !targetEventId) {
+      throw new Error('Please select an event before scanning.');
     }
 
-    // Search by ticket code, order ID, or attendee email
-    const match = attendees.find(a => 
-      a.ticketCode.toUpperCase() === cleanCode ||
-      a.orderId.toUpperCase() === cleanCode ||
-      a.email.toLowerCase() === cleanCode.toLowerCase()
-    );
-
-    if (!match) {
-      setScanResult({
-        status: 'not_found',
-        message: `Ticket pass "${cleanCode}" was not found in registered guest list.`
-      });
-      return;
-    }
-
-    if (match.checkInStatus === 'Checked In') {
-      setScanResult({
-        status: 'already_checked',
-        attendee: match,
-        message: `Already checked in at ${match.checkedInAt ? new Date(match.checkedInAt).toLocaleTimeString() : 'earlier today'} by ${match.checkedInBy || 'Staff'}.`
-      });
-      return;
-    }
-
-    // Mark as Checked In
+    const ticket = await attendeesApi.checkInAttendee(organizer.id, targetEventId, identifier);
+    
+    // Update local attendees
     const now = new Date().toISOString();
     const updated = attendees.map(a => {
-      if (a.id === match.id) {
+      if (
+        a.ticketCode.toUpperCase() === identifier.toUpperCase() ||
+        a.orderId.toUpperCase() === identifier.toUpperCase() ||
+        (ticket.ticketNumber && a.ticketCode.toUpperCase() === ticket.ticketNumber.toUpperCase())
+      ) {
         return {
           ...a,
           checkInStatus: 'Checked In' as const,
-          checkedInAt: now,
-          checkedInBy: currentStaffName || 'Gate Scanner'
+          checkedInAt: ticket.checkedInAt || now,
+          checkedInBy: currentStaffName
         };
       }
       return a;
     });
-
     saveAttendees(updated);
-    const updatedAttendee = updated.find(a => a.id === match.id)!;
+    attendeesApi.getGateStats(organizer.id, targetEventId).then(setGateStats).catch(() => {});
 
-    setScanResult({
-      status: 'success',
-      attendee: updatedAttendee,
-      message: `Verified! Entry Granted for ${updatedAttendee.name}.`
+    return ticket;
+  };
+
+  // QR Modal Undo Handler
+  const handleUndoCheckIn = async (identifier: string): Promise<TicketAttendee> => {
+    const targetEventId = selectedEventId !== 'all' ? selectedEventId : (events[0]?.id || '');
+    if (!organizer?.id || !targetEventId) {
+      throw new Error('Please select an event.');
+    }
+
+    const ticket = await attendeesApi.undoCheckInAttendee(organizer.id, targetEventId, identifier);
+
+    const updated = attendees.map(a => {
+      if (
+        a.ticketCode.toUpperCase() === identifier.toUpperCase() ||
+        a.orderId.toUpperCase() === identifier.toUpperCase() ||
+        (ticket.ticketNumber && a.ticketCode.toUpperCase() === ticket.ticketNumber.toUpperCase())
+      ) {
+        return {
+          ...a,
+          checkInStatus: 'Pending' as const,
+          checkedInAt: undefined,
+          checkedInBy: undefined
+        };
+      }
+      return a;
     });
+    saveAttendees(updated);
+    attendeesApi.getGateStats(organizer.id, targetEventId).then(setGateStats).catch(() => {});
 
-    showNotification(`Gate Entry Granted: ${updatedAttendee.name} (${updatedAttendee.ticketType})`, 'success');
+    return ticket;
   };
 
   // Filtered Attendees list
@@ -430,7 +410,7 @@ export const Attendees: React.FC = () => {
                 <span className="text-xs font-semibold text-zinc-400">•</span>
                 <span className="text-xs font-bold text-zinc-500 font-mono">Live Check-In</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight flex items-center gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight flex items-center gap-2.5">
                 <UserCheck className="w-7 h-7 text-[#E31B23]" />
                 Guest Check-In & Gate Scanner
               </h1>
@@ -468,7 +448,7 @@ export const Attendees: React.FC = () => {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={handleOpenScanner}
+                  onClick={() => setIsScannerOpen(true)}
                   className="bg-[#E31B23] hover:bg-[#c9171e] text-white gap-2 font-bold shadow-sm"
                 >
                   <QrCode className="w-4 h-4" />
@@ -540,70 +520,30 @@ export const Attendees: React.FC = () => {
               </div>
               <span className="text-[11px] font-bold text-zinc-500">Scan QR or enter ticket voucher code</span>
             </div>
-            <form 
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleVerifyTicketCode(manualCodeInput);
-                setManualCodeInput('');
-              }} 
-              className="flex flex-col sm:flex-row gap-2.5"
-            >
+            <div className="flex flex-col sm:flex-row gap-2.5">
               <div className="relative flex-1">
                 <ScanLine className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
                 <input
                   type="text"
-                  placeholder="Scan QR barcode or enter ticket code or order reference..."
-                  value={manualCodeInput}
-                  onChange={(e) => setManualCodeInput(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs sm:text-sm font-mono font-bold text-zinc-900 focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23] outline-none uppercase"
+                  placeholder="Search attendee by name, voucher code or order reference below, or open camera..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs sm:text-sm font-medium text-zinc-900 focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23] outline-none"
                 />
               </div>
               <div className="flex items-center gap-2">
                 <Button
-                  type="submit"
+                  type="button"
                   variant="primary"
                   size="sm"
-                  disabled={!manualCodeInput.trim()}
-                  className="bg-[#E31B23] hover:bg-[#c9171e] text-white font-bold px-5 py-2.5 text-xs rounded-xl shadow-xs"
+                  onClick={() => setIsScannerOpen(true)}
+                  className="bg-[#E31B23] hover:bg-[#c9171e] text-white font-bold px-5 py-2.5 text-xs rounded-xl shadow-xs flex items-center gap-2"
                 >
-                  Verify & Enter
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleOpenScanner}
-                  className="gap-2 bg-white text-xs py-2.5 rounded-xl border-zinc-200"
-                >
-                  <Camera className="w-3.5 h-3.5 text-zinc-600" />
-                  <span>Use Camera</span>
+                  <QrCode className="w-4 h-4" />
+                  <span>Launch Camera Scanner</span>
                 </Button>
               </div>
-            </form>
-
-            {scanResult && (
-              <div
-                className={`p-3 rounded-xl flex items-center justify-between gap-2 text-xs font-bold border transition-all ${
-                  scanResult.status === 'success'
-                    ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
-                    : scanResult.status === 'already_checked'
-                    ? 'bg-amber-50 text-amber-900 border-amber-200'
-                    : 'bg-rose-50 text-rose-900 border-rose-200'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  {scanResult.status === 'success' ? <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" /> : <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />}
-                  <span>{scanResult.message}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setScanResult(null)}
-                  className="text-zinc-400 hover:text-zinc-600 p-1"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
+            </div>
           </div>
         )}
 
@@ -865,123 +805,13 @@ export const Attendees: React.FC = () => {
         </div>
 
         {/* ----------------- QR SCANNER MODAL ----------------- */}
-        <Modal
+        <CameraQrScannerModal
           isOpen={isScannerOpen}
-          onClose={handleCloseScanner}
-          title="Live QR Gate Ticket Scanner"
-        >
-          <div className="space-y-5">
-            
-            {/* Camera Viewfinder */}
-            <div className="relative rounded-2xl overflow-hidden bg-zinc-950 aspect-video flex items-center justify-center border border-zinc-800 shadow-inner">
-              <video
-                ref={videoRef}
-                playsInline
-                muted
-                className="w-full h-full object-cover"
-              />
-
-              {/* Viewfinder Target Box Overlay */}
-              <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-                <div className="w-48 h-48 border-2 border-emerald-400 rounded-2xl relative animate-pulse shadow-lg flex items-center justify-center">
-                  <div className="w-full h-0.5 bg-emerald-400/80 absolute top-1/2 -translate-y-1/2" />
-                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300 bg-black/60 px-2 py-0.5 rounded-full">
-                    Align QR Voucher
-                  </span>
-                </div>
-              </div>
-
-              {!cameraActive && (
-                <div className="absolute inset-0 bg-zinc-950/90 flex flex-col items-center justify-center text-center p-6 text-zinc-400 space-y-3">
-                  <CameraOff className="w-10 h-10 text-zinc-500" />
-                  <p className="text-xs font-semibold text-zinc-300 max-w-xs">
-                    {cameraError || 'Camera view paused or not accessible.'}
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={startCamera}
-                    className="text-xs bg-zinc-900 border-zinc-700 text-white"
-                  >
-                    Retry Camera Access
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Scan Feedback Banner */}
-            {scanResult && (
-              <div className={`p-4 rounded-xl border text-xs flex items-start gap-3 transition-all ${
-                scanResult.status === 'success'
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
-                  : scanResult.status === 'already_checked'
-                  ? 'bg-amber-50 border-amber-200 text-amber-950'
-                  : 'bg-rose-50 border-rose-200 text-rose-950'
-              }`}>
-                {scanResult.status === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />}
-                {scanResult.status === 'already_checked' && <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />}
-                {scanResult.status === 'not_found' && <XCircle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />}
-
-                <div className="space-y-1">
-                  <strong className="block font-black text-sm">
-                    {scanResult.status === 'success' ? 'PASS VERIFIED: ENTRY GRANTED' : scanResult.status === 'already_checked' ? 'DUPLICATE SCAN DETECTED' : 'TICKET NOT FOUND'}
-                  </strong>
-                  <p>{scanResult.message}</p>
-                  {scanResult.attendee && (
-                    <div className="pt-1.5 font-semibold text-[11px] space-y-0.5">
-                      <div>Guest: <strong>{scanResult.attendee.name}</strong></div>
-                      <div>Tier: <strong>{scanResult.attendee.ticketType}</strong> • Code: <strong className="font-mono">{scanResult.attendee.ticketCode}</strong></div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Manual Code Entry Fallback */}
-            <div className="space-y-2 pt-2 border-t border-zinc-100">
-              <label className="text-xs font-bold text-zinc-700">Manual Code or Barcode Lookup</label>
-              <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleVerifyTicketCode(manualCodeInput);
-                  setManualCodeInput('');
-                }}
-                className="flex items-center gap-2"
-              >
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    value={manualCodeInput}
-                    onChange={(e) => setManualCodeInput(e.target.value)}
-                    placeholder="Enter voucher code (e.g. TKT-VIP-4821)..."
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-zinc-900 outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 uppercase"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm"
-                  disabled={!manualCodeInput.trim()}
-                  className="bg-zinc-900 text-white font-bold"
-                >
-                  Verify Code
-                </Button>
-              </form>
-            </div>
-
-            {/* Footer Done Button */}
-            <div className="pt-2 flex justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCloseScanner}
-              >
-                Close Scanner
-              </Button>
-            </div>
-
-          </div>
-        </Modal>
+          onClose={() => setIsScannerOpen(false)}
+          onScan={handleScanTicket}
+          onUndo={handleUndoCheckIn}
+          title={selectedEventId !== 'all' ? `Gate Scanner — ${selectedEventId}` : 'Gate QR Scanner'}
+        />
 
         {/* ----------------- GUEST DETAIL MODAL ----------------- */}
         <Modal

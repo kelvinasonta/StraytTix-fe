@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { ApiResponse, PaginatedResponse, TicketAttendee } from '../types/api';
+import type { ApiResponse, CheckInStats, PaginatedResponse, TicketAttendee } from '../types/api';
 
 const cleanUrl = (url: string) => url.startsWith('/api/v1') ? url.replace(/^\/api\/v1/, '') : url;
 
@@ -41,6 +41,42 @@ export const attendeesApi = {
     const res = await apiClient.post<ApiResponse<TicketAttendee>>(
       cleanUrl(`/api/v1/organizers/${organizerUuid}/events/${eventUuid}/check-in`),
       { identifier }
+    );
+    return res.data.data;
+  },
+
+  // 4. Reverse / Undo Check-in (by ticket number, QR code, or ticket uuid)
+  undoCheckInAttendee: async (
+    organizerUuid: string,
+    eventUuid: string,
+    identifier: string
+  ): Promise<TicketAttendee> => {
+    const res = await apiClient.post<ApiResponse<TicketAttendee>>(
+      cleanUrl(`/api/v1/organizers/${organizerUuid}/events/${eventUuid}/check-in/undo`),
+      { identifier }
+    );
+    return res.data.data;
+  },
+
+  // 5. Reverse / Undo Check-in by Ticket UUID endpoint
+  undoCheckInByUuid: async (
+    organizerUuid: string,
+    eventUuid: string,
+    ticketUuid: string
+  ): Promise<TicketAttendee> => {
+    const res = await apiClient.post<ApiResponse<TicketAttendee>>(
+      cleanUrl(`/api/v1/organizers/${organizerUuid}/events/${eventUuid}/attendees/${ticketUuid}/undo-check-in`)
+    );
+    return res.data.data;
+  },
+
+  // 6. Live Gate Check-in Stats
+  getGateStats: async (
+    organizerUuid: string,
+    eventUuid: string
+  ): Promise<CheckInStats> => {
+    const res = await apiClient.get<ApiResponse<CheckInStats>>(
+      cleanUrl(`/api/v1/organizers/${organizerUuid}/events/${eventUuid}/check-in/stats`)
     );
     return res.data.data;
   },
