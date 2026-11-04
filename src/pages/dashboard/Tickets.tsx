@@ -137,17 +137,17 @@ ISSUED BY:   Eventa Authenticated Box Office
         {/* ========================================================================= */}
         {/* 1. TOP HEADER WITH TELEMETRY & DISCOVER ACTION */}
         {/* ========================================================================= */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200/80 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200/80 dark:border-white/10 pb-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">
                 My Ticket Stubs
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-red-50 text-[#E31B23] border border-red-200/60">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-red-50 dark:bg-red-500/10 text-[#E31B23] border border-red-200/60 dark:border-red-500/20">
                 {allTickets.length} Total Passes
               </span>
             </div>
-            <p className="text-zinc-500 text-xs sm:text-sm font-medium">
+            <p className="text-zinc-500 dark:text-zinc-400 text-xs sm:text-sm font-medium">
               Access, download, and present your verified digital QR entry passes at the gate.
             </p>
           </div>
@@ -165,19 +165,21 @@ ISSUED BY:   Eventa Authenticated Box Office
         {/* ========================================================================= */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
           {/* Segmented Tab Controls */}
-          <div className="bg-zinc-100 p-1.5 rounded-2xl flex items-center gap-1 border border-zinc-200/60 max-w-fit">
+          <div className="bg-zinc-100 dark:bg-[#0F0F14] p-1.5 rounded-2xl flex items-center gap-1 border border-zinc-200/60 dark:border-white/10 max-w-fit">
             <button
               onClick={() => setActiveTab('upcoming')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
                 activeTab === 'upcoming'
-                  ? 'bg-white text-zinc-950 shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-800'
+                  ? 'bg-white dark:bg-white/10 text-zinc-950 dark:text-white shadow-xs'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
               }`}
             >
-              <Ticket className={`w-4 h-4 ${activeTab === 'upcoming' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
+              <Ticket className={`w-4 h-4 ${activeTab === 'upcoming' ? 'text-[#E31B23]' : 'text-zinc-400 dark:text-zinc-500'}`} />
               <span>Upcoming Passes</span>
               <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
-                activeTab === 'upcoming' ? 'bg-[#FEF2F2] text-[#E31B23]' : 'bg-zinc-200 text-zinc-600'
+                activeTab === 'upcoming' 
+                  ? 'bg-red-50 dark:bg-red-500/20 text-[#E31B23]' 
+                  : 'bg-zinc-200 dark:bg-white/5 text-zinc-600 dark:text-zinc-400'
               }`}>
                 {upcomingTickets.length}
               </span>
@@ -187,14 +189,16 @@ ISSUED BY:   Eventa Authenticated Box Office
               onClick={() => setActiveTab('past')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
                 activeTab === 'past'
-                  ? 'bg-white text-zinc-950 shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-800'
+                  ? 'bg-white dark:bg-white/10 text-zinc-950 dark:text-white shadow-xs'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
               }`}
             >
-              <History className={`w-4 h-4 ${activeTab === 'past' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
+              <History className={`w-4 h-4 ${activeTab === 'past' ? 'text-[#E31B23]' : 'text-zinc-400 dark:text-zinc-500'}`} />
               <span>Past Experiences</span>
               <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
-                activeTab === 'past' ? 'bg-[#FEF2F2] text-[#E31B23]' : 'bg-zinc-200 text-zinc-600'
+                activeTab === 'past' 
+                  ? 'bg-red-50 dark:bg-red-500/20 text-[#E31B23]' 
+                  : 'bg-zinc-200 dark:bg-white/5 text-zinc-600 dark:text-zinc-400'
               }`}>
                 {pastTickets.length}
               </span>
@@ -209,7 +213,7 @@ ISSUED BY:   Eventa Authenticated Box Office
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by event or ticket ID..."
-              className="w-full pl-10 pr-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-semibold text-zinc-800 placeholder-zinc-400 outline-none focus:border-[#E31B23] transition-colors shadow-2xs"
+              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-semibold text-zinc-800 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none focus:border-[#E31B23] transition-colors shadow-2xs"
             />
           </div>
         </div>
@@ -218,14 +222,14 @@ ISSUED BY:   Eventa Authenticated Box Office
         {/* 3. TICKET LIST OR "IF NO TICKETS SHOW NO TICKETS" */}
         {/* ========================================================================= */}
         {isLoading ? (
-          <div className="text-center py-20 px-6 bg-white border border-zinc-200/80 rounded-3xl shadow-xs flex flex-col items-center justify-center gap-3">
+          <div className="text-center py-20 px-6 bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl shadow-xs flex flex-col items-center justify-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-[#E31B23]" />
-            <span className="text-sm font-bold text-zinc-700">Loading your tickets...</span>
+            <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Loading your tickets...</span>
           </div>
         ) : filteredTickets.length === 0 ? (
           /* ================= EMPTY STATE: NO TICKETS FOUND ================= */
-          <div className="text-center py-16 sm:py-20 px-6 bg-white border border-zinc-200/80 rounded-3xl shadow-xs space-y-4">
-            <div className="w-16 h-16 rounded-3xl bg-red-50 text-[#E31B23] border border-red-100 flex items-center justify-center mx-auto shadow-2xs">
+          <div className="text-center py-16 sm:py-20 px-6 bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl shadow-xs space-y-4">
+            <div className="w-16 h-16 rounded-3xl bg-red-50 dark:bg-red-500/10 text-[#E31B23] border border-red-100 dark:border-red-500/20 flex items-center justify-center mx-auto shadow-2xs">
               {activeTab === 'upcoming' ? (
                 <Ticket className="w-8 h-8" />
               ) : (
@@ -234,14 +238,14 @@ ISSUED BY:   Eventa Authenticated Box Office
             </div>
 
             <div className="space-y-1.5 max-w-sm mx-auto">
-              <h3 className="text-lg sm:text-xl font-black text-zinc-950 tracking-tight">
+              <h3 className="text-lg sm:text-xl font-black text-zinc-950 dark:text-white tracking-tight">
                 {searchQuery
                   ? 'No matching ticket stubs'
                   : activeTab === 'upcoming'
                   ? 'No Upcoming Ticket Passes'
                   : 'No Past Experiences Yet'}
               </h3>
-              <p className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-medium">
+              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
                 {searchQuery
                   ? `No tickets match "${searchQuery}". Try searching for another event title or ticket ID.`
                   : activeTab === 'upcoming'
@@ -254,7 +258,7 @@ ISSUED BY:   Eventa Authenticated Box Office
               {searchQuery ? (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="px-5 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                  className="px-5 py-2.5 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-800 dark:text-zinc-200 text-xs font-bold rounded-xl transition-colors cursor-pointer"
                 >
                   Clear Search Query
                 </button>
@@ -285,20 +289,20 @@ ISSUED BY:   Eventa Authenticated Box Office
             {/* 4. PAGINATION BUTTONS (Only displayed when tickets exist) */}
             {/* ========================================================================= */}
             {totalPages > 1 && (
-              <div className="bg-white border border-zinc-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
-                <span className="text-xs font-bold text-zinc-500">
-                  Showing <span className="font-black text-zinc-900">{startIndex + 1}</span>–
-                  <span className="font-black text-zinc-900">
+              <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
+                <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                  Showing <span className="font-black text-zinc-900 dark:text-white">{startIndex + 1}</span>–
+                  <span className="font-black text-zinc-900 dark:text-white">
                     {Math.min(startIndex + itemsPerPage, totalItems)}
                   </span>{' '}
-                  of <span className="font-black text-zinc-900">{totalItems}</span> ticket passes
+                  of <span className="font-black text-zinc-900 dark:text-white">{totalItems}</span> ticket passes
                 </span>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="px-3.5 py-2 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50 disabled:opacity-40 disabled:pointer-events-none transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 disabled:opacity-40 disabled:pointer-events-none transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Previous</span>
@@ -315,7 +319,7 @@ ISSUED BY:   Eventa Authenticated Box Office
                           className={`w-9 h-9 rounded-xl text-xs font-black transition-all cursor-pointer ${
                             isActive
                               ? 'bg-[#E31B23] text-white shadow-xs'
-                              : 'text-zinc-600 hover:bg-zinc-100'
+                              : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5'
                           }`}
                         >
                           {pageNum}
@@ -327,7 +331,7 @@ ISSUED BY:   Eventa Authenticated Box Office
                   <button
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-3.5 py-2 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50 disabled:opacity-40 disabled:pointer-events-none transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 disabled:opacity-40 disabled:pointer-events-none transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                   >
                     <span>Next</span>
                     <ChevronRight className="w-4 h-4" />
@@ -350,24 +354,24 @@ ISSUED BY:   Eventa Authenticated Box Office
           {selectedTicket && (
             <div className="space-y-6 text-center py-2">
               <div className="space-y-1">
-                <span className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-red-50 text-[#E31B23] border border-red-100 inline-block">
+                <span className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-red-50 dark:bg-red-500/10 text-[#E31B23] border border-red-100 dark:border-red-500/20 inline-block">
                   {selectedTicket.ticketTypeName}
                 </span>
-                <h3 className="text-xl sm:text-2xl font-black text-zinc-950 leading-tight pt-1">
+                <h3 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white leading-tight pt-1">
                   {selectedTicket.eventTitle}
                 </h3>
               </div>
 
               {/* QR Code Pod */}
-              <div className="flex flex-col items-center justify-center p-6 border border-zinc-200 rounded-3xl bg-zinc-50 w-56 h-56 mx-auto shadow-inner">
-                <QrCode className="w-40 h-40 text-zinc-900" />
-                <span className="text-[11px] font-mono text-zinc-500 mt-2 font-black">
+              <div className="flex flex-col items-center justify-center p-6 border border-zinc-200 dark:border-white/10 rounded-3xl bg-zinc-50 dark:bg-zinc-900 w-56 h-56 mx-auto shadow-inner">
+                <QrCode className="w-40 h-40 text-zinc-900 dark:text-white" />
+                <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 mt-2 font-black">
                   {selectedTicket.ticketId}
                 </span>
               </div>
 
               {/* Event Metadata */}
-              <div className="space-y-2.5 text-left bg-zinc-50 p-4 sm:p-5 rounded-2xl border border-zinc-200 text-xs sm:text-sm font-semibold text-zinc-700">
+              <div className="space-y-2.5 text-left bg-zinc-50 dark:bg-white/[0.03] p-4 sm:p-5 rounded-2xl border border-zinc-200 dark:border-white/10 text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                 <div className="flex items-center gap-3">
                   <Calendar className="w-4 h-4 text-[#E31B23] flex-shrink-0" />
                   <span>{formatDate(selectedTicket.eventDate)}</span>
@@ -377,8 +381,8 @@ ISSUED BY:   Eventa Authenticated Box Office
                   <span className="truncate">{selectedTicket.eventVenue}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="text-emerald-700 font-bold">100% Genuine Box Office Pass</span>
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                  <span className="text-emerald-700 dark:text-emerald-400 font-bold">100% Genuine Box Office Pass</span>
                 </div>
               </div>
 
@@ -386,7 +390,7 @@ ISSUED BY:   Eventa Authenticated Box Office
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <button
                   onClick={() => handleDownloadTicket(selectedTicket)}
-                  className="w-full inline-flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-white bg-zinc-950 hover:bg-zinc-800 py-3 px-4 rounded-xl transition-all shadow-xs cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-white bg-zinc-950 dark:bg-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 py-3 px-4 rounded-xl transition-all shadow-xs cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>Save Stub</span>
@@ -395,7 +399,7 @@ ISSUED BY:   Eventa Authenticated Box Office
                 <Link
                   to={selectedTicket.eventSlug ? `/events/${selectedTicket.eventSlug}` : '/discover'}
                   onClick={() => setSelectedTicket(null)}
-                  className="w-full inline-flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-zinc-800 bg-white hover:bg-zinc-100 border border-zinc-300 py-3 px-4 rounded-xl transition-all cursor-pointer shadow-2xs"
+                  className="w-full inline-flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-zinc-800 dark:text-zinc-200 bg-white dark:bg-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 border border-zinc-300 dark:border-white/10 py-3 px-4 rounded-xl transition-all cursor-pointer shadow-2xs"
                 >
                   <span>Event Info</span>
                   <ExternalLink className="w-3.5 h-3.5" />
