@@ -523,15 +523,15 @@ export const Analytics: React.FC = () => {
       <div className="space-y-8">
         
         {/* Page Top Header */}
-        <div className="border-b border-zinc-200/80 pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="border-b border-zinc-200/80 dark:border-white/10 pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-red-50 text-[#E31B23]">
+              <div className="p-2 rounded-xl bg-red-50 dark:bg-red-500/10 text-[#E31B23] border border-red-100 dark:border-red-500/20">
                 <Wallet className="w-5 h-5" />
               </div>
-              <h1 className="text-xl font-black text-zinc-950 tracking-tight">Finance & Wallet</h1>
+              <h1 className="text-xl font-black text-zinc-950 dark:text-white tracking-tight">Finance & Wallet</h1>
             </div>
-            <p className="text-zinc-500 text-xs font-semibold mt-1">
+            <p className="text-zinc-500 dark:text-zinc-400 text-xs font-semibold mt-1">
               Manage cleared revenue, settlement bank accounts, escrow, and payout transfers.
             </p>
           </div>
@@ -580,15 +580,15 @@ export const Analytics: React.FC = () => {
           </div>
 
           {/* 2. Pending Clearance / Escrow */}
-          <div className="p-6 rounded-2xl bg-white border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">In Escrow (Pending)</span>
-                <span className="p-2 bg-amber-50 text-amber-600 rounded-xl">
+                <span className="p-2 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-100 dark:border-amber-500/20">
                   <Clock className="w-4 h-4" />
                 </span>
               </div>
-              <h2 className="text-2xl font-black text-zinc-950 tracking-tight mt-3">
+              <h2 className="text-2xl font-black text-zinc-950 dark:text-white tracking-tight mt-3">
                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-zinc-400" /> : formatCurrency(pendingEscrow)}
               </h2>
             </div>
@@ -598,46 +598,46 @@ export const Analytics: React.FC = () => {
           </div>
 
           {/* 3. Gross Ticket Revenue */}
-          <div className="p-6 rounded-2xl bg-white border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Gross Sales</span>
-                <span className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                <span className="p-2 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-100 dark:border-blue-500/20">
                   <TrendingUp className="w-4 h-4" />
                 </span>
               </div>
-              <h2 className="text-2xl font-black text-zinc-950 tracking-tight mt-3">
+              <h2 className="text-2xl font-black text-zinc-950 dark:text-white tracking-tight mt-3">
                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-zinc-400" /> : formatCurrency(grossRevenue)}
               </h2>
             </div>
             <p className="text-[11px] text-zinc-500 mt-4 flex items-center justify-between">
-              <span>Paid checkouts: <strong className="text-zinc-900">{paidOrders.length}</strong></span>
-              <span>Avg: <strong className="text-zinc-900">{formatCurrency(avgOrderValue)}</strong></span>
+              <span>Paid checkouts: <strong className="text-zinc-900 dark:text-white">{paidOrders.length}</strong></span>
+              <span>Avg: <strong className="text-zinc-900 dark:text-white">{formatCurrency(avgOrderValue)}</strong></span>
             </p>
           </div>
 
           {/* 4. Total Payouts Settled */}
-          <div className="p-6 rounded-2xl bg-white border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Settled to Bank</span>
-                <span className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                <span className="p-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
                   <Landmark className="w-4 h-4" />
                 </span>
               </div>
-              <h2 className="text-2xl font-black text-zinc-950 tracking-tight mt-3">
+              <h2 className="text-2xl font-black text-zinc-950 dark:text-white tracking-tight mt-3">
                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-zinc-400" /> : formatCurrency(totalSettledPayouts)}
               </h2>
             </div>
             <p className="text-[11px] text-zinc-500 mt-4 flex items-center justify-between">
-              <span>Transfers: <strong className="text-zinc-900">{payouts.length}</strong></span>
+              <span>Transfers: <strong className="text-zinc-900 dark:text-white">{payouts.length}</strong></span>
               <span className="text-emerald-600 font-bold">100% Cleared</span>
             </p>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="bg-white border border-zinc-200/80 p-2 rounded-2xl shadow-xs flex items-center gap-1.5 overflow-x-auto">
+        <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 p-2 rounded-2xl shadow-xs flex items-center gap-1.5 overflow-x-auto">
           {[
             { id: 'wallet', label: 'Wallet & Payouts', icon: <Wallet className="w-4 h-4" /> },
             { id: 'analytics', label: 'Sales & Velocity', icon: <BarChart3 className="w-4 h-4" /> },
@@ -650,8 +650,8 @@ export const Analytics: React.FC = () => {
               onClick={() => setActiveTab(tab.id as any)}
               className={`px-4 py-2.5 rounded-xl text-xs font-bold inline-flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'bg-zinc-900 text-white shadow-xs'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'
+                  ? 'bg-[#E31B23] text-white shadow-xs'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-white/5'
               }`}
             >
               {tab.icon}
@@ -665,12 +665,12 @@ export const Analytics: React.FC = () => {
           <div className="space-y-6">
             
             {/* Settlement Bank Account Card */}
-            <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-5">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-2xl p-6 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 dark:border-white/10 pb-5">
                 <div>
                   <div className="flex items-center gap-2">
-                    <Building2 className="w-5 h-5 text-zinc-700" />
-                    <h3 className="text-base font-black text-zinc-950">Settlement Bank Account</h3>
+                    <Building2 className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />
+                    <h3 className="text-base font-black text-zinc-950 dark:text-white">Settlement Bank Account</h3>
                     <Badge variant="success" className="gap-1">
                       <ShieldCheck className="w-3 h-3" /> Verified
                     </Badge>
@@ -693,7 +693,7 @@ export const Analytics: React.FC = () => {
                       });
                       setShowBankModal(true);
                     }}
-                    className="w-auto text-xs font-bold px-4 py-2"
+                    fullWidth={false} className="w-auto text-xs font-bold px-4 py-2"
                   >
                     Edit Bank Account
                   </Button>
@@ -701,11 +701,11 @@ export const Analytics: React.FC = () => {
               </div>
 
               {!bankAccount ? (
-                <div className="p-8 text-center bg-zinc-50/50 rounded-xl border border-dashed border-zinc-200 space-y-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-100 text-zinc-400 mx-auto flex items-center justify-center">
+                <div className="p-8 text-center bg-zinc-50/50 dark:bg-white/[0.02] rounded-xl border border-dashed border-zinc-200 dark:border-white/15 space-y-3">
+                  <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-white/10 text-zinc-400 mx-auto flex items-center justify-center">
                     <Landmark className="w-5 h-5" />
                   </div>
-                  <p className="text-sm font-bold text-zinc-800">No Settlement Bank Account Connected</p>
+                  <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">No Settlement Bank Account Connected</p>
                   <p className="text-xs text-zinc-500 max-w-sm mx-auto">
                     Connect your commercial bank account to receive automated ticket sales payouts and on-demand withdrawals.
                   </p>
@@ -721,7 +721,7 @@ export const Analytics: React.FC = () => {
                         });
                         setShowBankModal(true);
                       }}
-                      className="gap-1.5 mt-2"
+                      fullWidth={false} className="w-auto gap-1.5 mt-2 px-5"
                     >
                       <span>Connect Bank Account</span>
                     </Button>
@@ -732,17 +732,17 @@ export const Analytics: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-5">
                   <div className="space-y-1">
                     <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Financial Institution</span>
-                    <p className="text-sm font-bold text-zinc-900">{bankAccount.bankName}</p>
+                    <p className="text-sm font-bold text-zinc-900 dark:text-white">{bankAccount.bankName}</p>
                   </div>
 
                   <div className="space-y-1">
                     <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Account Name</span>
-                    <p className="text-sm font-bold text-zinc-900 truncate">{bankAccount.accountName}</p>
+                    <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">{bankAccount.accountName}</p>
                   </div>
 
                   <div className="space-y-1">
                     <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Account Number</span>
-                    <p className="text-sm font-mono font-bold text-zinc-900">{bankAccount.accountNumber}</p>
+                    <p className="text-sm font-mono font-bold text-zinc-900 dark:text-white">{bankAccount.accountNumber}</p>
                   </div>
 
                   <div className="space-y-1">
@@ -753,7 +753,7 @@ export const Analytics: React.FC = () => {
                         setPayoutSchedule(e.target.value as any);
                         showNotification(`Payout cadence updated to ${e.target.value}.`, 'info');
                       }}
-                      className="bg-zinc-50 border border-zinc-200 text-xs font-bold rounded-xl px-3 py-1.5 text-zinc-800 focus:outline-none focus:border-[#E31B23] cursor-pointer"
+                      className="bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-xs font-bold rounded-xl px-3 py-1.5 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-[#E31B23] cursor-pointer"
                     >
                       <option value="weekly">Weekly (Every Monday)</option>
                       <option value="daily">Daily (Next Business Day)</option>
@@ -766,10 +766,10 @@ export const Analytics: React.FC = () => {
             </div>
 
             {/* Payout Transfer History */}
-            <div className="bg-white border border-zinc-200/80 rounded-2xl shadow-xs overflow-hidden">
-              <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-2xl shadow-xs overflow-hidden">
+              <div className="p-6 border-b border-zinc-100 dark:border-white/10 flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-black text-zinc-950">Payout Transfer History</h3>
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white">Payout Transfer History</h3>
                   <p className="text-xs text-zinc-500 mt-0.5">Historical ledger of all disbursements to your bank account.</p>
                 </div>
                 <span className="text-xs font-bold text-zinc-500">
@@ -779,10 +779,10 @@ export const Analytics: React.FC = () => {
 
               {payouts.length === 0 ? (
                 <div className="p-12 text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-zinc-100 text-zinc-400 mx-auto flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-white/10 text-zinc-400 mx-auto flex items-center justify-center">
                     <Receipt className="w-6 h-6" />
                   </div>
-                  <h4 className="text-sm font-bold text-zinc-800">No Payouts Initiated Yet</h4>
+                  <h4 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">No Payouts Initiated Yet</h4>
                   <p className="text-xs text-zinc-500 max-w-sm mx-auto">
                     Once you request a withdrawal or an automated disbursement triggers, records will populate here.
                   </p>
@@ -790,7 +790,7 @@ export const Analytics: React.FC = () => {
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
-                    <thead className="bg-zinc-50 border-b border-zinc-100 text-zinc-400 font-bold uppercase tracking-wider text-xs">
+                    <thead className="bg-zinc-50 dark:bg-white/[0.03] border-b border-zinc-100 dark:border-white/10 text-zinc-400 font-bold uppercase tracking-wider text-xs">
                       <tr>
                         <th className="px-6 py-4">Reference ID</th>
                         <th className="px-6 py-4">Destination Account</th>
@@ -799,16 +799,16 @@ export const Analytics: React.FC = () => {
                         <th className="px-6 py-4 text-right">Amount</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100 font-medium text-zinc-800">
+                    <tbody className="divide-y divide-zinc-100 dark:divide-white/10 font-medium text-zinc-800 dark:text-zinc-200">
                       {payouts.map((p) => (
-                        <tr key={p.id} className="hover:bg-zinc-50/70 transition-colors">
+                        <tr key={p.id} className="hover:bg-zinc-50/70 dark:hover:bg-white/[0.02] transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
                               <FileText className="w-4 h-4 text-zinc-400 flex-shrink-0" />
-                              <span className="font-mono text-xs font-bold text-zinc-900">{p.reference}</span>
+                              <span className="font-mono text-xs font-bold text-zinc-900 dark:text-white">{p.reference}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-xs font-medium text-zinc-600">
+                          <td className="px-6 py-4 text-xs font-medium text-zinc-600 dark:text-zinc-300">
                             {p.destinationBank}
                           </td>
                           <td className="px-6 py-4 text-xs text-zinc-500 font-medium">
@@ -816,20 +816,20 @@ export const Analytics: React.FC = () => {
                           </td>
                           <td className="px-6 py-4">
                             {p.status === 'completed' ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
                                 <CheckCircle2 className="w-3 h-3" /> Completed
                               </span>
                             ) : p.status === 'processing' ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20">
                                 <RefreshCw className="w-3 h-3 animate-spin" /> Processing
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
                                 <Clock className="w-3 h-3" /> Scheduled
                               </span>
                             )}
                           </td>
-                          <td className="px-6 py-4 text-right font-bold text-zinc-950 font-mono text-sm">
+                          <td className="px-6 py-4 text-right font-bold text-zinc-950 dark:text-white dark:text-white font-mono text-sm">
                             {formatCurrency(p.amount)}
                           </td>
                         </tr>
@@ -846,10 +846,10 @@ export const Analytics: React.FC = () => {
         {/* TAB 2: SALES & VELOCITY */}
         {activeTab === 'analytics' && (
           <div className="space-y-6">
-            <div className="bg-white border border-zinc-200/80 p-6 rounded-2xl shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 p-6 rounded-2xl shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div>
-                  <h3 className="text-base font-black text-zinc-950 flex items-center gap-2">
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-[#E31B23]" /> Ticket Sales & Revenue Velocity
                   </h3>
                   <p className="text-xs text-zinc-500 mt-0.5">Real-time checkout volume and revenue cadence over time.</p>
@@ -862,8 +862,8 @@ export const Analytics: React.FC = () => {
                       onClick={() => setTimeframe(t)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                         timeframe === t
-                          ? 'bg-zinc-900 text-white'
-                          : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
+                          ? 'bg-[#E31B23] text-white'
+                          : 'bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300'
                       }`}
                     >
                       {t.toUpperCase()}
@@ -877,15 +877,15 @@ export const Analytics: React.FC = () => {
                   <Loader2 className="w-8 h-8 animate-spin text-[#E31B23]" />
                 </div>
               ) : salesData.length === 0 ? (
-                <div className="h-64 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-zinc-200 rounded-xl space-y-2">
+                <div className="h-64 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-zinc-200 dark:border-white/15 rounded-xl space-y-2">
                   <BarChart3 className="w-10 h-10 text-zinc-300" />
-                  <p className="text-sm font-bold text-zinc-700">No sales activity in this timeframe</p>
+                  <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">No sales activity in this timeframe</p>
                   <p className="text-xs text-zinc-400 max-w-sm">
                     When attendees purchase event tickets, your sales velocity throughput will chart here automatically.
                   </p>
                 </div>
               ) : (
-                <div className="h-72 flex items-end justify-between gap-3 pt-10 pb-4 border-b border-zinc-100">
+                <div className="h-72 flex items-end justify-between gap-3 pt-10 pb-4 border-b border-zinc-100 dark:border-white/10">
                   {salesData.map((data, idx) => {
                     const heightPercent = Math.min(100, Math.max(12, (data.count / maxSalesCount) * 85 + 10));
                     return (
@@ -914,10 +914,10 @@ export const Analytics: React.FC = () => {
 
         {/* TAB 3: REVENUE BY EVENT */}
         {activeTab === 'events' && (
-          <div className="bg-white border border-zinc-200/80 rounded-2xl shadow-xs overflow-hidden">
-            <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-2xl shadow-xs overflow-hidden">
+            <div className="p-6 border-b border-zinc-100 dark:border-white/10 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-black text-zinc-950">Event Revenue & Clearance Breakdown</h3>
+                <h3 className="text-base font-black text-zinc-950 dark:text-white">Event Revenue & Clearance Breakdown</h3>
                 <p className="text-xs text-zinc-500 mt-0.5">Performance, processing fee deduction, and payout settlement state per event.</p>
               </div>
               <span className="text-xs font-bold text-zinc-500">{events.length} Events Total</span>
@@ -926,13 +926,13 @@ export const Analytics: React.FC = () => {
             {events.length === 0 ? (
               <div className="p-12 text-center space-y-3">
                 <Receipt className="w-10 h-10 text-zinc-300 mx-auto" />
-                <h4 className="text-sm font-bold text-zinc-800">No Events Found</h4>
+                <h4 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">No Events Found</h4>
                 <p className="text-xs text-zinc-400">Create events to begin tracking admissions and revenue.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-zinc-50 border-b border-zinc-100 text-zinc-400 font-bold uppercase tracking-wider text-xs">
+                  <thead className="bg-zinc-50 dark:bg-white/[0.03] border-b border-zinc-100 dark:border-white/10 text-zinc-400 font-bold uppercase tracking-wider text-xs">
                     <tr>
                       <th className="px-6 py-4">Event Name</th>
                       <th className="px-6 py-4">Tickets Sold</th>
@@ -942,30 +942,30 @@ export const Analytics: React.FC = () => {
                       <th className="px-6 py-4 text-right">Escrow Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100 font-medium text-zinc-800">
+                  <tbody className="divide-y divide-zinc-100 dark:divide-white/10 font-medium text-zinc-800 dark:text-zinc-200">
                     {eventRevenueStats.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-zinc-50/70 transition-colors">
+                      <tr key={idx} className="hover:bg-zinc-50/70 dark:hover:bg-white/[0.02] transition-colors">
                         <td className="px-6 py-4">
-                          <p className="font-bold text-zinc-950">{item.event.title || 'Untitled Event'}</p>
+                          <p className="font-bold text-zinc-950 dark:text-white">{item.event.title || 'Untitled Event'}</p>
                           <span className="text-xs text-zinc-400">{item.event.startDate ? formatDate(item.event.startDate) : 'Upcoming'}</span>
                         </td>
-                        <td className="px-6 py-4 font-mono font-bold text-zinc-800">
+                        <td className="px-6 py-4 font-mono font-bold text-zinc-800 dark:text-zinc-200">
                           {item.ticketsSold}
                         </td>
-                        <td className="px-6 py-4 font-mono font-bold text-zinc-950">
+                        <td className="px-6 py-4 font-mono font-bold text-zinc-950 dark:text-white">
                           {formatCurrency(item.gross)}
                         </td>
                         <td className="px-6 py-4 font-mono text-zinc-500">
                           {formatCurrency(item.fee)}
                         </td>
-                        <td className="px-6 py-4 font-mono font-bold text-emerald-700">
+                        <td className="px-6 py-4 font-mono font-bold text-emerald-700 dark:text-emerald-400">
                           {formatCurrency(item.net)}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
                             item.settlementStatus.includes('Cleared')
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-amber-50 text-amber-700 border border-amber-200'
+                              ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
+                              : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20'
                           }`}>
                             {item.settlementStatus}
                           </span>
@@ -981,10 +981,10 @@ export const Analytics: React.FC = () => {
 
         {/* TAB 4: TRANSACTION LEDGER */}
         {activeTab === 'ledger' && (
-          <div className="bg-white border border-zinc-200/80 rounded-2xl shadow-xs overflow-hidden space-y-4">
-            <div className="p-6 border-b border-zinc-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-2xl shadow-xs overflow-hidden space-y-4">
+            <div className="p-6 border-b border-zinc-100 dark:border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h3 className="text-base font-black text-zinc-950">Ticket Transaction Ledger</h3>
+                <h3 className="text-base font-black text-zinc-950 dark:text-white">Ticket Transaction Ledger</h3>
                 <p className="text-xs text-zinc-500 mt-0.5">Granular audit log of attendee checkouts and ticketing transactions.</p>
               </div>
 
@@ -996,14 +996,14 @@ export const Analytics: React.FC = () => {
                     placeholder="Search order ID, attendee..."
                     value={ledgerSearch}
                     onChange={(e) => setLedgerSearch(e.target.value)}
-                    className="w-full bg-zinc-50 border border-zinc-200 text-xs rounded-xl pl-9 pr-3 py-2 font-medium focus:outline-none focus:border-[#E31B23]"
+                    className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs text-zinc-900 dark:text-white rounded-xl pl-9 pr-3 py-2 font-medium focus:outline-none focus:border-[#E31B23]"
                   />
                 </div>
 
                 <select
                   value={ledgerStatusFilter}
                   onChange={(e) => setLedgerStatusFilter(e.target.value as any)}
-                  className="bg-zinc-50 border border-zinc-200 text-xs font-bold rounded-xl px-3 py-2 text-zinc-800 focus:outline-none"
+                  className="bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-xs font-bold rounded-xl px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none"
                 >
                   <option value="all">All Statuses</option>
                   <option value="Paid">Paid</option>
@@ -1016,13 +1016,13 @@ export const Analytics: React.FC = () => {
             {filteredLedger.length === 0 ? (
               <div className="p-12 text-center space-y-3">
                 <FileText className="w-10 h-10 text-zinc-300 mx-auto" />
-                <h4 className="text-sm font-bold text-zinc-800">No Transactions Match Filter</h4>
+                <h4 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">No Transactions Match Filter</h4>
                 <p className="text-xs text-zinc-400">Clear your search query or status filter to see more results.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-zinc-50 border-b border-zinc-100 text-zinc-400 font-bold uppercase tracking-wider text-xs">
+                  <thead className="bg-zinc-50 dark:bg-white/[0.03] border-b border-zinc-100 dark:border-white/10 text-zinc-400 font-bold uppercase tracking-wider text-xs">
                     <tr>
                       <th className="px-6 py-4">Transaction / Order</th>
                       <th className="px-6 py-4">Attendee</th>
@@ -1032,17 +1032,17 @@ export const Analytics: React.FC = () => {
                       <th className="px-6 py-4 text-right">Amount</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100 font-medium text-zinc-800">
+                  <tbody className="divide-y divide-zinc-100 dark:divide-white/10 font-medium text-zinc-800 dark:text-zinc-200">
                     {filteredLedger.map((o) => (
-                      <tr key={o.id} className="hover:bg-zinc-50/70 transition-colors">
-                        <td className="px-6 py-4 font-mono font-bold text-xs text-zinc-950">
+                      <tr key={o.id} className="hover:bg-zinc-50/70 dark:hover:bg-white/[0.02] transition-colors">
+                        <td className="px-6 py-4 font-mono font-bold text-xs text-zinc-950 dark:text-white">
                           {o.id}
                         </td>
                         <td className="px-6 py-4">
-                          <p className="font-bold text-xs text-zinc-900">{o.customerName || 'Anonymous Attendee'}</p>
+                          <p className="font-bold text-xs text-zinc-900 dark:text-white">{o.customerName || 'Anonymous Attendee'}</p>
                           <span className="text-[11px] text-zinc-400">{o.customerEmail}</span>
                         </td>
-                        <td className="px-6 py-4 text-xs font-medium text-zinc-700">
+                        <td className="px-6 py-4 text-xs font-medium text-zinc-700 dark:text-zinc-300">
                           {o.eventTitle || 'General Event'}
                         </td>
                         <td className="px-6 py-4 text-xs text-zinc-400">
@@ -1051,15 +1051,15 @@ export const Analytics: React.FC = () => {
                         <td className="px-6 py-4">
                           <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                             o.status === 'Paid'
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
                               : o.status === 'Refunded'
-                              ? 'bg-red-50 text-red-700 border border-red-200'
-                              : 'bg-amber-50 text-amber-700 border border-amber-200'
+                              ? 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'
+                              : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20'
                           }`}>
                             {o.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-right font-bold font-mono text-zinc-950">
+                        <td className="px-6 py-4 text-right font-bold font-mono text-zinc-950 dark:text-white">
                           {formatCurrency(Number(o.amount || 0))}
                         </td>
                       </tr>
@@ -1074,21 +1074,21 @@ export const Analytics: React.FC = () => {
         {/* MODAL 1: REQUEST PAYOUT */}
         {showWithdrawModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-xs animate-fadeIn">
-            <div className="bg-white border border-zinc-200 rounded-3xl max-w-md w-full shadow-2xl p-6 space-y-6 animate-scaleUp">
-              <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl max-w-md w-full shadow-2xl p-6 space-y-6 animate-scaleUp text-zinc-900 dark:text-white">
+              <div className="flex items-center justify-between border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div className="flex items-center gap-2.5">
                   <div className="p-2.5 bg-red-50 text-[#E31B23] rounded-xl">
                     <ArrowDownToLine className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-black text-zinc-950">Request Payout</h3>
+                    <h3 className="text-base font-black text-zinc-950 dark:text-white">Request Payout</h3>
                     <p className="text-xs text-zinc-500">Withdraw available cleared funds to bank</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowWithdrawModal(false)}
-                  className="text-zinc-400 hover:text-zinc-700 p-1 rounded-lg transition-colors cursor-pointer"
+                  className="text-zinc-400 hover:text-zinc-700 dark:hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1096,14 +1096,14 @@ export const Analytics: React.FC = () => {
 
               <form onSubmit={handleRequestWithdrawal} className="space-y-4">
                 {/* Available balance indicator */}
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-between">
-                  <span className="text-xs font-bold text-zinc-600">Available to Withdraw</span>
-                  <span className="text-sm font-black font-mono text-zinc-950">{formatCurrency(availableBalance)}</span>
+                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-between">
+                  <span className="text-xs font-bold text-zinc-600 dark:text-zinc-300">Available to Withdraw</span>
+                  <span className="text-sm font-black font-mono text-zinc-950 dark:text-white">{formatCurrency(availableBalance)}</span>
                 </div>
 
                 {/* Amount Input */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-700">Withdrawal Amount (₦)</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Withdrawal Amount (₦)</label>
                   <div className="relative">
                     <input
                       type="number"
@@ -1114,7 +1114,7 @@ export const Analytics: React.FC = () => {
                       value={withdrawAmount}
                       onChange={(e) => setWithdrawAmount(e.target.value)}
                       required
-                      className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl font-mono text-base font-bold pr-20 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent transition-all"
+                      className="w-full px-3.5 py-2.5 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl font-mono text-base font-bold pr-20 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent transition-all"
                     />
                     <button
                       type="button"
@@ -1129,10 +1129,10 @@ export const Analytics: React.FC = () => {
 
                 {/* Destination Bank Preview */}
                 {bankAccount ? (
-                  <div className="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 flex items-center gap-3">
+                  <div className="p-3.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 flex items-center gap-3">
                     <Building2 className="w-5 h-5 text-zinc-500 flex-shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-zinc-900 truncate">{bankAccount.bankName}</p>
+                      <p className="text-xs font-bold text-zinc-900 dark:text-white truncate">{bankAccount.bankName}</p>
                       <p className="text-[11px] font-mono text-zinc-500">{bankAccount.accountNumber} • {bankAccount.accountName}</p>
                     </div>
                     <Badge variant="success" className="text-[9px]">Connected</Badge>
@@ -1147,14 +1147,14 @@ export const Analytics: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowWithdrawModal(false)}
-                    className="px-4 py-2.5 rounded-xl border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-bold cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 text-xs font-bold cursor-pointer"
                   >
                     Cancel
                   </button>
                   <Button
                     type="submit"
                     isLoading={isSubmittingWithdraw}
-                    className="bg-[#E31B23] hover:bg-[#c9141b] text-white px-6 py-2.5 text-xs font-bold rounded-xl"
+                    fullWidth={false} className="w-auto bg-[#E31B23] hover:bg-[#c9141b] text-white px-6 py-2.5 text-xs font-bold rounded-xl"
                   >
                     Confirm Payout
                   </Button>
@@ -1167,21 +1167,21 @@ export const Analytics: React.FC = () => {
         {/* MODAL 2: EDIT BANK ACCOUNT */}
         {showBankModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-xs animate-fadeIn">
-            <div className="bg-white border border-zinc-200 rounded-3xl max-w-md w-full shadow-2xl p-6 space-y-6 animate-scaleUp">
-              <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl max-w-md w-full shadow-2xl p-6 space-y-6 animate-scaleUp text-zinc-900 dark:text-white">
+              <div className="flex items-center justify-between border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div className="flex items-center gap-2.5">
                   <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
                     <Building2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-black text-zinc-950">Settlement Bank Details</h3>
+                    <h3 className="text-base font-black text-zinc-950 dark:text-white">Settlement Bank Details</h3>
                     <p className="text-xs text-zinc-500">Provide bank details for automated transfers</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowBankModal(false)}
-                  className="text-zinc-400 hover:text-zinc-700 p-1 rounded-lg transition-colors cursor-pointer"
+                  className="text-zinc-400 hover:text-zinc-700 dark:hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1189,11 +1189,11 @@ export const Analytics: React.FC = () => {
 
               <form onSubmit={handleSaveBank} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-700">Bank Name</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Bank Name</label>
                   <select
                     value={editBankForm.bankName}
                     onChange={(e) => setEditBankForm(prev => ({ ...prev, bankName: e.target.value }))}
-                    className="w-full bg-zinc-50 border border-zinc-200 text-xs font-bold rounded-xl px-3 py-2.5 text-zinc-900 focus:outline-none focus:border-[#E31B23] cursor-pointer"
+                    className="w-full bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-xs font-bold rounded-xl px-3 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:border-[#E31B23] cursor-pointer"
                   >
                     <option value="Guaranty Trust Bank (GTBank)">Guaranty Trust Bank (GTBank)</option>
                     <option value="Access Bank PLC">Access Bank PLC</option>
@@ -1230,7 +1230,7 @@ export const Analytics: React.FC = () => {
                   />
                 </div>
 
-                <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl text-xs text-blue-800 flex items-start gap-2">
+                <div className="p-3 bg-blue-50/70 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl text-xs text-blue-800 dark:text-blue-300 flex items-start gap-2">
                   <ShieldCheck className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                   <span>
                     Account name must match your legal business registration to avoid settlement compliance holds.
@@ -1241,14 +1241,14 @@ export const Analytics: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowBankModal(false)}
-                    className="px-4 py-2.5 rounded-xl border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-bold cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 text-xs font-bold cursor-pointer"
                   >
                     Cancel
                   </button>
                   <Button
                     type="submit"
                     isLoading={isSavingBank}
-                    className="bg-zinc-900 hover:bg-zinc-800 text-white px-6 py-2.5 text-xs font-bold rounded-xl"
+                    fullWidth={false} className="w-auto bg-[#E31B23] hover:bg-[#c9141b] text-white px-6 py-2.5 text-xs font-bold rounded-xl"
                   >
                     Save & Verify Account
                   </Button>
@@ -1287,7 +1287,7 @@ export const Analytics: React.FC = () => {
                   <Button
                     type="button"
                     onClick={() => setIsTopUpModalOpen(true)}
-                    className="bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs px-5 py-3 rounded-xl shadow-md inline-flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    fullWidth={false} className="w-auto bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs px-5 py-3 rounded-xl shadow-md inline-flex items-center justify-center gap-2 cursor-pointer transition-all"
                   >
                     <Plus className="w-4 h-4 stroke-[3]" />
                     Top-Up Credits
@@ -1308,7 +1308,7 @@ export const Analytics: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-black text-zinc-950 tracking-tight">Email Marketing & Outreach Packages</h3>
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white tracking-tight">Email Marketing & Outreach Packages</h3>
                   <p className="text-xs text-zinc-500 font-medium">Dispatch targeted emails, announcements, and promotional newsletters to ticket holders.</p>
                 </div>
                 <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
@@ -1324,7 +1324,7 @@ export const Analytics: React.FC = () => {
                     cost: 1,
                     unit: 'credit / SMS',
                     icon: MessageSquare,
-                    color: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+                    color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20',
                     actionLabel: 'Dispatch Test SMS',
                     actionCost: 1
                   },
@@ -1334,7 +1334,7 @@ export const Analytics: React.FC = () => {
                     cost: 5,
                     unit: 'credits / run',
                     icon: Sparkles,
-                    color: 'text-purple-600 bg-purple-50 border-purple-100',
+                    color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 border-purple-100 dark:border-purple-500/20',
                     actionLabel: 'Run AI Writer',
                     actionCost: 5
                   },
@@ -1344,7 +1344,7 @@ export const Analytics: React.FC = () => {
                     cost: 50,
                     unit: 'credits / 7 days',
                     icon: Rocket,
-                    color: 'text-red-600 bg-red-50 border-red-100',
+                    color: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20',
                     actionLabel: 'Boost Event',
                     actionCost: 50
                   },
@@ -1354,7 +1354,7 @@ export const Analytics: React.FC = () => {
                     cost: 25,
                     unit: 'credits / scanner',
                     icon: QrCode,
-                    color: 'text-blue-600 bg-blue-50 border-blue-100',
+                    color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20',
                     actionLabel: 'Provision Pass',
                     actionCost: 25
                   },
@@ -1364,7 +1364,7 @@ export const Analytics: React.FC = () => {
                     cost: 100,
                     unit: 'credits / mo',
                     icon: Mail,
-                    color: 'text-amber-600 bg-amber-50 border-amber-100',
+                    color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-100 dark:border-amber-500/20',
                     actionLabel: 'Subscribe Domain',
                     actionCost: 100
                   },
@@ -1374,7 +1374,7 @@ export const Analytics: React.FC = () => {
                     cost: 15,
                     unit: 'credits / device',
                     icon: Zap,
-                    color: 'text-teal-600 bg-teal-50 border-teal-100',
+                    color: 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-500/10 border-teal-100 dark:border-teal-500/20',
                     actionLabel: 'Enable POS License',
                     actionCost: 15
                   }
@@ -1383,19 +1383,19 @@ export const Analytics: React.FC = () => {
                   return (
                     <div
                       key={idx}
-                      className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-2xs hover:shadow-sm transition-all flex flex-col justify-between gap-4"
+                      className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-2xl p-5 shadow-2xs hover:shadow-sm transition-all flex flex-col justify-between gap-4"
                     >
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${item.color}`}>
                             <Icon className="w-4 h-4" />
                           </div>
-                          <span className="px-2 py-0.5 rounded-md text-[11px] font-black bg-zinc-100 text-zinc-800">
+                          <span className="px-2 py-0.5 rounded-md text-[11px] font-black bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
                             {item.cost} {item.unit}
                           </span>
                         </div>
                         <div>
-                          <h4 className="text-xs font-bold text-zinc-950">{item.title}</h4>
+                          <h4 className="text-xs font-bold text-zinc-950 dark:text-white">{item.title}</h4>
                           <p className="text-[11px] text-zinc-500 font-medium mt-1 leading-relaxed">{item.description}</p>
                         </div>
                       </div>
@@ -1404,7 +1404,7 @@ export const Analytics: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleSimulateFeatureUse(item.title, item.actionCost)}
-                          className="w-full py-2 px-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 text-zinc-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          className="w-full py-2 px-3 rounded-xl bg-zinc-50 dark:bg-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 border border-zinc-200/80 dark:border-white/10 text-zinc-800 dark:text-zinc-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                         >
                           <span>{item.actionLabel}</span>
                           <span className="text-[10px] text-zinc-400 font-semibold">({item.actionCost} credits)</span>
@@ -1417,10 +1417,10 @@ export const Analytics: React.FC = () => {
             </div>
 
             {/* Credit Transaction Ledger */}
-            <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div>
-                  <h3 className="text-base font-black text-zinc-950 tracking-tight">Credit Ledger & Transaction History</h3>
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white tracking-tight">Credit Ledger & Transaction History</h3>
                   <p className="text-xs text-zinc-500 font-medium">Record of all credit purchases, marketing deductions, and feature usage.</p>
                 </div>
                 <span className="text-xs font-bold text-zinc-400 font-mono">
@@ -1431,7 +1431,7 @@ export const Analytics: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-zinc-150 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+                    <tr className="border-b border-zinc-150 dark:border-white/10 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
                       <th className="pb-3 font-semibold">Date</th>
                       <th className="pb-3 font-semibold">Description</th>
                       <th className="pb-3 font-semibold">Reference</th>
@@ -1439,7 +1439,7 @@ export const Analytics: React.FC = () => {
                       <th className="pb-3 font-semibold text-right">Balance</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100">
+                  <tbody className="divide-y divide-zinc-100 dark:divide-white/10">
                     {creditTransactions.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="py-12 text-center text-zinc-500 font-medium">
@@ -1448,16 +1448,16 @@ export const Analytics: React.FC = () => {
                       </tr>
                     ) : (
                       creditTransactions.map((tx) => (
-                        <tr key={tx.id} className="hover:bg-zinc-50/60 transition-colors">
+                        <tr key={tx.id} className="hover:bg-zinc-50/60 dark:hover:bg-white/[0.02] transition-colors">
                           <td className="py-3.5 text-zinc-500 font-medium whitespace-nowrap">{tx.date}</td>
-                          <td className="py-3.5 text-zinc-900 font-bold">{tx.description}</td>
+                          <td className="py-3.5 text-zinc-900 dark:text-white font-bold">{tx.description}</td>
                           <td className="py-3.5 font-mono text-[11px] text-zinc-400">{tx.reference}</td>
                           <td className={`py-3.5 font-black text-right whitespace-nowrap ${
-                            tx.type === 'credit' ? 'text-emerald-600' : 'text-zinc-900'
+                            tx.type === 'credit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-900 dark:text-white'
                           }`}>
                             {tx.type === 'credit' ? `+${tx.amount}` : `-${tx.amount}`} Credits
                           </td>
-                          <td className="py-3.5 font-bold text-zinc-700 text-right whitespace-nowrap">
+                          <td className="py-3.5 font-bold text-zinc-700 dark:text-zinc-300 text-right whitespace-nowrap">
                             {tx.balanceAfter.toLocaleString()}
                           </td>
                         </tr>
@@ -1511,8 +1511,8 @@ export const Analytics: React.FC = () => {
                   onClick={() => setSelectedPack(pack.id as any)}
                   className={`p-4 rounded-2xl border-2 transition-all cursor-pointer relative flex flex-col justify-between gap-3 ${
                     selectedPack === pack.id
-                      ? 'border-[#E31B23] bg-red-50/20 shadow-xs'
-                      : 'border-zinc-200/80 hover:border-zinc-300 bg-white'
+                      ? 'border-[#E31B23] bg-red-50/20 dark:bg-red-500/10 shadow-xs'
+                      : 'border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-white dark:bg-white/5'
                   }`}
                 >
                   {pack.badge && (
@@ -1521,9 +1521,9 @@ export const Analytics: React.FC = () => {
                     </span>
                   )}
                   <div>
-                    <h4 className="text-xs font-bold text-zinc-800">{pack.name}</h4>
-                    <div className="text-xl font-black text-zinc-950 mt-1">
-                      {pack.credits} <span className="text-xs font-semibold text-zinc-500">Credits</span>
+                    <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{pack.name}</h4>
+                    <div className="text-xl font-black text-zinc-950 dark:text-white mt-1">
+                      {pack.credits} <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Credits</span>
                     </div>
                   </div>
                   <div className="text-xs font-black text-[#E31B23] pt-2 border-t border-zinc-100">
@@ -1534,7 +1534,7 @@ export const Analytics: React.FC = () => {
             </div>
 
             {/* Custom Amount Option */}
-            <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 space-y-3">
+            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 space-y-3">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
@@ -1543,7 +1543,7 @@ export const Analytics: React.FC = () => {
                   onChange={() => setSelectedPack('custom')}
                   className="w-4 h-4 text-[#E31B23] accent-[#E31B23]"
                 />
-                <span className="text-xs font-bold text-zinc-900">Custom Credits Amount (₦50 / credit)</span>
+                <span className="text-xs font-bold text-zinc-900 dark:text-white">Custom Credits Amount (₦50 / credit)</span>
               </label>
 
               {selectedPack === 'custom' && (
@@ -1559,14 +1559,14 @@ export const Analytics: React.FC = () => {
                       placeholder="e.g. 300"
                     />
                   </div>
-                  <span className="text-xs font-bold text-zinc-700">
+                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
                     Total: ₦{((Number(customCreditsAmount) || 0) * 50).toLocaleString()}
                   </span>
                 </div>
               )}
             </div>
 
-            <div className="p-4 rounded-2xl bg-zinc-100/70 border border-zinc-200/70 flex items-center justify-between text-xs font-medium text-zinc-700">
+            <div className="p-4 rounded-2xl bg-zinc-100/70 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 flex items-center justify-between text-xs font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
               <div className="flex items-center gap-2.5">
                 <CreditCard className="w-4 h-4 text-zinc-500" />
                 <span>Pay securely via <strong>Paystack / Flutterwave Gateway</strong></span>
@@ -1582,14 +1582,16 @@ export const Analytics: React.FC = () => {
                 variant="outline"
                 onClick={() => setIsTopUpModalOpen(false)}
                 disabled={isProcessingTopUp}
-                className="text-xs"
+                fullWidth={false}
+                className="w-auto px-5 text-xs"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 isLoading={isProcessingTopUp}
-                className="bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs"
+                fullWidth={false}
+                className="w-auto px-6 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs"
               >
                 <Plus className="w-3.5 h-3.5 mr-1" />
                 Pay & Top-Up Now

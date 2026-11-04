@@ -282,12 +282,12 @@ export const Events: React.FC = () => {
       <div className="space-y-6">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-150 pb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-150 dark:border-white/10 pb-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">
               {role === 'staff' ? 'Assigned Events' : 'Events'}
             </h1>
-            <p className="text-zinc-500 text-sm font-semibold mt-1">
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-semibold mt-1">
               {role === 'staff'
                 ? 'Events assigned to you for live ticket scanning and gate check-in.'
                 : 'Publish, preview, and edit your listings.'}
@@ -297,7 +297,7 @@ export const Events: React.FC = () => {
             <button
               onClick={() => fetchEvents()}
               disabled={isLoading}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300 text-sm font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50"
               title="Refresh listings"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
@@ -315,7 +315,7 @@ export const Events: React.FC = () => {
         {/* Search, Filter Tabs and View Mode Toolbar */}
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           {/* Status Filter Tabs (including Ended) */}
-          <div className="flex items-center gap-1.5 bg-zinc-100/80 p-1.5 rounded-2xl border border-zinc-200/80 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 bg-zinc-100/80 dark:bg-white/5 p-1.5 rounded-2xl border border-zinc-200/80 dark:border-white/10 overflow-x-auto no-scrollbar">
             {(['All', 'Published', 'Draft', 'Ended'] as const).map((status) => {
               const count = getStatusCount(status);
               const isActive = selectedStatus === status;
@@ -324,12 +324,12 @@ export const Events: React.FC = () => {
                   key={status}
                   onClick={() => setSelectedStatus(status)}
                   className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${isActive
-                    ? 'bg-white text-zinc-950 shadow-xs border border-zinc-200'
-                    : 'text-zinc-500 hover:text-zinc-900'
+                    ? 'bg-white dark:bg-[#0F0F14] text-zinc-950 dark:text-white shadow-xs border border-zinc-200 dark:border-white/10'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
                     }`}
                 >
                   <span>{status}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${isActive ? 'bg-[#E31B23] text-white' : 'bg-zinc-200/80 text-zinc-600'
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${isActive ? 'bg-[#E31B23] text-white' : 'bg-zinc-200/80 dark:bg-white/10 text-zinc-600 dark:text-zinc-300'
                     }`}>
                     {count}
                   </span>
@@ -347,16 +347,16 @@ export const Events: React.FC = () => {
                 placeholder="Search title, venue, genre..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm font-medium focus:outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all shadow-2xs"
+                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 text-zinc-900 dark:text-white rounded-xl text-sm font-medium focus:outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all shadow-2xs"
               />
             </div>
 
             {/* View Mode Switcher (Grid vs List - Matching Discover page) */}
-            <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl border border-zinc-200/70 shrink-0">
+            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-white/5 p-1 rounded-xl border border-zinc-200/70 dark:border-white/10 shrink-0">
               <button
                 onClick={() => handleViewModeChange('grid')}
                 className={`p-2 rounded-lg transition-all cursor-pointer ${
-                  viewMode === 'grid' ? 'bg-white text-zinc-950 shadow-xs' : 'text-zinc-400 hover:text-zinc-700'
+                  viewMode === 'grid' ? 'bg-white dark:bg-[#0F0F14] text-zinc-950 dark:text-white shadow-xs' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200'
                 }`}
                 title="Grid view"
                 aria-label="Grid view"
@@ -366,7 +366,7 @@ export const Events: React.FC = () => {
               <button
                 onClick={() => handleViewModeChange('list')}
                 className={`p-2 rounded-lg transition-all cursor-pointer ${
-                  viewMode === 'list' ? 'bg-white text-zinc-950 shadow-xs' : 'text-zinc-400 hover:text-zinc-700'
+                  viewMode === 'list' ? 'bg-white dark:bg-[#0F0F14] text-zinc-950 dark:text-white shadow-xs' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200'
                 }`}
                 title="List view"
                 aria-label="List view"
@@ -398,15 +398,15 @@ export const Events: React.FC = () => {
           viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-3xl p-4 border border-zinc-200 animate-pulse space-y-4 shadow-xs">
-                  <div className="h-48 bg-zinc-100 rounded-2xl w-full" />
+                <div key={i} className="bg-white dark:bg-[#0F0F14] rounded-3xl p-4 border border-zinc-200 dark:border-white/10 animate-pulse space-y-4 shadow-xs">
+                  <div className="h-48 bg-zinc-100 dark:bg-white/5 rounded-2xl w-full" />
                   <div className="space-y-2 px-1">
-                    <div className="h-5 bg-zinc-100 rounded-md w-3/4" />
-                    <div className="h-4 bg-zinc-100 rounded-md w-1/2" />
+                    <div className="h-5 bg-zinc-100 dark:bg-white/5 rounded-md w-3/4" />
+                    <div className="h-4 bg-zinc-100 dark:bg-white/5 rounded-md w-1/2" />
                   </div>
-                  <div className="pt-3 border-t border-zinc-100 flex justify-between items-center px-1">
-                    <div className="h-4 bg-zinc-100 rounded-md w-1/4" />
-                    <div className="h-8 bg-zinc-100 rounded-xl w-24" />
+                  <div className="pt-3 border-t border-zinc-100 dark:border-white/10 flex justify-between items-center px-1">
+                    <div className="h-4 bg-zinc-100 dark:bg-white/5 rounded-md w-1/4" />
+                    <div className="h-8 bg-zinc-100 dark:bg-white/5 rounded-xl w-24" />
                   </div>
                 </div>
               ))}
@@ -414,31 +414,31 @@ export const Events: React.FC = () => {
           ) : (
             <div className="space-y-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="bg-white border border-zinc-200/90 rounded-3xl p-5 shadow-xs animate-pulse flex flex-col md:flex-row gap-5 items-center">
-                  <div className="w-full sm:w-48 h-32 bg-zinc-100 rounded-2xl shrink-0" />
+                <div key={i} className="bg-white dark:bg-[#0F0F14] border border-zinc-200/90 dark:border-white/10 rounded-3xl p-5 shadow-xs animate-pulse flex flex-col md:flex-row gap-5 items-center">
+                  <div className="w-full sm:w-48 h-32 bg-zinc-100 dark:bg-white/5 rounded-2xl shrink-0" />
                   <div className="flex-1 space-y-2.5 w-full">
-                    <div className="h-5 bg-zinc-100 rounded-md w-1/2" />
-                    <div className="h-4 bg-zinc-100 rounded-md w-1/3" />
-                    <div className="h-3 bg-zinc-100 rounded-md w-2/3" />
+                    <div className="h-5 bg-zinc-100 dark:bg-white/5 rounded-md w-1/2" />
+                    <div className="h-4 bg-zinc-100 dark:bg-white/5 rounded-md w-1/3" />
+                    <div className="h-3 bg-zinc-100 dark:bg-white/5 rounded-md w-2/3" />
                   </div>
-                  <div className="w-full md:w-56 h-20 bg-zinc-100 rounded-2xl shrink-0" />
+                  <div className="w-full md:w-56 h-20 bg-zinc-100 dark:bg-white/5 rounded-2xl shrink-0" />
                 </div>
               ))}
             </div>
           )
         ) : filteredEvents.length === 0 ? (
-          <div className="bg-white border border-zinc-150 rounded-2xl shadow-sm py-16 px-4 text-center flex flex-col items-center justify-center">
-            <div className="w-14 h-14 bg-zinc-100 rounded-2xl flex items-center justify-center text-zinc-400 mb-3">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-150 dark:border-white/10 rounded-2xl shadow-sm py-16 px-4 text-center flex flex-col items-center justify-center">
+            <div className="w-14 h-14 bg-zinc-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-zinc-400 mb-3">
               <Calendar className="w-7 h-7" />
             </div>
-            <h3 className="text-base font-bold text-zinc-900">No events match your criteria</h3>
-            <p className="text-sm text-zinc-500 max-w-sm mt-1 mb-4">
+            <h3 className="text-base font-bold text-zinc-900 dark:text-white">No events match your criteria</h3>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mt-1 mb-4">
               {searchQuery ? `No results found for "${searchQuery}". Try clearing filters.` : `You haven't created any events in this tab.`}
             </p>
             {searchQuery ? (
               <button
                 onClick={() => { setSearchQuery(''); setSelectedStatus('All'); }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-sm font-bold rounded-xl transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-800 dark:text-zinc-200 text-sm font-bold rounded-xl transition-all cursor-pointer"
               >
                 Clear Filters
               </button>
@@ -467,7 +467,7 @@ export const Events: React.FC = () => {
               return (
                 <div
                   key={eventId}
-                  className="group bg-white border border-zinc-200/90 rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-zinc-300 transition-all flex flex-col justify-between"
+                  className="group bg-white dark:bg-[#0F0F14] border border-zinc-200/90 dark:border-white/10 rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-zinc-300 dark:hover:border-white/20 transition-all flex flex-col justify-between"
                 >
                   {/* Card Top Banner with Cover Image and Badges */}
                   <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-zinc-100">
@@ -479,7 +479,7 @@ export const Events: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
 
                     {/* Category Tag (Top Left) */}
-                    <span className="absolute top-3.5 left-3.5 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-zinc-800 shadow-xs border border-white/60">
+                    <span className="absolute top-3.5 left-3.5 bg-white/95 dark:bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-zinc-800 dark:text-zinc-200 shadow-xs border border-white/60 dark:border-white/20">
                       {evt.category || 'Event'}
                     </span>
 
@@ -512,11 +512,11 @@ export const Events: React.FC = () => {
                         to={targetManageUrl}
                         className="block"
                       >
-                        <h3 className="text-lg font-black text-zinc-950 truncate group-hover:text-[#E31B23] transition-colors" title={evt.title}>
+                        <h3 className="text-lg font-black text-zinc-950 dark:text-white truncate group-hover:text-[#E31B23] transition-colors" title={evt.title}>
                           {evt.title}
                         </h3>
                       </Link>
-                      <p className="text-xs text-zinc-500 font-medium flex items-center gap-1.5 mt-1.5 truncate">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium flex items-center gap-1.5 mt-1.5 truncate">
                         <MapPin className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
                         <span className="truncate">
                           {evt.venue || evt.city || (evt.locationType === 'online' ? 'Virtual / Livestream' : 'Location TBA')}
@@ -526,7 +526,7 @@ export const Events: React.FC = () => {
                   </div>
 
                   {/* Card Footer Actions */}
-                  <div className="px-5 py-3.5 bg-zinc-50/80 border-t border-zinc-100 flex items-center justify-between gap-2">
+                  <div className="px-5 py-3.5 bg-zinc-50/80 dark:bg-white/[0.02] border-t border-zinc-100 dark:border-white/10 flex items-center justify-between gap-2">
                     {role === 'staff' ? (
                       <Link
                         to={`/organizer/events/${eventId}?tab=attendees&sub=checkin`}
@@ -539,7 +539,7 @@ export const Events: React.FC = () => {
                       <>
                         <Link
                           to={`/organizer/events/${eventId}`}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-zinc-100 border border-zinc-200 hover:border-zinc-300 text-zinc-900 text-xs font-bold rounded-xl transition-all shadow-2xs"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-[#070709] hover:bg-zinc-100 dark:hover:bg-white/10 border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 text-zinc-900 dark:text-white text-xs font-bold rounded-xl transition-all shadow-2xs"
                         >
                           <Edit className="w-3.5 h-3.5 text-zinc-500" />
                           <span>Manage</span>
@@ -549,7 +549,7 @@ export const Events: React.FC = () => {
                           {perms.canConfigureTickets && (
                             <Link
                               to={`/organizer/events/${eventId}?tab=tickets`}
-                              className="p-2 text-zinc-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
+                              className="p-2 text-zinc-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 rounded-xl transition-colors"
                               title="Configure Tickets"
                             >
                               <Ticket className="w-4 h-4" />
@@ -561,7 +561,7 @@ export const Events: React.FC = () => {
                               href={`/events/${evt.slug || eventId}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/60 rounded-xl transition-colors"
+                              className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/60 dark:hover:bg-white/10 rounded-xl transition-colors"
                               title="View Public Page"
                             >
                               <Eye className="w-4 h-4" />
@@ -571,7 +571,7 @@ export const Events: React.FC = () => {
                           {perms.canDeleteEvents && (
                             <button
                               onClick={() => handleDeletePrompt(eventId, evt.title)}
-                              className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl cursor-pointer transition-colors"
+                              className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl cursor-pointer transition-colors"
                               title="Delete Listing"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -602,7 +602,7 @@ export const Events: React.FC = () => {
               return (
                 <div
                   key={eventId}
-                  className="group bg-white hover:bg-zinc-50/60 border border-zinc-200/90 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-2xs hover:shadow-md hover:border-zinc-300 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-5"
+                  className="group bg-white dark:bg-[#0F0F14] hover:bg-zinc-50/60 dark:hover:bg-white/[0.04] border border-zinc-200/90 dark:border-white/10 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-2xs hover:shadow-md hover:border-zinc-300 dark:hover:border-white/20 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-5"
                 >
                   {/* Left Block: Thumbnail + Title + Meta Details */}
                   <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 flex-1 min-w-0">
@@ -619,7 +619,7 @@ export const Events: React.FC = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent hidden sm:block" />
 
                       {/* Category Badge on thumbnail (tablet/desktop) */}
-                      <span className="hidden sm:inline-block absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] font-bold text-zinc-800 shadow-xs border border-white/60">
+                      <span className="hidden sm:inline-block absolute top-2.5 left-2.5 bg-white/95 dark:bg-black/80 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] font-bold text-zinc-800 dark:text-zinc-200 shadow-xs border border-white/60 dark:border-white/20">
                         {evt.category || 'Event'}
                       </span>
 
@@ -645,7 +645,7 @@ export const Events: React.FC = () => {
                         <Badge variant={displayStatus.variant} className="text-[9px] px-2 py-0.5 font-bold">
                           {displayStatus.label}
                         </Badge>
-                        <span className="text-[10px] font-bold text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-white/10 px-2 py-0.5 rounded-full">
                           {evt.category || 'Event'}
                         </span>
                         {evt.eventFormat && (
@@ -656,12 +656,12 @@ export const Events: React.FC = () => {
                       </div>
 
                       <Link to={targetManageUrl} className="block group/title">
-                        <h3 className="text-sm sm:text-lg font-black text-zinc-950 line-clamp-2 sm:truncate group-hover/title:text-[#E31B23] transition-colors leading-snug" title={evt.title}>
+                        <h3 className="text-sm sm:text-lg font-black text-zinc-950 dark:text-white line-clamp-2 sm:truncate group-hover/title:text-[#E31B23] transition-colors leading-snug" title={evt.title}>
                           {evt.title}
                         </h3>
                       </Link>
 
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-x-4 sm:gap-y-1.5 text-xs font-semibold text-zinc-500">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-x-4 sm:gap-y-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                         <span className="inline-flex items-center gap-1.5">
                           <Calendar className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
                           <span className="truncate">{formatDate(evt.startDate) || 'Date TBA'}</span>
@@ -686,7 +686,7 @@ export const Events: React.FC = () => {
                   </div>
 
                   {/* Right Block: Action Buttons */}
-                  <div className="flex items-center justify-between sm:justify-end gap-2 w-full lg:w-auto shrink-0 border-t sm:border-t-0 pt-2.5 sm:pt-0 border-zinc-150">
+                  <div className="flex items-center justify-between sm:justify-end gap-2 w-full lg:w-auto shrink-0 border-t sm:border-t-0 pt-2.5 sm:pt-0 border-zinc-150 dark:border-white/10">
                     {role === 'staff' ? (
                       <Link
                         to={`/organizer/events/${eventId}?tab=attendees&sub=checkin`}
@@ -700,7 +700,7 @@ export const Events: React.FC = () => {
                       <>
                         <Link
                           to={`/organizer/events/${eventId}`}
-                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 bg-zinc-950 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-xs font-bold rounded-xl transition-all shadow-xs"
                         >
                           <Edit className="w-3.5 h-3.5 text-zinc-400" />
                           <span>Manage</span>
@@ -710,7 +710,7 @@ export const Events: React.FC = () => {
                           {perms.canConfigureTickets && (
                             <Link
                               to={`/organizer/events/${eventId}?tab=tickets`}
-                              className="p-2 sm:p-2.5 text-zinc-500 hover:text-indigo-600 hover:bg-indigo-50 border border-zinc-200 hover:border-indigo-200 bg-white rounded-xl transition-colors shadow-2xs"
+                              className="p-2 sm:p-2.5 text-zinc-500 hover:text-indigo-600 hover:bg-indigo-50 border border-zinc-200 dark:border-white/10 hover:border-indigo-200 bg-white dark:bg-[#070709] rounded-xl transition-colors shadow-2xs"
                               title="Configure Tickets"
                             >
                               <Ticket className="w-4 h-4" />
@@ -722,7 +722,7 @@ export const Events: React.FC = () => {
                               href={`/events/${evt.slug || eventId}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="p-2 sm:p-2.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 border border-zinc-200 hover:border-zinc-300 bg-white rounded-xl transition-colors shadow-2xs"
+                              className="p-2 sm:p-2.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-white dark:bg-[#070709] rounded-xl transition-colors shadow-2xs"
                               title="View Public Page"
                             >
                               <Eye className="w-4 h-4" />
@@ -732,7 +732,7 @@ export const Events: React.FC = () => {
                           {perms.canDeleteEvents && (
                             <button
                               onClick={() => handleDeletePrompt(eventId, evt.title)}
-                              className="p-2 sm:p-2.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 border border-zinc-200 hover:border-red-200 bg-white rounded-xl cursor-pointer transition-colors shadow-2xs"
+                              className="p-2 sm:p-2.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 border border-zinc-200 dark:border-white/10 hover:border-red-200 bg-white dark:bg-[#070709] rounded-xl cursor-pointer transition-colors shadow-2xs"
                               title="Delete Listing"
                             >
                               <Trash2 className="w-4 h-4" />

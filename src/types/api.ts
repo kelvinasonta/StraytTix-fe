@@ -555,6 +555,7 @@ export interface OrderItem {
 
 export interface TicketAttendee {
   id: string; // uuid
+  uuid?: string;
   ticketNumber: string;
   pricePaid: number;
   currency: string;
@@ -629,6 +630,20 @@ export interface PaymentInitResponse {
   payment_url: string | null;
   amount: number;
   currency: string;
+}
+
+export interface CheckInStats {
+  total_tickets: number;
+  checked_in_count: number;
+  pending_count: number;
+  check_in_rate: number;
+  recent_check_ins: Array<{
+    ticket_number: string;
+    attendee_name: string | null;
+    attendee_email: string | null;
+    ticket_tier: string;
+    checked_in_at: string | null;
+  }>;
 }
 
 export interface CheckInResponse {

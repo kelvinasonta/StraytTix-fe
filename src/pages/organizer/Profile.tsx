@@ -297,9 +297,9 @@ export const Profile: React.FC = () => {
         {/* ========================================================================= */}
         {/* HEADER WITH PROFILE INFO & ACTION BUTTONS */}
         {/* ========================================================================= */}
-        <div className="bg-white border border-[#E5E7EB] rounded-3xl overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-3xl overflow-hidden shadow-xs">
           {/* Cover Banner Display */}
-          <div className="relative h-44 sm:h-52 md:h-60 w-full bg-zinc-950 overflow-hidden">
+          <div className="relative h-44 sm:h-52 md:h-60 w-full bg-zinc-950 overflow-hidden group">
             {bannerUrl && !bannerError ? (
               <img 
                 src={resolveImageUrl(bannerUrl)} 
@@ -308,9 +308,14 @@ export const Profile: React.FC = () => {
                 className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" 
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 flex items-center justify-center relative">
-                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#E31B23_1px,transparent_1px)] [background-size:20px_20px]" />
-                <span className="text-xs font-black uppercase tracking-widest text-zinc-400 relative z-10 flex items-center gap-2 bg-zinc-900/80 px-4 py-2 rounded-full border border-zinc-800 shadow-sm">
+              <div className="w-full h-full relative overflow-hidden bg-gradient-to-r from-zinc-950 via-[#111625] to-zinc-950 flex items-center justify-center">
+                <img
+                  src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1600&auto=format&fit=crop&q=80"
+                  alt="Default Organizer Atmosphere Backdrop"
+                  className="w-full h-full object-cover opacity-35 filter brightness-90"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/80 via-transparent to-zinc-950/80" />
+                <span className="text-xs font-black uppercase tracking-widest text-zinc-300 relative z-10 flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/15 shadow-sm">
                   <Sparkles className="w-4 h-4 text-[#E31B23]" /> Organizer Brand Cover Banner
                 </span>
               </div>
@@ -321,7 +326,7 @@ export const Profile: React.FC = () => {
           <div className="p-6 md:p-8 -mt-14 sm:-mt-16 relative z-10">
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
               <div className="flex flex-col sm:flex-row sm:items-end gap-5">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-zinc-950 text-white text-3xl font-black flex items-center justify-center shadow-xl flex-shrink-0 border-4 border-white overflow-hidden ring-1 ring-zinc-200/80">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-zinc-950 dark:bg-zinc-900 text-white text-3xl font-black flex items-center justify-center shadow-xl flex-shrink-0 border-4 border-white dark:border-[#0F0F14] overflow-hidden ring-1 ring-zinc-200/80 dark:ring-white/10">
                   {logo && !logoError ? (
                     <img 
                       src={resolveImageUrl(logo)} 
@@ -335,27 +340,27 @@ export const Profile: React.FC = () => {
                 </div>
                 <div className="space-y-1.5 sm:mb-1">
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+                    <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">
                       {name}
                     </h1>
                     {verificationStatus === 'verified' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 shadow-2xs">
                         <ShieldCheck className="w-4 h-4 text-blue-600" /> Verified Host
                       </span>
                     )}
                     {verificationStatus === 'pending' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
                         <Clock className="w-4 h-4 text-amber-600" /> Verification Pending
                       </span>
                     )}
                     {verificationStatus === 'rejected' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20">
                         <ShieldAlert className="w-4 h-4 text-rose-600" /> Verification Rejected
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-medium text-zinc-500">
-                    <span className="font-mono text-zinc-800 font-bold bg-zinc-100 px-2 py-0.5 rounded-md">@{slug}</span>
+                  <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                    <span className="font-mono text-zinc-800 dark:text-zinc-200 font-bold bg-zinc-100 dark:bg-white/10 px-2 py-0.5 rounded-md">@{slug}</span>
                     <span>•</span>
                     <span>{type === 'organization' ? 'Company / Agency' : 'Independent Host'}</span>
                     {website && (
@@ -396,7 +401,7 @@ export const Profile: React.FC = () => {
                 className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
                   activeTab === 'brand'
                     ? 'bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950/10'
-                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100/80 bg-zinc-50/60'
+                    : 'text-zinc-600 hover:text-zinc-950 dark:text-white hover:bg-zinc-100/80 bg-zinc-50/60'
                 }`}
               >
                 <Building2 className={`w-4 h-4 ${activeTab === 'brand' ? 'text-[#E31B23]' : 'text-zinc-500'}`} />
@@ -408,7 +413,7 @@ export const Profile: React.FC = () => {
                 className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
                   activeTab === 'contact'
                     ? 'bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950/10'
-                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100/80 bg-zinc-50/60'
+                    : 'text-zinc-600 hover:text-zinc-950 dark:text-white hover:bg-zinc-100/80 bg-zinc-50/60'
                 }`}
               >
                 <Share2 className={`w-4 h-4 ${activeTab === 'contact' ? 'text-[#E31B23]' : 'text-zinc-500'}`} />
@@ -420,7 +425,7 @@ export const Profile: React.FC = () => {
                 className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
                   activeTab === 'verification'
                     ? 'bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950/10'
-                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100/80 bg-zinc-50/60'
+                    : 'text-zinc-600 hover:text-zinc-950 dark:text-white hover:bg-zinc-100/80 bg-zinc-50/60'
                 }`}
               >
                 <ShieldCheck className={`w-4 h-4 ${activeTab === 'verification' ? 'text-blue-400' : 'text-zinc-500'}`} />
@@ -437,15 +442,15 @@ export const Profile: React.FC = () => {
         {/* TAB 1: BRAND & IDENTITY */}
         {/* ========================================================================= */}
         {activeTab === 'brand' && (
-          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-            <div className="border-b border-zinc-100 pb-5">
+          <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+            <div className="border-b border-zinc-100 dark:border-white/10 pb-5">
               <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-zinc-950 text-white flex items-center justify-center shrink-0 shadow-sm">
+                <div className="w-11 h-11 rounded-2xl bg-zinc-950 dark:bg-zinc-800 text-white flex items-center justify-center shrink-0 shadow-sm border border-transparent dark:border-white/10">
                   <Building2 className="w-5 h-5 text-[#E31B23]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-zinc-950">Organization Branding</h2>
-                  <p className="text-xs sm:text-sm font-medium text-zinc-500 mt-0.5">
+                  <h2 className="text-lg font-black text-zinc-950 dark:text-white">Organization Branding</h2>
+                  <p className="text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-0.5">
                     Configure your public agency profile, bio, and visual assets displayed on event listing pages.
                   </p>
                 </div>
@@ -462,18 +467,18 @@ export const Profile: React.FC = () => {
                   required
                 />
                 <div>
-                  <label className="block text-xs font-bold text-zinc-900 mb-1.5">
+                  <label className="block text-xs font-bold text-zinc-900 dark:text-white dark:text-white mb-1.5">
                     Custom Slug / Handle
                   </label>
                   <div className="flex items-center shadow-2xs rounded-xl overflow-hidden">
-                    <span className="px-3.5 py-3 bg-zinc-100 border border-r-0 border-zinc-200 text-xs font-mono font-bold text-zinc-500">
+                    <span className="px-3.5 py-3 bg-zinc-100 dark:bg-white/10 border border-r-0 border-zinc-200 dark:border-white/10 text-xs font-mono font-bold text-zinc-500 dark:text-zinc-400">
                       eventa.live/@
                     </span>
                     <input
                       type="text"
                       value={slug}
                       onChange={(e) => setSlug(e.target.value)}
-                      className="flex-1 px-4 py-3 bg-zinc-50/50 hover:bg-white focus:bg-white border border-zinc-200 text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23] transition-all"
+                      className="flex-1 px-4 py-3 bg-zinc-50/50 hover:bg-white focus:bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 text-sm font-medium text-zinc-900 dark:text-white focus:outline-none focus:border-[#E31B23] transition-all"
                     />
                   </div>
                 </div>
@@ -481,28 +486,28 @@ export const Profile: React.FC = () => {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-xs font-bold text-zinc-900">
+                  <label className="block text-xs font-bold text-zinc-900 dark:text-white">
                     Hosting Profile Type
                   </label>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-500 bg-zinc-100 px-2.5 py-0.5 rounded-full border border-zinc-200">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-white/10 px-2.5 py-0.5 rounded-full border border-zinc-200 dark:border-white/10">
                     <Lock className="w-3 h-3 text-zinc-400" /> Account Type Locked
                   </span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-zinc-50 to-zinc-100/50 border border-zinc-200/80 flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-white border border-zinc-200 flex items-center justify-center flex-shrink-0 text-zinc-700 shadow-2xs">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-zinc-50 to-zinc-100/50 dark:from-white/5 dark:to-white/[0.02] border border-zinc-200/80 dark:border-white/10 flex items-start gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 text-zinc-700 shadow-2xs">
                     {type === 'organization' ? <Building2 className="w-5 h-5 text-[#E31B23]" /> : <Sparkles className="w-5 h-5 text-[#E31B23]" />}
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-bold text-zinc-950">
+                      <h4 className="text-sm font-bold text-zinc-950 dark:text-white">
                         {type === 'organization' ? 'Registered Company / Agency Workspace' : 'Independent Creator / Solo Planner'}
                       </h4>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-zinc-200/80 text-zinc-700">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-zinc-200/80 dark:bg-white/10 text-zinc-700 dark:text-zinc-300">
                         {type}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
                       {type === 'organization'
                         ? 'Configured as a Company / Agency account with team collaboration, role permissions, and multi-staff management.'
                         : 'Configured as an Individual Planner account managed exclusively by a single event operator.'}
@@ -610,11 +615,11 @@ export const Profile: React.FC = () => {
                 />
               </div>
 
-              <div className="pt-4 flex justify-end border-t border-zinc-100">
+              <div className="pt-4 flex justify-end border-t border-zinc-100 dark:border-white/10">
                 <Button 
                   type="submit" 
                   isLoading={isLoading}
-                  className="w-full sm:w-auto px-8 py-3 text-sm font-bold shadow-sm"
+                  fullWidth={false} className="w-full sm:w-auto px-8 py-3 bg-[#E31B23] hover:bg-[#c9141b] text-white text-sm font-bold shadow-sm"
                 >
                   Save Brand Profile
                 </Button>
@@ -627,15 +632,15 @@ export const Profile: React.FC = () => {
         {/* TAB 2: CONTACT & SOCIAL PRESENCE */}
         {/* ========================================================================= */}
         {activeTab === 'contact' && (
-          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-            <div className="border-b border-zinc-100 pb-5">
+          <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+            <div className="border-b border-zinc-100 dark:border-white/10 pb-5">
               <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-zinc-950 text-white flex items-center justify-center shrink-0 shadow-sm">
+                <div className="w-11 h-11 rounded-2xl bg-zinc-950 dark:bg-zinc-800 text-white flex items-center justify-center shrink-0 shadow-sm border border-transparent dark:border-white/10">
                   <Share2 className="w-5 h-5 text-[#E31B23]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-zinc-950">Public Contact & Social Channels</h2>
-                  <p className="text-xs sm:text-sm font-medium text-zinc-500 mt-0.5">
+                  <h2 className="text-lg font-black text-zinc-950 dark:text-white">Public Contact & Social Channels</h2>
+                  <p className="text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-0.5">
                     Contact channels displayed so attendees can reach your support and customer service team.
                   </p>
                 </div>
@@ -671,8 +676,8 @@ export const Profile: React.FC = () => {
 
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400">Social Media Profiles</h3>
-                  <span className="text-[11px] font-medium text-zinc-500">Publicly visible on your events page</span>
+                  <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-400 dark:text-zinc-400 dark:text-zinc-400">Social Media Profiles</h3>
+                  <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">Publicly visible on your events page</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <Input
@@ -696,11 +701,11 @@ export const Profile: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end border-t border-zinc-100">
+              <div className="pt-4 flex justify-end border-t border-zinc-100 dark:border-white/10">
                 <Button 
                   type="submit" 
                   isLoading={isLoading}
-                  className="w-full sm:w-auto px-8 py-3 text-sm font-bold shadow-sm"
+                  fullWidth={false} className="w-full sm:w-auto px-8 py-3 bg-[#E31B23] hover:bg-[#c9141b] text-white text-sm font-bold shadow-sm"
                 >
                   Save Contact Information
                 </Button>
@@ -713,15 +718,15 @@ export const Profile: React.FC = () => {
         {/* TAB 4: HOST VERIFICATION (Backend Integration) */}
         {/* ========================================================================= */}
         {activeTab === 'verification' && (
-          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-5">
+          <div className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-5">
               <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-zinc-950 text-white flex items-center justify-center shrink-0 shadow-sm">
+                <div className="w-11 h-11 rounded-2xl bg-zinc-950 dark:bg-zinc-800 text-white flex items-center justify-center shrink-0 shadow-sm border border-transparent dark:border-white/10">
                   <ShieldCheck className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-zinc-950">Organizer Trust & Verification</h2>
-                  <p className="text-xs sm:text-sm font-medium text-zinc-500 mt-0.5">
+                  <h2 className="text-lg font-black text-zinc-950 dark:text-white">Organizer Trust & Verification</h2>
+                  <p className="text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-0.5">
                     Verified organizers receive the blue Verified Badge, elevated search rankings, and instant payout capabilities.
                   </p>
                 </div>
@@ -740,19 +745,19 @@ export const Profile: React.FC = () => {
 
             {/* STATUS 1: VERIFIED */}
             {verificationStatus === 'verified' && (
-              <div className="p-6 bg-gradient-to-r from-emerald-50 to-emerald-50/30 border border-emerald-200 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="p-6 bg-gradient-to-r from-emerald-50 to-emerald-50/30 dark:from-emerald-500/10 dark:to-emerald-500/5 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-emerald-600 text-white rounded-xl flex-shrink-0 shadow-sm">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-base font-bold text-emerald-950">Your Organization is Fully Verified</h3>
-                    <p className="text-xs text-emerald-800 leading-relaxed font-medium">
+                    <h3 className="text-base font-bold text-emerald-950 dark:text-emerald-300">Your Organization is Fully Verified</h3>
+                    <p className="text-xs text-emerald-800 dark:text-emerald-400 leading-relaxed font-medium">
                       {name} has successfully completed corporate identity verification, commercial bank authentication, and past event history review. The blue Verified badge is active across all your listings.
                     </p>
                   </div>
                 </div>
-                <span className="px-3.5 py-1 bg-emerald-200/70 text-emerald-950 rounded-full text-xs font-black uppercase tracking-wider flex-shrink-0 border border-emerald-300">
+                <span className="px-3.5 py-1 bg-emerald-200/70 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 rounded-full text-xs font-black uppercase tracking-wider flex-shrink-0 border border-emerald-300 dark:border-emerald-500/30">
                   Active Verified Badge
                 </span>
               </div>
@@ -760,13 +765,13 @@ export const Profile: React.FC = () => {
 
             {/* STATUS 2: PENDING REVIEW */}
             {verificationStatus === 'pending' && (
-              <div className="p-6 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-4">
+              <div className="p-6 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl flex items-start gap-4">
                 <div className="p-3 bg-amber-500 text-white rounded-xl flex-shrink-0 animate-pulse shadow-sm">
                   <Clock className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-amber-950">Verification Under Compliance Review</h3>
-                  <p className="text-xs text-amber-800 leading-relaxed font-medium">
+                  <h3 className="text-base font-bold text-amber-950 dark:text-amber-300">Verification Under Compliance Review</h3>
+                  <p className="text-xs text-amber-800 dark:text-amber-400 leading-relaxed font-medium">
                     Your verification documents for {name} have been submitted to the StraytTix Trust & Safety team. Verification typically takes 24–48 business hours. You will receive an email once approved.
                   </p>
                 </div>
@@ -775,14 +780,14 @@ export const Profile: React.FC = () => {
 
             {/* STATUS 3: REJECTED */}
             {verificationStatus === 'rejected' && (
-              <div className="p-6 bg-rose-50 border border-rose-200 rounded-2xl flex items-start justify-between gap-4">
+              <div className="p-6 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-2xl flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-rose-600 text-white rounded-xl flex-shrink-0 shadow-sm">
                     <ShieldAlert className="w-6 h-6" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-base font-bold text-rose-950">Verification Application Requires Attention</h3>
-                    <p className="text-xs text-rose-800 leading-relaxed font-medium">
+                    <h3 className="text-base font-bold text-rose-950 dark:text-rose-300">Verification Application Requires Attention</h3>
+                    <p className="text-xs text-rose-800 dark:text-rose-400 leading-relaxed font-medium">
                       {verificationData?.latest_verification?.rejection_reason || 
                         'One or more of your documents could not be validated. Please ensure your CAC registration number and Director ID match your organization records.'}
                     </p>
@@ -790,7 +795,7 @@ export const Profile: React.FC = () => {
                 </div>
                 <Button
                   onClick={() => setIsVerificationModalOpen(true)}
-                  className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm"
+                  fullWidth={false} className="w-auto bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm px-5 py-2.5 rounded-xl"
                 >
                   Resubmit Application
                 </Button>
@@ -799,21 +804,21 @@ export const Profile: React.FC = () => {
 
             {/* STATUS 4: UNVERIFIED */}
             {verificationStatus === 'unverified' && (
-              <div className="p-6 bg-gradient-to-br from-zinc-50 to-zinc-100/50 border border-zinc-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="p-6 bg-gradient-to-br from-zinc-50 to-zinc-100/50 dark:from-white/5 dark:to-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-zinc-900 text-white rounded-xl flex-shrink-0 shadow-sm">
                     <Shield className="w-6 h-6 text-[#E31B23]" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-base font-bold text-zinc-950">Become an StraytTix Verified Host</h3>
-                    <p className="text-xs text-zinc-500 leading-relaxed font-medium">
+                    <h3 className="text-base font-bold text-zinc-950 dark:text-white">Become an StraytTix Verified Host</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
                       Submit your business incorporation number and government ID to unlock the Verified badge, instant ticket payouts, and higher attendee conversion.
                     </p>
                   </div>
                 </div>
                 <Button
                   onClick={() => setIsVerificationModalOpen(true)}
-                  className="bg-[#E31B23] hover:bg-[#c9141b] text-white text-xs font-bold flex-shrink-0 shadow-sm"
+                  fullWidth={false} className="w-auto bg-[#E31B23] hover:bg-[#c9141b] text-white text-xs font-bold flex-shrink-0 shadow-sm px-5 py-2.5 rounded-xl"
                 >
                   Start Verification
                 </Button>
@@ -822,52 +827,52 @@ export const Profile: React.FC = () => {
 
             {/* Verification Credentials Card Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="p-5 bg-zinc-50/70 border border-zinc-200/80 rounded-2xl space-y-1.5 shadow-2xs">
+              <div className="p-5 bg-zinc-50/70 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 rounded-2xl space-y-1.5 shadow-2xs">
                 <span className="text-[11px] text-zinc-400 font-black uppercase tracking-wider">Business Reg.</span>
-                <p className="text-sm font-black text-zinc-950">{verifRegNumber || 'Not Provided'}</p>
-                <span className={`text-[11px] font-bold ${verificationStatus === 'verified' ? 'text-emerald-600' : 'text-zinc-500'}`}>
+                <p className="text-sm font-black text-zinc-950 dark:text-white">{verifRegNumber || 'Not Provided'}</p>
+                <span className={`text-[11px] font-bold ${verificationStatus === 'verified' ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-500 dark:text-zinc-400'}`}>
                   {verificationStatus === 'verified' ? 'Approved & Validated' : 'Pending Submission'}
                 </span>
               </div>
 
-              <div className="p-5 bg-zinc-50/70 border border-zinc-200/80 rounded-2xl space-y-1.5 shadow-2xs">
+              <div className="p-5 bg-zinc-50/70 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 rounded-2xl space-y-1.5 shadow-2xs">
                 <span className="text-[11px] text-zinc-400 font-black uppercase tracking-wider">Corporate Contact</span>
-                <p className="text-sm font-black text-zinc-950 truncate">{email || phone || "Direct Contact"}</p>
-                <span className={`text-[11px] font-bold ${email ? "text-emerald-600" : "text-zinc-500"}`}>
+                <p className="text-sm font-black text-zinc-950 dark:text-white truncate">{email || phone || "Direct Contact"}</p>
+                <span className={`text-[11px] font-bold ${email ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500 dark:text-zinc-400"}`}>
                   {email ? "Official Contact Linked" : "No Contact Provided"}
                 </span>
               </div>
 
-              <div className="p-5 bg-zinc-50/70 border border-zinc-200/80 rounded-2xl space-y-1.5 shadow-2xs">
+              <div className="p-5 bg-zinc-50/70 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 rounded-2xl space-y-1.5 shadow-2xs">
                 <span className="text-[11px] text-zinc-400 font-black uppercase tracking-wider">Trust Status</span>
-                <p className="text-sm font-black text-zinc-950">
+                <p className="text-sm font-black text-zinc-950 dark:text-white">
                   {verificationStatus === 'verified' ? 'Verified Host' : verificationStatus === 'pending' ? 'Review In Progress' : 'Unverified'}
                 </p>
-                <span className={`text-[11px] font-bold ${verificationStatus === 'verified' ? 'text-emerald-600' : 'text-zinc-500'}`}>
+                <span className={`text-[11px] font-bold ${verificationStatus === 'verified' ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-500 dark:text-zinc-400'}`}>
                   {verificationStatus === 'verified' ? 'Tier 1 Trusted Partner' : 'Standard Account'}
                 </span>
               </div>
             </div>
 
             {/* Verification Checklist Requirements */}
-            <div className="pt-4 border-t border-zinc-100">
-              <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-3">Verification Compliance Checklist</h3>
+            <div className="pt-4 border-t border-zinc-100 dark:border-white/10">
+              <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-400 dark:text-zinc-400 dark:text-zinc-400 mb-3">Verification Compliance Checklist</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                <div className="flex items-center gap-2.5 p-3.5 bg-zinc-50/80 rounded-xl border border-zinc-200/80">
+                <div className="flex items-center gap-2.5 p-3.5 bg-zinc-50/80 dark:bg-white/5 rounded-xl border border-zinc-200/80 dark:border-white/10">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="font-semibold text-zinc-800">Corporate CAC Certificate of Incorporation</span>
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200">Corporate CAC Certificate of Incorporation</span>
                 </div>
-                <div className="flex items-center gap-2.5 p-3.5 bg-zinc-50/80 rounded-xl border border-zinc-200/80">
+                <div className="flex items-center gap-2.5 p-3.5 bg-zinc-50/80 dark:bg-white/5 rounded-xl border border-zinc-200/80 dark:border-white/10">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="font-semibold text-zinc-800">Director / Principal Government Photo ID</span>
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200">Director / Principal Government Photo ID</span>
                 </div>
-                <div className="flex items-center gap-2.5 p-3.5 bg-zinc-50/80 rounded-xl border border-zinc-200/80">
+                <div className="flex items-center gap-2.5 p-3.5 bg-zinc-50/80 dark:bg-white/5 rounded-xl border border-zinc-200/80 dark:border-white/10">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="font-semibold text-zinc-800">Proof of Commercial Headquarters / Utility Bill</span>
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200">Proof of Commercial Headquarters / Utility Bill</span>
                 </div>
-                <div className="flex items-center gap-2.5 p-3.5 bg-zinc-50/80 rounded-xl border border-zinc-200/80">
+                <div className="flex items-center gap-2.5 p-3.5 bg-zinc-50/80 dark:bg-white/5 rounded-xl border border-zinc-200/80 dark:border-white/10">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="font-semibold text-zinc-800">Authenticated Business Settlement Account</span>
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200">Authenticated Business Settlement Account</span>
                 </div>
               </div>
             </div>
@@ -883,21 +888,21 @@ export const Profile: React.FC = () => {
         {/* ========================================================================= */}
         {isVerificationModalOpen && verificationStatus !== 'pending' && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs">
-            <div className="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-8 shadow-2xl border border-zinc-200 max-h-[90vh] overflow-y-auto space-y-6">
-              <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+            <div className="bg-white dark:bg-[#0F0F14] rounded-3xl max-w-2xl w-full p-6 md:p-8 shadow-2xl border border-zinc-200 dark:border-white/10 max-h-[90vh] overflow-y-auto space-y-6 text-zinc-900 dark:text-white">
+              <div className="flex items-center justify-between border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-zinc-900 text-white rounded-xl">
                     <ShieldCheck className="w-5 h-5 text-[#E31B23]" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-zinc-950">Organizer Verification Request</h3>
-                    <p className="text-xs text-zinc-500 font-medium">Official compliance & business identity verification</p>
+                    <h3 className="text-lg font-black text-zinc-950 dark:text-white">Organizer Verification Request</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Official compliance & business identity verification</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsVerificationModalOpen(false)}
-                  className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                  className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -906,7 +911,7 @@ export const Profile: React.FC = () => {
               <form onSubmit={handleSubmitVerification} className="space-y-5">
                 {/* SECTION 1: BUSINESS REGISTRATION */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400">1. Legal Entity & Registration</h4>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-400 dark:text-zinc-400 dark:text-zinc-400">1. Legal Entity & Registration</h4>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
@@ -918,13 +923,13 @@ export const Profile: React.FC = () => {
                     />
 
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
                         Business Entity Type
                       </label>
                       <select
                         value={verifBusinessType}
                         onChange={(e) => setVerifBusinessType(e.target.value)}
-                        className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
+                        className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 dark:text-white focus:outline-none focus:border-[#E31B23]"
                         required
                       >
                         <option value="Limited Liability Company (LLC)">Limited Liability Company (LLC)</option>
@@ -955,7 +960,7 @@ export const Profile: React.FC = () => {
 
                 {/* SECTION 2: CONTACT & PHYSICAL LOCATION */}
                 <div className="space-y-3 pt-2">
-                  <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400">2. Registered Headquarters & Contacts</h4>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-400 dark:text-zinc-400 dark:text-zinc-400">2. Registered Headquarters & Contacts</h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <Input
@@ -1014,7 +1019,7 @@ export const Profile: React.FC = () => {
 
                 {/* SECTION 3: COMPLIANCE DOCUMENTS */}
                 <div className="space-y-3 pt-2">
-                  <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400">3. Verification Documents (URLs / Scans)</h4>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-400 dark:text-zinc-400 dark:text-zinc-400">3. Verification Documents (URLs / Scans)</h4>
 
                   <div className="space-y-3">
                     <Input
@@ -1040,7 +1045,7 @@ export const Profile: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 leading-relaxed font-medium">
+                <div className="p-3.5 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl text-xs text-blue-900 dark:text-blue-300 leading-relaxed font-medium">
                   By submitting this verification request, you certify that all business documentation and director identification provided are authentic and compliant with StraytTix Verified Organizer Standards.
                 </div>
 
@@ -1048,14 +1053,14 @@ export const Profile: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsVerificationModalOpen(false)}
-                    className="px-5 py-2.5 rounded-xl border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-bold"
+                    className="px-5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 text-xs font-bold cursor-pointer"
                   >
                     Cancel
                   </button>
                   <Button
                     type="submit"
                     isLoading={isSubmittingVerification}
-                    className="bg-[#E31B23] hover:bg-[#c9141b] text-white px-6 py-2.5 text-xs font-bold"
+                    fullWidth={false} className="w-auto bg-[#E31B23] hover:bg-[#c9141b] text-white px-6 py-2.5 text-xs font-bold rounded-xl"
                   >
                     Submit for Compliance Review
                   </Button>

@@ -377,13 +377,13 @@ export const Orders: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20">
                   Sales & Commerce
                 </span>
                 <span className="text-xs font-semibold text-zinc-400">•</span>
                 <span className="text-xs font-bold text-zinc-500 font-mono">Live Roster</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight flex items-center gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight flex items-center gap-2.5">
                 <ShoppingBag className="w-7 h-7 text-[#E31B23]" />
                 Orders & Ticket Sales
               </h1>
@@ -399,7 +399,7 @@ export const Orders: React.FC = () => {
                 size="sm"
                 onClick={() => loadData(true)}
                 disabled={isRefreshing || isLoading}
-                className="gap-2 bg-white"
+                className="gap-2 bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white dark:text-white border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-[#E31B23]' : ''}`} />
                 <span>Refresh</span>
@@ -409,7 +409,7 @@ export const Orders: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleExportCSV}
-                className="gap-2 bg-white"
+                className="gap-2 bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white dark:text-white border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Export CSV</span>
@@ -450,7 +450,7 @@ export const Orders: React.FC = () => {
         </div>
 
         {/* Filter Toolbar */}
-        <div className="p-4 rounded-2xl bg-white border border-zinc-200/80 shadow-2xs space-y-4">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 shadow-2xs space-y-4 transition-colors">
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
             
             {/* Search Input */}
@@ -461,7 +461,7 @@ export const Orders: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by order ID, attendee name, email, or event title..."
-                className="w-full bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white border border-zinc-200 hover:border-zinc-300 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 text-xs sm:text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none transition-all text-zinc-900"
+                className="w-full bg-zinc-50/70 dark:bg-white/5 hover:bg-zinc-50 dark:hover:bg-white/10 focus:bg-white dark:focus:bg-[#070709] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 focus:border-[#E31B23] focus:ring-2 focus:ring-[#E31B23]/20 text-xs sm:text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none transition-all text-zinc-900 dark:text-white dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500"
               />
               {searchQuery && (
                 <button
@@ -482,13 +482,13 @@ export const Orders: React.FC = () => {
                   onClick={() => setStatusFilter(status)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                     statusFilter === status
-                      ? 'bg-zinc-900 text-white shadow-xs'
-                      : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70'
+                      ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 shadow-xs'
+                      : 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-white/10'
                   }`}
                 >
                   {status === 'all' ? 'All Orders' : status}
                   <span className={`ml-1.5 px-1.5 py-0.2 rounded-md text-[10px] font-black ${
-                    statusFilter === status ? 'bg-white/20 text-white' : 'bg-zinc-200 text-zinc-700'
+                    statusFilter === status ? 'bg-white/20 dark:bg-black/20 text-white dark:text-zinc-950' : 'bg-zinc-200 dark:bg-white/10 text-zinc-700 dark:text-zinc-300'
                   }`}>
                     {status === 'all' 
                       ? orders.length 
@@ -500,7 +500,7 @@ export const Orders: React.FC = () => {
           </div>
 
           {/* Secondary Filter Bar: Event & Timeframe */}
-          <div className="pt-3 border-t border-zinc-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="pt-3 border-t border-zinc-100 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex flex-wrap items-center gap-3">
               {/* Event Filter */}
               <div className="flex items-center gap-2">
@@ -508,7 +508,7 @@ export const Orders: React.FC = () => {
                 <select
                   value={eventFilter}
                   onChange={(e) => setEventFilter(e.target.value)}
-                  className="bg-zinc-50 border border-zinc-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-800 outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/30"
+                  className="bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23]/30"
                 >
                   <option value="all">All Events ({events.length})</option>
                   {events.map((evt) => (
@@ -525,7 +525,7 @@ export const Orders: React.FC = () => {
                 <select
                   value={timeframeFilter}
                   onChange={(e) => setTimeframeFilter(e.target.value as any)}
-                  className="bg-zinc-50 border border-zinc-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-800 outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/30"
+                  className="bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23]/30"
                 >
                   <option value="all">All Time</option>
                   <option value="today">Today</option>
@@ -536,17 +536,17 @@ export const Orders: React.FC = () => {
             </div>
 
             <div className="text-zinc-500 font-medium">
-              Showing <strong className="text-zinc-900 font-bold">{filteredOrders.length}</strong> of {orders.length} orders
+              Showing <strong className="text-zinc-900 dark:text-white dark:text-white font-bold">{filteredOrders.length}</strong> of {orders.length} orders
             </div>
           </div>
         </div>
 
         {/* Orders Table */}
-        <div className="bg-white border border-zinc-200/80 rounded-2xl overflow-hidden shadow-2xs">
+        <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs transition-colors">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-zinc-50/80 border-b border-zinc-200 text-zinc-500 font-black uppercase tracking-wider text-[11px]">
+                <tr className="bg-zinc-50/80 dark:bg-white/[0.02] border-b border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 font-black uppercase tracking-wider text-[11px]">
                   <th className="py-3.5 px-4">Order Reference</th>
                   <th className="py-3.5 px-4">Attendee / Customer</th>
                   <th className="py-3.5 px-4">Event</th>
@@ -557,7 +557,7 @@ export const Orders: React.FC = () => {
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100 font-semibold text-zinc-700">
+              <tbody className="divide-y divide-zinc-100 dark:divide-white/10 font-semibold text-zinc-700 dark:text-zinc-300">
                 {isLoading ? (
                   <tr>
                     <td colSpan={perms.canViewRevenue ? 8 : 7} className="py-16 text-center text-zinc-500">
@@ -571,10 +571,10 @@ export const Orders: React.FC = () => {
                   <tr>
                     <td colSpan={perms.canViewRevenue ? 8 : 7} className="py-16 text-center text-zinc-500">
                       <div className="flex flex-col items-center justify-center gap-3 max-w-md mx-auto">
-                        <div className="w-14 h-14 rounded-2xl bg-zinc-100 text-zinc-400 flex items-center justify-center border border-zinc-200/80">
+                        <div className="w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-500 flex items-center justify-center border border-zinc-200/80 dark:border-white/10">
                           <ShoppingBag className="w-7 h-7 text-zinc-400" />
                         </div>
-                        <p className="text-base font-bold text-zinc-950">No orders yet</p>
+                        <p className="text-base font-bold text-zinc-950 dark:text-white">No orders yet</p>
                         <p className="text-xs text-zinc-500 leading-relaxed max-w-sm">
                           When attendees purchase tickets for your events, checkout orders and sales transactions will automatically appear here in real-time.
                         </p>
@@ -585,10 +585,10 @@ export const Orders: React.FC = () => {
                   <tr>
                     <td colSpan={perms.canViewRevenue ? 8 : 7} className="py-16 text-center text-zinc-500">
                       <div className="flex flex-col items-center justify-center gap-3 max-w-md mx-auto">
-                        <div className="w-12 h-12 rounded-2xl bg-zinc-100 text-zinc-400 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-500 flex items-center justify-center border border-zinc-200/80 dark:border-white/10">
                           <ShoppingBag className="w-6 h-6" />
                         </div>
-                        <p className="text-sm font-black text-zinc-950">No orders found matching filters</p>
+                        <p className="text-sm font-black text-zinc-950 dark:text-white">No orders found matching filters</p>
                         <p className="text-xs text-zinc-500">
                           Try adjusting your search keywords, clearing status filters, or selecting "All Time".
                         </p>
@@ -621,12 +621,12 @@ export const Orders: React.FC = () => {
                           setSelectedOrder(ord);
                           setIsDetailModalOpen(true);
                         }}
-                        className="hover:bg-zinc-50/70 transition-all cursor-pointer group"
+                        className="hover:bg-zinc-50/70 dark:hover:bg-white/[0.03] transition-all cursor-pointer group"
                       >
                         {/* Order ID */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-mono font-bold text-zinc-950 group-hover:text-[#E31B23] transition-colors">
+                            <span className="font-mono font-bold text-zinc-950 dark:text-white group-hover:text-[#E31B23] transition-colors">
                               {ord.id}
                             </span>
                             <button
@@ -643,11 +643,11 @@ export const Orders: React.FC = () => {
                         {/* Customer */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-zinc-100 text-zinc-700 font-black text-xs flex items-center justify-center flex-shrink-0 border border-zinc-200">
+                            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 font-black text-xs flex items-center justify-center flex-shrink-0 border border-zinc-200 dark:border-white/10">
                               {ord.customerName?.charAt(0) || 'A'}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-zinc-950 font-bold truncate max-w-[170px]">{ord.customerName}</p>
+                              <p className="text-zinc-950 dark:text-white font-bold truncate max-w-[170px]">{ord.customerName}</p>
                               <p className="text-[11px] text-zinc-400 font-normal truncate max-w-[170px]">{ord.customerEmail}</p>
                             </div>
                           </div>
@@ -656,7 +656,7 @@ export const Orders: React.FC = () => {
                         {/* Event */}
                         <td className="py-3.5 px-4">
                           <div className="max-w-[200px]">
-                            <p className="text-zinc-900 font-bold truncate" title={ord.eventTitle}>
+                            <p className="text-zinc-900 dark:text-white dark:text-zinc-100 font-bold truncate" title={ord.eventTitle}>
                               {ord.eventTitle || 'General Event'}
                             </p>
                             <span className="text-[10px] text-zinc-400 font-medium">Standard Checkout</span>
@@ -665,7 +665,7 @@ export const Orders: React.FC = () => {
 
                         {/* Ticket Count */}
                         <td className="py-3.5 px-4 text-center">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-800 font-bold text-xs">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 font-bold text-xs">
                             {ord.ticketQuantity} {ord.ticketQuantity === 1 ? 'ticket' : 'tickets'}
                           </span>
                         </td>
@@ -673,7 +673,7 @@ export const Orders: React.FC = () => {
                         {/* Amount */}
                         {perms.canViewRevenue && (
                           <td className="py-3.5 px-4 text-right">
-                            <span className="font-mono font-black text-zinc-950 text-sm">
+                            <span className="font-mono font-black text-zinc-950 dark:text-white text-sm">
                               {formatCurrency(ord.amount)}
                             </span>
                           </td>
@@ -685,7 +685,7 @@ export const Orders: React.FC = () => {
                         </td>
 
                         {/* Date */}
-                        <td className="py-3.5 px-4 text-zinc-500 font-mono text-[11px] whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-zinc-500 dark:text-zinc-400 font-mono text-[11px] whitespace-nowrap">
                           {ord.createdAt ? formatDate(ord.createdAt) : '—'}
                         </td>
 
@@ -698,7 +698,7 @@ export const Orders: React.FC = () => {
                                 setSelectedOrder(ord);
                                 setIsDetailModalOpen(true);
                               }}
-                              className="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
+                              className="p-1.5 text-zinc-500 hover:text-zinc-900 dark:text-white dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                               title="View order breakdown"
                             >
                               <Eye className="w-4 h-4" />
@@ -741,14 +741,14 @@ export const Orders: React.FC = () => {
             <div className="space-y-6">
               
               {/* Status Header Banner */}
-              <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400 block mb-0.5">Order Status</span>
                   {getStatusBadge(selectedOrder.status)}
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400 block mb-0.5">Total Billed</span>
-                  <span className="font-mono font-black text-lg text-zinc-950">{formatCurrency(selectedOrder.amount)}</span>
+                  <span className="font-mono font-black text-lg text-zinc-950 dark:text-white">{formatCurrency(selectedOrder.amount)}</span>
                 </div>
               </div>
 
@@ -758,24 +758,24 @@ export const Orders: React.FC = () => {
                   <User className="w-3.5 h-3.5 text-zinc-500" />
                   Attendee & Purchaser Details
                 </h4>
-                <div className="p-4 rounded-xl border border-zinc-200 bg-white grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#070709] grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <span className="text-zinc-500 font-medium block">Full Name</span>
-                    <strong className="text-zinc-950 font-bold">{selectedOrder.customerName}</strong>
+                    <strong className="text-zinc-950 dark:text-white font-bold">{selectedOrder.customerName}</strong>
                   </div>
                   <div>
                     <span className="text-zinc-500 font-medium block">Email Address</span>
-                    <strong className="text-zinc-950 font-bold">{selectedOrder.customerEmail}</strong>
+                    <strong className="text-zinc-950 dark:text-white font-bold">{selectedOrder.customerEmail}</strong>
                   </div>
                   <div>
                     <span className="text-zinc-500 font-medium block">Transaction Date</span>
-                    <span className="text-zinc-800 font-mono">
+                    <span className="text-zinc-800 dark:text-zinc-200 font-mono">
                       {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString() : 'N/A'}
                     </span>
                   </div>
                   <div>
                     <span className="text-zinc-500 font-medium block">Order Reference</span>
-                    <span className="font-mono font-bold text-zinc-900">{selectedOrder.id}</span>
+                    <span className="font-mono font-bold text-zinc-900 dark:text-white">{selectedOrder.id}</span>
                   </div>
                 </div>
               </div>
@@ -786,10 +786,10 @@ export const Orders: React.FC = () => {
                   <Calendar className="w-3.5 h-3.5 text-zinc-500" />
                   Event Access Details
                 </h4>
-                <div className="p-4 rounded-xl border border-zinc-200 bg-white space-y-2.5 text-xs">
+                <div className="p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#070709] space-y-2.5 text-xs">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-bold text-zinc-950 text-sm">{selectedOrder.eventTitle}</p>
+                      <p className="font-bold text-zinc-950 dark:text-white text-sm">{selectedOrder.eventTitle}</p>
                       <p className="text-zinc-500 flex items-center gap-1 mt-0.5">
                         <MapPin className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
                         {selectedOrder.eventVenue || 'Venue specified on ticket pass'}
@@ -805,17 +805,17 @@ export const Orders: React.FC = () => {
                   <Receipt className="w-3.5 h-3.5 text-zinc-500" />
                   Ticket Line Items
                 </h4>
-                <div className="rounded-xl border border-zinc-200 overflow-hidden bg-white text-xs">
-                  <div className="p-3 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between font-bold text-zinc-600">
+                <div className="rounded-xl border border-zinc-200 dark:border-white/10 overflow-hidden bg-white dark:bg-[#070709] text-xs">
+                  <div className="p-3 bg-zinc-50 dark:bg-white/5 border-b border-zinc-200 dark:border-white/10 flex items-center justify-between font-bold text-zinc-600 dark:text-zinc-400">
                     <span>Ticket Type / Details</span>
                     <span>Qty × Price</span>
                   </div>
                   
                   {selectedOrder.items && selectedOrder.items.length > 0 ? (
                     selectedOrder.items.map((item, idx) => (
-                      <div key={item.id || idx} className="p-3.5 flex items-center justify-between border-b border-zinc-100">
+                      <div key={item.id || idx} className="p-3.5 flex items-center justify-between border-b border-zinc-100 dark:border-white/10">
                         <div>
-                          <p className="font-bold text-zinc-900">
+                          <p className="font-bold text-zinc-900 dark:text-white">
                             {item.ticketType?.name || 'Admission Pass'}
                           </p>
                           <p className="text-[11px] text-zinc-400">
@@ -823,7 +823,7 @@ export const Orders: React.FC = () => {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-zinc-900 font-mono">
+                          <p className="font-bold text-zinc-900 dark:text-white font-mono">
                             {item.quantity} × {formatCurrency(item.unitPrice || 0)}
                           </p>
                           <p className="text-[11px] text-zinc-400">
@@ -833,13 +833,13 @@ export const Orders: React.FC = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="p-3.5 flex items-center justify-between border-b border-zinc-100">
+                    <div className="p-3.5 flex items-center justify-between border-b border-zinc-100 dark:border-white/10">
                       <div>
-                        <p className="font-bold text-zinc-900">Standard Attendee Admission</p>
+                        <p className="font-bold text-zinc-900 dark:text-white">Standard Attendee Admission</p>
                         <p className="text-[11px] text-zinc-400">Includes live QR code entry & access</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-zinc-900 font-mono">
+                        <p className="font-bold text-zinc-900 dark:text-white font-mono">
                           {selectedOrder.ticketQuantity} × {formatCurrency(Math.round(selectedOrder.amount / (selectedOrder.ticketQuantity || 1)))}
                         </p>
                         <p className="text-[11px] text-zinc-400">Net Ticket Rate</p>
@@ -848,20 +848,20 @@ export const Orders: React.FC = () => {
                   )}
 
                   {Boolean(selectedOrder.serviceFee) && (
-                    <div className="px-3.5 py-2 flex items-center justify-between text-zinc-500 border-b border-zinc-100 text-xs">
+                    <div className="px-3.5 py-2 flex items-center justify-between text-zinc-500 border-b border-zinc-100 dark:border-white/10 text-xs">
                       <span>Service & Processing Fee</span>
                       <span className="font-mono">{formatCurrency(selectedOrder.serviceFee!)}</span>
                     </div>
                   )}
 
                   {Boolean(selectedOrder.discount) && (
-                    <div className="px-3.5 py-2 flex items-center justify-between text-emerald-600 border-b border-zinc-100 text-xs font-semibold">
+                    <div className="px-3.5 py-2 flex items-center justify-between text-emerald-600 border-b border-zinc-100 dark:border-white/10 text-xs font-semibold">
                       <span>Promo Discount</span>
                       <span className="font-mono">-{formatCurrency(selectedOrder.discount!)}</span>
                     </div>
                   )}
 
-                  <div className="p-3 bg-zinc-50/70 flex items-center justify-between font-black text-sm text-zinc-950">
+                  <div className="p-3 bg-zinc-50/70 dark:bg-white/5 flex items-center justify-between font-black text-sm text-zinc-950 dark:text-white">
                     <span>Total Paid</span>
                     <span className="font-mono">{formatCurrency(selectedOrder.amount)}</span>
                   </div>
@@ -875,11 +875,11 @@ export const Orders: React.FC = () => {
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                     Issued Tickets & Passes ({selectedOrder.tickets.length})
                   </h4>
-                  <div className="rounded-xl border border-zinc-200 overflow-hidden bg-white divide-y divide-zinc-100 text-xs">
+                  <div className="rounded-xl border border-zinc-200 overflow-hidden bg-white divide-y divide-zinc-100 dark:divide-white/10 text-xs">
                     {selectedOrder.tickets.map((tkt, idx) => (
                       <div key={tkt.id || idx} className="p-3 flex items-center justify-between">
                         <div>
-                          <p className="font-mono font-bold text-zinc-900">{tkt.ticketNumber}</p>
+                          <p className="font-mono font-bold text-zinc-900 dark:text-white">{tkt.ticketNumber}</p>
                           <p className="text-[11px] text-zinc-500">
                             {tkt.attendeeName || selectedOrder.customerName} {tkt.attendeeEmail ? `(${tkt.attendeeEmail})` : ''}
                           </p>
@@ -898,7 +898,7 @@ export const Orders: React.FC = () => {
               )}
 
               {/* Action Buttons in Modal */}
-              <div className="pt-2 border-t border-zinc-200 flex flex-wrap items-center justify-between gap-3">
+              <div className="pt-2 border-t border-zinc-200 dark:border-white/10 flex flex-wrap items-center justify-between gap-3">
                 <Button
                   variant="outline"
                   size="sm"
@@ -958,7 +958,7 @@ export const Orders: React.FC = () => {
           {orderToRefund && (
             <div className="space-y-5">
               
-              <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-900 flex items-start gap-3">
+              <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 text-xs text-rose-900 dark:text-rose-300 flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <strong className="block font-bold">Caution: Non-Reversible Financial Action</strong>
@@ -972,15 +972,15 @@ export const Orders: React.FC = () => {
               <div className="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 space-y-1.5 text-xs">
                 <div className="flex justify-between">
                   <span className="text-zinc-500">Attendee:</span>
-                  <span className="font-bold text-zinc-900">{orderToRefund.customerName} ({orderToRefund.customerEmail})</span>
+                  <span className="font-bold text-zinc-900 dark:text-white">{orderToRefund.customerName} ({orderToRefund.customerEmail})</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-500">Refund Amount:</span>
-                  <span className="font-mono font-bold text-zinc-950 text-sm">{formatCurrency(orderToRefund.amount)}</span>
+                  <span className="font-mono font-bold text-zinc-950 dark:text-white text-sm">{formatCurrency(orderToRefund.amount)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-500">Tickets Cancelled:</span>
-                  <span className="font-bold text-zinc-900">{orderToRefund.ticketQuantity} ticket(s)</span>
+                  <span className="font-bold text-zinc-900 dark:text-white">{orderToRefund.ticketQuantity} ticket(s)</span>
                 </div>
               </div>
 
@@ -990,7 +990,7 @@ export const Orders: React.FC = () => {
                 <select
                   value={refundReason}
                   onChange={(e) => setRefundReason(e.target.value)}
-                  className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2 text-xs font-semibold text-zinc-900 outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20"
+                  className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2 text-xs font-semibold text-zinc-900 dark:text-white outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20"
                 >
                   <option value="Attendee Requested Cancellation">Attendee Requested Cancellation</option>
                   <option value="Event Rescheduled or Venue Change">Event Rescheduled or Venue Change</option>
@@ -1008,12 +1008,12 @@ export const Orders: React.FC = () => {
                   value={refundCustomNotes}
                   onChange={(e) => setRefundCustomNotes(e.target.value)}
                   placeholder="Additional context for your organization records..."
-                  className="w-full bg-white border border-zinc-200 rounded-xl p-3 text-xs outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 text-zinc-900 resize-none"
+                  className="w-full bg-white border border-zinc-200 rounded-xl p-3 text-xs outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 text-zinc-900 dark:text-white resize-none"
                 />
               </div>
 
               {/* Actions */}
-              <div className="pt-3 border-t border-zinc-200 flex items-center justify-end gap-2.5">
+              <div className="pt-3 border-t border-zinc-200 dark:border-white/10 flex items-center justify-end gap-2.5">
                 <Button
                   variant="outline"
                   size="sm"
