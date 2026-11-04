@@ -73,37 +73,23 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
   useEffect(() => {
     let lastScrollY = window.scrollY || document.documentElement.scrollTop;
-    let accumulatedDownScroll = 0;
-    let accumulatedUpScroll = 0;
-
-    const SCROLL_DELTA_THRESHOLD = 180;
-    const MIN_PAGE_OFFSET = 350;
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY || document.documentElement.scrollTop;
       const delta = currentScrollY - lastScrollY;
 
-      // Convert to pill when scrolled past top (activates at >20px)
+      // Convert to pill when scrolled past top (>20px)
       setIsScrolled(currentScrollY > 20);
 
-      if (currentScrollY <= MIN_PAGE_OFFSET) {
+      // Always show when near top or if mobile menu is open
+      if (currentScrollY <= 80 || isOpen) {
         setIsVisible(true);
-        accumulatedDownScroll = 0;
-        accumulatedUpScroll = 0;
-      } else if (isOpen) {
+      } else if (delta < -4) {
+        // Any upward scroll immediately restores navbar visibility
         setIsVisible(true);
-      } else if (delta > 0) {
-        accumulatedUpScroll = 0;
-        accumulatedDownScroll += delta;
-        if (accumulatedDownScroll >= SCROLL_DELTA_THRESHOLD) {
-          setIsVisible(false);
-        }
-      } else if (delta < 0) {
-        accumulatedDownScroll = 0;
-        accumulatedUpScroll += Math.abs(delta);
-        if (accumulatedUpScroll >= 16 || currentScrollY <= MIN_PAGE_OFFSET) {
-          setIsVisible(true);
-        }
+      } else if (delta > 8 && currentScrollY > 120) {
+        // Scrolling downward hides navbar to free screen space
+        setIsVisible(false);
       }
 
       lastScrollY = currentScrollY <= 0 ? 0 : currentScrollY;
