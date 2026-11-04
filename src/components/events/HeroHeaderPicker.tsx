@@ -72,14 +72,14 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <label className="text-xs font-bold text-zinc-900 block">
+          <label className="text-xs font-bold text-zinc-900 dark:text-white block">
             Hero Header Layout
           </label>
-          <p className="text-[11px] text-zinc-500">
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
             Choose how your cover media and event title are presented to attendees.
           </p>
         </div>
-        <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-full border border-zinc-200">
+        <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 dark:bg-white/10 text-zinc-600 dark:text-zinc-300 rounded-full border border-zinc-200 dark:border-white/10">
           4 Distinct Layouts
         </span>
       </div>
@@ -95,22 +95,22 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
               onClick={() => onChange(opt.id)}
               className={`relative rounded-2xl border-2 p-4 cursor-pointer transition-all duration-200 flex flex-col justify-between space-y-3 ${
                 isSelected
-                  ? 'border-[#E31B23] bg-red-50/20 shadow-sm ring-2 ring-red-500/20'
-                  : 'border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-xs'
+                  ? 'border-[#E31B23] bg-red-50/20 dark:bg-red-500/10 shadow-sm ring-2 ring-red-500/20'
+                  : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0F0F14] hover:border-zinc-300 dark:hover:border-white/20 hover:shadow-xs'
               }`}
             >
               {/* Radio Indicator & Labels */}
               <div className="flex items-start justify-between gap-2">
                 <div className="space-y-0.5 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs font-black text-zinc-950 truncate">
+                    <span className="text-xs font-black text-zinc-950 dark:text-white truncate">
                       {opt.label}
                     </span>
                     {isSelected && (
                       <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
                     )}
                   </div>
-                  <p className="text-[10px] font-semibold text-zinc-500 truncate">
+                  <p className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 truncate">
                     {opt.tagline}
                   </p>
                 </div>
@@ -119,7 +119,7 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
                   className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
                     isSelected
                       ? 'border-[#E31B23] bg-[#E31B23] text-white'
-                      : 'border-zinc-300 bg-zinc-50'
+                      : 'border-zinc-300 dark:border-white/20 bg-zinc-50 dark:bg-[#070709]'
                   }`}
                 >
                   {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
@@ -127,7 +127,7 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
               </div>
 
               {/* Wireframe Diagram of Header */}
-              <div className="rounded-xl bg-zinc-100 p-2 border border-zinc-200/80 overflow-hidden">
+              <div className="rounded-xl bg-zinc-100 dark:bg-black/40 p-2 border border-zinc-200/80 dark:border-white/10 overflow-hidden">
                 {opt.id === 'cinematic' && (
                   <div className="h-16 w-full rounded-lg bg-zinc-950 relative overflow-hidden p-1.5 flex flex-col justify-between border border-zinc-800">
                     <div className="flex justify-between items-center">
@@ -150,11 +150,11 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
                       <div className="h-1.5 w-6 rounded-full bg-white/60" />
                       <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
                     </div>
-                    <div className="bg-white border border-zinc-300 rounded-b-lg p-1 space-y-0.5 shadow-2xs">
-                      <div className="h-1.5 w-3/4 rounded-sm bg-zinc-900" />
+                    <div className="bg-white dark:bg-[#0F0F14] border border-zinc-300 dark:border-white/10 rounded-b-lg p-1 space-y-0.5 shadow-2xs">
+                      <div className="h-1.5 w-3/4 rounded-sm bg-zinc-900 dark:bg-white" />
                       <div className="flex gap-1">
-                        <div className="h-1 w-8 rounded-full bg-red-100" />
-                        <div className="h-1 w-6 rounded-full bg-zinc-100" />
+                        <div className="h-1 w-8 rounded-full bg-red-100 dark:bg-red-500/20" />
+                        <div className="h-1 w-6 rounded-full bg-zinc-100 dark:bg-white/10" />
                       </div>
                     </div>
                   </div>
@@ -175,12 +175,12 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
                 )}
 
                 {opt.id === 'bento' && (
-                  <div className="h-16 w-full rounded-lg bg-white border border-zinc-300 p-1 grid grid-cols-3 gap-1">
+                  <div className="h-16 w-full rounded-lg bg-white dark:bg-[#0F0F14] border border-zinc-300 dark:border-white/10 p-1 grid grid-cols-3 gap-1">
                     <div className="col-span-2 rounded-md bg-zinc-900 p-1 flex flex-col justify-between">
                       <div className="h-1 w-6 rounded-full bg-white/60" />
                       <div className="h-1.5 w-4/5 rounded-sm bg-white" />
                     </div>
-                    <div className="col-span-1 rounded-md bg-red-50 border border-red-200 p-1 flex flex-col justify-between">
+                    <div className="col-span-1 rounded-md bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-1 flex flex-col justify-between">
                       <div className="w-2 h-2 rounded-full bg-[#E31B23]" />
                       <div className="h-1 w-full rounded-sm bg-[#E31B23]" />
                     </div>
@@ -189,12 +189,12 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
               </div>
 
               {/* Tag / Description */}
-              <div className="space-y-1 pt-1 border-t border-zinc-100">
-                <span className="text-[9px] font-bold text-zinc-600 block leading-snug line-clamp-2">
+              <div className="space-y-1 pt-1 border-t border-zinc-100 dark:border-white/10">
+                <span className="text-[9px] font-bold text-zinc-600 dark:text-zinc-400 block leading-snug line-clamp-2">
                   {opt.description}
                 </span>
-                <span className="text-[8px] font-semibold text-zinc-400 block truncate">
-                  For: <span className="text-zinc-700">{opt.idealFor}</span>
+                <span className="text-[8px] font-semibold text-zinc-400 dark:text-zinc-500 block truncate">
+                  For: <span className="text-zinc-700 dark:text-zinc-300">{opt.idealFor}</span>
                 </span>
               </div>
             </div>
@@ -204,14 +204,14 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
 
       {/* Live Mini Preview Box */}
       {showLivePreview && (
-        <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/90 space-y-3">
+        <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200/90 dark:border-white/10 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-zinc-900 flex items-center gap-1.5">
+            <span className="text-xs font-black text-zinc-900 dark:text-white flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
               <span>Layout In-Action Preview</span>
             </span>
-            <span className="text-[11px] font-bold text-zinc-500 capitalize">
-              Style: <strong className="text-zinc-900">{HERO_LAYOUT_OPTIONS.find(o => o.id === value)?.label}</strong>
+            <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 capitalize">
+              Style: <strong className="text-zinc-900 dark:text-white">{HERO_LAYOUT_OPTIONS.find(o => o.id === value)?.label}</strong>
             </span>
           </div>
 
@@ -267,16 +267,16 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
                   </span>
                 </div>
               </div>
-              <div className="bg-white border border-zinc-200 rounded-b-2xl p-3.5 space-y-2 shadow-2xs">
+              <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-b-2xl p-3.5 space-y-2 shadow-2xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="space-y-0.5">
-                    <span className="text-[10px] font-black uppercase text-red-600 tracking-wider">
+                    <span className="text-[10px] font-black uppercase text-red-600 dark:text-red-400 tracking-wider">
                       ● Confirmed Schedule
                     </span>
-                    <h4 className="text-sm sm:text-base font-black text-zinc-950">
+                    <h4 className="text-sm sm:text-base font-black text-zinc-950 dark:text-white">
                       {eventTitle}
                     </h4>
-                    <p className="text-[11px] text-zinc-500 font-medium">
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
                       {eventDate} • {eventVenue}
                     </p>
                   </div>
@@ -340,9 +340,9 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
 
           {/* PREVIEW 4: BENTO */}
           {value === 'bento' && (
-            <div className="rounded-2xl bg-white border border-zinc-200 p-3 sm:p-4 shadow-xs space-y-3">
+            <div className="rounded-2xl bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 p-3 sm:p-4 shadow-xs space-y-3">
               <div className="grid grid-cols-12 gap-3 items-center">
-                <div className="col-span-7 h-28 rounded-xl overflow-hidden relative bg-zinc-900 border border-zinc-200">
+                <div className="col-span-7 h-28 rounded-xl overflow-hidden relative bg-zinc-900 border border-zinc-200 dark:border-white/10">
                   <img
                     src={previewImageUrl}
                     alt="Bento Cover Preview"
@@ -355,10 +355,10 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
                 <div className="col-span-5 space-y-2">
                   <div className="space-y-1">
                     <span className="text-[9px] font-black uppercase text-[#E31B23]">✦ Featured Event</span>
-                    <h4 className="text-xs sm:text-sm font-black text-zinc-950 leading-tight">
+                    <h4 className="text-xs sm:text-sm font-black text-zinc-950 dark:text-white leading-tight">
                       {eventTitle}
                     </h4>
-                    <p className="text-[10px] text-zinc-500 font-medium">
+                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">
                       {eventDate}
                     </p>
                   </div>
