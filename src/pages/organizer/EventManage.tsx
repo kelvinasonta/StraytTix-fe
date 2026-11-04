@@ -4299,7 +4299,7 @@ export const EventManage: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Event status message</h3>
-                  <p className="text-xs text-zinc-500 max-w-2xl mt-0.5">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-2xl mt-0.5">
                     You can use this feature to put up your event page before you’re ready to start sales or display a custom message after sales have ended.
                   </p>
                 </div>
@@ -4319,12 +4319,12 @@ export const EventManage: React.FC = () => {
                         setIsStatusMsgEnabled(false);
                       }}
                       className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${statusMessageType === 'none'
-                        ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-white dark:bg-[#0F0F14]'
+                        ? 'border-[#E31B23] bg-red-500/10 ring-1 ring-[#E31B23]'
+                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-white dark:bg-[#070709]'
                         }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'none' ? 'bg-red-100 text-[#E31B23]' : 'bg-zinc-100 dark:bg-white/10 text-zinc-500'
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'none' ? 'bg-red-500/15 text-[#E31B23]' : 'bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400'
                           }`}>
                           <MinusCircle className="w-4 h-4" />
                         </div>
@@ -4335,7 +4335,7 @@ export const EventManage: React.FC = () => {
                       </div>
                       <div>
                         <span className="text-sm font-bold text-zinc-900 dark:text-white block">None</span>
-                        <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
                           Standard event page with regular ticket purchasing active.
                         </p>
                       </div>
@@ -4349,12 +4349,12 @@ export const EventManage: React.FC = () => {
                         setIsStatusMsgEnabled(true);
                       }}
                       className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${statusMessageType === 'pre_sale'
-                        ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-white dark:bg-[#0F0F14]'
+                        ? 'border-[#E31B23] bg-red-500/10 ring-1 ring-[#E31B23]'
+                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-white dark:bg-[#070709]'
                         }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'pre_sale' ? 'bg-amber-100 text-amber-600' : 'bg-zinc-100 dark:bg-white/10 text-zinc-500'
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'pre_sale' ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' : 'bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400'
                           }`}>
                           <Clock className="w-4 h-4" />
                         </div>
@@ -4365,7 +4365,7 @@ export const EventManage: React.FC = () => {
                       </div>
                       <div>
                         <span className="text-sm font-bold text-zinc-900 dark:text-white block">Show a pre sale message</span>
-                        <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
                           Display a custom announcement on your event page before sales open.
                         </p>
                       </div>
@@ -4379,12 +4379,12 @@ export const EventManage: React.FC = () => {
                         setIsStatusMsgEnabled(true);
                       }}
                       className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${statusMessageType === 'post_sales'
-                        ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-white dark:bg-[#0F0F14]'
+                        ? 'border-[#E31B23] bg-red-500/10 ring-1 ring-[#E31B23]'
+                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-white dark:bg-[#070709]'
                         }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'post_sales' ? 'bg-rose-100 text-rose-600' : 'bg-zinc-100 dark:bg-white/10 text-zinc-500'
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'post_sales' ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400' : 'bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400'
                           }`}>
                           <AlertCircle className="w-4 h-4" />
                         </div>
@@ -4395,7 +4395,7 @@ export const EventManage: React.FC = () => {
                       </div>
                       <div>
                         <span className="text-sm font-bold text-zinc-900 dark:text-white block">Show a post sales message</span>
-                        <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
                           Display a notice on your event page after ticket sales have ended.
                         </p>
                       </div>
@@ -4405,13 +4405,13 @@ export const EventManage: React.FC = () => {
 
                 {/* Pre Sale Message Editor */}
                 {statusMessageType === 'pre_sale' && (
-                  <div className="p-5 rounded-2xl bg-amber-50/40 border border-amber-200/80 space-y-4 animate-in fade-in duration-200">
+                  <div className="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20 space-y-4 animate-in fade-in duration-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-amber-600" />
+                        <Sparkles className="w-4 h-4 text-amber-500" />
                         <label className="text-xs font-bold text-zinc-900 dark:text-white">Pre-sale Announcement Message</label>
                       </div>
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20">
                         Pre-Sale Mode Active
                       </span>
                     </div>
@@ -4424,7 +4424,7 @@ export const EventManage: React.FC = () => {
                         setStatusMessage(e.target.value);
                       }}
                       placeholder="e.g. Tickets will go on sale on Friday at 10:00 AM. Join the waitlist to get early access!"
-                      className="w-full px-4 py-3 bg-white dark:bg-amber-950/20 border border-amber-200 dark:border-amber-500/30 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-amber-500 shadow-2xs leading-relaxed"
+                      className="w-full px-4 py-3 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] leading-relaxed transition-colors"
                     />
 
                     {/* Quick suggestion pills */}
@@ -4443,7 +4443,7 @@ export const EventManage: React.FC = () => {
                               setPreSaleMessage(suggestion);
                               setStatusMessage(suggestion);
                             }}
-                            className="px-2.5 py-1 bg-white dark:bg-amber-950/30 border border-amber-200 dark:border-amber-500/30 hover:border-amber-400 rounded-lg text-[11px] font-semibold text-zinc-700 dark:text-amber-300 hover:text-amber-800 transition-colors cursor-pointer"
+                            className="px-2.5 py-1 bg-white dark:bg-white/[0.04] border border-zinc-200 dark:border-white/10 hover:border-amber-400 dark:hover:border-amber-400/50 rounded-lg text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 hover:text-amber-800 dark:hover:text-amber-300 transition-colors cursor-pointer"
                           >
                             + {suggestion}
                           </button>
@@ -4452,12 +4452,12 @@ export const EventManage: React.FC = () => {
                     </div>
 
                     {/* Live Preview Box */}
-                    <div className="pt-2 border-t border-amber-200/60">
+                    <div className="pt-2 border-t border-amber-500/20">
                       <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-2">Attendee Page Preview</span>
-                      <div className="p-3.5 rounded-xl bg-amber-100/70 border border-amber-300/80 text-amber-950 flex items-start gap-3 shadow-2xs">
-                        <Clock className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+                      <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-zinc-900 dark:text-white flex items-start gap-3">
+                        <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                         <div className="text-xs">
-                          <span className="font-bold block text-amber-900 text-[11px] uppercase tracking-wide">Pre-Sale Announcement</span>
+                          <span className="font-bold block text-amber-700 dark:text-amber-400 text-[11px] uppercase tracking-wide">Pre-Sale Announcement</span>
                           <p className="mt-0.5 text-zinc-800 dark:text-zinc-200 font-medium">{preSaleMessage || 'Tickets will go on sale soon.'}</p>
                         </div>
                       </div>
@@ -4467,13 +4467,13 @@ export const EventManage: React.FC = () => {
 
                 {/* Post Sales Message Editor */}
                 {statusMessageType === 'post_sales' && (
-                  <div className="p-5 rounded-2xl bg-rose-50/40 border border-rose-200/80 space-y-4 animate-in fade-in duration-200">
+                  <div className="p-5 rounded-2xl bg-rose-500/5 border border-rose-500/20 space-y-4 animate-in fade-in duration-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 text-rose-600" />
+                        <AlertCircle className="w-4 h-4 text-rose-500" />
                         <label className="text-xs font-bold text-zinc-900 dark:text-white">Post-sales Notice Message</label>
                       </div>
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800">
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/20">
                         Post-Sales Mode Active
                       </span>
                     </div>
@@ -4486,7 +4486,7 @@ export const EventManage: React.FC = () => {
                         setStatusMessage(e.target.value);
                       }}
                       placeholder="e.g. Ticket sales have officially ended. Thank you for your support, and we look forward to seeing you at the event!"
-                      className="w-full px-4 py-3 bg-white dark:bg-rose-950/20 border border-rose-200 dark:border-rose-500/30 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-rose-500 shadow-2xs leading-relaxed"
+                      className="w-full px-4 py-3 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] leading-relaxed transition-colors"
                     />
 
                     {/* Quick suggestion pills */}
@@ -4505,7 +4505,7 @@ export const EventManage: React.FC = () => {
                               setPostSaleMessage(suggestion);
                               setStatusMessage(suggestion);
                             }}
-                            className="px-2.5 py-1 bg-white dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/30 hover:border-rose-400 rounded-lg text-[11px] font-semibold text-zinc-700 dark:text-rose-300 hover:text-rose-800 transition-colors cursor-pointer"
+                            className="px-2.5 py-1 bg-white dark:bg-white/[0.04] border border-zinc-200 dark:border-white/10 hover:border-rose-400 dark:hover:border-rose-400/50 rounded-lg text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 hover:text-rose-800 dark:hover:text-rose-300 transition-colors cursor-pointer"
                           >
                             + {suggestion}
                           </button>
@@ -4514,12 +4514,12 @@ export const EventManage: React.FC = () => {
                     </div>
 
                     {/* Live Preview Box */}
-                    <div className="pt-2 border-t border-rose-200/60">
+                    <div className="pt-2 border-t border-rose-500/20">
                       <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-2">Attendee Page Preview</span>
-                      <div className="p-3.5 rounded-xl bg-rose-100/70 border border-rose-300/80 text-rose-950 flex items-start gap-3 shadow-2xs">
-                        <AlertCircle className="w-4 h-4 text-rose-700 flex-shrink-0 mt-0.5" />
+                      <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-zinc-900 dark:text-white flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" />
                         <div className="text-xs">
-                          <span className="font-bold block text-rose-900 text-[11px] uppercase tracking-wide">Sales Concluded Notice</span>
+                          <span className="font-bold block text-rose-700 dark:text-rose-400 text-[11px] uppercase tracking-wide">Sales Concluded Notice</span>
                           <p className="mt-0.5 text-zinc-800 dark:text-zinc-200 font-medium">{postSaleMessage || 'Ticket sales have ended.'}</p>
                         </div>
                       </div>
@@ -4529,7 +4529,7 @@ export const EventManage: React.FC = () => {
 
                 {/* Status None Info */}
                 {statusMessageType === 'none' && (
-                  <div className="p-4 rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center gap-3 text-xs text-zinc-600">
+                  <div className="p-4 rounded-xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 flex items-center gap-3 text-xs text-zinc-600 dark:text-zinc-400">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                     <span>No status message active. Attendees can view tickets and complete checkout as usual.</span>
                   </div>
