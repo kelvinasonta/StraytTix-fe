@@ -48,8 +48,11 @@ export const normalizeOrder = (raw: any, fallbackEvents: Event[] = []): Order =>
     status: normalizedStatus,
     reservedUntil: raw.reservedUntil || raw.reserved_until || null,
     paidAt: raw.paidAt || raw.paid_at || null,
+    guestToken: raw.guestToken || raw.guest_token || null,
+    guest_token: raw.guest_token || raw.guestToken || null,
     createdAt: raw.createdAt || raw.created_at || new Date().toISOString(),
     items: raw.items || [],
     tickets: raw.tickets || []
   };
 };
+

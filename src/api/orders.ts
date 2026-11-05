@@ -25,9 +25,13 @@ export const ordersApi = {
   // 4. Initialize Payment (Paystack / Flutterwave / Stripe / Free)
   initializePayment: async (
     orderUuid: string,
-    payload?: { gateway?: 'paystack' | 'flutterwave' | 'stripe' | 'free'; callback_url?: string }
+    payload?: { gateway?: 'paystack' | 'flutterwave' | 'stripe' | 'free'; callback_url?: string; guest_token?: string }
   ): Promise<PaymentInitResponse> => {
-    const res = await apiClient.post<ApiResponse<PaymentInitResponse>>(cleanUrl(`/api/v1/orders/${orderUuid}/payments`), payload);
+    const config: any = {};
+    if (payload?.guest_token) {
+      config.headers = { 'X-Guest-Token': payload.guest_token };
+    }
+    const res = await apiClient.post<ApiResponse<PaymentInitResponse>>(cleanUrl(`/api/v1/orders/${orderUuid}/payments`), payload, config);
     return res.data.data;
   },
 

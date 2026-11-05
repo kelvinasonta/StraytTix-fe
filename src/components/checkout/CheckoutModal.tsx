@@ -189,9 +189,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         }
 
         if (order && order.id && !isFree) {
+          const guestToken = (order as any).guestToken || (order as any).guest_token;
           const payment = await ordersApi.initializePayment(order.id, {
             gateway: 'paystack',
             callback_url: `${window.location.origin}/checkout/callback`,
+            guest_token: guestToken,
           });
           if (payment?.payment_url) {
             window.location.href = payment.payment_url;

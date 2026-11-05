@@ -337,10 +337,13 @@ export const CheckoutPage: React.FC = () => {
     // If order was created and requires gateway payment (Paystack redirect)
     if (orderResult && !isFree && (orderResult.id || orderResult.uuid)) {
       const targetOrderId = orderResult.id || orderResult.uuid;
+      const guestToken = orderResult.guestToken || orderResult.guest_token;
       try {
         const paymentRes = await apiClient.post(`/orders/${targetOrderId}/payments`, {
           gateway: 'paystack',
           callback_url: `${window.location.origin}/checkout/callback`,
+        }, {
+          headers: guestToken ? { 'X-Guest-Token': guestToken } : {}
         });
         const paymentData = paymentRes.data?.data || paymentRes.data;
         if (paymentData?.payment_url) {

@@ -597,6 +597,8 @@ export interface Order {
   status: OrderStatus;
   reservedUntil?: string | null; // ISO Date string (15-min hold)
   paidAt?: string | null;
+  guestToken?: string | null;
+  guest_token?: string | null;
   createdAt: string;
   event?: {
     id: string;
