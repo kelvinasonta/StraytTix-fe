@@ -61,3 +61,28 @@ export const formatEventDateTime = (dateStr?: string, timeStr?: string): string 
   
   return dateFormatted ? `${dateFormatted} • ${formattedTime}` : formattedTime;
 };
+
+/**
+ * Returns a personalized greeting (Good morning / Good afternoon / Good evening)
+ * based on user's timezone (or system timezone / UTC fallback).
+ */
+export const getGreeting = (userTimezone?: string): string => {
+  try {
+    const targetTimezone = userTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    const hourFormatter = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      hourCycle: 'h23',
+      timeZone: targetTimezone,
+    });
+    const hour = parseInt(hourFormatter.format(new Date()), 10);
+    if (hour >= 5 && hour < 12) return 'Good morning';
+    if (hour >= 12 && hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  } catch {
+    const localHour = new Date().getHours();
+    if (localHour >= 5 && localHour < 12) return 'Good morning';
+    if (localHour >= 12 && localHour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+};
+

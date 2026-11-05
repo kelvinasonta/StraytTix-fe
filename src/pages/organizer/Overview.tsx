@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import OrganizerDashboardLayout from '../../components/layout/OrganizerDashboardLayout';
-import { formatCurrency, formatDate } from '../../utils/format';
+import { formatCurrency, formatDate, getGreeting } from '../../utils/format';
 import {
   Calendar,
   Ticket,
@@ -80,7 +80,7 @@ export const Overview: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-black text-zinc-950 dark:text-white tracking-tight flex items-center gap-2">
-              Good morning, {firstName} <Sparkles className="w-5 h-5 text-amber-500 fill-amber-400 inline-block" />
+              {getGreeting(user?.timezone)}, {firstName} <Sparkles className="w-5 h-5 text-amber-500 fill-amber-400 inline-block" />
             </h1>
             <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium mt-1">
               {role === 'staff'
