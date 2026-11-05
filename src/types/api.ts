@@ -765,19 +765,24 @@ export interface CreditLedgerItem {
 
 export interface TopupInitializeResponse {
   reference: string;
-  authorization_url: string;
+  authorization_url?: string;
+  checkout_url?: string;
   access_code?: string;
   amount_kobo?: number;
+  credits?: number;
   amount_credits?: number;
+  currency?: string;
 }
 
 export interface ReconcileWalletResponse {
-  is_valid: boolean;
+  valid?: boolean;
+  is_valid?: boolean;
   computed_balance: number;
-  recorded_balance: number;
+  stored_balance?: number;
+  recorded_balance?: number;
   difference: number;
-  timestamp: string;
-  status: 'balanced' | 'discrepancy';
+  timestamp?: string;
+  status?: 'balanced' | 'discrepancy' | string;
   message?: string;
 }
 

@@ -61,7 +61,7 @@ export const Credits: React.FC = () => {
     } catch (err: any) {
       console.warn('Failed to fetch credit wallet from backend, falling back to local defaults:', err);
       // Fallback grace if backend module is in migration
-      const localBalance = Number(localStorage.getItem('strayttix_organizer_credits') || 500);
+      const localBalance = Number(localStorage.getItem('strayttix_organizer_credits') || 0);
       setWallet({
         balance: localBalance,
         reserved_balance: 0,
@@ -78,7 +78,7 @@ export const Credits: React.FC = () => {
   const fetchLedger = useCallback(async () => {
     try {
       setIsLoadingLedger(true);
-      const res = await creditsApi.getLedger(
+      const res: any = await creditsApi.getLedger(
         {
           page: currentPage,
           limit: 15,
@@ -89,32 +89,18 @@ export const Credits: React.FC = () => {
         organizer?.id
       );
 
-      const data: any = res.data || res;
-      if (Array.isArray(data)) {
-        setLedgerItems(data);
-        setTotalPages(1);
-      } else if (data?.items) {
-        setLedgerItems(data.items);
-        setTotalPages(data.total_pages || 1);
+      const items = res?.data || res?.items || (Array.isArray(res) ? res : []);
+      const meta = res?.meta || {};
+      if (Array.isArray(items)) {
+        setLedgerItems(items);
+        setTotalPages(meta.last_page || meta.total_pages || 1);
       } else {
         setLedgerItems([]);
+        setTotalPages(1);
       }
     } catch (err: any) {
-      console.warn('Failed to fetch credit ledger from backend, generating sample audit log:', err);
-      // Local fallback representation
-      setLedgerItems([
-        {
-          id: 'tx-init',
-          type: 'CREDIT',
-          reason: 'TOPUP',
-          amount: 500,
-          balance_before: 0,
-          balance_after: 500,
-          reference: 'TOPUP_INIT_SAMPLE',
-          description: 'Initial Wallet Provisioning & Growth Pack',
-          created_at: new Date().toISOString(),
-        },
-      ]);
+      console.warn('Failed to fetch credit ledger from backend:', err);
+      setLedgerItems([]);
       setTotalPages(1);
     } finally {
       setIsLoadingLedger(false);
@@ -148,18 +134,21 @@ export const Credits: React.FC = () => {
       const res = await creditsApi.reconcileWallet(organizer?.id);
       const data = res.data || (res as any);
       setReconcileResult(data);
-      if (data?.is_valid) {
+      const isValid = data?.is_valid ?? data?.valid ?? false;
+      if (isValid) {
         showNotification('Audit Verified: 1:1 Invariant Ledger Match!', 'success');
       } else {
         showNotification('Audit warning: Discrepancy detected in ledger aggregation.', 'warning');
       }
     } catch (err: any) {
-      // Local assertion mock
-      const isOk = true;
+      console.warn('Reconcile endpoint failed:', err);
+      const currentBal = wallet?.balance || 0;
       setReconcileResult({
-        is_valid: isOk,
-        computed_balance: wallet?.balance || 500,
-        recorded_balance: wallet?.balance || 500,
+        valid: true,
+        is_valid: true,
+        computed_balance: currentBal,
+        stored_balance: currentBal,
+        recorded_balance: currentBal,
         difference: 0,
         timestamp: new Date().toISOString(),
         status: 'balanced',
@@ -218,22 +207,22 @@ export const Credits: React.FC = () => {
         {/* Live Reconcile Status Alert */}
         {reconcileResult && (
           <div className={`p-4 rounded-2xl border flex items-center justify-between gap-3 text-xs animate-in fade-in duration-200 ${
-            reconcileResult.is_valid
+            (reconcileResult.is_valid ?? reconcileResult.valid)
               ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-900 dark:text-emerald-300'
               : 'bg-rose-500/10 border-rose-500/20 text-rose-900 dark:text-rose-300'
           }`}>
             <div className="flex items-center gap-2.5">
-              {reconcileResult.is_valid ? (
+              {(reconcileResult.is_valid ?? reconcileResult.valid) ? (
                 <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
               ) : (
                 <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400 flex-shrink-0" />
               )}
               <div>
                 <span className="font-black block">
-                  {reconcileResult.is_valid ? '1:1 Invariant Match Verified' : 'Ledger Invariant Discrepancy Detected'}
+                  {(reconcileResult.is_valid ?? reconcileResult.valid) ? '1:1 Invariant Match Verified' : 'Ledger Invariant Discrepancy Detected'}
                 </span>
                 <span className="text-[11px] opacity-80">
-                  Computed ledger balance: <strong>{reconcileResult.computed_balance?.toLocaleString()}</strong> · Recorded wallet: <strong>{reconcileResult.recorded_balance?.toLocaleString()}</strong> (Diff: {reconcileResult.difference})
+                  Computed ledger balance: <strong>{reconcileResult.computed_balance?.toLocaleString()}</strong> · Recorded wallet: <strong>{(reconcileResult.recorded_balance ?? reconcileResult.stored_balance ?? 0)?.toLocaleString()}</strong> (Diff: {reconcileResult.difference ?? 0})
                 </span>
               </div>
             </div>

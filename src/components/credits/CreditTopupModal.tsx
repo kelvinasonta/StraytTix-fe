@@ -94,6 +94,7 @@ export const CreditTopupModal: React.FC<CreditTopupModalProps> = ({
       
       const res = await creditsApi.initializeTopup(
         {
+          credits: currentCredits,
           amount_credits: currentCredits,
           callback_url: callbackUrl,
           package_id: selectedPack !== 'custom' ? selectedPack : undefined,
@@ -102,9 +103,10 @@ export const CreditTopupModal: React.FC<CreditTopupModalProps> = ({
       );
 
       const data = res.data || (res as any);
-      if (data?.authorization_url) {
+      const redirectUrl = data?.authorization_url || data?.checkout_url;
+      if (redirectUrl) {
         // Redirect to gateway authorization URL
-        window.location.href = data.authorization_url;
+        window.location.href = redirectUrl;
       } else {
         showNotification(
           `Payment initialized! Reference: ${data?.reference || 'N/A'}. Refreshing wallet...`,

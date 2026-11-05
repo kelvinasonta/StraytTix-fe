@@ -76,13 +76,21 @@ export const creditsApi = {
    * Prepares a Paystack checkout transaction for credit purchase.
    */
   async initializeTopup(
-    payload: { amount_credits: number; callback_url?: string; package_id?: string },
+    payload: { amount_credits?: number; credits?: number; amount?: number; callback_url?: string; package_id?: string },
     organizerUuid?: string
   ): Promise<ApiResponse<TopupInitializeResponse>> {
     const orgUuid = resolveOrganizerUuid(organizerUuid);
+    const creditsAmount = payload.credits ?? payload.amount_credits ?? 100;
+    const body = {
+      credits: creditsAmount,
+      amount_credits: creditsAmount,
+      amount: creditsAmount * 10,
+      callback_url: payload.callback_url,
+      package_id: payload.package_id,
+    };
     const { data } = await apiClient.post<ApiResponse<TopupInitializeResponse>>(
       `/organizers/${orgUuid}/credits/top-up/initialize`,
-      payload
+      body
     );
     return data;
   },
