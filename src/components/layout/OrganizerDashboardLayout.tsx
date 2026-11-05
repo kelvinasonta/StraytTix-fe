@@ -85,25 +85,6 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
             </span>
           </div>
 
-          {/* Switch to Attendee Account Button */}
-          <Link
-            to="/dashboard"
-            className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-white/5 hover:bg-zinc-100/90 dark:hover:bg-white/10 border border-zinc-200/80 dark:border-white/10 text-zinc-900 dark:text-white transition-all group cursor-pointer shadow-2xs"
-            title="Switch to personal attendee account (tickets & favorites)"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-500/10 text-[#E31B23] flex items-center justify-center font-bold flex-shrink-0">
-                <Ticket className="w-4 h-4" />
-              </div>
-              <div className="text-left">
-                <p className="text-xs font-bold text-zinc-950 dark:text-white flex items-center gap-1.5 leading-tight">
-                  Attendee Account
-                </p>
-                <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">Tickets, saves & orders</p>
-              </div>
-            </div>
-            <ArrowRight className="w-4 h-4 text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-950 dark:group-hover:text-white group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-          </Link>
 
           {/* Navigation Links */}
           <nav className="space-y-1.5">

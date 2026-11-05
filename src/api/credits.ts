@@ -76,7 +76,7 @@ export const creditsApi = {
    * Prepares a Paystack checkout transaction for credit purchase.
    */
   async initializeTopup(
-    payload: { amount_credits?: number; credits?: number; amount?: number; callback_url?: string; package_id?: string },
+    payload: { amount_credits?: number; credits?: number; amount?: number; callback_url?: string; package_id?: string; gateway?: string },
     organizerUuid?: string
   ): Promise<ApiResponse<TopupInitializeResponse>> {
     const orgUuid = resolveOrganizerUuid(organizerUuid);
@@ -87,10 +87,28 @@ export const creditsApi = {
       amount: creditsAmount * 10,
       callback_url: payload.callback_url,
       package_id: payload.package_id,
+      gateway: payload.gateway,
     };
     const { data } = await apiClient.post<ApiResponse<TopupInitializeResponse>>(
       `/organizers/${orgUuid}/credits/top-up/initialize`,
       body
+    );
+    return data;
+  },
+
+  /**
+   * GET /api/v1/organizers/{organizerUuid}/credits/top-up/verify/{reference}
+   * Verifies top-up payment with backend/gateway and updates wallet credits immediately.
+   */
+  async verifyTopup(
+    reference: string,
+    organizerUuid?: string,
+    gateway?: string
+  ): Promise<ApiResponse<{ status: string; credits_awarded: number; balance: number; reference: string }>> {
+    const orgUuid = resolveOrganizerUuid(organizerUuid);
+    const { data } = await apiClient.get<ApiResponse<{ status: string; credits_awarded: number; balance: number; reference: string }>>(
+      `/organizers/${orgUuid}/credits/top-up/verify/${reference}`,
+      { params: { gateway } }
     );
     return data;
   },

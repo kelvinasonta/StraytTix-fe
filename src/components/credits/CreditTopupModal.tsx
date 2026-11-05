@@ -90,7 +90,7 @@ export const CreditTopupModal: React.FC<CreditTopupModalProps> = ({
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      const callbackUrl = `${window.location.origin}${window.location.pathname}?topup_status=completed&ref=`;
+      const callbackUrl = `${window.location.origin}/organizer/credits/callback`;
       
       const res = await creditsApi.initializeTopup(
         {

@@ -58,6 +58,9 @@ export const Credits: React.FC = () => {
       const res = await creditsApi.getWallet(organizer?.id);
       const data = res.data || (res as any);
       setWallet(data);
+      if (data?.balance !== undefined) {
+        localStorage.setItem('strayttix_organizer_credits', String(data.balance));
+      }
     } catch (err: any) {
       console.warn('Failed to fetch credit wallet from backend, falling back to local defaults:', err);
       // Fallback grace if backend module is in migration
@@ -116,16 +119,41 @@ export const Credits: React.FC = () => {
     fetchLedger();
   }, [fetchLedger]);
 
-  // Handle URL query return from gateway
+  // Handle URL query return from gateway (Paystack / Flutterwave)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('topup_status') === 'completed') {
-      showNotification('Payment verified! Your credits wallet has been updated.', 'success');
-      fetchWallet();
-      fetchLedger();
-      window.history.replaceState({}, '', window.location.pathname);
+    const topupStatus = params.get('topup_status');
+    // Gateways send reference in 'reference', 'trxref', or 'tx_ref'
+    const reference = params.get('reference') || params.get('trxref') || params.get('tx_ref') || params.get('ref');
+
+    if (topupStatus === 'completed' || reference) {
+      const settlePayment = async () => {
+        try {
+          if (reference) {
+            showNotification('Verifying top-up payment with gateway...', 'info');
+            const verifyRes = await creditsApi.verifyTopup(reference, organizer?.id);
+            const verifiedData = verifyRes.data || (verifyRes as any);
+            const awarded = verifiedData?.credits_awarded || 0;
+            showNotification(
+              `Payment verified! Added ${awarded > 0 ? awarded : ''} credits to your wallet.`,
+              'success'
+            );
+          } else {
+            showNotification('Payment verified! Your credits wallet has been updated.', 'success');
+          }
+        } catch (err: any) {
+          console.warn('Direct verify failed or already verified via webhook:', err);
+          showNotification('Payment received! Updating wallet balance...', 'success');
+        } finally {
+          await fetchWallet();
+          await fetchLedger();
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      };
+
+      settlePayment();
     }
-  }, [fetchWallet, fetchLedger, showNotification]);
+  }, [organizer?.id, fetchWallet, fetchLedger, showNotification]);
 
   // Run Reconcile Assert
   const handleReconcile = async () => {
