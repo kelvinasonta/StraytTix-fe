@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { eventApi, normalizeBackendEvent } from '../../api/events';
+import { normalizeOrder } from '../../utils/order';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
 import type { Event, Order } from '../../types/api';
 
@@ -43,7 +44,8 @@ export const Overview: React.FC = () => {
           : Array.isArray((rawEvents as any)?.data)
             ? (rawEvents as any).data
             : [];
-        setEvents(eventItems.map(normalizeBackendEvent));
+        const normalizedEvents = eventItems.map(normalizeBackendEvent);
+        setEvents(normalizedEvents);
 
         const rawOrders = ordersRes.data;
         const orderItems = Array.isArray(rawOrders)
@@ -51,7 +53,7 @@ export const Overview: React.FC = () => {
           : Array.isArray((rawOrders as any)?.data)
             ? (rawOrders as any).data
             : [];
-        setOrders(orderItems);
+        setOrders(orderItems.map((o: any) => normalizeOrder(o, normalizedEvents)));
       })
       .finally(() => {
         setIsLoading(false);
