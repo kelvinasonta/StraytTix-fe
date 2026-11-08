@@ -2567,19 +2567,19 @@ export const CreateEvent: React.FC = () => {
                       <label className="text-xs font-bold text-zinc-900 block">Cover Photo & Event Flyer</label>
                       <span className="text-[11px] text-zinc-400">High-res 16:9 banner displayed across event discovery & passes</span>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-full border border-zinc-200 dark:border-white/10">
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 dark:bg-white/10 text-zinc-600 dark:text-zinc-300 rounded-full border border-zinc-200 dark:border-white/10">
                       16:9 Recommended
                     </span>
                   </div>
 
                   {/* Cover Mode Selector */}
-                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100/80 rounded-xl border border-zinc-200 dark:border-white/10/60 text-xs font-bold">
+                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100/80 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-bold">
                     <button
                       type="button"
                       onClick={() => setCoverMode('upload')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'upload'
-                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
-                        : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
+                        ? 'bg-white dark:bg-[#14151B] text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                         }`}
                     >
                       <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -2589,8 +2589,8 @@ export const CreateEvent: React.FC = () => {
                       type="button"
                       onClick={() => setCoverMode('preset')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'preset'
-                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
-                        : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
+                        ? 'bg-white dark:bg-[#14151B] text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                         }`}
                     >
                       <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -2600,8 +2600,8 @@ export const CreateEvent: React.FC = () => {
                       type="button"
                       onClick={() => setCoverMode('url')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'url'
-                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
-                        : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
+                        ? 'bg-white dark:bg-[#14151B] text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                         }`}
                     >
                       <ExternalLink className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -2630,7 +2630,7 @@ export const CreateEvent: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => coverFileInputRef.current?.click()}
-                              className="px-3.5 py-2 bg-white text-zinc-950 dark:text-white text-xs font-bold rounded-xl shadow-md hover:bg-zinc-100 transition-all flex items-center gap-1.5 cursor-pointer"
+                              className="px-3.5 py-2 bg-white text-zinc-950 text-xs font-bold rounded-xl shadow-md hover:bg-zinc-100 transition-all flex items-center gap-1.5 cursor-pointer"
                             >
                               <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
                               <span>Replace Flyer</span>

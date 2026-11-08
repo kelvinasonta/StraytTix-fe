@@ -242,16 +242,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-zinc-150 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-[#0D0E12] text-zinc-900 dark:text-zinc-100 w-full max-w-lg rounded-3xl shadow-2xl border border-zinc-200/80 dark:border-white/10 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-zinc-150 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-zinc-200/80 dark:border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
-            <h3 className="text-sm font-bold text-zinc-950">
+            <h3 className="text-sm font-bold text-zinc-950 dark:text-white">
               {step === 4 ? "Booking Confirmed" : "Secure Checkout"}
             </h3>
             {step < 4 && (
-              <span className="ml-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+              <span className="ml-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                 <span>Reserved: {formatTimer(timeLeft)}</span>
               </span>
@@ -260,7 +260,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-full text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer"
+            className="p-2 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -272,15 +272,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           {/* STEP 1: REVIEW SELECTED TICKETS */}
           {step === 1 && (
             <div className="space-y-6">
-              <div className="flex items-center gap-4 pb-4 border-b border-zinc-100">
+              <div className="flex items-center gap-4 pb-4 border-b border-zinc-100 dark:border-white/10">
                 <img
                   src={event.imageUrl}
                   alt={event.title}
-                  className="w-16 h-16 rounded-2xl object-cover flex-shrink-0 border border-zinc-200"
+                  className="w-16 h-16 rounded-2xl object-cover flex-shrink-0 border border-zinc-200 dark:border-white/10"
                 />
                 <div className="min-w-0">
-                  <h4 className="text-base font-bold text-zinc-950 truncate">{event.title}</h4>
-                  <p className="text-sm text-zinc-500 mt-0.5 truncate">
+                  <h4 className="text-base font-bold text-zinc-950 dark:text-white truncate">{event.title}</h4>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
                     {formatDate(event.startDate)} • {(event.locationType === 'online' || (event as any).eventType === 'virtual') ? 'Virtual or Online Event' : (event.venue || event.city || 'Venue')}
                   </p>
                 </div>
@@ -288,18 +288,18 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
               {/* Selected Tiers Breakdown */}
               <div className="space-y-3">
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider block">
+                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
                   Your Tickets ({totalQuantity})
                 </label>
                 {selectedItems.map(({ tier, quantity, subtotal: tierSubtotal }) => (
-                  <div key={tier.id} className="flex items-center justify-between p-3.5 rounded-xl bg-zinc-50 border border-zinc-150 text-sm">
+                  <div key={tier.id} className="flex items-center justify-between p-3.5 rounded-xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 text-sm">
                     <div>
-                      <p className="font-bold text-zinc-900">{tier.name}</p>
-                      <p className="text-xs text-zinc-500 mt-0.5">
+                      <p className="font-bold text-zinc-900 dark:text-white">{tier.name}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
                         {quantity} × {tier.price === 0 ? 'Free' : formatCurrency(tier.price)}
                       </p>
                     </div>
-                    <span className="font-extrabold text-zinc-950 text-base">
+                    <span className="font-extrabold text-zinc-950 dark:text-white text-base">
                       {tier.price === 0 ? 'Free' : formatCurrency(tierSubtotal)}
                     </span>
                   </div>
@@ -307,17 +307,17 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </div>
 
               {/* Promo / Voucher Code */}
-              <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-2">
-                <label className="text-xs font-bold text-zinc-700 flex items-center gap-1.5">
+              <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 space-y-2">
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
                   <Tag className="w-3.5 h-3.5 text-[#E31B23]" /> Have a promo code or promoter voucher?
                 </label>
                 {appliedPromo ? (
-                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs">
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/50 text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                      <span className="font-mono font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded">
                         {appliedPromo.code}
                       </span>
-                      <span className="font-medium text-emerald-700">
+                      <span className="font-medium text-emerald-700 dark:text-emerald-300">
                         {(appliedPromo.discountType === 'fixed' || appliedPromo.discount_type === 'fixed')
                           ? `${formatCurrency(appliedPromo.discount)} OFF applied`
                           : `${appliedPromo.discount}% OFF applied`}
@@ -329,7 +329,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         setAppliedPromo(null);
                         setPromoCodeInput('');
                       }}
-                      className="text-xs font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer"
+                      className="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-200 cursor-pointer"
                     >
                       Remove
                     </button>
@@ -344,39 +344,39 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         setPromoCodeInput(e.target.value.toUpperCase());
                         setPromoError('');
                       }}
-                      className="flex-1 px-3.5 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-mono font-bold outline-none focus:border-[#E31B23]"
+                      className="flex-1 px-3.5 py-2 bg-white dark:bg-[#14151B] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-mono font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
                     />
                     <button
                       type="button"
                       onClick={handleApplyPromo}
-                      className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl cursor-pointer transition-colors"
+                      className="px-4 py-2 bg-zinc-900 dark:bg-white/10 hover:bg-zinc-800 dark:hover:bg-white/20 text-white text-xs font-bold rounded-xl cursor-pointer transition-colors"
                     >
                       Apply
                     </button>
                   </div>
                 )}
                 {promoError && (
-                  <p className="text-[11px] font-medium text-rose-600 mt-1">{promoError}</p>
+                  <p className="text-[11px] font-medium text-rose-600 dark:text-rose-400 mt-1">{promoError}</p>
                 )}
               </div>
 
               {/* Cost Summary */}
-              <div className="p-5 rounded-2xl bg-[#F8F9FB] border border-zinc-200/80 space-y-2.5 text-sm">
-                <div className="flex justify-between text-zinc-600">
+              <div className="p-5 rounded-2xl bg-[#F8F9FB] dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 space-y-2.5 text-sm">
+                <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
                   <span>Subtotal</span>
-                  <span className="font-semibold text-zinc-900">{formatCurrency(subtotal)}</span>
+                  <span className="font-semibold text-zinc-900 dark:text-white">{formatCurrency(subtotal)}</span>
                 </div>
                 {discountAmount > 0 && (
-                  <div className="flex justify-between text-emerald-600 font-semibold">
+                  <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
                     <span>Discount ({appliedPromo?.code})</span>
                     <span>-{formatCurrency(discountAmount)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-zinc-600">
+                <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
                   <span>Service Fee</span>
-                  <span className="font-semibold text-zinc-900">{formatCurrency(serviceFee)}</span>
+                  <span className="font-semibold text-zinc-900 dark:text-white">{formatCurrency(serviceFee)}</span>
                 </div>
-                <div className="flex justify-between pt-3 border-t border-zinc-200 text-base font-black text-zinc-950">
+                <div className="flex justify-between pt-3 border-t border-zinc-200 dark:border-white/10 text-base font-black text-zinc-950 dark:text-white">
                   <span>Total Amount</span>
                   <span className="text-[#E31B23] text-lg">{formatCurrency(totalAmount)}</span>
                 </div>
@@ -395,53 +395,53 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           {step === 2 && (
             <div className="space-y-5">
               <div>
-                <h4 className="text-base font-bold text-zinc-900">Attendee Information</h4>
-                <p className="text-sm text-zinc-500 mt-0.5">Where should we send your digital tickets?</p>
+                <h4 className="text-base font-bold text-zinc-900 dark:text-white">Attendee Information</h4>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Where should we send your digital tickets?</p>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-bold text-zinc-700 block">Full Name</label>
+                  <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300 block">Full Name</label>
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Kelvin Okafor"
                     required
-                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm text-zinc-900 outline-none focus:border-[#E31B23] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-zinc-50 dark:bg-[#14151B] border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] transition-all font-medium"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-bold text-zinc-700 block">Email Address</label>
+                  <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300 block">Email Address</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
-                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm text-zinc-900 outline-none focus:border-[#E31B23] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-zinc-50 dark:bg-[#14151B] border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] transition-all font-medium"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-bold text-zinc-700 block">Phone Number (Optional)</label>
+                  <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300 block">Phone Number (Optional)</label>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+234 800 000 0000"
-                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm text-zinc-900 outline-none focus:border-[#E31B23] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-zinc-50 dark:bg-[#14151B] border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] transition-all font-medium"
                   />
                 </div>
               </div>
 
               {/* Attendee Custom Questions */}
               {((event.customQuestions && event.customQuestions.length > 0) || ((event as any).custom_questions && (event as any).custom_questions.length > 0)) && (
-                <div className="pt-2 space-y-4 border-t border-zinc-150">
+                <div className="pt-2 space-y-4 border-t border-zinc-200/80 dark:border-white/10">
                   <div>
-                    <h5 className="text-sm font-bold text-zinc-900">Event Specific Questions</h5>
-                    <p className="text-xs text-zinc-500 mt-0.5">Please provide details requested by the organizer.</p>
+                    <h5 className="text-sm font-bold text-zinc-900 dark:text-white">Event Specific Questions</h5>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Please provide details requested by the organizer.</p>
                   </div>
                   <div className="space-y-3.5">
                     {(event.customQuestions || (event as any).custom_questions || []).map((q: any) => {
@@ -453,10 +453,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
                       return (
                         <div key={qKey} className="space-y-1.5">
-                          <label className="text-xs font-bold text-zinc-700 flex items-center justify-between">
+                          <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center justify-between">
                             <span>{q.question}</span>
                             {isRequired ? (
-                              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">Required</span>
+                              <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/50 px-1.5 py-0.5 rounded">Required</span>
                             ) : (
                               <span className="text-[10px] text-zinc-400">Optional</span>
                             )}
@@ -468,13 +468,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                               value={answers[qKey] || ''}
                               onChange={(e) => setAnswers(prev => ({ ...prev, [qKey]: e.target.value }))}
                               placeholder="Your answer..."
-                              className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-[#E31B23]"
+                              className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-[#14151B] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
                             />
                           ) : q.type === 'Select' && parsedOptions.length > 0 ? (
                             <select
                               value={answers[qKey] || ''}
                               onChange={(e) => setAnswers(prev => ({ ...prev, [qKey]: e.target.value }))}
-                              className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-[#E31B23] cursor-pointer"
+                              className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-[#14151B] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] cursor-pointer"
                             >
                               <option value="">-- Select an option --</option>
                               {parsedOptions.map((opt: string, i: number) => (
@@ -487,7 +487,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                               value={answers[qKey] || ''}
                               onChange={(e) => setAnswers(prev => ({ ...prev, [qKey]: e.target.value }))}
                               placeholder="Your answer..."
-                              className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-[#E31B23]"
+                              className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-[#14151B] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
                             />
                           )}
                         </div>
@@ -501,7 +501,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="px-5 py-3 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50 cursor-pointer"
+                  className="px-5 py-3 rounded-xl border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer"
                 >
                   Back
                 </button>
@@ -521,10 +521,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-base font-bold text-zinc-900">Payment Method</h4>
-                  <p className="text-sm text-zinc-500 mt-0.5">All transactions are encrypted with 256-bit SSL.</p>
+                  <h4 className="text-base font-bold text-zinc-900 dark:text-white">Payment Method</h4>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">All transactions are encrypted with 256-bit SSL.</p>
                 </div>
-                <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full">
                   <ShieldCheck className="w-4 h-4" /> Secure
                 </span>
               </div>
@@ -535,8 +535,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   onClick={() => setPaymentMethod('card')}
                   className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${
                     paymentMethod === 'card'
-                      ? 'border-[#E31B23] bg-[#FEF2F2]/50 text-zinc-900 font-bold'
-                      : 'border-zinc-200 hover:bg-zinc-50 text-zinc-600'
+                      ? 'border-[#E31B23] bg-[#FEF2F2]/50 dark:bg-[#E31B23]/10 text-zinc-900 dark:text-white font-bold'
+                      : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-600 dark:text-zinc-300'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -550,8 +550,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   onClick={() => setPaymentMethod('bank')}
                   className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${
                     paymentMethod === 'bank'
-                      ? 'border-[#E31B23] bg-[#FEF2F2]/50 text-zinc-900 font-bold'
-                      : 'border-zinc-200 hover:bg-zinc-50 text-zinc-600'
+                      ? 'border-[#E31B23] bg-[#FEF2F2]/50 dark:bg-[#E31B23]/10 text-zinc-900 dark:text-white font-bold'
+                      : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-600 dark:text-zinc-300'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -563,7 +563,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </div>
 
               {/* Security info box */}
-              <div className="p-3.5 bg-zinc-50 rounded-xl border border-zinc-150 text-xs text-zinc-500 flex items-center gap-2.5">
+              <div className="p-3.5 bg-zinc-50 dark:bg-white/[0.03] rounded-xl border border-zinc-200/80 dark:border-white/10 text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-2.5">
                 <Lock className="w-4 h-4 text-zinc-400 flex-shrink-0" />
                 <span>Your card details are never stored on our servers.</span>
               </div>
@@ -572,7 +572,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="px-5 py-3 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50 cursor-pointer"
+                  className="px-5 py-3 rounded-xl border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer"
                 >
                   Back
                 </button>
@@ -598,25 +598,25 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           {/* STEP 4: CONFIRMATION "YOU'RE GOING!" (Matching specifications) */}
           {step === 4 && (
             <div className="text-center space-y-6 py-2">
-              <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-sm">
                 <CheckCircle2 className="w-9 h-9" />
               </div>
 
               <div className="space-y-1.5">
-                <h3 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">You're Going!</h3>
-                <p className="text-sm text-zinc-500">
-                  Your ticket has been booked and sent to <span className="font-bold text-zinc-800">{email}</span>.
+                <h3 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">You're Going!</h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  Your ticket has been booked and sent to <span className="font-bold text-zinc-800 dark:text-zinc-200">{email}</span>.
                 </p>
               </div>
 
               {/* Digital Ticket Pass Card */}
-              <div className="bg-[#F8F9FB] border border-zinc-200 rounded-2xl p-5 text-left space-y-4 shadow-xs relative overflow-hidden">
-                <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+              <div className="bg-[#F8F9FB] dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 text-left space-y-4 shadow-xs relative overflow-hidden">
+                <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 pb-3">
                   <div>
                     <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide">Order Number</span>
-                    <p className="text-sm font-black text-zinc-900 font-mono mt-0.5">{orderNumber}</p>
+                    <p className="text-sm font-black text-zinc-900 dark:text-white font-mono mt-0.5">{orderNumber}</p>
                   </div>
-                  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">
+                  <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 text-xs font-extrabold">
                     Confirmed
                   </span>
                 </div>
@@ -626,8 +626,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <QrCode className="w-16 h-16 text-zinc-900" />
                   </div>
                   <div className="min-w-0">
-                    <h5 className="text-sm font-bold text-zinc-950 truncate">{event.title}</h5>
-                    <p className="text-xs text-zinc-500 mt-1">
+                    <h5 className="text-sm font-bold text-zinc-950 dark:text-white truncate">{event.title}</h5>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                       {formatDate(event.startDate)} • {(event.locationType === 'online' || (event as any).eventType === 'virtual') ? 'Virtual or Online Event' : (event.venue || event.city || 'Venue')}
                     </p>
                     <p className="text-xs font-bold text-[#E31B23] mt-1.5">{totalQuantity} Ticket(s) Reserved</p>
@@ -648,7 +648,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   onClick={() => {
                     showNotification('Ticket PDF download simulated.', 'info');
                   }}
-                  className="py-3 px-4 rounded-xl border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-sm font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  className="py-3 px-4 rounded-xl border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 text-sm font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
                   <Download className="w-4 h-4" /> Download
                 </button>

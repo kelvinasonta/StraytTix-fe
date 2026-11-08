@@ -116,7 +116,7 @@ export const EventCard: React.FC<EventCardProps> = ({
     return (
       <Link 
         to={`/events/${event.slug || event.id}`} 
-        className="group flex items-center gap-4 p-3.5 bg-white hover:bg-zinc-50 border border-zinc-200 rounded-2xl transition-all shadow-xs"
+        className="group flex items-center gap-4 p-3.5 bg-white dark:bg-[#0F0F14] hover:bg-zinc-50 dark:hover:bg-[#14151B] border border-zinc-200 dark:border-white/10 rounded-2xl transition-all shadow-xs"
       >
         <img 
           src={event.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=300&q=80'} 
@@ -124,8 +124,8 @@ export const EventCard: React.FC<EventCardProps> = ({
           className="w-14 h-14 object-cover rounded-xl flex-shrink-0 group-hover:scale-105 transition-all"
         />
         <div className="min-w-0 flex-1">
-          <h4 className="text-base font-bold text-zinc-950 truncate group-hover:text-[#E31B23] transition-colors">{event.title}</h4>
-          <p className="text-sm text-zinc-500 truncate">{formatDate(event.startDate)} • {isOnline ? 'Virtual or Online Event' : (event.venue || event.city || 'Venue')}</p>
+          <h4 className="text-base font-bold text-zinc-950 dark:text-white truncate group-hover:text-[#E31B23] transition-colors">{event.title}</h4>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{formatDate(event.startDate)} • {isOnline ? 'Virtual or Online Event' : (event.venue || event.city || 'Venue')}</p>
         </div>
         <span className="text-sm font-extrabold text-[#E31B23] flex-shrink-0">{getStartingPrice()}</span>
       </Link>
@@ -136,14 +136,14 @@ export const EventCard: React.FC<EventCardProps> = ({
     return (
       <Link 
         to={`/events/${event.slug || event.id}`} 
-        className="group relative flex flex-row items-center gap-3 sm:gap-5 p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-white/10 hover:border-white/25 bg-[#0F0F14] hover:bg-[#14151B] transition-all duration-300 shadow-md hover:shadow-xl active:scale-[0.99]"
+        className="group relative flex flex-row items-center gap-3 sm:gap-5 p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/25 bg-white dark:bg-[#0F0F14] hover:bg-zinc-50 dark:hover:bg-[#14151B] transition-all duration-300 shadow-sm dark:shadow-md hover:shadow-xl active:scale-[0.99]"
       >
         {/* Compact Square Thumbnail on Mobile / Wide Landscape on Tablet+ */}
-        <div className="relative w-24 h-24 sm:w-44 sm:h-32 md:w-56 md:h-36 rounded-xl sm:rounded-2xl overflow-hidden flex-shrink-0 bg-zinc-900 border border-white/10">
+        <div className="relative w-24 h-24 sm:w-44 sm:h-32 md:w-56 md:h-36 rounded-xl sm:rounded-2xl overflow-hidden flex-shrink-0 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10">
           <img 
             src={event.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=800&q=80'} 
             alt={event.title} 
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 brightness-[0.88] contrast-[1.05]"
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 brightness-[0.94] dark:brightness-[0.88] contrast-[1.05]"
           />
           <span className="hidden sm:inline-block absolute top-2.5 left-2.5 bg-black/70 backdrop-blur-md border border-white/20 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-white shadow-xs">
             {categoryName}
@@ -154,32 +154,32 @@ export const EventCard: React.FC<EventCardProps> = ({
         <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch py-0.5 sm:py-1">
           <div className="space-y-1 sm:space-y-1.5">
             {/* Mobile Category & Date inline row */}
-            <div className="flex items-center gap-2 text-[11px] sm:text-xs font-mono text-zinc-400">
+            <div className="flex items-center gap-2 text-[11px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400">
               <span className="sm:hidden font-bold text-[#E31B23] uppercase text-[10px] tracking-wider">
                 {categoryName}
               </span>
-              <span className="sm:hidden text-zinc-600">•</span>
-              <span className="flex items-center gap-1 text-zinc-300 font-medium">
+              <span className="sm:hidden text-zinc-400 dark:text-zinc-600">•</span>
+              <span className="flex items-center gap-1 text-zinc-600 dark:text-zinc-300 font-medium">
                 <Calendar className="w-3 h-3 text-[#E31B23] shrink-0" />
                 <span>{formatDate(event.startDate)}</span>
               </span>
             </div>
 
             {/* Title */}
-            <h3 className="text-sm sm:text-lg md:text-xl font-bold text-white line-clamp-1 sm:line-clamp-2 leading-snug group-hover:text-[#E31B23] transition-colors">
+            <h3 className="text-sm sm:text-lg md:text-xl font-bold text-zinc-950 dark:text-white line-clamp-1 sm:line-clamp-2 leading-snug group-hover:text-[#E31B23] transition-colors">
               {event.title}
             </h3>
 
             {/* Venue / City */}
-            <div className="flex items-center gap-1.5 text-xs text-zinc-400 font-normal truncate">
+            <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 font-normal truncate">
               {isOnline ? (
                 <>
-                  <Video className="w-3 h-3 text-indigo-400 shrink-0" />
+                  <Video className="w-3 h-3 text-indigo-500 dark:text-indigo-400 shrink-0" />
                   <span>Online event</span>
                 </>
               ) : (
                 <>
-                  <MapPin className="w-3 h-3 text-zinc-500 shrink-0" />
+                  <MapPin className="w-3 h-3 text-zinc-400 dark:text-zinc-500 shrink-0" />
                   <span className="truncate">{event.venue || event.city || 'Venue'}</span>
                 </>
               )}
@@ -187,24 +187,24 @@ export const EventCard: React.FC<EventCardProps> = ({
 
             {/* Snippet (hidden on mobile, visible on tablet+) */}
             {event.description && (
-              <p className="hidden sm:block text-xs text-zinc-400 line-clamp-1 leading-relaxed">
+              <p className="hidden sm:block text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1 leading-relaxed">
                 {event.description}
               </p>
             )}
           </div>
 
           {/* Bottom Bar: Price & Favorite */}
-          <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-1 sm:mt-2">
+          <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-white/5 mt-1 sm:mt-2">
             <div>
-              <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-500 hidden sm:block">Starting from</span>
-              <span className="text-xs sm:text-base font-bold font-mono text-white">
+              <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 dark:text-zinc-500 hidden sm:block">Starting from</span>
+              <span className="text-xs sm:text-base font-bold font-mono text-zinc-950 dark:text-white">
                 {getStartingPrice()}
               </span>
             </div>
 
             <button 
               onClick={handleFavoriteClick}
-              className="p-1.5 sm:p-2 rounded-full bg-white/[0.04] hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0"
+              className="p-1.5 sm:p-2 rounded-full bg-zinc-100 dark:bg-white/[0.04] hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
               title="Save event"
               aria-label="Save event to favorites"
             >

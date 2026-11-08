@@ -134,11 +134,11 @@ export const AcceptInvitation: React.FC = () => {
         subtitle="This invitation link is missing a required security token."
       >
         <div className="flex flex-col items-center gap-4 py-8 text-center">
-          <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-full">
+          <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 rounded-full">
             <AlertCircle className="w-10 h-10" />
           </div>
-          <h3 className="text-base font-bold text-zinc-900">Missing Invitation Token</h3>
-          <p className="text-zinc-500 text-xs font-semibold max-w-xs leading-relaxed">
+          <h3 className="text-base font-bold text-zinc-900 dark:text-white">Missing Invitation Token</h3>
+          <p className="text-zinc-500 dark:text-zinc-400 text-xs font-semibold max-w-xs leading-relaxed">
             Please check the link provided in your invitation email or contact the organization administrator to send a new invite.
           </p>
           <Link to="/login" className="text-xs font-bold text-brand-accent hover:underline mt-4">
@@ -157,14 +157,14 @@ export const AcceptInvitation: React.FC = () => {
         subtitle="This invitation link is no longer valid."
       >
         <div className="flex flex-col items-center gap-4 py-8 text-center">
-          <div className="p-3.5 bg-amber-50 border border-amber-200 text-amber-600 rounded-full shadow-xs">
+          <div className="p-3.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-full shadow-xs">
             <Clock className="w-10 h-10" />
           </div>
-          <h3 className="text-base font-bold text-zinc-900">Invitation Expired</h3>
-          <p className="text-zinc-600 text-xs font-medium max-w-sm leading-relaxed bg-amber-50/70 border border-amber-200 p-3.5 rounded-xl">
+          <h3 className="text-base font-bold text-zinc-900 dark:text-white">Invitation Expired</h3>
+          <p className="text-zinc-600 dark:text-zinc-300 text-xs font-medium max-w-sm leading-relaxed bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-3.5 rounded-xl">
             {errorMessage || 'This invitation link has expired. For security reasons, invitations have a limited validity period. Please contact your organization administrator to resend a new invite.'}
           </p>
-          <Link to="/login" className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-colors mt-2">
+          <Link to="/login" className="px-5 py-2.5 bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-xs font-bold rounded-xl transition-colors mt-2">
             Back to Sign In
           </Link>
         </div>
@@ -180,14 +180,14 @@ export const AcceptInvitation: React.FC = () => {
         subtitle="This invitation could not be verified."
       >
         <div className="flex flex-col items-center gap-4 py-8 text-center">
-          <div className="p-3.5 bg-red-50 border border-red-200 text-red-600 rounded-full shadow-xs">
+          <div className="p-3.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 rounded-full shadow-xs">
             <AlertCircle className="w-10 h-10" />
           </div>
-          <h3 className="text-base font-bold text-zinc-900">Invalid or Revoked Invitation</h3>
-          <p className="text-zinc-600 text-xs font-medium max-w-sm leading-relaxed bg-red-50/70 border border-red-200 p-3.5 rounded-xl">
+          <h3 className="text-base font-bold text-zinc-900 dark:text-white">Invalid or Revoked Invitation</h3>
+          <p className="text-zinc-600 dark:text-zinc-300 text-xs font-medium max-w-sm leading-relaxed bg-red-50/70 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-3.5 rounded-xl">
             {errorMessage || 'This invitation link is invalid or may have been revoked by the organization administrator. Please check the email link or request a new invitation.'}
           </p>
-          <Link to="/login" className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-colors mt-2">
+          <Link to="/login" className="px-5 py-2.5 bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-xs font-bold rounded-xl transition-colors mt-2">
             Back to Sign In
           </Link>
         </div>
@@ -203,14 +203,14 @@ export const AcceptInvitation: React.FC = () => {
         subtitle="You are already part of this team."
       >
         <div className="flex flex-col items-center gap-4 py-8 text-center">
-          <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-full shadow-xs">
+          <div className="p-3.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full shadow-xs">
             <UserCheck className="w-10 h-10" />
           </div>
-          <h3 className="text-base font-bold text-zinc-900">Invitation Already Used</h3>
-          <p className="text-zinc-600 text-xs font-medium max-w-sm leading-relaxed bg-emerald-50/70 border border-emerald-200 p-3.5 rounded-xl">
+          <h3 className="text-base font-bold text-zinc-900 dark:text-white">Invitation Already Used</h3>
+          <p className="text-zinc-600 dark:text-zinc-300 text-xs font-medium max-w-sm leading-relaxed bg-emerald-50/70 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-3.5 rounded-xl">
             {errorMessage || 'This invitation has already been accepted. You can log into your account directly to access the organizer console.'}
           </p>
-          <Link to="/login" className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-colors mt-2">
+          <Link to="/login" className="px-5 py-2.5 bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-xs font-bold rounded-xl transition-colors mt-2">
             Sign In to Your Account
           </Link>
         </div>
@@ -226,10 +226,10 @@ export const AcceptInvitation: React.FC = () => {
         subtitle="Please wait while we validate your invitation link..."
       >
         <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center animate-spin text-zinc-600">
+          <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center animate-spin text-zinc-600 dark:text-zinc-300">
             <RefreshCw className="w-6 h-6" />
           </div>
-          <p className="text-xs font-bold text-zinc-500">Checking security token...</p>
+          <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Checking security token...</p>
         </div>
       </AuthLayout>
     );
@@ -354,11 +354,11 @@ export const AcceptInvitation: React.FC = () => {
         subtitle="Your team membership is active."
       >
         <div className="flex flex-col items-center gap-4 py-8 text-center">
-          <div className="p-3 bg-emerald-50 border border-emerald-250 text-emerald-600 rounded-full">
+          <div className="p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full">
             <CheckCircle2 className="w-10 h-10" />
           </div>
-          <h3 className="text-base font-bold text-zinc-900">Invitation Accepted!</h3>
-          <p className="text-zinc-500 text-xs font-semibold max-w-xs leading-relaxed">
+          <h3 className="text-base font-bold text-zinc-900 dark:text-white">Invitation Accepted!</h3>
+          <p className="text-zinc-500 dark:text-zinc-400 text-xs font-semibold max-w-xs leading-relaxed">
             Redirecting you to the organizer console...
           </p>
           <Button onClick={() => navigate('/organizer')} className="mt-4 inline-flex items-center gap-2">
@@ -372,24 +372,24 @@ export const AcceptInvitation: React.FC = () => {
   return (
     <AuthLayout
       title={invitationDetails?.organizer_name ? `Join ${invitationDetails.organizer_name}` : "Team Invitation"}
-      subtitle={invitationDetails ? `You've been invited to join the team as ${invitationDetails.role}.` : "You've been invited to join an organization on StraytTix."}
+      subtitle={invitationDetails ? `You've been invited to join the team as ${invitationDetails.role_label || invitationDetails.role}.` : "You've been invited to join an organization on StraytTix."}
     >
       <div className="space-y-6">
         {/* Invitation Context Banner */}
-        <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200/80 flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-white border border-zinc-200 text-brand-accent shadow-xs flex-shrink-0">
+        <div className="p-4 rounded-xl bg-zinc-50 dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-brand-accent shadow-xs flex-shrink-0">
             <Users className="w-5 h-5" />
           </div>
           <div className="space-y-0.5">
-            <h4 className="text-xs font-bold text-zinc-900">
+            <h4 className="text-xs font-bold text-zinc-900 dark:text-white">
               {invitationDetails?.organizer_name 
                 ? `${invitationDetails.organizer_name} Team Invitation` 
                 : 'Event Staff & Management Invitation'}
             </h4>
-            <p className="text-[11px] text-zinc-500 leading-relaxed">
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
               {invitationDetails ? (
                 <>
-                  You have been invited to join as <span className="font-bold capitalize text-zinc-800">{invitationDetails.role}</span> ({invitationDetails.email}).
+                  You have been invited to join as <span className="font-bold capitalize text-zinc-800 dark:text-zinc-200">{invitationDetails.role_label || invitationDetails.role}</span> ({invitationDetails.email}).
                 </>
               ) : (
                 'Accept this invitation to access event tools, gate check-in, ticketing, or assigned team duties.'
@@ -400,7 +400,7 @@ export const AcceptInvitation: React.FC = () => {
 
         {/* Global Error Banner */}
         {formError && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs flex items-start gap-2" role="alert">
+          <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 rounded-xl text-xs flex items-start gap-2" role="alert">
             <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <span>{formError}</span>
           </div>
@@ -409,17 +409,17 @@ export const AcceptInvitation: React.FC = () => {
         {/* SCENARIO A: User is already logged in */}
         {isAuthenticated && user ? (
           <div className="space-y-4 pt-2">
-            <div className="p-4 rounded-xl border border-zinc-200 bg-white shadow-xs">
+            <div className="p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0F0F14] shadow-xs">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-brand-accent/10 border border-brand-accent/20 flex items-center justify-center text-brand-accent font-bold text-sm">
                   {user.firstName?.[0] || user.email?.[0] || 'U'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Logged in as</span>
-                  <p className="text-sm font-bold text-zinc-900 truncate">
+                  <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">
                     {user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email}
                   </p>
-                  <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{user.email}</p>
                 </div>
                 <ShieldCheck className="w-5 h-5 text-emerald-500 flex-shrink-0" />
               </div>
@@ -438,7 +438,7 @@ export const AcceptInvitation: React.FC = () => {
               <button
                 type="button"
                 onClick={logout}
-                className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-700 font-semibold transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-white font-semibold transition-colors cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" /> Not you? Switch account
               </button>
@@ -447,18 +447,18 @@ export const AcceptInvitation: React.FC = () => {
         ) : invitationDetails?.user_exists ? (
           /* SCENARIO B1: Existing registered user - Clean 1-click confirmation card */
           <div className="space-y-5">
-            <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 text-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto shadow-xs">
+            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 flex items-center justify-center mx-auto shadow-xs">
                 <UserCheck className="w-6 h-6" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-bold text-zinc-950">
+                <h4 className="text-sm font-bold text-zinc-950 dark:text-white">
                   Existing Account Detected
                 </h4>
-                <p className="text-xs text-zinc-600 font-medium leading-relaxed max-w-sm mx-auto">
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed max-w-sm mx-auto">
                   You've been invited to join{' '}
-                  <strong className="text-zinc-900">{invitationDetails.organizer_name || 'the team'}</strong> as{' '}
-                  <strong className="text-zinc-900">{invitationDetails.role_label || invitationDetails.role}</strong> ({invitationDetails.email}).
+                  <strong className="text-zinc-900 dark:text-white">{invitationDetails.organizer_name || 'the team'}</strong> as{' '}
+                  <strong className="text-zinc-900 dark:text-white">{invitationDetails.role_label || invitationDetails.role}</strong> ({invitationDetails.email}).
                 </p>
               </div>
             </div>
@@ -473,7 +473,7 @@ export const AcceptInvitation: React.FC = () => {
             </Button>
 
             <div className="pt-2 text-center text-xs text-zinc-500">
-              <Link to="/login" className="text-zinc-500 hover:text-zinc-900 font-semibold">
+              <Link to="/login" className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white font-semibold">
                 Sign in to another account
               </Link>
             </div>
@@ -483,13 +483,13 @@ export const AcceptInvitation: React.FC = () => {
           <div className="space-y-5">
             <form onSubmit={handleNewUserSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="block text-xs font-bold text-zinc-700">Email Address (Invited)</label>
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300">Email Address (Invited)</label>
                 <input
                   type="email"
                   value={invitationDetails?.email || ''}
                   readOnly
                   disabled
-                  className="w-full bg-zinc-100 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-zinc-600 cursor-not-allowed"
+                  className="w-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 cursor-not-allowed"
                 />
               </div>
 
@@ -546,7 +546,7 @@ export const AcceptInvitation: React.FC = () => {
             </form>
 
             <div className="pt-2 text-center text-xs text-zinc-500">
-              <Link to="/login" className="text-zinc-500 hover:text-zinc-900 font-semibold">
+              <Link to="/login" className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white font-semibold">
                 Already have an account? Sign In
               </Link>
             </div>

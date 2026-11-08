@@ -255,7 +255,7 @@ export const EventDetails: React.FC = () => {
     }
   };
 
-  const pageBgClass = 'bg-[#070709] text-white';
+  const pageBgClass = 'bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-white';
 
   const telemetryCardClass = 'bg-zinc-950/80 border border-white/10 text-white backdrop-blur-md';
 
@@ -491,43 +491,43 @@ export const EventDetails: React.FC = () => {
     }
 
     return (
-      <div className="min-h-screen bg-[#F8F9FB] text-[#111827] flex flex-col justify-between">
+      <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#070709] text-[#111827] dark:text-white flex flex-col justify-between transition-colors">
         <Navbar />
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 space-y-8 lg:space-y-12 pb-32 lg:pb-16 animate-pulse">
           {/* Breadcrumb Skeleton */}
           <div className="flex items-center gap-2">
-            <div className="h-3.5 bg-zinc-200 rounded w-12" />
-            <div className="h-3 bg-zinc-200 rounded w-3" />
-            <div className="h-3.5 bg-zinc-200 rounded w-24" />
-            <div className="h-3 bg-zinc-200 rounded w-3" />
-            <div className="h-3.5 bg-zinc-200 rounded w-20" />
-            <div className="h-3 bg-zinc-200 rounded w-3" />
-            <div className="h-3.5 bg-zinc-200 rounded w-36" />
+            <div className="h-3.5 bg-zinc-200 dark:bg-white/10 rounded w-12" />
+            <div className="h-3 bg-zinc-200 dark:bg-white/10 rounded w-3" />
+            <div className="h-3.5 bg-zinc-200 dark:bg-white/10 rounded w-24" />
+            <div className="h-3 bg-zinc-200 dark:bg-white/10 rounded w-3" />
+            <div className="h-3.5 bg-zinc-200 dark:bg-white/10 rounded w-20" />
+            <div className="h-3 bg-zinc-200 dark:bg-white/10 rounded w-3" />
+            <div className="h-3.5 bg-zinc-200 dark:bg-white/10 rounded w-36" />
           </div>
 
           {/* Cinematic Hero Skeleton */}
-          <div className="relative min-h-[360px] sm:min-h-[460px] lg:min-h-[540px] w-full rounded-3xl sm:rounded-[32px] overflow-hidden shadow-xl border border-zinc-200 bg-zinc-200 flex flex-col justify-between p-6 sm:p-10">
+          <div className="relative min-h-[360px] sm:min-h-[460px] lg:min-h-[540px] w-full rounded-3xl sm:rounded-[32px] overflow-hidden shadow-xl border border-zinc-200 dark:border-white/10 bg-zinc-200 dark:bg-[#0F0F14] flex flex-col justify-between p-6 sm:p-10">
             {/* Top Badges & Action Buttons */}
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <div className="h-7 w-24 rounded-full bg-zinc-300" />
-                <div className="h-7 w-28 rounded-full bg-zinc-300" />
-                <div className="hidden sm:block h-7 w-28 rounded-full bg-zinc-300" />
+                <div className="h-7 w-24 rounded-full bg-zinc-300 dark:bg-white/10" />
+                <div className="h-7 w-28 rounded-full bg-zinc-300 dark:bg-white/10" />
+                <div className="hidden sm:block h-7 w-28 rounded-full bg-zinc-300 dark:bg-white/10" />
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-zinc-300" />
-                <div className="w-10 h-10 rounded-full bg-zinc-300" />
-                <div className="w-10 h-10 rounded-full bg-zinc-300" />
+                <div className="w-10 h-10 rounded-full bg-zinc-300 dark:bg-white/10" />
+                <div className="w-10 h-10 rounded-full bg-zinc-300 dark:bg-white/10" />
+                <div className="w-10 h-10 rounded-full bg-zinc-300 dark:bg-white/10" />
               </div>
             </div>
 
             {/* Bottom Hero Info */}
             <div className="space-y-4 max-w-3xl">
-              <div className="h-5 w-36 rounded-full bg-zinc-300" />
-              <div className="h-10 sm:h-14 w-4/5 rounded-2xl bg-zinc-300" />
+              <div className="h-5 w-36 rounded-full bg-zinc-300 dark:bg-white/10" />
+              <div className="h-10 sm:h-14 w-4/5 rounded-2xl bg-zinc-300 dark:bg-white/10" />
               <div className="flex flex-wrap gap-4 pt-2">
-                <div className="h-5 w-44 rounded-lg bg-zinc-300" />
-                <div className="h-5 w-56 rounded-lg bg-zinc-300" />
+                <div className="h-5 w-44 rounded-lg bg-zinc-300 dark:bg-white/10" />
+                <div className="h-5 w-56 rounded-lg bg-zinc-300 dark:bg-white/10" />
               </div>
             </div>
           </div>
@@ -535,11 +535,11 @@ export const EventDetails: React.FC = () => {
           {/* 4 Telemetry Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-white border border-[#E5E7EB] p-4 sm:p-5 rounded-2xl shadow-xs flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-zinc-100 flex-shrink-0" />
+              <div key={i} className="bg-white dark:bg-[#0F0F14] border border-[#E5E7EB] dark:border-white/10 p-4 sm:p-5 rounded-2xl shadow-xs flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-xl bg-zinc-100 dark:bg-white/10 flex-shrink-0" />
                 <div className="space-y-2 flex-1">
-                  <div className="h-3 bg-zinc-100 rounded w-16" />
-                  <div className="h-4 bg-zinc-100 rounded w-24" />
+                  <div className="h-3 bg-zinc-100 dark:bg-white/10 rounded w-16" />
+                  <div className="h-4 bg-zinc-100 dark:bg-white/10 rounded w-24" />
                 </div>
               </div>
             ))}
@@ -550,44 +550,44 @@ export const EventDetails: React.FC = () => {
             {/* Left 2 Cols: About, Schedule, Venue */}
             <div className="lg:col-span-2 space-y-8">
               {/* About section card */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-zinc-200 shadow-xs space-y-4">
-                <div className="h-6 bg-zinc-100 rounded-lg w-40" />
+              <div className="bg-white dark:bg-[#0F0F14] rounded-3xl p-6 sm:p-8 border border-zinc-200 dark:border-white/10 shadow-xs space-y-4">
+                <div className="h-6 bg-zinc-100 dark:bg-white/10 rounded-lg w-40" />
                 <div className="space-y-2.5 pt-2">
-                  <div className="h-4 bg-zinc-100 rounded w-full" />
-                  <div className="h-4 bg-zinc-100 rounded w-full" />
-                  <div className="h-4 bg-zinc-100 rounded w-5/6" />
-                  <div className="h-4 bg-zinc-100 rounded w-4/6" />
+                  <div className="h-4 bg-zinc-100 dark:bg-white/10 rounded w-full" />
+                  <div className="h-4 bg-zinc-100 dark:bg-white/10 rounded w-full" />
+                  <div className="h-4 bg-zinc-100 dark:bg-white/10 rounded w-5/6" />
+                  <div className="h-4 bg-zinc-100 dark:bg-white/10 rounded w-4/6" />
                 </div>
               </div>
 
               {/* Schedule / lineup card */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-zinc-200 shadow-xs space-y-4">
-                <div className="h-6 bg-zinc-100 rounded-lg w-48" />
+              <div className="bg-white dark:bg-[#0F0F14] rounded-3xl p-6 sm:p-8 border border-zinc-200 dark:border-white/10 shadow-xs space-y-4">
+                <div className="h-6 bg-zinc-100 dark:bg-white/10 rounded-lg w-48" />
                 <div className="space-y-3 pt-2">
-                  <div className="h-16 bg-zinc-50 rounded-2xl border border-zinc-100" />
-                  <div className="h-16 bg-zinc-50 rounded-2xl border border-zinc-100" />
+                  <div className="h-16 bg-zinc-50 dark:bg-white/5 rounded-2xl border border-zinc-100 dark:border-white/10" />
+                  <div className="h-16 bg-zinc-50 dark:bg-white/5 rounded-2xl border border-zinc-100 dark:border-white/10" />
                 </div>
               </div>
 
               {/* Venue map card */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-zinc-200 shadow-xs space-y-4">
-                <div className="h-6 bg-zinc-100 rounded-lg w-44" />
-                <div className="h-56 bg-zinc-100 rounded-2xl w-full" />
+              <div className="bg-white dark:bg-[#0F0F14] rounded-3xl p-6 sm:p-8 border border-zinc-200 dark:border-white/10 shadow-xs space-y-4">
+                <div className="h-6 bg-zinc-100 dark:bg-white/10 rounded-lg w-44" />
+                <div className="h-56 bg-zinc-100 dark:bg-white/10 rounded-2xl w-full" />
               </div>
             </div>
 
             {/* Right 1 Col: Ticket card */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-3xl p-6 border border-zinc-200 shadow-sm space-y-5">
-                <div className="flex justify-between items-center pb-4 border-b border-zinc-100">
-                  <div className="h-5 bg-zinc-100 rounded w-24" />
-                  <div className="h-6 bg-zinc-100 rounded w-20" />
+              <div className="bg-white dark:bg-[#0F0F14] rounded-3xl p-6 border border-zinc-200 dark:border-white/10 shadow-sm space-y-5">
+                <div className="flex justify-between items-center pb-4 border-b border-zinc-100 dark:border-white/10">
+                  <div className="h-5 bg-zinc-100 dark:bg-white/10 rounded w-24" />
+                  <div className="h-6 bg-zinc-100 dark:bg-white/10 rounded w-20" />
                 </div>
                 <div className="space-y-3">
-                  <div className="h-20 bg-zinc-50 rounded-2xl border border-zinc-100" />
-                  <div className="h-20 bg-zinc-50 rounded-2xl border border-zinc-100" />
+                  <div className="h-20 bg-zinc-50 dark:bg-white/5 rounded-2xl border border-zinc-100 dark:border-white/10" />
+                  <div className="h-20 bg-zinc-50 dark:bg-white/5 rounded-2xl border border-zinc-100 dark:border-white/10" />
                 </div>
-                <div className="h-12 bg-zinc-200 rounded-2xl w-full mt-4" />
+                <div className="h-12 bg-zinc-200 dark:bg-white/10 rounded-2xl w-full mt-4" />
               </div>
             </div>
           </div>
@@ -630,15 +630,15 @@ export const EventDetails: React.FC = () => {
     }
 
     return (
-      <div className="min-h-screen bg-[#F8F9FB] flex flex-col justify-between">
+      <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#070709] flex flex-col justify-between transition-colors">
         <Navbar />
         <main className="flex-1 max-w-xl w-full mx-auto px-6 py-28 text-center space-y-5">
-          <div className="w-16 h-16 bg-red-50 border border-red-100 text-[#E31B23] rounded-3xl flex items-center justify-center mx-auto shadow-xs">
+          <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-[#E31B23] rounded-3xl flex items-center justify-center mx-auto shadow-xs">
             <AlertCircle className="w-8 h-8" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Error Reaching API</h2>
-            <p className="text-sm text-zinc-600 leading-relaxed max-w-md mx-auto">{error || "Unable to reach the server to load this event experience. Please check your internet connection."}</p>
+            <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">Error Reaching API</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-md mx-auto">{error || "Unable to reach the server to load this event experience. Please check your internet connection."}</p>
           </div>
           <div className="pt-3 flex items-center justify-center gap-3">
             <button
@@ -650,7 +650,7 @@ export const EventDetails: React.FC = () => {
               <span>Retry Connection</span>
             </button>
             <Link to="/discover">
-              <button className="px-6 py-3 bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-800 text-xs font-bold rounded-full shadow-xs transition-all cursor-pointer">
+              <button className="px-6 py-3 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/10 text-zinc-800 dark:text-white text-xs font-bold rounded-full shadow-xs transition-all cursor-pointer">
                 Explore Available Events
               </button>
             </Link>
@@ -1205,14 +1205,14 @@ export const EventDetails: React.FC = () => {
         {/* ========================================================================= */}
         {/* 1. BREADCRUMBS NAVIGATION */}
         {/* ========================================================================= */}
-        <nav className="flex items-center gap-2 text-xs font-semibold text-zinc-400 overflow-x-auto whitespace-nowrap">
-          <Link to="/" className="hover:text-white transition-colors">Home</Link>
-          <ChevronRight className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
-          <Link to="/discover" className="hover:text-white transition-colors">Discover Events</Link>
-          <ChevronRight className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
-          <span className="text-zinc-300 font-bold">{categoryLabel}</span>
-          <ChevronRight className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
-          <span className="text-white font-bold truncate max-w-[220px]">{event.title}</span>
+        <nav className="flex items-center gap-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 overflow-x-auto whitespace-nowrap">
+          <Link to="/" className="hover:text-zinc-950 dark:hover:text-white transition-colors">Home</Link>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600 flex-shrink-0" />
+          <Link to="/discover" className="hover:text-zinc-950 dark:hover:text-white transition-colors">Discover Events</Link>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600 flex-shrink-0" />
+          <span className="text-zinc-700 dark:text-zinc-300 font-bold">{categoryLabel}</span>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600 flex-shrink-0" />
+          <span className="text-zinc-950 dark:text-white font-bold truncate max-w-[220px]">{event.title}</span>
         </nav>
 
         {/* ========================================================================= */}
@@ -1305,13 +1305,13 @@ export const EventDetails: React.FC = () => {
       {/* 5. MOBILE FLOATING STICKY ACTION BAR (Visible only on < lg screens) */}
       {/* ========================================================================= */}
       {isTicketSalesActive ? (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-2xl border-t p-3.5 shadow-2xl bg-[#090D16]/95 border-white/10">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-2xl border-t p-3.5 shadow-2xl bg-white/95 dark:bg-[#090D16]/95 border-zinc-200 dark:border-white/10">
           <div className="max-w-md mx-auto flex items-center justify-between gap-4">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wide block text-zinc-400">
+              <span className="text-[10px] font-bold uppercase tracking-wide block text-zinc-500 dark:text-zinc-400">
                 Tickets From
               </span>
-              <span className="text-base sm:text-lg font-black text-white">
+              <span className="text-base sm:text-lg font-black text-zinc-950 dark:text-white">
                 {lowestPrice === 0 ? 'Free RSVP' : formatCurrency(lowestPrice)}
               </span>
             </div>
@@ -1327,7 +1327,7 @@ export const EventDetails: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-2xl border-t p-3 shadow-2xl bg-[#090D16]/95 border-white/10">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-2xl border-t p-3 shadow-2xl bg-white/95 dark:bg-[#090D16]/95 border-zinc-200 dark:border-white/10">
           <div className="max-w-md mx-auto flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               {statusMessageType === 'pre_sale' ? (
@@ -1335,13 +1335,13 @@ export const EventDetails: React.FC = () => {
               ) : (
                 <AlertCircle className="w-4 h-4 text-rose-500 flex-shrink-0" />
               )}
-              <span className="text-xs font-bold truncate text-zinc-800">
+              <span className="text-xs font-bold truncate text-zinc-800 dark:text-zinc-200">
                 {statusMessageType === 'pre_sale' ? 'Pre-Sale: Opening soon' : 'Ticket sales closed'}
               </span>
             </div>
             <button
               onClick={handleNativeShare}
-              className="px-3.5 py-1.5 bg-zinc-800 text-white rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer flex-shrink-0"
+              className="px-3.5 py-1.5 bg-zinc-900 dark:bg-zinc-800 text-white rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer flex-shrink-0"
             >
               <Share2 className="w-3 h-3" />
               <span>Share</span>
@@ -1356,22 +1356,22 @@ export const EventDetails: React.FC = () => {
       {shareModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-xs" onClick={() => setShareModalOpen(false)} />
-          <div className="relative z-10 max-w-sm w-full bg-[#0F0F14] text-white rounded-3xl p-6 shadow-2xl space-y-5 border border-white/10">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h4 className="text-base font-black text-white">Share Experience</h4>
-              <button onClick={() => setShareModalOpen(false)} className="p-1 rounded-full text-zinc-400 hover:text-white cursor-pointer">
+          <div className="relative z-10 max-w-sm w-full bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white rounded-3xl p-6 shadow-2xl space-y-5 border border-zinc-200 dark:border-white/10">
+            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 pb-3">
+              <h4 className="text-base font-black text-zinc-950 dark:text-white">Share Experience</h4>
+              <button onClick={() => setShareModalOpen(false)} className="p-1 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-zinc-400 font-medium">Invite friends or share {event.title} across your network.</p>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Invite friends or share {event.title} across your network.</p>
 
             <div className="grid grid-cols-2 gap-3">
               <a
                 href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${event.title} on StraytTix: ${window.location.href}`)}`}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold text-center transition-colors"
+                className="p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold text-center transition-colors"
               >
                 WhatsApp
               </a>
@@ -1379,18 +1379,18 @@ export const EventDetails: React.FC = () => {
                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I'm attending ${event.title}! Get tickets on StraytTix: ${window.location.href}`)}`}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 text-xs font-bold text-center transition-colors"
+                className="p-3 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-600 dark:text-sky-400 text-xs font-bold text-center transition-colors"
               >
                 Twitter / X
               </a>
             </div>
 
-            <div className="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/10">
+            <div className="flex items-center gap-2 p-2 rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10">
               <input 
                 type="text" 
                 readOnly 
                 value={window.location.href} 
-                className="w-full bg-transparent text-xs text-zinc-200 outline-none truncate font-medium pl-2"
+                className="w-full bg-transparent text-xs text-zinc-800 dark:text-zinc-200 outline-none truncate font-medium pl-2"
               />
               <button
                 onClick={handleCopyLink}
@@ -1410,15 +1410,15 @@ export const EventDetails: React.FC = () => {
       {calendarModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-xs" onClick={() => setCalendarModalOpen(false)} />
-          <div className="relative z-10 max-w-sm w-full bg-[#0F0F14] text-white rounded-3xl p-6 shadow-2xl space-y-5 border border-white/10">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h4 className="text-base font-black text-white">Add to Calendar</h4>
-              <button onClick={() => setCalendarModalOpen(false)} className="p-1 rounded-full text-zinc-400 hover:text-white cursor-pointer">
+          <div className="relative z-10 max-w-sm w-full bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white rounded-3xl p-6 shadow-2xl space-y-5 border border-zinc-200 dark:border-white/10">
+            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 pb-3">
+              <h4 className="text-base font-black text-zinc-950 dark:text-white">Add to Calendar</h4>
+              <button onClick={() => setCalendarModalOpen(false)} className="p-1 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-zinc-400 font-medium">Never miss {event.title}. Add the schedule directly into your favorite calendar app.</p>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Never miss {event.title}. Add the schedule directly into your favorite calendar app.</p>
 
             <div className="space-y-2.5">
               <a
@@ -1426,7 +1426,7 @@ export const EventDetails: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => setCalendarModalOpen(false)}
-                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white transition-colors"
+                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-zinc-50 hover:bg-zinc-100 dark:bg-white/5 dark:hover:bg-white/10 border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-900 dark:text-white transition-colors"
               >
                 <span className="flex items-center gap-2.5">
                   <Calendar className="w-4 h-4 text-[#E31B23]" />
@@ -1437,7 +1437,7 @@ export const EventDetails: React.FC = () => {
 
               <button
                 onClick={downloadIcsFile}
-                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white transition-colors cursor-pointer"
+                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-zinc-50 hover:bg-zinc-100 dark:bg-white/5 dark:hover:bg-white/10 border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-900 dark:text-white transition-colors cursor-pointer"
               >
                 <span className="flex items-center gap-2.5">
                   <Download className="w-4 h-4 text-[#E31B23]" />
@@ -1456,19 +1456,19 @@ export const EventDetails: React.FC = () => {
       {contactModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-xs" onClick={() => setContactModalOpen(false)} />
-          <form onSubmit={handleSendMessage} className="relative z-10 max-w-md w-full bg-[#0F0F14] text-white rounded-3xl p-6 shadow-2xl space-y-4 border border-white/10">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <form onSubmit={handleSendMessage} className="relative z-10 max-w-md w-full bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white rounded-3xl p-6 shadow-2xl space-y-4 border border-zinc-200 dark:border-white/10">
+            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-[#E31B23]" />
-                <h4 className="text-base font-black text-white">Contact Event Host</h4>
+                <h4 className="text-base font-black text-zinc-950 dark:text-white">Contact Event Host</h4>
               </div>
-              <button type="button" onClick={() => setContactModalOpen(false)} className="p-1 rounded-full text-zinc-400 hover:text-white cursor-pointer">
+              <button type="button" onClick={() => setContactModalOpen(false)} className="p-1 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-zinc-400 font-medium">
-              Have questions regarding {event.title}? Send a direct inquiry to <strong className="text-white">{event.organizer?.name}</strong>.
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">
+              Have questions regarding {event.title}? Send a direct inquiry to <strong className="text-zinc-950 dark:text-white">{event.organizer?.name}</strong>.
             </p>
 
             <textarea
@@ -1477,7 +1477,7 @@ export const EventDetails: React.FC = () => {
               placeholder="Type your question or request here (e.g., VIP parking details, accessibility accommodations)..."
               rows={4}
               required
-              className="w-full bg-white/5 border border-white/10 rounded-2xl p-3.5 text-xs text-white placeholder-zinc-500 outline-none focus:border-[#E31B23] transition-all resize-none font-medium"
+              className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl p-3.5 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none focus:border-[#E31B23] transition-all resize-none font-medium"
             />
 
             <button

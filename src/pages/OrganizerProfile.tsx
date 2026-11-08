@@ -254,7 +254,7 @@ export const OrganizerProfile: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB] text-[#111827] flex flex-col justify-between font-sans antialiased">
+    <div className="min-h-screen bg-[#F8F9FB] dark:bg-[#070709] text-[#111827] dark:text-white flex flex-col justify-between font-sans antialiased transition-colors duration-300">
       <Navbar />
 
       {/* ========================================================================= */}
@@ -483,8 +483,8 @@ export const OrganizerProfile: React.FC = () => {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === tab.id 
-                    ? 'bg-zinc-950 text-white shadow-xs' 
-                    : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 hover:bg-zinc-100'
+                    ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 shadow-xs' 
+                    : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5'
                 }`}
               >
                 <span>{tab.label}</span>
@@ -554,7 +554,7 @@ export const OrganizerProfile: React.FC = () => {
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         filterType === f.id
                           ? 'bg-[#E31B23] text-white shadow-xs'
-                          : 'bg-zinc-100 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/70'
+                          : 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-white/10'
                       }`}
                     >
                       {f.label}
@@ -953,14 +953,14 @@ export const OrganizerProfile: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="bg-white dark:bg-[#0F0F14] w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl border border-zinc-150 dark:border-white/10 space-y-5 animate-in zoom-in-95 duration-150 text-zinc-900 dark:text-white">
             
-            <div className="flex items-center justify-between border-b border-zinc-150 pb-3">
+            <div className="flex items-center justify-between border-b border-zinc-150 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#E31B23]" />
                 <h3 className="text-base font-black text-zinc-950 dark:text-white">Inquire with {orgName}</h3>
               </div>
               <button 
                 onClick={() => setShowContactModal(false)} 
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -968,7 +968,7 @@ export const OrganizerProfile: React.FC = () => {
 
             <form onSubmit={handleContactSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-zinc-700 block mb-1">Inquiry Purpose</label>
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Inquiry Purpose</label>
                 <select
                   value={contactSubject}
                   onChange={(e) => setContactSubject(e.target.value)}
@@ -984,7 +984,7 @@ export const OrganizerProfile: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-zinc-700 block mb-1">Your Name</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Your Name</label>
                   <input 
                     type="text" 
                     required
@@ -995,7 +995,7 @@ export const OrganizerProfile: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-zinc-700 block mb-1">Email Address</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Email Address</label>
                   <input 
                     type="email" 
                     required
@@ -1008,7 +1008,7 @@ export const OrganizerProfile: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-zinc-700 block mb-1">Message Details</label>
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Message Details</label>
                 <textarea 
                   rows={4} 
                   required

@@ -117,7 +117,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   const isDashboardView = isDashboard || hideNavLinks || location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/organizer');
   
   const isDarkCanvasPage = isDark;
-  const isDarkHeroPage = location.pathname === '/' || location.pathname === '/discover';
+  const isDarkHeroPage = location.pathname === '/';
+  const useLightNavText = isDarkCanvasPage || (!isDashboardView && isDarkHeroPage && !isScrolled);
 
   const handleLogout = async () => {
     await logout();
@@ -232,7 +233,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
         }`}
       >
         {/* Brand Logo */}
-        <Logo to={logoTarget} size="md" variant={isDarkCanvasPage ? 'light' : 'dark'} />
+        <Logo to={logoTarget} size="md" variant={useLightNavText ? 'light' : 'dark'} />
 
         {/* Center Desktop Navigation: Different for Guest vs Auth */}
         <div className={`hidden lg:flex items-center transition-[gap] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
@@ -248,7 +249,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                     `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                       isActive
                         ? 'text-[#E31B23] font-bold'
-                        : 'text-zinc-300 hover:text-[#E31B23]'
+                        : useLightNavText
+                          ? 'text-zinc-200 hover:text-[#E31B23]'
+                          : 'text-zinc-700 hover:text-[#E31B23]'
                     }`
                   }
                 >
@@ -264,7 +267,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                   className={`text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1 cursor-pointer select-none ${
                     isMoreDropdownActive || moreDropdown
                       ? 'text-[#E31B23] font-bold'
-                      : 'text-zinc-300 hover:text-[#E31B23]'
+                      : useLightNavText
+                        ? 'text-zinc-200 hover:text-[#E31B23]'
+                        : 'text-zinc-700 hover:text-[#E31B23]'
                   }`}
                   aria-expanded={moreDropdown}
                   aria-haspopup="true"
@@ -331,8 +336,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                   `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                     isActive
                       ? 'text-[#E31B23] font-bold'
-                      : isDarkCanvasPage
-                        ? 'text-zinc-300 hover:text-[#E31B23]'
+                      : useLightNavText
+                        ? 'text-zinc-200 hover:text-[#E31B23]'
                         : 'text-zinc-700 hover:text-[#E31B23]'
                   }`
                 }
@@ -352,7 +357,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
               isDark
                 ? 'bg-white/5 hover:bg-white/10 text-amber-300 border-white/15'
-                : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
+                : useLightNavText
+                  ? 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
             }`}
             title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             aria-label="Toggle theme mode"
@@ -366,8 +373,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               {/* Notification Bell */}
               <button
                 className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
-                  isDarkCanvasPage
-                    ? 'text-zinc-400 hover:text-white hover:bg-white/10'
+                  useLightNavText
+                    ? 'text-zinc-300 hover:text-white hover:bg-white/10'
                     : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
                 }`}
                 title="Notifications"
@@ -546,9 +553,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               <Link
                 to="/login"
                 className={`rounded-full font-bold transition-all duration-300 cursor-pointer whitespace-nowrap ${
-                  isDarkCanvasPage
-                    ? 'px-5 py-2 text-xs xl:text-sm text-zinc-300 hover:text-white border border-white/20 hover:border-white/40 hover:bg-white/5'
-                    : 'px-5 py-2 text-xs xl:text-sm text-zinc-700 hover:text-zinc-950 border border-zinc-200 hover:border-zinc-300'
+                  useLightNavText
+                    ? 'px-5 py-2 text-xs xl:text-sm text-zinc-200 hover:text-white border border-white/25 hover:border-white/40 hover:bg-white/10'
+                    : 'px-5 py-2 text-xs xl:text-sm text-zinc-700 hover:text-zinc-950 border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
                 }`}
               >
                 Log In
@@ -574,7 +581,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors border ${
               isDark
                 ? 'bg-white/5 text-amber-300 border-white/15'
-                : 'bg-zinc-100 text-zinc-700 border-zinc-200'
+                : useLightNavText
+                  ? 'bg-white/10 text-white border-white/20'
+                  : 'bg-zinc-100 text-zinc-700 border-zinc-200'
             }`}
             title="Toggle Theme"
           >
@@ -584,7 +593,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`p-2 rounded-xl focus:outline-none transition-colors ${
-              isDarkCanvasPage
+              useLightNavText
                 ? 'text-white hover:bg-white/10'
                 : 'text-zinc-700 hover:bg-zinc-100'
             }`}

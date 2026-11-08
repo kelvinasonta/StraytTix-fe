@@ -403,21 +403,21 @@ export const Attendees: React.FC = () => {
       <div className="space-y-8 max-w-7xl mx-auto pb-16">
         
         {/* Top Header */}
-        <div className="border-b border-zinc-200/80 pb-5">
+        <div className="border-b border-zinc-200/80 dark:border-white/10 pb-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
                   Gate Operations
                 </span>
                 <span className="text-xs font-semibold text-zinc-400">•</span>
-                <span className="text-xs font-bold text-zinc-500 font-mono">Live Check-In</span>
+                <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 font-mono">Live Check-In</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight flex items-center gap-2.5">
                 <UserCheck className="w-7 h-7 text-[#E31B23]" />
                 Guest Check-In & Gate Scanner
               </h1>
-              <p className="text-zinc-500 text-xs sm:text-sm font-medium mt-1">
+              <p className="text-zinc-500 dark:text-zinc-400 text-xs sm:text-sm font-medium mt-1">
                 Scan attendee QR vouchers, verify ticket passes at the door, and track live occupancy in real time.
               </p>
             </div>
@@ -429,7 +429,7 @@ export const Attendees: React.FC = () => {
                 size="sm"
                 onClick={() => loadData(true)}
                 disabled={isRefreshing || isLoading}
-                className="gap-2 bg-white"
+                className="gap-2 bg-white dark:bg-white/5"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-[#E31B23]' : ''}`} />
                 <span>Refresh</span>
@@ -440,7 +440,7 @@ export const Attendees: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={handleExportCSV}
-                  className="gap-2 bg-white"
+                  className="gap-2 bg-white dark:bg-white/5"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Export Roster</span>
@@ -468,7 +468,7 @@ export const Attendees: React.FC = () => {
             title="Total Registered"
             value={metrics.total.toString()}
             description="Confirmed ticket holders"
-            icon={<Users className="w-5 h-5 text-zinc-700" />}
+            icon={<Users className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />}
           />
 
           <StatCard
@@ -476,36 +476,36 @@ export const Attendees: React.FC = () => {
             value={metrics.checkedIn.toString()}
             description={`${metrics.checkInRate}% attendance rate`}
             trend={{ value: metrics.checkInRate, type: 'up' }}
-            icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />}
+            icon={<CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />}
           />
 
           <StatCard
             title="Awaiting Arrival"
             value={metrics.pending.toString()}
             description="Tickets yet to be scanned"
-            icon={<Clock className="w-5 h-5 text-amber-600" />}
+            icon={<Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />}
           />
 
           <StatCard
             title="VIP All-Access"
             value={metrics.vipCount.toString()}
             description="Priority access guests"
-            icon={<Sparkles className="w-5 h-5 text-indigo-600" />}
+            icon={<Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
           />
         </div>
 
         {/* Live Attendance Progress Bar */}
-        <div className="p-4 rounded-2xl bg-white border border-zinc-200/80 shadow-2xs space-y-2">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0D0E12] border border-zinc-200/80 dark:border-white/10 shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-xs font-bold">
-            <span className="text-zinc-700 flex items-center gap-1.5">
+            <span className="text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
               <ScanLine className="w-4 h-4 text-[#E31B23]" />
               Live Venue Occupancy & Gate Clearance
             </span>
-            <span className="text-zinc-950 font-mono">
+            <span className="text-zinc-950 dark:text-white font-mono">
               {metrics.checkedIn} / {metrics.total} Guests ({metrics.checkInRate}%)
             </span>
           </div>
-          <div className="w-full bg-zinc-100 rounded-full h-2.5 overflow-hidden">
+          <div className="w-full bg-zinc-100 dark:bg-white/10 rounded-full h-2.5 overflow-hidden">
             <div 
               className="bg-emerald-500 h-full rounded-full transition-all duration-500 ease-out"
               style={{ width: `${metrics.checkInRate}%` }}
@@ -515,13 +515,13 @@ export const Attendees: React.FC = () => {
 
         {/* Gate Quick Scanner Bar */}
         {perms.canScanGateTickets && (
-          <div className="bg-gradient-to-r from-red-50/60 via-zinc-50 to-emerald-50/60 border border-zinc-200/80 rounded-2xl p-5 shadow-2xs space-y-3">
+          <div className="bg-gradient-to-r from-red-50/60 via-zinc-50 to-emerald-50/60 dark:from-[#E31B23]/10 dark:via-[#0D0E12] dark:to-emerald-500/10 border border-zinc-200/80 dark:border-white/10 rounded-2xl p-5 shadow-2xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <QrCode className="w-5 h-5 text-[#E31B23]" />
-                <h3 className="text-sm font-black text-zinc-950">Gate Scanner & Quick Check-In Bar</h3>
+                <h3 className="text-sm font-black text-zinc-950 dark:text-white">Gate Scanner & Quick Check-In Bar</h3>
               </div>
-              <span className="text-[11px] font-bold text-zinc-500">Scan QR or enter ticket voucher code</span>
+              <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400">Scan QR or enter ticket voucher code</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-2.5">
               <div className="relative flex-1">
@@ -531,7 +531,7 @@ export const Attendees: React.FC = () => {
                   placeholder="Search attendee by name, voucher code or order reference below, or open camera..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs sm:text-sm font-medium text-zinc-900 focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23] outline-none"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#14151B] text-xs sm:text-sm font-medium text-zinc-900 dark:text-white focus:ring-2 focus:ring-[#E31B23]/20 focus:border-[#E31B23] outline-none"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -551,7 +551,7 @@ export const Attendees: React.FC = () => {
         )}
 
         {/* Filter & Search Bar */}
-        <div className="p-4 rounded-2xl bg-white border border-zinc-200/80 shadow-2xs space-y-4">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0D0E12] border border-zinc-200/80 dark:border-white/10 shadow-2xs space-y-4">
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
             
             {/* Search Input */}
@@ -562,13 +562,13 @@ export const Attendees: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search guest by name, email, voucher code, or order ID..."
-                className="w-full bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white border border-zinc-200 hover:border-zinc-300 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 text-xs sm:text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none transition-all text-zinc-900"
+                className="w-full bg-zinc-50/70 dark:bg-[#14151B] hover:bg-zinc-50 dark:hover:bg-white/[0.06] focus:bg-white dark:focus:bg-[#14151B] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 text-xs sm:text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none transition-all text-zinc-900 dark:text-white"
               />
               {search && (
                 <button
                   type="button"
                   onClick={() => setSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 p-1 rounded-md"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1 rounded-md"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -583,13 +583,13 @@ export const Attendees: React.FC = () => {
                   onClick={() => setStatusFilter(st)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                     statusFilter === st
-                      ? 'bg-zinc-900 text-white shadow-xs'
-                      : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70'
+                      ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 shadow-xs'
+                      : 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-white/10'
                   }`}
                 >
                   {st === 'all' ? 'All Guests' : st === 'Checked In' ? 'Verified Entry' : 'Awaiting Arrival'}
                   <span className={`ml-1.5 px-1.5 py-0.2 rounded-md text-[10px] font-black ${
-                    statusFilter === st ? 'bg-white/20 text-white' : 'bg-zinc-200 text-zinc-700'
+                    statusFilter === st ? 'bg-white/20 dark:bg-zinc-900/20 text-white dark:text-zinc-950' : 'bg-zinc-200 dark:bg-white/10 text-zinc-700 dark:text-zinc-300'
                   }`}>
                     {st === 'all' ? attendees.length : attendees.filter(a => a.checkInStatus === st).length}
                   </span>
@@ -599,15 +599,15 @@ export const Attendees: React.FC = () => {
           </div>
 
           {/* Secondary Filter: Event & Ticket Tier */}
-          <div className="pt-3 border-t border-zinc-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="pt-3 border-t border-zinc-100 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex flex-wrap items-center gap-3">
               {/* Event Filter */}
               <div className="flex items-center gap-2">
-                <span className="font-bold text-zinc-500">Event:</span>
+                <span className="font-bold text-zinc-500 dark:text-zinc-400">Event:</span>
                 <select
                   value={selectedEventId}
                   onChange={(e) => setSelectedEventId(e.target.value)}
-                  className="bg-zinc-50 border border-zinc-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-800 outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/30"
+                  className="bg-zinc-50 dark:bg-[#14151B] border border-zinc-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-800 dark:text-zinc-200 outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/30"
                 >
                   <option value="all">All Events ({events.length})</option>
                   {events.map((evt) => (
@@ -620,11 +620,11 @@ export const Attendees: React.FC = () => {
 
               {/* Ticket Tier Filter */}
               <div className="flex items-center gap-2">
-                <span className="font-bold text-zinc-500">Category:</span>
+                <span className="font-bold text-zinc-500 dark:text-zinc-400">Category:</span>
                 <select
                   value={ticketTierFilter}
                   onChange={(e) => setTicketTierFilter(e.target.value)}
-                  className="bg-zinc-50 border border-zinc-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-800 outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/30"
+                  className="bg-zinc-50 dark:bg-[#14151B] border border-zinc-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-800 dark:text-zinc-200 outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/30"
                 >
                   <option value="all">All Tiers ({uniqueTicketTiers.length})</option>
                   {uniqueTicketTiers.map((tier) => (
@@ -636,18 +636,18 @@ export const Attendees: React.FC = () => {
               </div>
             </div>
 
-            <div className="text-zinc-500 font-medium">
-              Showing <strong className="text-zinc-900 font-bold">{filteredAttendees.length}</strong> of {attendees.length} guests
+            <div className="text-zinc-500 dark:text-zinc-400 font-medium">
+              Showing <strong className="text-zinc-900 dark:text-white font-bold">{filteredAttendees.length}</strong> of {attendees.length} guests
             </div>
           </div>
         </div>
 
         {/* Attendees List Table */}
-        <div className="bg-white border border-zinc-200/80 rounded-2xl overflow-hidden shadow-2xs">
+        <div className="bg-white dark:bg-[#0D0E12] border border-zinc-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-zinc-50/80 border-b border-zinc-200 text-zinc-500 font-black uppercase tracking-wider text-[11px]">
+                <tr className="bg-zinc-50/80 dark:bg-white/[0.03] border-b border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 font-black uppercase tracking-wider text-[11px]">
                   <th className="py-3.5 px-4">Attendee Guest</th>
                   <th className="py-3.5 px-4">Ticket Tier</th>
                   <th className="py-3.5 px-4">Ticket Voucher Code</th>
@@ -656,25 +656,25 @@ export const Attendees: React.FC = () => {
                   <th className="py-3.5 px-4 text-right">Verification</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100 font-semibold text-zinc-700">
+              <tbody className="divide-y divide-zinc-100 dark:divide-white/5 font-semibold text-zinc-700 dark:text-zinc-300">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="py-16 text-center text-zinc-500">
+                    <td colSpan={6} className="py-16 text-center text-zinc-500 dark:text-zinc-400">
                       <div className="flex flex-col items-center justify-center gap-3">
                         <Loader2 className="w-7 h-7 animate-spin text-[#E31B23]" />
-                        <span className="text-xs font-bold text-zinc-700">Loading attendee roster...</span>
+                        <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Loading attendee roster...</span>
                       </div>
                     </td>
                   </tr>
                 ) : attendees.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-16 text-center text-zinc-500">
+                    <td colSpan={6} className="py-16 text-center text-zinc-500 dark:text-zinc-400">
                       <div className="flex flex-col items-center justify-center gap-3 max-w-md mx-auto">
-                        <div className="w-14 h-14 rounded-2xl bg-zinc-100 text-zinc-400 flex items-center justify-center border border-zinc-200/80">
+                        <div className="w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-white/5 text-zinc-400 flex items-center justify-center border border-zinc-200/80 dark:border-white/10">
                           <Users className="w-7 h-7 text-zinc-400" />
                         </div>
-                        <p className="text-base font-bold text-zinc-950">No attendees yet</p>
-                        <p className="text-xs text-zinc-500 leading-relaxed max-w-sm">
+                        <p className="text-base font-bold text-zinc-950 dark:text-white">No attendees yet</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-sm">
                           When attendees purchase tickets or register for your events, they will automatically appear here for check-in and roster management.
                         </p>
                       </div>
@@ -682,13 +682,13 @@ export const Attendees: React.FC = () => {
                   </tr>
                 ) : filteredAttendees.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-16 text-center text-zinc-500">
+                    <td colSpan={6} className="py-16 text-center text-zinc-500 dark:text-zinc-400">
                       <div className="flex flex-col items-center justify-center gap-3 max-w-md mx-auto">
-                        <div className="w-12 h-12 rounded-2xl bg-zinc-100 text-zinc-400 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-white/5 text-zinc-400 flex items-center justify-center">
                           <Users className="w-6 h-6" />
                         </div>
-                        <p className="text-sm font-black text-zinc-950">No attendees match your search</p>
-                        <p className="text-xs text-zinc-500">
+                        <p className="text-sm font-black text-zinc-950 dark:text-white">No attendees match your search</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
                           Try searching by attendee name, email, or clearing filter options.
                         </p>
                         {(search || statusFilter !== 'all' || ticketTierFilter !== 'all' || selectedEventId !== 'all') && (
@@ -717,18 +717,18 @@ export const Attendees: React.FC = () => {
                       <tr 
                         key={att.id} 
                         onClick={() => setSelectedAttendee(att)}
-                        className="hover:bg-zinc-50/70 transition-all cursor-pointer group"
+                        className="hover:bg-zinc-50/70 dark:hover:bg-white/[0.03] transition-all cursor-pointer group"
                       >
                         {/* Guest Info */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2.5">
                             <div className={`w-8 h-8 rounded-full font-black text-xs flex items-center justify-center flex-shrink-0 border ${
-                              isCheckedIn ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-zinc-100 text-zinc-700 border-zinc-200'
+                              isCheckedIn ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50' : 'bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-white/10'
                             }`}>
                               {att.name?.charAt(0) || 'G'}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-zinc-950 font-bold truncate max-w-[170px] group-hover:text-[#E31B23] transition-colors">
+                              <p className="text-zinc-950 dark:text-white font-bold truncate max-w-[170px] group-hover:text-[#E31B23] transition-colors">
                                 {att.name}
                               </p>
                               <p className="text-[11px] text-zinc-400 font-normal truncate max-w-[170px]">
@@ -742,22 +742,22 @@ export const Attendees: React.FC = () => {
                         <td className="py-3.5 px-4">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-md font-bold text-xs ${
                             att.ticketType.toLowerCase().includes('vip')
-                              ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                              : 'bg-zinc-100 text-zinc-700'
+                              ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50'
+                              : 'bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300'
                           }`}>
                             {att.ticketType}
                           </span>
                         </td>
 
                         {/* Ticket Voucher Code */}
-                        <td className="py-3.5 px-4 font-mono font-bold text-zinc-900">
-                          <span className="bg-zinc-100 px-2 py-1 rounded-md text-[11px] border border-zinc-200">
+                        <td className="py-3.5 px-4 font-mono font-bold text-zinc-900 dark:text-zinc-200">
+                          <span className="bg-zinc-100 dark:bg-white/10 px-2 py-1 rounded-md text-[11px] border border-zinc-200 dark:border-white/10">
                             {att.ticketCode}
                           </span>
                         </td>
 
                         {/* Order ID */}
-                        <td className="py-3.5 px-4 font-mono text-zinc-500">
+                        <td className="py-3.5 px-4 font-mono text-zinc-500 dark:text-zinc-400">
                           #{att.orderId}
                         </td>
 
@@ -766,7 +766,7 @@ export const Attendees: React.FC = () => {
                           {isCheckedIn ? (
                             <div>
                               <Badge variant="success" className="font-bold gap-1 inline-flex items-center">
-                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                                 Checked In
                               </Badge>
                               {att.checkedInAt && (
@@ -777,7 +777,7 @@ export const Attendees: React.FC = () => {
                             </div>
                           ) : (
                             <Badge variant="warning" className="font-bold gap-1 inline-flex items-center">
-                              <Clock className="w-3 h-3 text-amber-600" />
+                              <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                               Awaiting Entry
                             </Badge>
                           )}
@@ -790,7 +790,7 @@ export const Attendees: React.FC = () => {
                             onClick={() => handleToggleCheckIn(att.id)}
                             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-2xs ${
                               isCheckedIn
-                                ? 'bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-700'
+                                ? 'bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 border-rose-200 dark:border-rose-800/50 text-rose-700 dark:text-rose-300'
                                 : 'bg-emerald-600 hover:bg-emerald-700 text-white border-transparent'
                             }`}
                           >
@@ -826,7 +826,7 @@ export const Attendees: React.FC = () => {
             <div className="space-y-6">
               
               {/* Status Header */}
-              <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400 block mb-0.5">Gate Status</span>
                   {selectedAttendee.checkInStatus === 'Checked In' ? (
@@ -838,53 +838,53 @@ export const Attendees: React.FC = () => {
 
                 <div className="text-right">
                   <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400 block mb-0.5">Ticket Voucher</span>
-                  <span className="font-mono font-bold text-sm bg-zinc-200 px-2 py-0.5 rounded-md text-zinc-950">
+                  <span className="font-mono font-bold text-sm bg-zinc-200 dark:bg-white/10 px-2 py-0.5 rounded-md text-zinc-950 dark:text-white">
                     {selectedAttendee.ticketCode}
                   </span>
                 </div>
               </div>
 
               {/* Guest Profile Details */}
-              <div className="p-4 rounded-xl border border-zinc-200 bg-white grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-white/[0.02] grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div>
-                  <span className="text-zinc-500 font-medium block">Full Name</span>
-                  <strong className="text-zinc-950 font-bold">{selectedAttendee.name}</strong>
+                  <span className="text-zinc-500 dark:text-zinc-400 font-medium block">Full Name</span>
+                  <strong className="text-zinc-950 dark:text-white font-bold">{selectedAttendee.name}</strong>
                 </div>
                 <div>
-                  <span className="text-zinc-500 font-medium block">Email Address</span>
-                  <strong className="text-zinc-950 font-bold">{selectedAttendee.email}</strong>
+                  <span className="text-zinc-500 dark:text-zinc-400 font-medium block">Email Address</span>
+                  <strong className="text-zinc-950 dark:text-white font-bold">{selectedAttendee.email}</strong>
                 </div>
                 <div>
-                  <span className="text-zinc-500 font-medium block">Ticket Category</span>
-                  <span className="font-bold text-zinc-900">{selectedAttendee.ticketType}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400 font-medium block">Ticket Category</span>
+                  <span className="font-bold text-zinc-900 dark:text-white">{selectedAttendee.ticketType}</span>
                 </div>
                 <div>
-                  <span className="text-zinc-500 font-medium block">Order Reference</span>
-                  <span className="font-mono font-bold text-zinc-900">#{selectedAttendee.orderId}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400 font-medium block">Order Reference</span>
+                  <span className="font-mono font-bold text-zinc-900 dark:text-white">#{selectedAttendee.orderId}</span>
                 </div>
                 {selectedAttendee.checkedInAt && (
                   <div>
-                    <span className="text-zinc-500 font-medium block">Gate Check-In Time</span>
-                    <span className="font-mono text-emerald-700 font-bold">
+                    <span className="text-zinc-500 dark:text-zinc-400 font-medium block">Gate Check-In Time</span>
+                    <span className="font-mono text-emerald-700 dark:text-emerald-400 font-bold">
                       {new Date(selectedAttendee.checkedInAt).toLocaleString()}
                     </span>
                   </div>
                 )}
                 {selectedAttendee.checkedInBy && (
                   <div>
-                    <span className="text-zinc-500 font-medium block">Verified By Staff</span>
-                    <strong className="text-zinc-900">{selectedAttendee.checkedInBy}</strong>
+                    <span className="text-zinc-500 dark:text-zinc-400 font-medium block">Verified By Staff</span>
+                    <strong className="text-zinc-900 dark:text-white">{selectedAttendee.checkedInBy}</strong>
                   </div>
                 )}
               </div>
 
               {/* Actions */}
-              <div className="pt-2 border-t border-zinc-200 flex items-center justify-between">
+              <div className="pt-2 border-t border-zinc-200 dark:border-white/10 flex items-center justify-between">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleToggleCheckIn(selectedAttendee.id)}
-                  className={selectedAttendee.checkInStatus === 'Checked In' ? 'text-rose-600 border-rose-200 hover:bg-rose-50' : 'text-emerald-700 border-emerald-200 hover:bg-emerald-50'}
+                  className={selectedAttendee.checkInStatus === 'Checked In' ? 'text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800/50 hover:bg-rose-50 dark:hover:bg-rose-950/50' : 'text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/50'}
                 >
                   <UserCheck className="w-3.5 h-3.5 mr-1.5" />
                   <span>{selectedAttendee.checkInStatus === 'Checked In' ? 'Undo Entry' : 'Verify Entry'}</span>

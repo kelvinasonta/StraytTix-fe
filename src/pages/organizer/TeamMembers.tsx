@@ -392,7 +392,11 @@ export const TeamMembers: React.FC = () => {
         setInvitations(inviteList.map(normalizeInvitation));
       }
       if (rolesRes.success && rolesRes.data) {
-        const rolesList = Array.isArray(rolesRes.data) ? rolesRes.data : [];
+        const rolesList = Array.isArray(rolesRes.data)
+          ? rolesRes.data
+          : Array.isArray((rolesRes.data as any)?.roles)
+          ? (rolesRes.data as any).roles
+          : [];
         setRoleCatalog(rolesList);
       }
     } catch {

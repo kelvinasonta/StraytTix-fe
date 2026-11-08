@@ -448,17 +448,17 @@ export const Discover: React.FC = () => {
   }, [isPriceCustomized, minPrice, maxPrice]);
 
   return (
-    <div className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070709] text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-[#E31B23] selection:text-white antialiased transition-colors duration-300">
       <Navbar />
 
       {/* ========================================================================= */}
       {/* 1. TOP HEADER & SEARCH BAR                                                */}
       {/* ========================================================================= */}
-      <header className="border-b border-white/5 bg-[#070709] pt-8 sm:pt-12 pb-4 sm:pb-5 px-4 sm:px-6 lg:px-8">
+      <header className="border-b border-zinc-200 dark:border-white/5 bg-white dark:bg-[#070709] pt-8 sm:pt-12 pb-4 sm:pb-5 px-4 sm:px-6 lg:px-8 transition-colors">
         <div className="max-w-7xl mx-auto space-y-4">
           
           <div className="flex items-center justify-between gap-4">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-zinc-950 dark:text-white">
               Discover events
             </h1>
 
@@ -468,8 +468,8 @@ export const Discover: React.FC = () => {
               onClick={() => openModal('region')}
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
                 selectedCountry
-                  ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
-                  : 'bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border-white/10'
+                  ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-950 dark:border-white font-semibold shadow-xs'
+                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:text-zinc-200 dark:border-white/10'
               }`}
               title="Select Region"
             >
@@ -480,20 +480,20 @@ export const Discover: React.FC = () => {
           </div>
 
           {/* Search Input Bar */}
-          <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-[#111217] border border-white/10 focus-within:border-white/25 transition-all">
+          <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-zinc-50 dark:bg-[#111217] border border-zinc-200 dark:border-white/10 focus-within:border-zinc-400 dark:focus-within:border-white/25 transition-all">
             <Search className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400 shrink-0" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search events, artists, venues, or cities..."
-              className="w-full bg-transparent text-sm sm:text-base text-white placeholder-zinc-500 outline-none border-none ring-0 font-normal truncate"
+              className="w-full bg-transparent text-sm sm:text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none border-none ring-0 font-normal truncate"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                className="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                className="p-1 rounded-lg hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-400 hover:text-zinc-700 dark:hover:text-white transition-colors cursor-pointer shrink-0"
                 aria-label="Clear search"
               >
                 <X className="w-4 h-4" />
@@ -512,8 +512,8 @@ export const Discover: React.FC = () => {
                   onClick={() => setCategory(cat)}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer shrink-0 border ${
                     isActive
-                      ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
-                      : 'bg-white/[0.03] text-zinc-400 hover:text-white hover:bg-white/[0.08] border-white/10'
+                      ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-950 dark:border-white font-semibold shadow-xs'
+                      : 'bg-zinc-100 text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200 border-zinc-200 dark:bg-white/[0.03] dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.08] dark:border-white/10'
                   }`}
                 >
                   {cat}
@@ -528,7 +528,7 @@ export const Discover: React.FC = () => {
       {/* ========================================================================= */}
       {/* 2. UNIFIED FILTER BUTTONS STRIP (Triggers Bottom Sheet Modals)             */}
       {/* ========================================================================= */}
-      <section className="border-b border-white/5 bg-[#090A0E] px-4 sm:px-6 lg:px-8 py-3">
+      <section className="border-b border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-[#090A0E] px-4 sm:px-6 lg:px-8 py-3 transition-colors">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           
           {/* Button Group: Price, Date, Format (opens modal from underneath) */}
@@ -540,8 +540,8 @@ export const Discover: React.FC = () => {
               onClick={() => openModal('price')}
               className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors border cursor-pointer shrink-0 ${
                 isPriceCustomized
-                  ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
-                  : 'bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] border-white/10'
+                  ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-950 dark:border-white font-semibold shadow-xs'
+                  : 'bg-white text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 border-zinc-200 dark:bg-white/[0.04] dark:text-zinc-300 dark:hover:text-white dark:hover:bg-white/[0.08] dark:border-white/10'
               }`}
             >
               <Coins className={`w-3.5 h-3.5 ${isPriceCustomized ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
@@ -555,8 +555,8 @@ export const Discover: React.FC = () => {
               onClick={() => openModal('date')}
               className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors border cursor-pointer shrink-0 ${
                 dateFilter !== 'all'
-                  ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
-                  : 'bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] border-white/10'
+                  ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-950 dark:border-white font-semibold shadow-xs'
+                  : 'bg-white text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 border-zinc-200 dark:bg-white/[0.04] dark:text-zinc-300 dark:hover:text-white dark:hover:bg-white/[0.08] dark:border-white/10'
               }`}
             >
               <Calendar className={`w-3.5 h-3.5 ${dateFilter !== 'all' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
@@ -570,8 +570,8 @@ export const Discover: React.FC = () => {
               onClick={() => openModal('format')}
               className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors border cursor-pointer shrink-0 ${
                 formatFilter !== 'All'
-                  ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
-                  : 'bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] border-white/10'
+                  ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-950 dark:border-white font-semibold shadow-xs'
+                  : 'bg-white text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 border-zinc-200 dark:bg-white/[0.04] dark:text-zinc-300 dark:hover:text-white dark:hover:bg-white/[0.08] dark:border-white/10'
               }`}
             >
               <SlidersHorizontal className={`w-3.5 h-3.5 ${formatFilter !== 'All' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
@@ -584,7 +584,7 @@ export const Discover: React.FC = () => {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="px-2.5 py-1.5 rounded-full text-xs font-medium text-zinc-400 hover:text-[#E31B23] transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+                className="px-2.5 py-1.5 rounded-full text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-[#E31B23] transition-colors cursor-pointer flex items-center gap-1 shrink-0"
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>Reset all</span>
@@ -595,7 +595,7 @@ export const Discover: React.FC = () => {
 
           {/* Right: Results Count & View Mode Toggle */}
           <div className="flex items-center gap-3 shrink-0">
-            <span className="text-xs text-zinc-400 font-mono hidden sm:inline-block">
+            <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono hidden sm:inline-block">
               {isLoading ? (
                 <span className="inline-flex items-center gap-1.5">
                   <Loader2 className="w-3 h-3 animate-spin text-[#E31B23]" /> Loading...
@@ -605,12 +605,12 @@ export const Discover: React.FC = () => {
               )}
             </span>
 
-            <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-xl border border-white/10">
+            <div className="flex items-center gap-1 bg-white dark:bg-white/[0.04] p-1 rounded-xl border border-zinc-200 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                  viewMode === 'list' ? 'bg-white/15 text-white' : 'text-zinc-400 hover:text-white'
+                  viewMode === 'list' ? 'bg-zinc-900 text-white dark:bg-white/15 dark:text-white' : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
                 }`}
                 title="List view"
                 aria-label="List view"
@@ -621,7 +621,7 @@ export const Discover: React.FC = () => {
                 type="button"
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                  viewMode === 'grid' ? 'bg-white/15 text-white' : 'text-zinc-400 hover:text-white'
+                  viewMode === 'grid' ? 'bg-zinc-900 text-white dark:bg-white/15 dark:text-white' : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
                 }`}
                 title="Grid view"
                 aria-label="Grid view"
@@ -656,14 +656,14 @@ export const Discover: React.FC = () => {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-              className="relative w-full max-w-lg mx-auto bg-[#111217] border-t border-white/15 rounded-t-3xl shadow-2xl p-6 sm:p-7 space-y-6 z-10 text-left"
+              className="relative w-full max-w-lg mx-auto bg-white dark:bg-[#111217] border-t border-zinc-200 dark:border-white/15 rounded-t-3xl shadow-2xl p-6 sm:p-7 space-y-6 z-10 text-left"
             >
               
               {/* Grab handle & Header */}
               <div className="space-y-3">
-                <div className="w-10 h-1 bg-white/20 rounded-full mx-auto" />
-                <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                  <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                <div className="w-10 h-1 bg-zinc-300 dark:bg-white/20 rounded-full mx-auto" />
+                <div className="flex items-center justify-between pb-2 border-b border-zinc-200 dark:border-white/10">
+                  <h2 className="text-base sm:text-lg font-bold text-zinc-950 dark:text-white flex items-center gap-2">
                     {activeModal === 'price' && (
                       <>
                         <Coins className="w-4 h-4 text-[#E31B23]" />
@@ -692,7 +692,7 @@ export const Discover: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveModal(null)}
-                    className="p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
+                    className="p-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-white/5 dark:hover:bg-white/10 text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -705,7 +705,7 @@ export const Discover: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4">
                     {/* Minimum amount */}
                     <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-zinc-400 block">
+                      <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400 block">
                         Minimum amount (NGN)
                       </label>
                       <div className="relative">
@@ -717,14 +717,14 @@ export const Discover: React.FC = () => {
                           step="500"
                           value={tempMinPrice}
                           onChange={(e) => setTempMinPrice(Math.max(0, Number(e.target.value)))}
-                          className="w-full bg-white/[0.04] border border-white/15 focus:border-white/30 rounded-xl pl-7 pr-3 py-2.5 text-sm font-mono text-white outline-none"
+                          className="w-full bg-zinc-50 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/15 focus:border-zinc-400 dark:focus:border-white/30 rounded-xl pl-7 pr-3 py-2.5 text-sm font-mono text-zinc-900 dark:text-white outline-none"
                         />
                       </div>
                     </div>
 
                     {/* Maximum amount */}
                     <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-zinc-400 block">
+                      <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400 block">
                         Maximum amount (NGN)
                       </label>
                       <div className="relative">
@@ -736,7 +736,7 @@ export const Discover: React.FC = () => {
                           step="1000"
                           value={tempMaxPrice}
                           onChange={(e) => setTempMaxPrice(Math.max(tempMinPrice, Number(e.target.value)))}
-                          className="w-full bg-white/[0.04] border border-white/15 focus:border-white/30 rounded-xl pl-7 pr-3 py-2.5 text-sm font-mono text-white outline-none"
+                          className="w-full bg-zinc-50 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/15 focus:border-zinc-400 dark:focus:border-white/30 rounded-xl pl-7 pr-3 py-2.5 text-sm font-mono text-zinc-900 dark:text-white outline-none"
                         />
                       </div>
                     </div>
@@ -752,7 +752,7 @@ export const Discover: React.FC = () => {
                       value={tempMaxPrice}
                       onChange={(e) => setTempMaxPrice(Number(e.target.value))}
                       aria-label="Maximum price slider"
-                      className="w-full accent-[#E31B23] h-2 bg-zinc-800 rounded-lg cursor-pointer"
+                      className="w-full accent-[#E31B23] h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg cursor-pointer"
                     />
                     <div className="flex justify-between text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
                       <span>₦0</span>
@@ -763,28 +763,28 @@ export const Discover: React.FC = () => {
 
                   {/* Quick Presets */}
                   <div className="space-y-2 pt-1">
-                    <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider block">
+                    <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
                       Quick Presets
                     </span>
                     <div className="flex flex-wrap gap-2">
                       <button
                         type="button"
                         onClick={() => { setTempMinPrice(0); setTempMaxPrice(0); }}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/[0.04] hover:bg-white/10 text-zinc-300 border border-white/10 cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border border-zinc-200 dark:bg-white/[0.04] dark:hover:bg-white/10 dark:text-zinc-300 dark:border-white/10 cursor-pointer"
                       >
                         Free RSVP
                       </button>
                       <button
                         type="button"
                         onClick={() => { setTempMinPrice(0); setTempMaxPrice(10000); }}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/[0.04] hover:bg-white/10 text-zinc-300 border border-white/10 cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border border-zinc-200 dark:bg-white/[0.04] dark:hover:bg-white/10 dark:text-zinc-300 dark:border-white/10 cursor-pointer"
                       >
                         Under ₦10,000
                       </button>
                       <button
                         type="button"
                         onClick={() => { setTempMinPrice(10000); setTempMaxPrice(30000); }}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/[0.04] hover:bg-white/10 text-zinc-300 border border-white/10 cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border border-zinc-200 dark:bg-white/[0.04] dark:hover:bg-white/10 dark:text-zinc-300 dark:border-white/10 cursor-pointer"
                       >
                         ₦10k – ₦30k
                       </button>
@@ -792,11 +792,11 @@ export const Discover: React.FC = () => {
                   </div>
 
                   {/* Footer Actions: Clear & Apply */}
-                  <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                  <div className="pt-4 border-t border-zinc-200 dark:border-white/10 flex items-center justify-between gap-3">
                     <button
                       type="button"
                       onClick={clearPriceModal}
-                      className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-pointer"
                     >
                       Clear
                     </button>
@@ -822,8 +822,8 @@ export const Discover: React.FC = () => {
                         onClick={() => setTempDateFilter(d.id as any)}
                         className={`w-full text-left px-4 py-3 rounded-2xl text-xs sm:text-sm font-medium transition-colors cursor-pointer flex items-center justify-between border ${
                           tempDateFilter === d.id
-                            ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
-                            : 'bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.06] border-white/10'
+                            ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-950 dark:border-white font-semibold shadow-xs'
+                            : 'bg-zinc-50 text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 border-zinc-200 dark:bg-white/[0.03] dark:text-zinc-300 dark:hover:text-white dark:hover:bg-white/[0.06] dark:border-white/10'
                         }`}
                       >
                         <span>{d.label}</span>
@@ -833,11 +833,11 @@ export const Discover: React.FC = () => {
                   </div>
 
                   {/* Footer Actions: Clear & Apply */}
-                  <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                  <div className="pt-4 border-t border-zinc-200 dark:border-white/10 flex items-center justify-between gap-3">
                     <button
                       type="button"
                       onClick={clearDateModal}
-                      className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-pointer"
                     >
                       Clear
                     </button>
@@ -863,8 +863,8 @@ export const Discover: React.FC = () => {
                         onClick={() => setTempFormatFilter(fmt.id as any)}
                         className={`w-full text-left px-4 py-3 rounded-2xl text-xs sm:text-sm font-medium transition-colors cursor-pointer flex items-center justify-between border ${
                           tempFormatFilter === fmt.id
-                            ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
-                            : 'bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.06] border-white/10'
+                            ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-950 dark:border-white font-semibold shadow-xs'
+                            : 'bg-zinc-50 text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 border-zinc-200 dark:bg-white/[0.03] dark:text-zinc-300 dark:hover:text-white dark:hover:bg-white/[0.06] dark:border-white/10'
                         }`}
                       >
                         <span>{fmt.label}</span>
@@ -874,11 +874,11 @@ export const Discover: React.FC = () => {
                   </div>
 
                   {/* Footer Actions: Clear & Apply */}
-                  <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                  <div className="pt-4 border-t border-zinc-200 dark:border-white/10 flex items-center justify-between gap-3">
                     <button
                       type="button"
                       onClick={clearFormatModal}
-                      className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-pointer"
                     >
                       Clear
                     </button>
@@ -901,8 +901,8 @@ export const Discover: React.FC = () => {
                     onClick={() => handleSelectCountry(null)}
                     className={`w-full text-left px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-medium transition-colors cursor-pointer flex items-center justify-between border ${
                       !selectedCountry
-                        ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
-                        : 'bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.06] border-white/10'
+                        ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-950 dark:border-white font-semibold shadow-xs'
+                        : 'bg-zinc-50 text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 border-zinc-200 dark:bg-white/[0.03] dark:text-zinc-300 dark:hover:text-white dark:hover:bg-white/[0.06] dark:border-white/10'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -919,8 +919,8 @@ export const Discover: React.FC = () => {
                       onClick={() => handleSelectCountry(c)}
                       className={`w-full text-left px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-medium transition-colors cursor-pointer flex items-center justify-between border ${
                         selectedCountry?.code === c.code
-                          ? 'bg-white text-zinc-950 dark:text-white border-white font-semibold shadow-xs'
-                          : 'bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.06] border-white/10'
+                          ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-950 dark:border-white font-semibold shadow-xs'
+                          : 'bg-zinc-50 text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 border-zinc-200 dark:bg-white/[0.03] dark:text-zinc-300 dark:hover:text-white dark:hover:bg-white/[0.06] dark:border-white/10'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 truncate">
@@ -947,7 +947,7 @@ export const Discover: React.FC = () => {
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center space-y-3">
             <AlertCircle className="w-8 h-8 text-[#E31B23] mx-auto" />
-            <p className="text-sm font-medium text-white">{error}</p>
+            <p className="text-sm font-medium text-zinc-900 dark:text-white">{error}</p>
             <button
               type="button"
               onClick={() => fetchEvents(paginationMeta.current_page)}
@@ -962,15 +962,15 @@ export const Discover: React.FC = () => {
         {isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-white/[0.02] rounded-3xl p-4 border border-white/10 animate-pulse space-y-4">
-                <div className="h-48 bg-white/[0.04] rounded-2xl w-full" />
+              <div key={i} className="bg-white dark:bg-white/[0.02] rounded-3xl p-4 border border-zinc-200 dark:border-white/10 animate-pulse space-y-4">
+                <div className="h-48 bg-zinc-100 dark:bg-white/[0.04] rounded-2xl w-full" />
                 <div className="space-y-2 px-1">
-                  <div className="h-4 bg-white/[0.04] rounded-md w-3/4" />
-                  <div className="h-3 bg-white/[0.04] rounded-md w-1/2" />
+                  <div className="h-4 bg-zinc-100 dark:bg-white/[0.04] rounded-md w-3/4" />
+                  <div className="h-3 bg-zinc-100 dark:bg-white/[0.04] rounded-md w-1/2" />
                 </div>
-                <div className="pt-3 border-t border-white/5 flex justify-between items-center px-1">
-                  <div className="h-3 bg-white/[0.04] rounded-md w-1/4" />
-                  <div className="h-6 bg-white/[0.04] rounded-lg w-16" />
+                <div className="pt-3 border-t border-zinc-100 dark:border-white/5 flex justify-between items-center px-1">
+                  <div className="h-3 bg-zinc-100 dark:bg-white/[0.04] rounded-md w-1/4" />
+                  <div className="h-6 bg-zinc-100 dark:bg-white/[0.04] rounded-lg w-16" />
                 </div>
               </div>
             ))}
@@ -1056,10 +1056,10 @@ export const Discover: React.FC = () => {
             </div>
 
             <div className="space-y-2 relative z-10">
-              <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              <h3 className="text-xl sm:text-2xl font-bold text-zinc-950 dark:text-white tracking-tight">
                 No events found
               </h3>
-              <p className="text-xs sm:text-sm text-zinc-400 max-w-sm mx-auto leading-relaxed">
+              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-sm mx-auto leading-relaxed">
                 We couldn&apos;t find any events matching your selected filters. Try broadening your dates or clearing your search.
               </p>
             </div>
@@ -1096,8 +1096,8 @@ export const Discover: React.FC = () => {
 
         {/* Pagination Controls */}
         {!isLoading && paginationMeta.last_page > 1 && (
-          <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-xs text-zinc-400 font-mono">
+          <div className="pt-8 border-t border-zinc-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
               Page {paginationMeta.current_page} of {paginationMeta.last_page}
             </div>
 
@@ -1106,7 +1106,7 @@ export const Discover: React.FC = () => {
                 type="button"
                 onClick={() => handlePageChange(paginationMeta.current_page - 1)}
                 disabled={paginationMeta.current_page <= 1 || isLoading}
-                className="px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed bg-white/[0.05] hover:bg-white/10 border border-white/10 text-white"
+                className="px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed bg-white hover:bg-zinc-100 border border-zinc-200 text-zinc-900 dark:bg-white/[0.05] dark:hover:bg-white/10 dark:border-white/10 dark:text-white"
               >
                 <ChevronLeft className="w-4 h-4" />
                 <span>Previous</span>
@@ -1121,7 +1121,7 @@ export const Discover: React.FC = () => {
                     className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                       pageNum === paginationMeta.current_page
                         ? 'bg-[#E31B23] text-white font-semibold'
-                        : 'bg-white/[0.03] text-zinc-400 hover:text-white hover:bg-white/[0.08] border border-white/10'
+                        : 'bg-white text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 border border-zinc-200 dark:bg-white/[0.03] dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.08] dark:border-white/10'
                     }`}
                   >
                     {pageNum}
@@ -1133,7 +1133,7 @@ export const Discover: React.FC = () => {
                 type="button"
                 onClick={() => handlePageChange(paginationMeta.current_page + 1)}
                 disabled={paginationMeta.current_page >= paginationMeta.last_page || isLoading}
-                className="px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed bg-white/[0.05] hover:bg-white/10 border border-white/10 text-white"
+                className="px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed bg-white hover:bg-zinc-100 border border-zinc-200 text-zinc-900 dark:bg-white/[0.05] dark:hover:bg-white/10 dark:border-white/10 dark:text-white"
               >
                 <span>Next</span>
                 <ChevronRight className="w-4 h-4" />

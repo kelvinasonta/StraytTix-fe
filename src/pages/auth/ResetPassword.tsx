@@ -58,12 +58,12 @@ export const ResetPassword: React.FC = () => {
         subtitle="This password recovery link is invalid or has expired"
       >
         <div className="space-y-6">
-          <div className="p-6 bg-red-500/10 border border-red-500/20 text-red-300 rounded-2xl text-center space-y-3">
-            <div className="w-12 h-12 bg-red-500/20 text-[#E31B23] rounded-2xl flex items-center justify-center mx-auto">
+          <div className="p-6 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-300 rounded-2xl text-center space-y-3">
+            <div className="w-12 h-12 bg-red-100 dark:bg-red-500/20 text-[#E31B23] rounded-2xl flex items-center justify-center mx-auto">
               <AlertCircle className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-white">Missing or expired token</h3>
-            <p className="text-xs text-zinc-400 leading-relaxed font-normal">
+            <h3 className="text-base font-bold text-zinc-950 dark:text-white">Missing or expired token</h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
               For security reasons, password recovery tokens expire after 60 minutes. Please request a fresh recovery email.
             </p>
           </div>
@@ -77,7 +77,7 @@ export const ResetPassword: React.FC = () => {
             </Link>
             <Link
               to="/login"
-              className="w-full py-2.5 text-center text-xs font-semibold text-zinc-400 hover:text-white block"
+              className="w-full py-2.5 text-center text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white block"
             >
               Back to Sign In
             </Link>
@@ -94,12 +94,12 @@ export const ResetPassword: React.FC = () => {
         subtitle="Your account security credentials have been updated"
       >
         <div className="space-y-6">
-          <div className="p-6 bg-[#0F0F14] border border-white/10 rounded-2xl text-center space-y-3">
-            <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto">
+          <div className="p-6 bg-zinc-50 dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-2xl text-center space-y-3">
+            <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-white">Password reset complete</h3>
-            <p className="text-xs text-zinc-400 leading-relaxed font-normal">
+            <h3 className="text-base font-bold text-zinc-950 dark:text-white">Password reset complete</h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
               Your password has been changed successfully. You can now use your new credentials to sign in.
             </p>
           </div>
@@ -109,7 +109,7 @@ export const ResetPassword: React.FC = () => {
               to="/login"
               className="w-full py-3.5 px-4 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs text-center"
             >
-              Sign In to Eventa
+              Sign In to StraytTix
             </Link>
           </div>
         </div>
@@ -124,14 +124,14 @@ export const ResetPassword: React.FC = () => {
     >
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {formError && (
-          <div className="p-3.5 bg-red-500/10 border border-red-500/30 text-red-300 rounded-xl text-xs flex items-start gap-2.5" role="alert">
+          <div className="p-3.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-300 rounded-xl text-xs flex items-start gap-2.5" role="alert">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#E31B23]" />
             <span className="font-semibold">{formError}</span>
           </div>
         )}
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-mono font-bold uppercase tracking-wider text-zinc-300">New password</label>
+          <label className="block text-xs font-mono font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">New password</label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
@@ -141,12 +141,12 @@ export const ResetPassword: React.FC = () => {
               required
               autoComplete="new-password"
               disabled={isLoading}
-              className="w-full pl-4 pr-11 py-3 bg-[#0F0F14] border border-white/10 hover:border-white/20 rounded-xl text-sm text-white placeholder-zinc-500 outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all font-medium"
+              className="w-full pl-4 pr-11 py-3 bg-zinc-50 dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 rounded-xl text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all font-medium"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 transition-colors focus:outline-none cursor-pointer"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-white transition-colors focus:outline-none cursor-pointer"
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -156,9 +156,9 @@ export const ResetPassword: React.FC = () => {
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="block text-xs font-mono font-bold uppercase tracking-wider text-zinc-300">Confirm new password</label>
+            <label className="block text-xs font-mono font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">Confirm new password</label>
             {password && confirmPassword && (
-              <span className={`text-[11px] font-semibold ${password === confirmPassword ? 'text-emerald-600' : 'text-red-500'}`}>
+              <span className={`text-[11px] font-semibold ${password === confirmPassword ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
                 {password === confirmPassword ? 'Passwords match' : 'Does not match'}
               </span>
             )}
@@ -172,16 +172,16 @@ export const ResetPassword: React.FC = () => {
               required
               autoComplete="new-password"
               disabled={isLoading}
-              className={`w-full pl-4 pr-11 py-3 bg-white border rounded-xl text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-all font-medium ${
+              className={`w-full pl-4 pr-11 py-3 bg-zinc-50 dark:bg-[#0F0F14] border rounded-xl text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none transition-all font-medium ${
                 confirmPassword && password !== confirmPassword
-                  ? 'border-red-300 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                  : 'border-zinc-200 hover:border-zinc-300 focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900'
+                  ? 'border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                  : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23]'
               }`}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 transition-colors focus:outline-none cursor-pointer"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-white transition-colors focus:outline-none cursor-pointer"
               title={showConfirmPassword ? 'Hide password' : 'Show password'}
             >
               {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -201,7 +201,7 @@ export const ResetPassword: React.FC = () => {
         <div className="text-center pt-2">
           <Link
             to="/login"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Cancel and return to sign in
           </Link>

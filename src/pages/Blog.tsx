@@ -96,14 +96,14 @@ export const Blog: React.FC = () => {
       <main className="flex-1 py-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 max-w-[1600px] mx-auto w-full space-y-16">
         {/* Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#E31B23] text-xs font-bold uppercase tracking-wider backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-50 dark:bg-white/5 border border-red-200 dark:border-white/10 text-[#E31B23] text-xs font-bold uppercase tracking-wider backdrop-blur-md">
             <BookOpen className="w-3.5 h-3.5" />
             StraytTix Dispatch & Insights
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-zinc-950 dark:text-white tracking-tight leading-[1.1]">
             The Event Organizer’s Guide to Scale
           </h1>
-          <p className="text-zinc-400 text-sm sm:text-base font-normal leading-relaxed">
+          <p className="text-zinc-600 dark:text-zinc-400 text-sm sm:text-base font-normal leading-relaxed">
             Proven playbooks, developer architectures, and high-conversion strategies from the teams engineering modern live experiences.
           </p>
         </div>
@@ -116,8 +116,8 @@ export const Blog: React.FC = () => {
               onClick={() => setActiveCategory(cat)}
               className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 activeCategory === cat
-                  ? 'bg-white text-zinc-950 shadow-lg shadow-white/10 font-black'
-                  : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border border-white/10'
+                  ? 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 shadow-lg font-black'
+                  : 'bg-white dark:bg-white/[0.04] text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/[0.08] border border-zinc-200 dark:border-white/10'
               }`}
             >
               {cat}
@@ -127,13 +127,13 @@ export const Blog: React.FC = () => {
 
         {/* Hero Featured Article (Shown when "All" or match) */}
         {(activeCategory === 'All' || activeCategory === featuredArticle.category) && (
-          <div className="bg-zinc-950/70 rounded-3xl border border-white/10 overflow-hidden shadow-2xl hover:border-white/20 transition-all group backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#0F0F14] rounded-3xl border border-zinc-200 dark:border-white/10 overflow-hidden shadow-lg dark:shadow-2xl hover:border-zinc-300 dark:hover:border-white/20 transition-all group backdrop-blur-sm">
             <div className="grid grid-cols-1 lg:grid-cols-12">
               <div className="lg:col-span-7 h-72 sm:h-96 lg:h-auto min-h-[380px] relative overflow-hidden bg-zinc-900">
                 <img
                   src={featuredArticle.image}
                   alt={featuredArticle.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-95 dark:opacity-90"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent lg:hidden" />
                 <div className="absolute top-5 left-5">
@@ -145,29 +145,29 @@ export const Blog: React.FC = () => {
 
               <div className="lg:col-span-5 p-8 sm:p-12 flex flex-col justify-between space-y-6">
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-xs text-zinc-400 font-semibold">
+                  <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 font-semibold">
                     <span className="text-[#E31B23] font-bold uppercase tracking-wider">{featuredArticle.category}</span>
                     <span>•</span>
                     <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {featuredArticle.readTime}</span>
                   </div>
 
-                  <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug group-hover:text-[#E31B23] transition-colors">
+                  <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight leading-snug group-hover:text-[#E31B23] transition-colors">
                     {featuredArticle.title}
                   </h2>
 
-                  <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-normal">
+                  <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm leading-relaxed font-normal">
                     {featuredArticle.excerpt}
                   </p>
                 </div>
 
-                <div className="pt-6 border-t border-white/10 flex items-center justify-between">
+                <div className="pt-6 border-t border-zinc-200 dark:border-white/10 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#E31B23]/20 text-[#E31B23] font-black flex items-center justify-center text-xs border border-[#E31B23]/30">
+                    <div className="w-10 h-10 rounded-full bg-[#E31B23]/15 dark:bg-[#E31B23]/20 text-[#E31B23] font-black flex items-center justify-center text-xs border border-[#E31B23]/30">
                       KV
                     </div>
                     <div>
                       <p className="text-xs font-bold text-zinc-950 dark:text-white">{featuredArticle.author}</p>
-                      <p className="text-[11px] text-zinc-400">{featuredArticle.authorRole}</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400">{featuredArticle.authorRole}</p>
                     </div>
                   </div>
 
@@ -185,14 +185,14 @@ export const Blog: React.FC = () => {
           {filteredArticles.filter(a => a.id !== (activeCategory === 'All' ? featuredArticle.id : 0)).map((article) => (
             <article
               key={article.id}
-              className="bg-zinc-950/60 rounded-3xl border border-white/10 overflow-hidden shadow-lg hover:border-white/25 hover:shadow-2xl transition-all flex flex-col justify-between group cursor-pointer"
+              className="bg-white dark:bg-[#0F0F14] rounded-3xl border border-zinc-200 dark:border-white/10 overflow-hidden shadow-sm dark:shadow-lg hover:border-zinc-300 dark:hover:border-white/25 hover:shadow-xl dark:hover:shadow-2xl transition-all flex flex-col justify-between group cursor-pointer"
             >
               <div className="space-y-4">
                 <div className="h-52 overflow-hidden relative bg-zinc-900">
                   <img
                     src={article.image}
                     alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-95 dark:opacity-90"
                   />
                   <div className="absolute top-3 left-3">
                     <span className="px-3 py-1 bg-zinc-950/80 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg">
@@ -202,24 +202,24 @@ export const Blog: React.FC = () => {
                 </div>
 
                 <div className="px-6 space-y-2.5">
-                  <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-medium">
+                  <div className="flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
                     <span>{article.date}</span>
                     <span>•</span>
                     <span>{article.readTime}</span>
                   </div>
 
-                  <h3 className="text-base font-bold text-white tracking-tight leading-snug group-hover:text-[#E31B23] transition-colors line-clamp-2">
+                  <h3 className="text-base font-bold text-zinc-950 dark:text-white tracking-tight leading-snug group-hover:text-[#E31B23] transition-colors line-clamp-2">
                     {article.title}
                   </h3>
 
-                  <p className="text-xs text-zinc-400 line-clamp-3 leading-relaxed font-normal">
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-3 leading-relaxed font-normal">
                     {article.excerpt}
                   </p>
                 </div>
               </div>
 
-              <div className="p-6 pt-4 mt-4 border-t border-white/10 flex items-center justify-between text-xs">
-                <span className="font-semibold text-zinc-300">{article.author}</span>
+              <div className="p-6 pt-4 mt-4 border-t border-zinc-200 dark:border-white/10 flex items-center justify-between text-xs">
+                <span className="font-semibold text-zinc-700 dark:text-zinc-300">{article.author}</span>
                 <span className="text-[#E31B23] font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                   Read <ArrowRight className="w-3.5 h-3.5" />
                 </span>

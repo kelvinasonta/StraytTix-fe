@@ -147,34 +147,34 @@ export const Pricing: React.FC = () => {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-black text-zinc-950 dark:text-white">{plan.name}</h3>
+                    <h3 className={`text-2xl font-black ${plan.popular ? 'text-white' : 'text-zinc-950 dark:text-white'}`}>{plan.name}</h3>
                     {!plan.popular && (
                       <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-zinc-100 dark:bg-white text-zinc-950 shadow-md border border-zinc-200 dark:border-transparent">
                         {plan.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed min-h-[36px]">
+                  <p className={`text-xs sm:text-sm leading-relaxed min-h-[36px] ${plan.popular ? 'text-zinc-300' : 'text-zinc-600 dark:text-zinc-400'}`}>
                     {plan.description}
                   </p>
                 </div>
 
                 {/* Price Display */}
-                <div className="py-5 border-y border-zinc-200 dark:border-white/10 space-y-1.5">
+                <div className={`py-5 border-y space-y-1.5 ${plan.popular ? 'border-white/10' : 'border-zinc-200 dark:border-white/10'}`}>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl sm:text-5xl font-black font-mono text-zinc-950 dark:text-white tracking-tight">{plan.price}</span>
-                    <span className="text-xs font-mono font-bold text-zinc-500 dark:text-zinc-400">{plan.period}</span>
+                    <span className={`text-4xl sm:text-5xl font-black font-mono tracking-tight ${plan.popular ? 'text-white' : 'text-zinc-950 dark:text-white'}`}>{plan.price}</span>
+                    <span className={`text-xs font-mono font-bold ${plan.popular ? 'text-zinc-400' : 'text-zinc-500 dark:text-zinc-400'}`}>{plan.period}</span>
                   </div>
-                  <p className="text-xs font-mono text-zinc-500">{plan.subtext}</p>
+                  <p className={`text-xs font-mono ${plan.popular ? 'text-zinc-400' : 'text-zinc-500'}`}>{plan.subtext}</p>
                 </div>
 
                 {/* Features List */}
                 <div className="space-y-3 pt-2">
-                  <p className="text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">Included Features:</p>
+                  <p className={`text-xs font-mono font-bold uppercase tracking-wider ${plan.popular ? 'text-zinc-200' : 'text-zinc-700 dark:text-zinc-300'}`}>Included Features:</p>
                   <ul className="space-y-3">
                     {plan.features.map((feature, fIdx) => (
-                      <li key={fIdx} className="flex items-start gap-3 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 font-normal">
-                        <div className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <li key={fIdx} className={`flex items-start gap-3 text-xs sm:text-sm font-normal ${plan.popular ? 'text-zinc-200' : 'text-zinc-600 dark:text-zinc-300'}`}>
+                        <div className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                           <Check className="w-3 h-3 stroke-[2.5]" />
                         </div>
                         <span>{feature}</span>
@@ -231,7 +231,7 @@ export const Pricing: React.FC = () => {
                   step="50"
                   value={estimatedTickets}
                   onChange={(e) => setEstimatedTickets(Number(e.target.value))}
-                  className="w-full h-2.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#E31B23]"
+                  className="w-full h-2.5 bg-zinc-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#E31B23]"
                 />
                 <div className="flex justify-between text-[11px] font-mono text-zinc-500">
                   <span>50</span>
@@ -244,7 +244,7 @@ export const Pricing: React.FC = () => {
               <div className="space-y-2.5">
                 <div className="flex justify-between text-xs font-mono font-bold text-zinc-700 dark:text-zinc-200">
                   <span>Average Ticket Price</span>
-                  <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg font-mono font-black">${averagePrice}</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg font-mono font-black">${averagePrice}</span>
                 </div>
                 <input
                   type="range"
@@ -253,7 +253,7 @@ export const Pricing: React.FC = () => {
                   step="5"
                   value={averagePrice}
                   onChange={(e) => setAveragePrice(Number(e.target.value))}
-                  className="w-full h-2.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#E31B23]"
+                  className="w-full h-2.5 bg-zinc-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#E31B23]"
                 />
                 <div className="flex justify-between text-[11px] font-mono text-zinc-500">
                   <span>$5</span>
@@ -264,7 +264,7 @@ export const Pricing: React.FC = () => {
             </div>
 
             {/* Results Card */}
-            <div className="bg-black/60 rounded-2xl p-6 md:p-8 text-white space-y-6 border border-white/10 shadow-2xl">
+            <div className="bg-zinc-950 dark:bg-black/60 rounded-2xl p-6 md:p-8 text-white space-y-6 border border-zinc-800 dark:border-white/10 shadow-2xl">
               <div className="space-y-1">
                 <span className="text-zinc-400 text-xs font-mono uppercase tracking-wider">Estimated Net Organizer Payout</span>
                 <div className="text-3xl md:text-5xl font-black font-mono text-emerald-400">
@@ -301,15 +301,15 @@ export const Pricing: React.FC = () => {
             <h2 className="text-2xl md:text-4xl font-black text-zinc-950 dark:text-white tracking-tight">
               Frequently Asked Questions
             </h2>
-            <p className="text-zinc-400 text-xs sm:text-sm font-normal">
+            <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm font-normal">
               Everything you need to know about billing, fees, and payouts.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-white/[0.03] p-6 rounded-2xl border border-white/10 shadow-lg space-y-2.5">
-                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+              <div key={idx} className="bg-white dark:bg-white/[0.03] p-6 rounded-2xl border border-zinc-200 dark:border-white/10 shadow-sm dark:shadow-lg space-y-2.5">
+                <h4 className="text-sm font-bold text-zinc-950 dark:text-white flex items-center gap-2">
                   <HelpCircle className="w-4 h-4 text-[#E31B23] flex-shrink-0" />
                   {faq.q}
                 </h4>

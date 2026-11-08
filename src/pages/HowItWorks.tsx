@@ -192,7 +192,7 @@ export const HowItWorks: React.FC = () => {
         {/* ========================================================================= */}
         {/* 1. HERO HEADER: Human, Editorial, Structured */}
         {/* ========================================================================= */}
-        <section className="relative px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pt-16 pb-20 sm:pt-24 sm:pb-24 border-b border-white/5 overflow-hidden">
+        <section className="relative px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pt-16 pb-20 sm:pt-24 sm:pb-24 border-b border-zinc-200 dark:border-white/5 overflow-hidden">
           {/* Ambient Lighting */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-[#E31B23]/12 blur-[180px] rounded-full pointer-events-none" />
 
@@ -204,24 +204,24 @@ export const HowItWorks: React.FC = () => {
               THE STRAYTTIX ARCHITECTURE
             </div>
 
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.05] text-balance">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05] text-balance">
               How StraytTix moves you from discovery to the front row.
             </h1>
 
-            <p className="text-zinc-400 text-base sm:text-xl font-normal max-w-2xl mx-auto leading-relaxed">
+            <p className="text-zinc-600 dark:text-zinc-400 text-base sm:text-xl font-normal max-w-2xl mx-auto leading-relaxed">
               A high-assurance ticketing and gate entry system engineered for transparent pricing, instant delivery, and zero-headache venue operations.
             </p>
 
             {/* Audience Toggle (Attendee vs Organizer) */}
             <div className="pt-4 flex justify-center w-full">
-              <div className="inline-flex flex-col sm:flex-row w-full sm:w-auto p-1.5 bg-white/[0.04] rounded-2xl border border-white/10 shadow-xl gap-1">
+              <div className="inline-flex flex-col sm:flex-row w-full sm:w-auto p-1.5 bg-zinc-200/70 dark:bg-white/[0.04] rounded-2xl border border-zinc-300 dark:border-white/10 shadow-sm dark:shadow-xl gap-1">
                 <button
                   type="button"
                   onClick={() => { setActiveAudience('attendee'); setActiveStep(0); }}
                   className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                     activeAudience === 'attendee'
                       ? 'bg-white text-zinc-950 shadow-md font-black'
-                      : 'text-zinc-300 hover:text-white hover:bg-white/5'
+                      : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5'
                   }`}
                 >
                   <Ticket className="w-4 h-4 text-[#E31B23]" />
@@ -233,7 +233,7 @@ export const HowItWorks: React.FC = () => {
                   className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                     activeAudience === 'organizer'
                       ? 'bg-white text-zinc-950 shadow-md font-black'
-                      : 'text-zinc-300 hover:text-white hover:bg-white/5'
+                      : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5'
                   }`}
                 >
                   <Users className="w-4 h-4 text-[#E31B23]" />
@@ -257,7 +257,7 @@ export const HowItWorks: React.FC = () => {
                 <p className="font-mono text-xs font-bold text-[#E31B23] tracking-widest uppercase">
                   {activeAudience === 'attendee' ? 'ATTENDEE LIFECYCLE' : 'ORGANIZER WORKFLOW'}
                 </p>
-                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">
                   {activeAudience === 'attendee' ? 'Four seamless steps to the stage' : 'Launch, sell, and scan in 4 steps'}
                 </h2>
               </div>
@@ -271,13 +271,13 @@ export const HowItWorks: React.FC = () => {
                       onClick={() => setActiveStep(idx)}
                       className={`cursor-pointer text-left p-5 rounded-2xl border transition-all duration-200 ${
                         isSelected 
-                          ? 'bg-white/[0.08] text-white border-white/30 shadow-2xl shadow-[#E31B23]/10 translate-x-1' 
-                          : 'bg-white/[0.02] text-zinc-300 border-white/10 hover:border-white/20 hover:bg-white/[0.04]'
+                          ? 'bg-white dark:bg-white/[0.08] text-zinc-950 dark:text-white border-zinc-300 dark:border-white/30 shadow-xl dark:shadow-2xl shadow-[#E31B23]/10 translate-x-1' 
+                          : 'bg-white/60 dark:bg-white/[0.02] text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 hover:bg-white dark:hover:bg-white/[0.04]'
                       }`}
                     >
                       <div className="flex items-start gap-4">
                         <div className={`font-mono text-sm font-black px-2.5 py-1 rounded-lg ${
-                          isSelected ? 'bg-[#E31B23] text-white shadow-md' : 'bg-white text-zinc-950 font-bold'
+                          isSelected ? 'bg-[#E31B23] text-white shadow-md' : 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 font-bold'
                         }`}>
                           {step.num}
                         </div>
@@ -285,31 +285,31 @@ export const HowItWorks: React.FC = () => {
                         <div className="flex-1 space-y-1.5">
                           <div className="flex items-center justify-between">
                             <span className={`font-mono text-[10px] tracking-wider uppercase ${
-                              isSelected ? 'text-zinc-300' : 'text-zinc-500'
+                              isSelected ? 'text-zinc-600 dark:text-zinc-300' : 'text-zinc-500'
                             }`}>
                               {step.tag}
                             </span>
                             <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-                              isSelected ? 'bg-white text-zinc-950 shadow-sm' : 'bg-white/10 text-zinc-300'
+                              isSelected ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-sm' : 'bg-zinc-100 dark:bg-white/10 text-zinc-600 dark:text-zinc-300'
                             }`}>
                               {step.badge}
                             </span>
                           </div>
 
-                          <h3 className="text-base font-bold text-white tracking-tight">
+                          <h3 className="text-base font-bold text-zinc-950 dark:text-white tracking-tight">
                             {step.title}
                           </h3>
 
-                          <p className="text-xs leading-relaxed text-zinc-400">
+                          <p className="text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
                             {step.description}
                           </p>
 
                           {/* Bullet Highlights */}
                           {isSelected && (
-                            <ul className="pt-2 space-y-1.5 text-xs text-zinc-300 border-t border-white/10 mt-3">
+                            <ul className="pt-2 space-y-1.5 text-xs text-zinc-700 dark:text-zinc-300 border-t border-zinc-200 dark:border-white/10 mt-3">
                               {step.highlights.map((h, hIdx) => (
                                 <li key={hIdx} className="flex items-center gap-2">
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                                   <span>{h}</span>
                                 </li>
                               ))}
@@ -523,10 +523,10 @@ export const HowItWorks: React.FC = () => {
             <span className="font-mono text-xs font-bold text-[#E31B23] tracking-widest uppercase">
               CLARITY FIRST
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-950 dark:text-white">
               Frequently Asked Questions
             </h2>
-            <p className="text-zinc-400 text-sm">
+            <p className="text-zinc-600 dark:text-zinc-400 text-sm">
               Everything you need to know about purchasing tickets or hosting your first event.
             </p>
           </div>
@@ -535,13 +535,13 @@ export const HowItWorks: React.FC = () => {
             {faqs.map((faq, idx) => (
               <div 
                 key={idx} 
-                className="bg-white/[0.03] border border-white/10 rounded-3xl p-7 space-y-3 hover:border-white/25 transition-colors shadow-lg"
+                className="bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-3xl p-7 space-y-3 hover:border-zinc-300 dark:hover:border-white/25 transition-colors shadow-sm dark:shadow-lg"
               >
-                <h3 className="text-base font-bold text-white flex items-start gap-3">
+                <h3 className="text-base font-bold text-zinc-950 dark:text-white flex items-start gap-3">
                   <span className="font-mono text-xs font-bold text-white bg-[#E31B23] px-2 py-0.5 rounded shadow-sm">Q</span>
                   <span>{faq.q}</span>
                 </h3>
-                <p className="text-xs sm:text-sm text-zinc-400 pl-8 leading-relaxed font-normal">
+                <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 pl-8 leading-relaxed font-normal">
                   {faq.a}
                 </p>
               </div>
@@ -549,7 +549,7 @@ export const HowItWorks: React.FC = () => {
           </div>
 
           <div className="text-center pt-4">
-            <p className="text-xs font-mono text-zinc-400">
+            <p className="text-xs font-mono text-zinc-600 dark:text-zinc-400">
               Have an enterprise inquiry or need custom on-site gate assistance?{' '}
               <Link to="/about" className="text-[#E31B23] font-bold underline hover:text-red-400">
                 Contact our support team

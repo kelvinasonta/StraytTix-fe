@@ -44,26 +44,26 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     switch (variant) {
       case 'primary':
         return (
-          <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-200">
+          <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
             <Mail className="w-5 h-5" />
           </div>
         );
       case 'warning':
         return (
-          <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-200">
+          <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
             <AlertTriangle className="w-5 h-5" />
           </div>
         );
       case 'info':
         return (
-          <div className="p-2.5 rounded-xl bg-zinc-100 text-zinc-600 border border-zinc-200">
+          <div className="p-2.5 rounded-xl bg-zinc-100 dark:bg-white/10 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-white/10">
             <Info className="w-5 h-5" />
           </div>
         );
       case 'danger':
       default:
         return (
-          <div className="p-2.5 rounded-xl bg-red-50 text-red-600 border border-red-200">
+          <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20">
             <AlertTriangle className="w-5 h-5" />
           </div>
         );
@@ -74,12 +74,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     switch (variant) {
       case 'primary':
       case 'warning':
-        return 'text-amber-600';
+        return 'text-amber-600 dark:text-amber-400';
       case 'info':
-        return 'text-zinc-500';
+        return 'text-zinc-500 dark:text-zinc-400';
       case 'danger':
       default:
-        return 'text-red-600';
+        return 'text-red-600 dark:text-red-400';
     }
   };
 
@@ -90,9 +90,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-xs animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs animate-fadeIn">
       <div 
-        className="bg-white border border-zinc-200 rounded-2xl max-w-md w-full shadow-2xl p-6 space-y-5 animate-scaleUp"
+        className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-2xl max-w-md w-full shadow-2xl p-6 space-y-5 animate-scaleUp"
         role="dialog"
         aria-modal="true"
       >
@@ -100,7 +100,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <div className="flex items-center gap-3">
             {getHeaderIcon()}
             <div>
-              <h3 className="text-base font-black text-zinc-950 tracking-tight">{title}</h3>
+              <h3 className="text-base font-black text-zinc-950 dark:text-white tracking-tight">{title}</h3>
               <span className={`text-[10px] font-bold uppercase tracking-wider ${getBadgeColor()}`}>
                 Confirmation Required
               </span>
@@ -109,13 +109,13 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <button
             onClick={onCancel}
             disabled={isLoading}
-            className="text-zinc-400 hover:text-zinc-700 p-1 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+            className="text-zinc-400 hover:text-zinc-700 dark:hover:text-white p-1 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <p className="text-xs text-zinc-600 font-medium leading-relaxed bg-zinc-50 border border-zinc-150 p-3.5 rounded-xl">
+        <p className="text-xs text-zinc-600 dark:text-zinc-300 font-medium leading-relaxed bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 p-3.5 rounded-xl">
           {message}
         </p>
 

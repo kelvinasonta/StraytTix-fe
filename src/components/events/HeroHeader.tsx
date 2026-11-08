@@ -310,15 +310,15 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
         </div>
 
         {/* Attached Details Card */}
-        <div className="bg-[#0F0F14]/95 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-7 lg:p-8 shadow-2xl -mt-6 sm:-mt-10 mx-2 sm:mx-6 relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 text-white">
+        <div className="bg-white/95 dark:bg-[#0F0F14]/95 backdrop-blur-xl border border-zinc-200 dark:border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-7 lg:p-8 shadow-xl dark:shadow-2xl -mt-6 sm:-mt-10 mx-2 sm:mx-6 relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 text-zinc-900 dark:text-white">
           <div className="space-y-3 max-w-3xl">
-            <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-white/10 text-zinc-300 border border-white/10">
+            <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10">
               {categoryLabel}
             </span>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 dark:text-white tracking-tight leading-tight">
               {event.title}
             </h1>
-            <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-zinc-300">
+            <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-zinc-600 dark:text-zinc-300">
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-[#E31B23]" />
                 {formatDate(event.startDate)}
@@ -352,9 +352,9 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
   // 4. MODERN BENTO GRID
   // =========================================================================
   return (
-    <div className="rounded-3xl sm:rounded-[36px] bg-[#0F0F14]/95 backdrop-blur-xl border border-white/10 p-4 sm:p-6 lg:p-8 shadow-2xl space-y-6 text-white">
+    <div className="rounded-3xl sm:rounded-[36px] bg-white/95 dark:bg-[#0F0F14]/95 backdrop-blur-xl border border-zinc-200 dark:border-white/10 p-4 sm:p-6 lg:p-8 shadow-xl dark:shadow-2xl space-y-6 text-zinc-900 dark:text-white">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <div className="lg:col-span-7 rounded-2xl sm:rounded-3xl overflow-hidden relative min-h-[300px] sm:min-h-[380px] bg-zinc-950 border border-white/10 group shadow-xs flex flex-col justify-between p-5 sm:p-7">
+        <div className="lg:col-span-7 rounded-2xl sm:rounded-3xl overflow-hidden relative min-h-[300px] sm:min-h-[380px] bg-zinc-950 border border-zinc-200 dark:border-white/10 group shadow-xs flex flex-col justify-between p-5 sm:p-7">
           <img
             src={coverUrl}
             alt={event.title}
@@ -373,11 +373,11 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
           </div>
         </div>
 
-        <div className="lg:col-span-5 flex flex-col justify-between p-6 rounded-2xl bg-white/[0.03] border border-white/10 space-y-4">
+        <div className="lg:col-span-5 flex flex-col justify-between p-6 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 space-y-4">
           <div className="space-y-3">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block">Host & Security</span>
-            <h4 className="text-lg font-bold text-white">Verified Pass Admission</h4>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">Host & Security</span>
+            <h4 className="text-lg font-bold text-zinc-950 dark:text-white">Verified Pass Admission</h4>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
               Admission passes are secured and delivered directly to your wallet upon checkout.
             </p>
           </div>

@@ -86,18 +86,18 @@ export const PaymentCallback: React.FC = () => {
         {/* SUCCESS STATE */}
         {status === 'success' && (
           <div className="text-center space-y-6">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
+            <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
             <div className="space-y-1.5">
-              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full">
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/50 px-3 py-0.5 rounded-full">
                 Payment Confirmed
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">
                 You're Going!
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-500">
+              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
                 Your ticket vouchers have been generated and sent to{' '}
                 <strong className="text-zinc-900 dark:text-white font-bold">{order?.customerEmail}</strong>.
               </p>
@@ -105,11 +105,11 @@ export const PaymentCallback: React.FC = () => {
 
             {/* Order & Event Summary Card */}
             {order && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 border border-zinc-200 text-left space-y-3.5">
-                <div className="flex items-center justify-between border-b border-zinc-200 pb-2.5">
+              <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 text-left space-y-3.5">
+                <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 pb-2.5">
                   <div>
                     <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wide">Order Number</span>
-                    <p className="font-mono font-bold text-xs text-zinc-950 mt-0.5">{order.orderNumber || order.id}</p>
+                    <p className="font-mono font-bold text-xs text-zinc-950 dark:text-white mt-0.5">{order.orderNumber || order.id}</p>
                   </div>
                   <div className="text-right">
                     <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wide">Total Paid</span>
@@ -120,19 +120,19 @@ export const PaymentCallback: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <h4 className="font-bold text-sm text-zinc-950">{order.event?.title || order.eventTitle || 'Event Access'}</h4>
-                  <p className="text-xs text-zinc-500 flex items-center gap-1.5">
+                  <h4 className="font-bold text-sm text-zinc-950 dark:text-white">{order.event?.title || order.eventTitle || 'Event Access'}</h4>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-zinc-400" />
                     <span>{formatDate(order.eventDate || order.createdAt)}</span>
                   </p>
-                  <p className="text-xs text-zinc-500 flex items-center gap-1.5">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-zinc-400" />
                     <span>{order.event?.venue || order.eventVenue || 'Venue specified on ticket pass'}</span>
                   </p>
                 </div>
 
                 {order.items && order.items.length > 0 && (
-                  <div className="pt-2 border-t border-zinc-200 text-xs text-zinc-600 space-y-1">
+                  <div className="pt-2 border-t border-zinc-200 dark:border-white/10 text-xs text-zinc-600 dark:text-zinc-300 space-y-1">
                     {order.items.map((item, idx) => (
                       <div key={item.id || idx} className="flex justify-between font-medium">
                         <span>{item.ticketType?.name || 'General Admission'} × {item.quantity}</span>
@@ -156,9 +156,9 @@ export const PaymentCallback: React.FC = () => {
 
               <Link
                 to="/discover"
-                className="py-3 px-4 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="py-3 px-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-zinc-50 dark:hover:bg-white/10 text-zinc-800 dark:text-zinc-200 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
-                <Home className="w-4 h-4 text-zinc-500" />
+                <Home className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
                 <span>Browse More Events</span>
               </Link>
             </div>
@@ -168,30 +168,30 @@ export const PaymentCallback: React.FC = () => {
         {/* FAILED / ERROR STATE */}
         {status === 'failed' && (
           <div className="text-center space-y-6">
-            <div className="w-16 h-16 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto shadow-xs">
+            <div className="w-16 h-16 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto shadow-xs">
               <XCircle className="w-10 h-10" />
             </div>
 
             <div className="space-y-1.5">
-              <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-50 border border-rose-200 px-3 py-0.5 rounded-full">
+              <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/50 px-3 py-0.5 rounded-full">
                 Verification Issue
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight">
                 Could Not Verify Payment
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-500">
+              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
                 {errorMessage || 'The payment gateway could not confirm this transaction, or the session expired.'}
               </p>
             </div>
 
             {reference && (
-              <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 text-xs text-zinc-600 font-mono">
-                Transaction Reference: <strong className="text-zinc-900">{reference}</strong>
+              <div className="p-3 bg-zinc-50 dark:bg-white/[0.03] rounded-xl border border-zinc-200 dark:border-white/10 text-xs text-zinc-600 dark:text-zinc-400 font-mono">
+                Transaction Reference: <strong className="text-zinc-900 dark:text-white">{reference}</strong>
               </div>
             )}
 
-            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-left text-xs text-amber-900 flex items-start gap-2.5">
-              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 text-left text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
               <span>
                 If money was deducted from your bank account, please allow a few minutes for webhook confirmation, or contact support with your transaction reference.
               </span>
@@ -201,14 +201,14 @@ export const PaymentCallback: React.FC = () => {
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="flex-1 py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs sm:text-sm font-bold transition-all cursor-pointer"
+                className="flex-1 py-3 px-4 rounded-xl bg-zinc-900 dark:bg-white/10 hover:bg-zinc-800 dark:hover:bg-white/20 text-white text-xs sm:text-sm font-bold transition-all cursor-pointer"
               >
                 Retry Verification
               </button>
 
               <Link
                 to="/discover"
-                className="flex-1 py-3 px-4 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-xs sm:text-sm font-bold text-center transition-all cursor-pointer"
+                className="flex-1 py-3 px-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-zinc-50 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-200 text-xs sm:text-sm font-bold text-center transition-all cursor-pointer"
               >
                 Return to Events
               </Link>

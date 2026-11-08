@@ -15,13 +15,23 @@
   --color-brand-text: #111827; /* Dark text */
   --color-brand-muted: #6b7280; /* Slate secondary */
   --color-brand-border: #e5e7eb;
+
+  /* Custom intermediate Zinc shades used across UI components */
+  --color-zinc-150: #ececee;
+  --color-zinc-250: #dcdce0;
+  --color-zinc-350: #b8b8c0;
 }
 
-html.dark,
-html.dark body,
-html.dark #root {
-  background-color: #070709;
-  color: #f4f4f5;
+:root {
+  color-scheme: light dark;
+}
+
+html.light {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 html,
@@ -37,6 +47,13 @@ body,
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html.dark,
+html.dark body,
+html.dark #root {
+  background-color: #070709;
+  color: #f4f4f5;
 }
 
 /* Headings font styling across every page */
@@ -78,7 +95,7 @@ code, kbd, samp, pre, .font-mono {
   font-feature-settings: 'tnum', 'zero';
 }
 
-/* Custom scrollbars matching premium light theme */
+/* Custom scrollbars matching adaptive light & dark theme */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -88,12 +105,22 @@ code, kbd, samp, pre, .font-mono {
   background: #fafafa;
 }
 
+html.dark ::-webkit-scrollbar-track {
+  background: #0b0b0f;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #e4e4e7;
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+html.dark ::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover,
+html.dark ::-webkit-scrollbar-thumb:hover {
   background: #dc2626;
 }
 

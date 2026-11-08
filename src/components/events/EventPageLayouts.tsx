@@ -92,17 +92,17 @@ export const DEFAULT_EVENT_FAQS: FaqItem[] = [
  */
 export const AboutThisEventSection: React.FC<{ event: Event }> = ({ event }) => (
   <section className="space-y-4 pt-2">
-    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+    <h3 className="text-xl sm:text-2xl font-bold text-zinc-950 dark:text-white tracking-tight">
       About this event
     </h3>
-    <div className="text-zinc-300 text-base leading-relaxed font-normal">
+    <div className="text-zinc-700 dark:text-zinc-300 text-base leading-relaxed font-normal">
       {event.description ? (
         <div
-          className="space-y-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-white [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+          className="space-y-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-zinc-950 dark:[&_h3]:text-white [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
           dangerouslySetInnerHTML={{ __html: event.description }}
         />
       ) : (
-        <p className="text-zinc-400">Join us for this exciting live event experience.</p>
+        <p className="text-zinc-500 dark:text-zinc-400">Join us for this exciting live event experience.</p>
       )}
     </div>
   </section>
@@ -112,7 +112,7 @@ export const AboutThisEventSection: React.FC<{ event: Event }> = ({ event }) => 
  * 2. Mobile App Promo Banner (Styled after Orbit app banner in screenshot)
  */
 export const OrbitAppPromoBanner: React.FC = () => (
-  <div className="rounded-3xl bg-[#0F0F14] border border-white/10 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative overflow-hidden my-6">
+  <div className="rounded-3xl bg-zinc-950 dark:bg-[#0F0F14] border border-zinc-800 dark:border-white/10 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative overflow-hidden my-6 shadow-xl">
     {/* Subtle glow circle */}
     <div className="absolute right-0 top-0 w-64 h-64 bg-[#E31B23]/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -157,13 +157,13 @@ export const HostedBySection: React.FC<{
   const organizerLogo = getOrganizerLogo(event.organizer);
 
   return (
-    <section className="space-y-4 pt-4 border-t border-white/10">
-      <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+    <section className="space-y-4 pt-4 border-t border-zinc-200 dark:border-white/10">
+      <h3 className="text-lg sm:text-xl font-bold text-zinc-950 dark:text-white tracking-tight">
         Hosted by
       </h3>
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-full bg-zinc-800 border border-white/15 overflow-hidden flex items-center justify-center font-bold text-base text-white flex-shrink-0">
+          <div className="w-12 h-12 rounded-full bg-zinc-900 dark:bg-zinc-800 border border-zinc-200 dark:border-white/15 overflow-hidden flex items-center justify-center font-bold text-base text-white flex-shrink-0">
             {organizerLogo ? (
               <img src={organizerLogo} alt={organizerName} className="w-full h-full object-cover" />
             ) : (
@@ -171,15 +171,15 @@ export const HostedBySection: React.FC<{
             )}
           </div>
           <div>
-            <h4 className="text-base font-bold text-white">{organizerName}</h4>
-            <p className="text-xs text-zinc-400">{handleOrRole}</p>
+            <h4 className="text-base font-bold text-zinc-950 dark:text-white">{organizerName}</h4>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">{handleOrRole}</p>
           </div>
         </div>
 
         <button
           type="button"
           onClick={() => setContactModalOpen(true)}
-          className="px-4 py-2 rounded-xl bg-white/[0.06] hover:bg-white/15 text-white text-xs font-bold border border-white/10 transition-all flex items-center gap-1.5 cursor-pointer"
+          className="px-4 py-2 rounded-xl bg-white hover:bg-zinc-100 text-zinc-900 border border-zinc-200 dark:bg-white/[0.06] dark:hover:bg-white/15 dark:text-white text-xs font-bold dark:border-white/10 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs dark:shadow-none"
         >
           <MessageCircle className="w-3.5 h-3.5 text-[#E31B23]" />
           <span>Contact</span>
@@ -202,16 +202,16 @@ export const DirectionsSection: React.FC<{
 }> = ({ event, isPhysical, directionsUrl, embedMapUrl, handleCopyAddress, copiedAddress }) => {
   if (!isPhysical) {
     return (
-      <section className="space-y-4 pt-4 border-t border-white/10">
-        <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+      <section className="space-y-4 pt-4 border-t border-zinc-200 dark:border-white/10">
+        <h3 className="text-lg sm:text-xl font-bold text-zinc-950 dark:text-white tracking-tight">
           Directions
         </h3>
-        <div className="p-5 rounded-2xl bg-[#0F0F14] border border-white/10 space-y-2">
-          <div className="flex items-center gap-2 text-indigo-400">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 space-y-2 shadow-xs dark:shadow-none">
+          <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
             <Video className="w-5 h-5" />
-            <h4 className="text-sm font-bold text-white">Online Virtual Event</h4>
+            <h4 className="text-sm font-bold text-zinc-950 dark:text-white">Online Virtual Event</h4>
           </div>
-          <p className="text-xs text-zinc-400 leading-relaxed">
+          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
             Direct streaming links will be sent to your registered email address upon getting your ticket.
           </p>
         </div>
@@ -222,9 +222,9 @@ export const DirectionsSection: React.FC<{
   const locationText = [event.venue, event.address, event.city].filter(Boolean).join(', ') || 'Venue Location';
 
   return (
-    <section className="space-y-4 pt-4 border-t border-white/10">
+    <section className="space-y-4 pt-4 border-t border-zinc-200 dark:border-white/10">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+        <h3 className="text-lg sm:text-xl font-bold text-zinc-950 dark:text-white tracking-tight">
           Directions
         </h3>
         <div className="flex items-center gap-2">
@@ -243,15 +243,15 @@ export const DirectionsSection: React.FC<{
       </div>
 
       {/* Map with Floating Address Card (Matching Screenshot exactly) */}
-      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 h-72 sm:h-96 w-full shadow-lg bg-zinc-950">
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-zinc-200 dark:border-white/10 h-72 sm:h-96 w-full shadow-lg bg-zinc-100 dark:bg-zinc-950">
         {/* Floating Google Place Card on Top-Left */}
-        <div className="absolute top-4 left-4 z-10 max-w-[280px] sm:max-w-xs bg-[#0F0F14]/95 text-white p-3 sm:p-4 rounded-xl shadow-2xl border border-white/10 backdrop-blur-md">
+        <div className="absolute top-4 left-4 z-10 max-w-[280px] sm:max-w-xs bg-white/95 dark:bg-[#0F0F14]/95 text-zinc-900 dark:text-white p-3 sm:p-4 rounded-xl shadow-2xl border border-zinc-200 dark:border-white/10 backdrop-blur-md">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h5 className="text-xs sm:text-sm font-bold leading-tight line-clamp-2 text-white">
+              <h5 className="text-xs sm:text-sm font-bold leading-tight line-clamp-2 text-zinc-950 dark:text-white">
                 {event.venue || event.city}
               </h5>
-              <p className="text-[11px] text-zinc-400 mt-1 line-clamp-2">
+              <p className="text-[11px] text-zinc-600 dark:text-zinc-400 mt-1 line-clamp-2">
                 {event.address ? `${event.address}, ` : ''}{event.city || ''}
               </p>
             </div>
@@ -260,23 +260,23 @@ export const DirectionsSection: React.FC<{
                 href={directionsUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="p-1.5 rounded-lg bg-white/10 text-white hover:bg-white/20 flex-shrink-0"
+                className="p-1.5 rounded-lg bg-zinc-100 dark:bg-white/10 text-zinc-900 dark:text-white hover:bg-zinc-200 dark:hover:bg-white/20 flex-shrink-0"
                 title="Navigate"
               >
                 <Navigation className="w-4 h-4 text-[#E31B23]" />
               </a>
             )}
           </div>
-          <div className="pt-2 mt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-zinc-400">
+          <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-white/10 flex items-center justify-between text-[10px] text-zinc-500 dark:text-zinc-400">
             <button
               type="button"
               onClick={handleCopyAddress}
-              className="font-bold text-zinc-300 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+              className="font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
             >
-              {copiedAddress ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+              {copiedAddress ? <Check className="w-3 h-3 text-emerald-500 dark:text-emerald-400" /> : <Copy className="w-3 h-3" />}
               <span>{copiedAddress ? 'Address Copied' : 'Copy Address'}</span>
             </button>
-            <span className="font-semibold text-amber-400">★ 4.8</span>
+            <span className="font-semibold text-amber-500 dark:text-amber-400">★ 4.8</span>
           </div>
         </div>
 
@@ -285,7 +285,7 @@ export const DirectionsSection: React.FC<{
           <iframe
             title="Event Directions Map"
             src={embedMapUrl}
-            className="w-full h-full border-0 grayscale opacity-90 contrast-125"
+            className="w-full h-full border-0 dark:grayscale opacity-90 contrast-125"
             loading="lazy"
           />
         ) : (
@@ -326,15 +326,15 @@ export const CleanTicketPassCard: React.FC<{
   }, 0);
 
   return (
-    <div id="tickets-section" className="bg-[#0F0F14] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 text-white sticky top-24">
-      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+    <div id="tickets-section" className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-5 sm:p-6 shadow-lg dark:shadow-2xl space-y-4 text-zinc-900 dark:text-white sticky top-24">
+      <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 pb-3">
         <div>
-          <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block">Available Passes</span>
-          <span className="text-lg font-black text-white">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">Available Passes</span>
+          <span className="text-lg font-black text-zinc-950 dark:text-white">
             {lowestPrice === 0 ? 'Free RSVP' : `From ${formatCurrency(lowestPrice)}`}
           </span>
         </div>
-        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
           Instant QR Delivery
         </span>
       </div>
@@ -351,28 +351,28 @@ export const CleanTicketPassCard: React.FC<{
               className={`p-3 rounded-2xl border transition-all ${
                 qty > 0
                   ? 'bg-red-500/10 border-[#E31B23]'
-                  : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                  : 'bg-zinc-50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20'
               }`}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <h5 className="text-xs sm:text-sm font-bold text-white truncate">{t.name}</h5>
+                  <h5 className="text-xs sm:text-sm font-bold text-zinc-950 dark:text-white truncate">{t.name}</h5>
                   <p className="text-xs font-mono font-bold text-[#E31B23]">
                     {isFree ? 'Free' : formatCurrency(t.price)}
                   </p>
                 </div>
 
                 {onQtyChange && (
-                  <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-xl p-1">
+                  <div className="flex items-center gap-2 bg-white dark:bg-black/50 border border-zinc-200 dark:border-white/10 rounded-xl p-1">
                     <button
                       type="button"
                       onClick={() => onQtyChange(t.id!, -1)}
                       disabled={qty <= 0}
-                      className="w-6 h-6 rounded-lg bg-white/5 hover:bg-white/15 text-white flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                      className="w-6 h-6 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-900 dark:bg-white/5 dark:hover:bg-white/15 dark:text-white flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                     >
                       <Minus className="w-3 h-3" />
                     </button>
-                    <span className="w-4 text-center text-xs font-bold font-mono">{qty}</span>
+                    <span className="w-4 text-center text-xs font-bold font-mono text-zinc-950 dark:text-white">{qty}</span>
                     <button
                       type="button"
                       onClick={() => onQtyChange(t.id!, 1)}
