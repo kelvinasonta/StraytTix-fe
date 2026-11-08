@@ -1,4 +1,8 @@
-export type OrganizerRole = 'owner' | 'admin' | 'manager' | 'staff';
+export type OrganizerRole = 'owner' | 'admin' | 'finance' | 'manager' | 'staff';
+
+export function hasPermission(permissions: string[] = [], requiredPermission: string): boolean {
+  return permissions.includes('*') || permissions.includes(requiredPermission);
+}
 
 export interface RolePermissions {
   // Event Creation & Drafting
@@ -40,6 +44,7 @@ export const resolveOrganizerRole = (organizer: any): OrganizerRole => {
   const raw = String(organizer.role || organizer.member_role || organizer.user_role || '').toLowerCase().trim();
   if (raw === 'owner') return 'owner';
   if (raw === 'admin') return 'admin';
+  if (raw === 'finance') return 'finance';
   if (raw === 'manager') return 'manager';
   if (raw === 'staff') return 'staff';
   if (organizer.isOwner === true || organizer.is_owner === true) return 'owner';
@@ -98,6 +103,28 @@ export const getRolePermissions = (role: OrganizerRole): RolePermissions => {
         canAccessSettings: true,
         canManageLifecycle: false,
         canAccessMarketing: true,
+      };
+
+    case 'finance':
+      return {
+        canCreateEvents: false,
+        canPublishEvents: false,
+        canDeleteEvents: false,
+        canConfigureTickets: false,
+        canIssueRefunds: true,
+        canViewRevenue: true,
+        canViewFinanceWallet: true,
+        canManageBanking: true,
+        canManageTeam: false,
+        canAssignStaffToEvent: false,
+        canViewOrders: true,
+        canDownloadAttendees: true,
+        canMonitorCheckInCounts: true,
+        canScanGateTickets: false,
+        canEditOrganizerProfile: false,
+        canAccessSettings: true,
+        canManageLifecycle: false,
+        canAccessMarketing: false,
       };
 
     case 'manager':
@@ -193,6 +220,18 @@ export const getDefaultRolePermissionsList = (role: OrganizerRole): string[] => 
         'org.attendees.view',
         'org.attendees.manage',
         'org.tickets.manage',
+        'org.audit_logs.view',
+      ];
+    case 'finance':
+      return [
+        'org.view',
+        'org.verification.view',
+        'org.members.view',
+        'org.finance.view',
+        'org.finance.manage',
+        'org.credits.manage',
+        'org.events.view',
+        'org.attendees.view',
         'org.audit_logs.view',
       ];
     case 'manager':

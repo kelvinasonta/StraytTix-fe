@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import type { User, Organizer, AuthPayload } from '../types/api';
 import { tokenStorage } from '../utils/storage';
 import { authApi } from '../api/auth';
+import { organizerApi } from '../api/organizers';
 import { favoritesApi } from '../api/favorites';
 import { getApiErrorMessage } from '../api/client';
 import { useNotification } from './NotificationContext';
@@ -9,6 +10,7 @@ import { useNotification } from './NotificationContext';
 interface AuthContextType {
   user: User | null;
   organizer: Organizer | null; // Selected/Active organizer context
+  organizations: Organizer[]; // All organizations user belongs to
   token: string | null;
   isAuthenticated: boolean;
   isEmailVerified: boolean;
@@ -16,8 +18,9 @@ interface AuthContextType {
   login: (credentials: any) => Promise<void>;
   register: (data: any) => Promise<void>;
   logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
+  refreshUser: (organizerUuid?: string) => Promise<void>;
   setActiveOrganizer: (org: Organizer | null) => void;
+  switchOrganization: (organizerUuid: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(tokenStorage.getUser<User>());
   const [organizer, setOrganizer] = useState<Organizer | null>(null);
+  const [organizations, setOrganizations] = useState<Organizer[]>([]);
   const [token, setToken] = useState<string | null>(tokenStorage.getToken());
   const [isEmailVerified, setIsEmailVerified] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -45,27 +49,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const setActiveOrganizer = useCallback((org: Organizer | null) => {
     setOrganizer(org);
     if (org) {
+      const orgId = org.uuid || org.id;
       localStorage.setItem('strayttix_active_organizer', JSON.stringify(org));
-      tokenStorage.setActiveOrganizerUuid(org.id, true);
+      tokenStorage.setActiveOrganizerUuid(orgId, true);
     } else {
       localStorage.removeItem('strayttix_active_organizer');
       tokenStorage.clearActiveOrganizerUuid();
     }
   }, []);
 
-  const refreshUser = useCallback(async () => {
+  const refreshUser = useCallback(async (targetOrgUuid?: string) => {
     const currentToken = tokenStorage.getToken();
     if (!currentToken) {
       setUser(null);
       setToken(null);
       setOrganizer(null);
+      setOrganizations([]);
       setIsEmailVerified(false);
       setIsLoading(false);
       return;
     }
 
     try {
-      const res = await authApi.getMe();
+      const activeUuid = targetOrgUuid || tokenStorage.getActiveOrganizerUuid() || undefined;
+      const res = await authApi.getMe(activeUuid);
       if (res.success && res.data) {
         const remember = tokenStorage.isRemembered();
         setUser(res.data.user);
@@ -94,6 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         setToken(null);
         setOrganizer(null);
+        setOrganizations([]);
         setIsEmailVerified(false);
       }
     } finally {
@@ -101,9 +109,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [setActiveOrganizer]);
 
+  // Fetch all organizations the user belongs to
+  const loadMyOrganizations = useCallback(async () => {
+    const currentToken = tokenStorage.getToken();
+    if (!currentToken) {
+      setOrganizations([]);
+      return;
+    }
+    try {
+      const res = await organizerApi.getMyOrganizations();
+      if (res.success && Array.isArray(res.data)) {
+        setOrganizations(res.data);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
+
+  useEffect(() => {
+    if (token) {
+      loadMyOrganizations();
+    }
+  }, [token, loadMyOrganizations, organizer?.id]);
+
+  const switchOrganization = async (newOrgUuid: string) => {
+    setIsLoading(true);
+    try {
+      tokenStorage.setActiveOrganizerUuid(newOrgUuid, true);
+      await refreshUser(newOrgUuid);
+      await loadMyOrganizations();
+      showNotification('Switched organization workspace.', 'success');
+    } catch (err: any) {
+      showNotification(getApiErrorMessage(err, 'Failed to switch organization.'), 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const login = async (credentials: any) => {
     setIsLoading(true);
@@ -199,6 +244,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         organizer,
+        organizations,
         token,
         isAuthenticated: !!token,
         isEmailVerified,
@@ -208,6 +254,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         refreshUser,
         setActiveOrganizer,
+        switchOrganization,
       }}
     >
       {children}

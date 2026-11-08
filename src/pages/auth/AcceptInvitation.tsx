@@ -52,7 +52,9 @@ export const AcceptInvitation: React.FC = () => {
   const [invitationDetails, setInvitationDetails] = useState<{
     email: string;
     role: string;
+    role_label?: string;
     organizer_name?: string;
+    user_exists: boolean;
     expires_at?: string;
   } | null>(null);
 
@@ -99,6 +101,11 @@ export const AcceptInvitation: React.FC = () => {
           setInvitationDetails(res.data);
           if (res.data.email) {
             setLoginEmail(res.data.email);
+          }
+          if (res.data.user_exists) {
+            setMode('existing_user');
+          } else {
+            setMode('new_user');
           }
         }
       } catch (err: any) {
@@ -310,10 +317,9 @@ export const AcceptInvitation: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const payload = {
-        token,
-        email: loginEmail,
-        password: loginPassword,
+      // Backend contract: If user already exists, accept with just { token }
+      const payload: { token: string; email?: string; password?: string } = {
+        token: token!,
       };
 
       const res = await authApi.acceptInvitation(payload);
@@ -324,12 +330,13 @@ export const AcceptInvitation: React.FC = () => {
         tokenStorage.setUser(res.data.user, true);
       }
       if (res.data?.organizer) {
-        tokenStorage.setActiveOrganizerUuid(res.data.organizer.id, true);
+        const orgUuid = res.data.organizer.uuid || res.data.organizer.id;
+        tokenStorage.setActiveOrganizerUuid(orgUuid, true);
       }
 
       await refreshUser();
       setIsSuccess(true);
-      showNotification('Signed in and invitation accepted! Welcome.', 'success');
+      showNotification('Invitation accepted successfully! Welcome.', 'success');
       setTimeout(() => {
         navigate('/organizer', { replace: true });
       }, 1200);
@@ -437,126 +444,110 @@ export const AcceptInvitation: React.FC = () => {
               </button>
             </div>
           </div>
-        ) : (
-          /* SCENARIO B: User is not logged in */
+        ) : invitationDetails?.user_exists ? (
+          /* SCENARIO B1: Existing registered user - Clean 1-click confirmation card */
           <div className="space-y-5">
-            {/* Mode Selector Tabs */}
-            <div className="grid grid-cols-2 p-1 rounded-xl bg-zinc-100 border border-zinc-200/80 text-xs font-bold">
-              <button
-                type="button"
-                onClick={() => setMode('new_user')}
-                className={`py-2 rounded-lg transition-all ${
-                  mode === 'new_user'
-                    ? 'bg-white text-zinc-900 shadow-xs'
-                    : 'text-zinc-500 hover:text-zinc-900'
-                }`}
-              >
-                New Account
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode('existing_user')}
-                className={`py-2 rounded-lg transition-all ${
-                  mode === 'existing_user'
-                    ? 'bg-white text-zinc-900 shadow-xs'
-                    : 'text-zinc-500 hover:text-zinc-900'
-                }`}
-              >
-                Existing User
-              </button>
+            <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto shadow-xs">
+                <UserCheck className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-bold text-zinc-950">
+                  Existing Account Detected
+                </h4>
+                <p className="text-xs text-zinc-600 font-medium leading-relaxed max-w-sm mx-auto">
+                  You've been invited to join{' '}
+                  <strong className="text-zinc-900">{invitationDetails.organizer_name || 'the team'}</strong> as{' '}
+                  <strong className="text-zinc-900">{invitationDetails.role_label || invitationDetails.role}</strong> ({invitationDetails.email}).
+                </p>
+              </div>
             </div>
 
-            {mode === 'new_user' ? (
-              /* Sub-form 1: Create new account & Accept */
-              <form onSubmit={handleNewUserSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <Input
-                    label="First Name"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required
-                    placeholder="Jane"
-                    error={fieldErrors.first_name?.[0]}
-                  />
-                  <Input
-                    label="Last Name"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required
-                    placeholder="Doe"
-                    error={fieldErrors.last_name?.[0]}
-                  />
-                </div>
+            <Button
+              onClick={handleExistingUserSubmit}
+              isLoading={isLoading}
+              variant="primary"
+              className="w-full text-xs font-bold py-3 bg-[#E31B23] hover:bg-[#c9141b] text-white"
+            >
+              Accept Invitation & Join Team
+            </Button>
 
-                <div className="space-y-2">
-                  <Input
-                    label="Create Password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    placeholder="••••••••"
-                    error={fieldErrors.password?.[0]}
-                  />
-                  <PasswordStrengthMeter password={password} />
-                </div>
-
-                <Input
-                  label="Confirm Password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  error={fieldErrors.password_confirmation?.[0]}
-                />
-
-                <Button
-                  type="submit"
-                  isLoading={isLoading}
-                  variant="primary"
-                  className="w-full text-xs font-bold py-2.5 mt-2"
-                >
-                  Create Account & Accept
-                </Button>
-              </form>
-            ) : (
-              /* Sub-form 2: Sign in with existing credentials & Accept */
-              <form onSubmit={handleExistingUserSubmit} className="space-y-4">
-                <Input
-                  label="Email Address"
+            <div className="pt-2 text-center text-xs text-zinc-500">
+              <Link to="/login" className="text-zinc-500 hover:text-zinc-900 font-semibold">
+                Sign in to another account
+              </Link>
+            </div>
+          </div>
+        ) : (
+          /* SCENARIO B2: New unregistered user */
+          <div className="space-y-5">
+            <form onSubmit={handleNewUserSubmit} className="space-y-4">
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-zinc-700">Email Address (Invited)</label>
+                <input
                   type="email"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  required
-                  placeholder="you@example.com"
-                  error={fieldErrors.email?.[0]}
+                  value={invitationDetails?.email || ''}
+                  readOnly
+                  disabled
+                  className="w-full bg-zinc-100 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-zinc-600 cursor-not-allowed"
                 />
+              </div>
 
+              <div className="grid grid-cols-2 gap-3">
                 <Input
-                  label="Password"
+                  label="First Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  placeholder="Alex"
+                  error={fieldErrors.first_name?.[0]}
+                />
+                <Input
+                  label="Last Name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                  placeholder="Rivera"
+                  error={fieldErrors.last_name?.[0]}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Input
+                  label="Create Password"
                   type="password"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
                   error={fieldErrors.password?.[0]}
                 />
+                <PasswordStrengthMeter password={password} />
+              </div>
 
-                <Button
-                  type="submit"
-                  isLoading={isLoading}
-                  variant="primary"
-                  className="w-full text-xs font-bold py-2.5 mt-2"
-                >
-                  Sign In & Accept Invitation
-                </Button>
-              </form>
-            )}
+              <Input
+                label="Confirm Password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                error={fieldErrors.password_confirmation?.[0]}
+              />
+
+              <Button
+                type="submit"
+                isLoading={isLoading}
+                variant="primary"
+                className="w-full text-xs font-bold py-3 mt-2 bg-[#E31B23] hover:bg-[#c9141b] text-white"
+              >
+                Create Account & Join Team
+              </Button>
+            </form>
 
             <div className="pt-2 text-center text-xs text-zinc-500">
               <Link to="/login" className="text-zinc-500 hover:text-zinc-900 font-semibold">
-                Back to Sign In
+                Already have an account? Sign In
               </Link>
             </div>
           </div>

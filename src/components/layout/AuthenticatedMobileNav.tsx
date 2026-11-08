@@ -18,7 +18,9 @@ import {
   Menu,
   ArrowRight,
   Sun,
-  Moon
+  Moon,
+  ChevronDown,
+  Check
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -31,11 +33,12 @@ interface AuthenticatedMobileNavProps {
 }
 
 export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ currentMode }) => {
-  const { user, organizer, logout } = useAuth();
+  const { user, organizer, organizations, switchOrganization, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const { can } = useCan();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mobileOrgDropdownOpen, setMobileOrgDropdownOpen] = useState(false);
 
   const handleLogout = async () => {
     setDrawerOpen(false);
@@ -175,7 +178,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                 <div className="w-11 h-11 rounded-2xl bg-[#E31B23] text-white font-black text-sm flex items-center justify-center shadow-2xs flex-shrink-0">
                   {user?.firstName?.[0] || 'U'}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h4 className="text-sm font-black text-zinc-950 dark:text-white truncate">
                     {user?.firstName || 'User'} {user?.lastName || ''}
                   </h4>
@@ -187,6 +190,58 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                   </span>
                 </div>
               </div>
+
+              {/* Mobile Workspace Switcher */}
+              {isOrganizerMode && organizations.length > 0 && (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setMobileOrgDropdownOpen(!mobileOrgDropdownOpen)}
+                    className="w-full flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-left"
+                  >
+                    <div className="truncate pr-2">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Active Workspace</span>
+                      <p className="text-xs font-bold text-zinc-950 dark:text-white truncate">
+                        {organizer?.name || 'My Organization'}
+                      </p>
+                      <span className="text-[10px] text-zinc-500 capitalize">{organizer?.role_label || role}</span>
+                    </div>
+                    <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${mobileOrgDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {mobileOrgDropdownOpen && (
+                    <div className="mt-1.5 p-1.5 bg-white dark:bg-[#15151C] border border-zinc-200 dark:border-white/15 rounded-2xl shadow-lg space-y-1">
+                      {organizations.map((org) => {
+                        const orgId = org.uuid || org.id;
+                        const isCurrent = (organizer?.uuid || organizer?.id) === orgId;
+                        return (
+                          <button
+                            key={orgId}
+                            type="button"
+                            onClick={async () => {
+                              setMobileOrgDropdownOpen(false);
+                              if (!isCurrent) {
+                                await switchOrganization(orgId);
+                              }
+                            }}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs ${
+                              isCurrent
+                                ? 'bg-red-50 dark:bg-red-500/10 text-[#E31B23] font-bold'
+                                : 'hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300'
+                            }`}
+                          >
+                            <div className="truncate pr-2">
+                              <span className="block font-bold truncate">{org.name}</span>
+                              <span className="text-[10px] text-zinc-400 capitalize">{org.role_label || org.role || 'Member'}</span>
+                            </div>
+                            {isCurrent && <Check className="w-3.5 h-3.5 text-[#E31B23] flex-shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Navigation List depending strictly on role */}
               <div className="space-y-1">

@@ -1,6 +1,6 @@
 export type AccountType = 'customer' | 'organizer';
 export type OrganizerType = 'individual' | 'organization';
-export type StaffRole = 'owner' | 'admin' | 'manager' | 'staff';
+export type StaffRole = 'owner' | 'admin' | 'finance' | 'manager' | 'staff';
 export type EventStatus = 'Draft' | 'Published' | 'Upcoming' | 'Completed' | 'Cancelled' | 'Archived' | 'Ended';
 export type TicketStatus = 'Upcoming' | 'Used' | 'Cancelled' | 'Expired';
 export type OrderStatus = 'pending' | 'processing' | 'paid' | 'cancelled' | 'refunded' | 'failed' | 'Paid' | 'Pending' | 'Failed' | 'Refunded';
@@ -77,11 +77,15 @@ export interface LoginHistoryPagination {
 
 export interface Organizer {
   id: string;
+  uuid?: string;
   name: string;
   slug: string;
   type: OrganizerType;
   role?: StaffRole;
+  role_label?: string;
   isOwner?: boolean;
+  is_owner?: boolean;
+  is_verified?: boolean;
   permissions?: string[];
   bio?: string;
   description?: string;
@@ -173,18 +177,90 @@ export interface StaffMemberSettings {
 }
 
 export interface TeamMember {
-  id: string;
+  id: string | number;
   uuid: string;
+  member_id?: number | string;
+  user_id?: string;
+  organizer_id?: string;
+  name?: string;
   firstName: string;
   lastName: string;
   email: string;
   role: StaffRole;
+  role_label?: string;
+  is_owner?: boolean;
   permissions?: string[];
   phone?: string;
   duty?: string;
   station?: string;
   settings?: StaffMemberSettings;
   joinedAt: string;
+  joined_at?: string;
+}
+
+export interface RoleCatalogItem {
+  role: StaffRole;
+  label: string;
+  description: string;
+  level: number;
+  can_assign: boolean;
+  permissions: string[];
+}
+
+export interface OrganizerRolesResponse {
+  current_role: StaffRole;
+  permissions: string[];
+  roles: RoleCatalogItem[];
+}
+
+export interface CountryMeta {
+  code: string;
+  iso2: string;
+  iso3: string;
+  name: string;
+  dial_code: string;
+  currency: string;
+  currency_symbol: string;
+  flag: string;
+}
+
+export interface OrganizerPayoutsSummary {
+  organizer_uuid: string;
+  gross_revenue: number;
+  net_revenue: number;
+  total_revenue: number;
+  service_fees: number;
+  total_orders: number;
+  total_paid_out: number;
+  available_balance: number;
+  pending_balance: number;
+  currency: string;
+  summary?: {
+    gross_revenue: number;
+    net_revenue: number;
+    total_revenue: number;
+    service_fees: number;
+    total_orders: number;
+    total_paid_out: number;
+    available_balance: number;
+    pending_balance: number;
+    currency: string;
+  };
+  bank_account?: {
+    bank_name: string;
+    bank_code: string;
+    account_name: string;
+    account_number: string;
+    is_default: boolean;
+  } | null;
+  payouts: any[];
+  items: any[];
+  meta?: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
 }
 
 export interface StaffInvitation {

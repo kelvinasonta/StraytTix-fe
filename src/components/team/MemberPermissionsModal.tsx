@@ -4,7 +4,7 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { ALL_CAPABILITIES_DICTIONARY, getDefaultRolePermissionsList, type OrganizerRole } from '../../utils/permissions';
-import type { TeamMember, StaffRole } from '../../types/api';
+import type { TeamMember, StaffRole, RoleCatalogItem } from '../../types/api';
 
 export interface MemberPermissionsModalProps {
   isOpen: boolean;
@@ -12,6 +12,7 @@ export interface MemberPermissionsModalProps {
   member: TeamMember | null;
   onSave: (memberUuid: string, role: StaffRole, permissions: string[]) => Promise<void>;
   currentOrganizerRole: OrganizerRole;
+  assignableRoles?: RoleCatalogItem[];
   isSaving?: boolean;
 }
 
@@ -21,12 +22,13 @@ export const MemberPermissionsModal: React.FC<MemberPermissionsModalProps> = ({
   member,
   onSave,
   currentOrganizerRole,
+  assignableRoles,
   isSaving = false,
 }) => {
   if (!member) return null;
 
-  const memberId = member.uuid || member.id;
-  const isOwner = member.role === 'owner';
+  const memberId = String(member.member_id || member.id || member.uuid || member.user_id);
+  const isOwner = member.is_owner === true || member.role === 'owner';
   const isSelf = false;
 
   const [selectedRole, setSelectedRole] = useState<StaffRole>(member.role || 'staff');
@@ -52,8 +54,13 @@ export const MemberPermissionsModal: React.FC<MemberPermissionsModalProps> = ({
   const handleRoleChange = (newRole: StaffRole) => {
     setSelectedRole(newRole);
     if (!isCustomMode) {
-      const defaults = getDefaultRolePermissionsList(newRole as OrganizerRole);
-      setSelectedPermissions(defaults);
+      const matchedCatalog = assignableRoles?.find((r) => r.role === newRole);
+      if (matchedCatalog && matchedCatalog.permissions) {
+        setSelectedPermissions(matchedCatalog.permissions);
+      } else {
+        const defaults = getDefaultRolePermissionsList(newRole as OrganizerRole);
+        setSelectedPermissions(defaults);
+      }
     }
   };
 
@@ -139,34 +146,42 @@ export const MemberPermissionsModal: React.FC<MemberPermissionsModalProps> = ({
               <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
                 Primary Access Role
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {[
-                  {
-                    id: 'admin' as StaffRole,
-                    label: 'Admin',
-                    desc: 'Full console & operations',
-                    allowed: currentOrganizerRole === 'owner',
-                  },
-                  {
-                    id: 'manager' as StaffRole,
-                    label: 'Manager',
-                    desc: 'Events & attendee management',
-                    allowed: true,
-                  },
-                  {
-                    id: 'staff' as StaffRole,
-                    label: 'Staff',
-                    desc: 'Gate check-in & scanners',
-                    allowed: true,
-                  },
-                ].map((r) => {
-                  const isSelected = selectedRole === r.id;
-                  if (!r.allowed) return null;
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {(assignableRoles && assignableRoles.length > 0
+                  ? assignableRoles.filter((r) => r.can_assign || currentOrganizerRole === 'owner')
+                  : [
+                      {
+                        role: 'admin' as StaffRole,
+                        label: 'Admin',
+                        description: 'Full console & operations',
+                        can_assign: currentOrganizerRole === 'owner',
+                      },
+                      {
+                        role: 'finance' as StaffRole,
+                        label: 'Finance',
+                        description: 'Orders, payouts & bank accounts',
+                        can_assign: true,
+                      },
+                      {
+                        role: 'manager' as StaffRole,
+                        label: 'Event Manager',
+                        description: 'Events & attendee management',
+                        can_assign: true,
+                      },
+                      {
+                        role: 'staff' as StaffRole,
+                        label: 'Event Staff',
+                        description: 'Gate check-in & scanners',
+                        can_assign: true,
+                      },
+                    ]
+                ).map((r) => {
+                  const isSelected = selectedRole === r.role;
                   return (
                     <button
                       type="button"
-                      key={r.id}
-                      onClick={() => handleRoleChange(r.id)}
+                      key={r.role}
+                      onClick={() => handleRoleChange(r.role)}
                       className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
                         isSelected
                           ? 'border-[#E31B23] bg-red-50/40 dark:bg-red-500/10 text-zinc-950 dark:text-white shadow-xs'
@@ -177,7 +192,7 @@ export const MemberPermissionsModal: React.FC<MemberPermissionsModalProps> = ({
                         <span className="font-bold text-sm text-zinc-950 dark:text-white">{r.label}</span>
                         {isSelected && <div className="w-2 h-2 rounded-full bg-[#E31B23]" />}
                       </div>
-                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1">{r.desc}</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">{r.description}</p>
                     </button>
                   );
                 })}

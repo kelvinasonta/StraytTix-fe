@@ -7,12 +7,31 @@ import type {
   PaginatedData,
   VerificationStatusResponse,
   OrganizerVerification,
-  RequestVerificationPayload 
+  RequestVerificationPayload,
+  OrganizerRolesResponse,
+  CountryMeta,
+  OrganizerPayoutsSummary
 } from '../types/api';
 
 export const organizerApi = {
   async getMyOrganizations(): Promise<ApiResponse<Organizer[]>> {
     const { data } = await apiClient.get<ApiResponse<Organizer[]>>('/organizers');
+    return data;
+  },
+
+  async getRoles(organizerUuid: string): Promise<ApiResponse<OrganizerRolesResponse>> {
+    const { data } = await apiClient.get<ApiResponse<OrganizerRolesResponse>>(`/organizers/${organizerUuid}/roles`);
+    return data;
+  },
+
+  async getCountries(): Promise<ApiResponse<CountryMeta[]>> {
+    const { data } = await apiClient.get<ApiResponse<CountryMeta[]>>('/countries');
+    return data;
+  },
+
+  async getPayouts(organizerUuid?: string): Promise<ApiResponse<OrganizerPayoutsSummary>> {
+    const url = organizerUuid ? `/organizers/${organizerUuid}/payouts` : '/payments/payouts';
+    const { data } = await apiClient.get<ApiResponse<OrganizerPayoutsSummary>>(url);
     return data;
   },
 
@@ -52,25 +71,25 @@ export const organizerApi = {
     return data;
   },
 
-  async updateMemberRole(organizerUuid: string, memberUuid: string, role: string, permissions?: string[]): Promise<ApiResponse<TeamMember>> {
+  async updateMemberRole(organizerUuid: string, memberIdentifier: string | number, role: string, permissions?: string[]): Promise<ApiResponse<TeamMember>> {
     const payload: { role: string; permissions?: string[] } = { role };
     if (permissions) payload.permissions = permissions;
-    const { data } = await apiClient.put<ApiResponse<TeamMember>>(`/organizers/${organizerUuid}/members/${memberUuid}`, payload);
+    const { data } = await apiClient.put<ApiResponse<TeamMember>>(`/organizers/${organizerUuid}/members/${memberIdentifier}`, payload);
     return data;
   },
 
-  async updateMemberPermissions(organizerUuid: string, memberUuid: string, permissions: string[]): Promise<ApiResponse<TeamMember>> {
-    const { data } = await apiClient.put<ApiResponse<TeamMember>>(`/organizers/${organizerUuid}/members/${memberUuid}/permissions`, { permissions });
+  async updateMemberPermissions(organizerUuid: string, memberIdentifier: string | number, permissions: string[]): Promise<ApiResponse<TeamMember>> {
+    const { data } = await apiClient.put<ApiResponse<TeamMember>>(`/organizers/${organizerUuid}/members/${memberIdentifier}/permissions`, { permissions });
     return data;
   },
 
-  async updateMemberSettings(organizerUuid: string, memberUuid: string, settings: any): Promise<ApiResponse<TeamMember>> {
-    const { data } = await apiClient.put<ApiResponse<TeamMember>>(`/organizers/${organizerUuid}/members/${memberUuid}/settings`, settings);
+  async updateMemberSettings(organizerUuid: string, memberIdentifier: string | number, settings: any): Promise<ApiResponse<TeamMember>> {
+    const { data } = await apiClient.put<ApiResponse<TeamMember>>(`/organizers/${organizerUuid}/members/${memberIdentifier}/settings`, settings);
     return data;
   },
 
-  async removeTeamMember(organizerUuid: string, memberUuid: string): Promise<ApiResponse<null>> {
-    const { data } = await apiClient.delete<ApiResponse<null>>(`/organizers/${organizerUuid}/members/${memberUuid}`);
+  async removeTeamMember(organizerUuid: string, memberIdentifier: string | number): Promise<ApiResponse<null>> {
+    const { data } = await apiClient.delete<ApiResponse<null>>(`/organizers/${organizerUuid}/members/${memberIdentifier}`);
     return data;
   },
 
