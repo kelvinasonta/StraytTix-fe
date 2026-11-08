@@ -664,25 +664,12 @@ export const TeamMembers: React.FC = () => {
                           <td className="px-6 py-4">
                             {isOwner ? (
                               <Badge variant="neutral">Owner (All Permissions)</Badge>
-                            ) : isCurrentUser ? (
-                              member.role === 'admin' ? (
-                                <Badge variant="info">Admin (Full Console)</Badge>
-                              ) : member.role === 'manager' ? (
-                                <Badge variant="warning">Manager (Events & Orders)</Badge>
-                              ) : (
-                                <Badge variant="default">Staff (Gate Check-in)</Badge>
-                              )
+                            ) : member.role === 'admin' ? (
+                              <Badge variant="info">Admin (Full Console)</Badge>
+                            ) : member.role === 'manager' ? (
+                              <Badge variant="warning">Manager (Events & Orders)</Badge>
                             ) : (
-                              <select
-                                value={member.role}
-                                disabled={updatingMemberUuid === memberId || !canManageEvents || (member.role === 'admin' && userRole !== 'owner')}
-                                onChange={(e) => handleRoleChange(memberId, e.target.value)}
-                                className="bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-xs font-bold rounded-xl px-3 py-1.5 text-zinc-800 dark:text-zinc-200 focus:border-[#E31B23] focus:outline-none cursor-pointer disabled:opacity-50"
-                              >
-                                {userRole === 'owner' && <option value="admin">Admin — Full Console</option>}
-                                <option value="manager">Manager — Events & Orders</option>
-                                <option value="staff">Staff — Gate Check-in</option>
-                              </select>
+                              <Badge variant="default">Staff (Gate Check-in)</Badge>
                             )}
                           </td>
                           <td className="px-6 py-4 text-zinc-500 font-medium text-xs">
