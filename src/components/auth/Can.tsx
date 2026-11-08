@@ -21,3 +21,4 @@ export function Can({ permission, role, fallback = null, children }: CanProps) {
 
   return <>{children}</>;
 }
+

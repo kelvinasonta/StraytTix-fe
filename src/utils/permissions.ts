@@ -217,3 +217,61 @@ export const getDefaultRolePermissionsList = (role: OrganizerRole): string[] => 
   }
 };
 
+export interface CapabilityItem {
+  key: string;
+  label: string;
+  description: string;
+}
+
+export interface CapabilityCategory {
+  category: string;
+  permissions: CapabilityItem[];
+}
+
+export const ALL_CAPABILITIES_DICTIONARY: CapabilityCategory[] = [
+  {
+    category: 'Organization & Workspace',
+    permissions: [
+      { key: 'org.view', label: 'View Organization', description: 'View profile, branding and general configuration' },
+      { key: 'org.update', label: 'Update Organization', description: 'Update profile details, branding and preferences' },
+      { key: 'org.delete', label: 'Delete Organization', description: 'Terminate and permanently delete the entire organization' },
+    ],
+  },
+  {
+    category: 'Events & Experiences',
+    permissions: [
+      { key: 'org.events.view', label: 'View Events', description: 'Inspect events catalog and event summaries' },
+      { key: 'org.events.create', label: 'Create Events', description: 'Draft and create new event listings' },
+      { key: 'org.events.update', label: 'Edit & Manage Events', description: 'Modify event schedules, lineup, ticket tiers, and publish status' },
+      { key: 'org.events.delete', label: 'Delete Events', description: 'Permanently remove event listings and drafts' },
+    ],
+  },
+  {
+    category: 'Attendees & Ticketing',
+    permissions: [
+      { key: 'org.attendees.view', label: 'View Attendees', description: 'View attendee names, orders and ticket passes' },
+      { key: 'org.attendees.manage', label: 'Manage & Export Attendees', description: 'Export attendee rosters, manage check-in passes and manual approvals' },
+      { key: 'org.tickets.manage', label: 'Manage Ticket Tiers', description: 'Configure pricing, quantities, promos and invite-only tiers' },
+    ],
+  },
+  {
+    category: 'Finance, Banking & Credits',
+    permissions: [
+      { key: 'org.finance.view', label: 'View Financials & Wallet', description: 'View gross revenues, sales analytics, and ledger balance' },
+      { key: 'org.finance.manage', label: 'Manage Bank Accounts & Payouts', description: 'Manage settlement accounts, withdraw funds and view bank statements' },
+      { key: 'org.credits.manage', label: 'Purchase & Top-Up Credits', description: 'Execute Paystack credit top-ups and ledger allocations' },
+    ],
+  },
+  {
+    category: 'Team & Compliance',
+    permissions: [
+      { key: 'org.members.view', label: 'View Team Members', description: 'See who has access to this workspace' },
+      { key: 'org.members.manage', label: 'Manage Team & Permissions', description: 'Invite members, modify roles, and grant granular permissions' },
+      { key: 'org.verification.view', label: 'View KYC & Verification', description: 'Inspect organization verification status' },
+      { key: 'org.verification.manage', label: 'Manage KYC & Submit Documents', description: 'Upload corporate verification and business records' },
+      { key: 'org.audit_logs.view', label: 'View Audit Logs', description: 'Access immutable security audit history and system events' },
+    ],
+  },
+];
+
+

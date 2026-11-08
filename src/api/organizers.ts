@@ -52,8 +52,15 @@ export const organizerApi = {
     return data;
   },
 
-  async updateMemberRole(organizerUuid: string, memberUuid: string, role: string): Promise<ApiResponse<TeamMember>> {
-    const { data } = await apiClient.put<ApiResponse<TeamMember>>(`/organizers/${organizerUuid}/members/${memberUuid}`, { role });
+  async updateMemberRole(organizerUuid: string, memberUuid: string, role: string, permissions?: string[]): Promise<ApiResponse<TeamMember>> {
+    const payload: { role: string; permissions?: string[] } = { role };
+    if (permissions) payload.permissions = permissions;
+    const { data } = await apiClient.put<ApiResponse<TeamMember>>(`/organizers/${organizerUuid}/members/${memberUuid}`, payload);
+    return data;
+  },
+
+  async updateMemberPermissions(organizerUuid: string, memberUuid: string, permissions: string[]): Promise<ApiResponse<TeamMember>> {
+    const { data } = await apiClient.put<ApiResponse<TeamMember>>(`/organizers/${organizerUuid}/members/${memberUuid}/permissions`, { permissions });
     return data;
   },
 

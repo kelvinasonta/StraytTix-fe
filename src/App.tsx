@@ -59,6 +59,7 @@ import { EventManage as OrganizerEventManage } from './pages/organizer/EventMana
 import { PaymentCallback } from './pages/checkout/PaymentCallback';
 import { CheckoutPage } from './pages/checkout/CheckoutPage';
 import { NotFound } from './pages/NotFound';
+import { Forbidden } from './pages/Forbidden';
 import { ScrollToTop } from './components/layout/ScrollToTop';
 
 const OrganizerEditRedirect: React.FC = () => {
@@ -329,6 +330,9 @@ export const App: React.FC = () => {
 
             {/* Public Organizer Profile (Supports direct /artful-media or /@artful-media) */}
             <Route path="/:slug" element={<OrganizerProfile />} />
+
+            {/* 403 Forbidden Access Page */}
+            <Route path="/403" element={<Forbidden />} />
 
             {/* Fallback 404 */}
             <Route path="*" element={<NotFound />} />

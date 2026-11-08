@@ -33,16 +33,20 @@ import {
   ChevronDown,
   UserCog,
   Settings,
+  KeyRound,
 } from 'lucide-react';
+import { useCan } from '../../hooks/useCan';
+import { MemberPermissionsModal } from '../../components/team/MemberPermissionsModal';
 
 export const TeamMembers: React.FC = () => {
   const { organizer, user } = useAuth();
   const { showNotification } = useNotification();
+  const { can, isOwner } = useCan();
 
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
 
-  if (organizer?.type === 'individual' || !perms.canManageTeam) {
+  if (organizer?.type === 'individual' || (!perms.canManageTeam && !can('org.members.view'))) {
     return <Navigate to="/organizer" replace />;
   }
 
@@ -65,10 +69,16 @@ export const TeamMembers: React.FC = () => {
     const memberRole: StaffRole = ['owner', 'admin', 'manager', 'staff'].includes(String(rawRole).toLowerCase())
       ? String(rawRole).toLowerCase() as StaffRole : 'staff';
     const resolvedId = String(u.uuid || u.id || raw.uuid || raw.id || raw.user_id || Math.random().toString());
+    const permissions: string[] = Array.isArray(raw.permissions)
+      ? raw.permissions
+      : Array.isArray(u.permissions)
+      ? u.permissions
+      : [];
     return {
       id: resolvedId,
       uuid: resolvedId,
       firstName: firstName || 'Team', lastName: lastName || 'Member', email: email || '', role: memberRole,
+      permissions: permissions.length > 0 ? permissions : undefined,
       joinedAt: raw.joinedAt || raw.joined_at || raw.createdAt || raw.created_at || new Date().toISOString()
     };
   };
@@ -114,6 +124,41 @@ export const TeamMembers: React.FC = () => {
     isLoading?: boolean;
     onConfirm: () => void | Promise<void>;
   }>({ isOpen: false, title: '', message: '', confirmLabel: 'Delete', variant: 'danger', isLoading: false, onConfirm: () => { } });
+
+  // =========================================================================
+  // GRANULAR PERMISSIONS MODAL STATE
+  // =========================================================================
+  const [isPermsModalOpen, setIsPermsModalOpen] = useState(false);
+  const [selectedPermsMember, setSelectedPermsMember] = useState<TeamMember | null>(null);
+  const [isSavingPerms, setIsSavingPerms] = useState(false);
+
+  const handleOpenPermsModal = (member: TeamMember) => {
+    setSelectedPermsMember(member);
+    setIsPermsModalOpen(true);
+  };
+
+  const handleSaveMemberPermissions = async (memberUuid: string, newRole: StaffRole, newPermissions: string[]) => {
+    setIsSavingPerms(true);
+    try {
+      if (organizer?.id) {
+        await organizerApi.updateMemberRole(organizer.id, memberUuid, newRole, newPermissions);
+      }
+      setMembers(prev =>
+        prev.map(m =>
+          (m.uuid === memberUuid || m.id === memberUuid)
+            ? { ...m, role: newRole, permissions: newPermissions }
+            : m
+        )
+      );
+      showNotification('Member role and capabilities updated successfully!', 'success');
+      setIsPermsModalOpen(false);
+    } catch (err: any) {
+      const msg = getApiErrorMessage(err);
+      showNotification(msg || 'Failed to update member permissions.', 'error');
+    } finally {
+      setIsSavingPerms(false);
+    }
+  };
 
   // =========================================================================
   // STAFF MEMBER SETTINGS MODAL STATE
@@ -645,6 +690,17 @@ export const TeamMembers: React.FC = () => {
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
+                              {canManageEvents && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenPermsModal(member)}
+                                  className="px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white border border-zinc-200 dark:border-white/10 rounded-xl transition-colors inline-flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                                  title="Configure Member Permissions & Capabilities"
+                                >
+                                  <KeyRound className="w-3.5 h-3.5 text-[#E31B23]" />
+                                  <span>Permissions</span>
+                                </button>
+                              )}
                               {canManageEvents && (
                                 <button
                                   type="button"
@@ -1289,6 +1345,16 @@ export const TeamMembers: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Member Permissions & Capabilities Modal */}
+        <MemberPermissionsModal
+          isOpen={isPermsModalOpen}
+          onClose={() => setIsPermsModalOpen(false)}
+          member={selectedPermsMember}
+          onSave={handleSaveMemberPermissions}
+          currentOrganizerRole={role}
+          isSaving={isSavingPerms}
+        />
 
         {/* Confirm Dialog */}
         <ConfirmDialog

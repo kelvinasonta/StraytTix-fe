@@ -179,6 +179,7 @@ export interface TeamMember {
   lastName: string;
   email: string;
   role: StaffRole;
+  permissions?: string[];
   phone?: string;
   duty?: string;
   station?: string;
