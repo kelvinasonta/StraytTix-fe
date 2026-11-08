@@ -663,13 +663,13 @@ export const TeamMembers: React.FC = () => {
                           </td>
                           <td className="px-6 py-4">
                             {isOwner ? (
-                              <Badge variant="neutral">Owner (All Permissions)</Badge>
+                              <Badge variant="neutral">Owner</Badge>
                             ) : member.role === 'admin' ? (
-                              <Badge variant="info">Admin (Full Console)</Badge>
+                              <Badge variant="info">Admin</Badge>
                             ) : member.role === 'manager' ? (
-                              <Badge variant="warning">Manager (Events & Orders)</Badge>
+                              <Badge variant="warning">Manager</Badge>
                             ) : (
-                              <Badge variant="default">Staff (Gate Check-in)</Badge>
+                              <Badge variant="default">Staff</Badge>
                             )}
                           </td>
                           <td className="px-6 py-4 text-zinc-500 font-medium text-xs">
