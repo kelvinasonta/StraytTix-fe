@@ -24,6 +24,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Logo } from '../ui/Logo';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
+import { useCan } from '../../hooks/useCan';
 
 interface AuthenticatedMobileNavProps {
   currentMode: 'attendee' | 'organizer';
@@ -32,6 +33,7 @@ interface AuthenticatedMobileNavProps {
 export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ currentMode }) => {
   const { user, organizer, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { can } = useCan();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -64,8 +66,8 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
   const organizerBottomTabs = [
     { to: '/organizer', label: 'Dashboard', icon: LayoutDashboard, end: true },
     { to: '/organizer/events', label: role === 'staff' ? 'Assigned' : 'Events', icon: Calendar },
-    ...(perms.canCreateEvents ? [{ to: '/organizer/events/create', label: 'Create', icon: PlusCircle, isCta: true }] : []),
-    ...(perms.canViewOrders ? [{ to: '/organizer/orders', label: 'Sales', icon: ShoppingBag }] : []),
+    ...(can('org.events.create') && perms.canCreateEvents ? [{ to: '/organizer/events/create', label: 'Create', icon: PlusCircle, isCta: true }] : []),
+    ...(can(['org.attendees.view', 'org.events.view']) && perms.canViewOrders ? [{ to: '/organizer/orders', label: 'Sales', icon: ShoppingBag }] : []),
     { to: '#menu', label: 'Menu', icon: Menu, isMenuTrigger: true },
   ];
 
@@ -217,7 +219,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                       <Calendar className="w-4 h-4" />
                       <span>{role === 'staff' ? 'Assigned Events' : 'My Events'}</span>
                     </NavLink>
-                    {perms.canViewOrders && (
+                    {can(['org.attendees.view', 'org.events.view']) && perms.canViewOrders && (
                       <NavLink
                         to="/organizer/orders"
                         onClick={() => setDrawerOpen(false)}
@@ -232,7 +234,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                     )}
 
                     {/* Team Members: ONLY for Organizations & allowed roles */}
-                    {isOrganization && perms.canManageTeam && (
+                    {isOrganization && can('org.members.view') && perms.canManageTeam && (
                       <NavLink
                         to="/organizer/team"
                         onClick={() => setDrawerOpen(false)}
@@ -246,7 +248,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                       </NavLink>
                     )}
 
-                    {perms.canViewFinanceWallet && (
+                    {can('org.finance.view') && perms.canViewFinanceWallet && (
                       <NavLink
                         to="/organizer/analytics"
                         onClick={() => setDrawerOpen(false)}
@@ -259,7 +261,20 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                         <span>Finance & Wallet</span>
                       </NavLink>
                     )}
-                    {perms.canEditOrganizerProfile && (
+                    {can(['org.finance.view', 'org.credits.manage']) && perms.canViewFinanceWallet && (
+                      <NavLink
+                        to="/organizer/credits"
+                        onClick={() => setDrawerOpen(false)}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${isActive ? 'bg-[#E31B23] text-white shadow-2xs' : 'text-zinc-700 hover:bg-zinc-50'
+                          }`
+                        }
+                      >
+                        <Wallet className="w-4 h-4" />
+                        <span>Credits & Billing</span>
+                      </NavLink>
+                    )}
+                    {can('org.view') && perms.canEditOrganizerProfile && (
                       <NavLink
                         to="/organizer/profile"
                         onClick={() => setDrawerOpen(false)}

@@ -82,6 +82,7 @@ export interface Organizer {
   type: OrganizerType;
   role?: StaffRole;
   isOwner?: boolean;
+  permissions?: string[];
   bio?: string;
   description?: string;
   email?: string;

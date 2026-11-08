@@ -11,6 +11,8 @@ import { useNotification } from '../../context/NotificationContext';
 import { eventApi } from '../../api/events';
 import { attendeesApi } from '../../api/attendees';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
+import { useCan } from '../../hooks/useCan';
+import { Can } from '../../components/auth/Can';
 import type { Event, TicketAttendee, CheckInStats } from '../../types/api';
 import CameraQrScannerModal from '../../components/events/CameraQrScannerModal';
 import { 
@@ -58,12 +60,13 @@ interface AttendeeRecord {
 export const Attendees: React.FC = () => {
   const { organizer, user } = useAuth();
   const { showNotification } = useNotification();
+  const { can } = useCan();
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
   const currentStaffName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Gate Staff' : 'Gate Staff';
 
   // If user cannot monitor check-ins or scan tickets, bounce
-  if (!perms.canMonitorCheckInCounts && !perms.canScanGateTickets && !perms.canViewOrders) {
+  if (!perms.canMonitorCheckInCounts && !perms.canScanGateTickets && !perms.canViewOrders && !can(['org.attendees.view', 'org.events.view'])) {
     return <Navigate to="/organizer" replace />;
   }
 
@@ -432,7 +435,7 @@ export const Attendees: React.FC = () => {
                 <span>Refresh</span>
               </Button>
 
-              {perms.canDownloadAttendees && (
+              {perms.canDownloadAttendees && can(['org.attendees.manage', 'org.attendees.view']) && (
                 <Button
                   variant="outline"
                   size="sm"

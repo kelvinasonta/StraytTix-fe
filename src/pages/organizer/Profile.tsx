@@ -15,6 +15,8 @@ import type {
   RequestVerificationPayload 
 } from '../../types/api';
 import { resolveImageUrl, getOrganizerLogo, getOrganizerCoverPhoto } from '../../utils/imageUrl';
+import { useCan } from '../../hooks/useCan';
+import { Can } from '../../components/auth/Can';
 import { 
   Building2, 
   ExternalLink, 
@@ -34,6 +36,7 @@ import {
 export const Profile: React.FC = () => {
   const { organizer, setActiveOrganizer } = useAuth();
   const { showNotification } = useNotification();
+  const { can } = useCan();
 
   const [activeTab, setActiveTab] = useState<'brand' | 'contact' | 'verification'>('brand');
 
@@ -420,20 +423,22 @@ export const Profile: React.FC = () => {
                 <span>Contact & Socials</span>
               </button>
 
-              <button
-                onClick={() => setActiveTab('verification')}
-                className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
-                  activeTab === 'verification'
-                    ? 'bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950/10'
-                    : 'text-zinc-600 hover:text-zinc-950 dark:text-white hover:bg-zinc-100/80 bg-zinc-50/60'
-                }`}
-              >
-                <ShieldCheck className={`w-4 h-4 ${activeTab === 'verification' ? 'text-blue-400' : 'text-zinc-500'}`} />
-                <span>Host Verification</span>
-                {verificationStatus === 'verified' && (
-                  <span className="w-2 h-2 rounded-full bg-blue-500" />
-                )}
-              </button>
+              {can(['org.verification.view', 'org.verification.manage']) && (
+                <button
+                  onClick={() => setActiveTab('verification')}
+                  className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
+                    activeTab === 'verification'
+                      ? 'bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950/10'
+                      : 'text-zinc-600 hover:text-zinc-950 dark:text-white hover:bg-zinc-100/80 bg-zinc-50/60'
+                  }`}
+                >
+                  <ShieldCheck className={`w-4 h-4 ${activeTab === 'verification' ? 'text-blue-400' : 'text-zinc-500'}`} />
+                  <span>Host Verification</span>
+                  {verificationStatus === 'verified' && (
+                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -616,13 +621,19 @@ export const Profile: React.FC = () => {
               </div>
 
               <div className="pt-4 flex justify-end border-t border-zinc-100 dark:border-white/10">
-                <Button 
-                  type="submit" 
-                  isLoading={isLoading}
-                  fullWidth={false} className="w-full sm:w-auto px-8 py-3 bg-[#E31B23] hover:bg-[#c9141b] text-white text-sm font-bold shadow-sm"
-                >
-                  Save Brand Profile
-                </Button>
+                {can('org.update') ? (
+                  <Button 
+                    type="submit" 
+                    isLoading={isLoading}
+                    fullWidth={false} className="w-full sm:w-auto px-8 py-3 bg-[#E31B23] hover:bg-[#c9141b] text-white text-sm font-bold shadow-sm"
+                  >
+                    Save Brand Profile
+                  </Button>
+                ) : (
+                  <div className="text-xs text-zinc-500 font-semibold italic">
+                    You do not have permission to edit organizer brand profiles.
+                  </div>
+                )}
               </div>
             </form>
           </div>
@@ -731,7 +742,7 @@ export const Profile: React.FC = () => {
                   </p>
                 </div>
               </div>
-              {verificationStatus !== 'pending' && (
+              {can('org.verification.manage') && verificationStatus !== 'pending' && (
                 <button
                   type="button"
                   onClick={() => setIsVerificationModalOpen(true)}

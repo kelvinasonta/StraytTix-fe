@@ -11,6 +11,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { formatCurrency, formatDate } from '../../utils/format';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
+import { useCan } from '../../hooks/useCan';
+import { Can } from '../../components/auth/Can';
 import type { Event, TicketType, ScheduleSession, LineupMember, EventStats, FaqItem, EventStaffAssignment, TeamMember, CheckInStats, TicketAttendee } from '../../types/api';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
@@ -103,6 +105,7 @@ export const EventManage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { organizer, user } = useAuth();
   const { showNotification } = useNotification();
+  const { can, hasRole } = useCan();
 
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
@@ -133,19 +136,19 @@ export const EventManage: React.FC = () => {
     }
     if (qTab) {
       // Validate tab permission
-      if (qTab === 'setup' && (!perms.canCreateEvents || isStaffOnly)) return;
-      if (qTab === 'tickets' && !perms.canConfigureTickets) return;
+      if (qTab === 'setup' && (!perms.canCreateEvents || !can(['org.events.update', 'org.events.create']) || isStaffOnly)) return;
+      if (qTab === 'tickets' && (!perms.canConfigureTickets || !can('org.tickets.manage'))) return;
       if (qTab === 'policies' && (!perms.canIssueRefunds || isStaffOnly)) return;
-      if (qTab === 'finance' && !perms.canViewRevenue) return;
-      if (qTab === 'marketing' && !perms.canAccessMarketing) return;
-      if (qTab === 'settings' && !perms.canAccessSettings) return;
+      if (qTab === 'finance' && (!perms.canViewRevenue || !can('org.finance.view'))) return;
+      if (qTab === 'marketing' && (!perms.canAccessMarketing || !can('org.events.update'))) return;
+      if (qTab === 'settings' && (!perms.canAccessSettings || !can('org.events.update'))) return;
 
       setActiveTab(qTab);
       if (qSub) {
         if (qTab === 'attendees') {
-          if (qSub === 'staff' && !perms.canAssignStaffToEvent) return;
-          if (qSub === 'invite_approval' && !perms.canConfigureTickets) return;
-          if (qSub === 'view' && !perms.canDownloadAttendees) return;
+          if (qSub === 'staff' && (!perms.canAssignStaffToEvent || !can('org.members.manage'))) return;
+          if (qSub === 'invite_approval' && (!perms.canConfigureTickets || !can('org.tickets.manage'))) return;
+          if (qSub === 'view' && (!perms.canDownloadAttendees || !can(['org.attendees.view', 'org.attendees.manage']))) return;
           setAttendeesSubtab(qSub as any);
         } else if (qTab === 'setup') {
           setSetupSubtab(qSub as any);
@@ -154,12 +157,12 @@ export const EventManage: React.FC = () => {
         } else if (qTab === 'policies') {
           setPoliciesSubtab(qSub as any);
         } else if (qTab === 'finance') {
-          if (qSub === 'payout' && !perms.canManageBanking) return;
+          if (qSub === 'payout' && (!perms.canManageBanking || !can('org.finance.manage'))) return;
           setFinanceSubtab(qSub as any);
         } else if (qTab === 'marketing') {
           setMarketingSubtab(qSub as any);
         } else if (qTab === 'settings') {
-          if (qSub === 'delete' && !perms.canDeleteEvents) return;
+          if (qSub === 'delete' && (!perms.canDeleteEvents || !can('org.events.delete'))) return;
           setSettingsSubtab(qSub as any);
         }
       }
@@ -2159,34 +2162,34 @@ export const EventManage: React.FC = () => {
       icon: isStaffOnly ? QrCode : Users,
       count: attendees.length,
       subtabs: [
-        ...(perms.canDownloadAttendees ? [
+        ...(perms.canDownloadAttendees && can(['org.attendees.view', 'org.attendees.manage']) ? [
           { id: 'view', label: 'View attendees', icon: Users, desc: 'Search & manage ticket holders' }
         ] : []),
         { id: 'checkin', label: 'Check-in scanner', icon: QrCode, desc: 'Real-time gate check-in & verification' },
-        ...(perms.canAssignStaffToEvent ? [
+        ...(perms.canAssignStaffToEvent && can('org.members.manage') ? [
           { id: 'staff', label: 'Event staff & crew', icon: UserCheck, desc: 'Assign staff, gate scanners & duties' }
         ] : []),
-        ...(perms.canConfigureTickets ? [
+        ...(perms.canConfigureTickets && can('org.tickets.manage') ? [
           { id: 'invite_approval', label: 'Ticket approvals', icon: ShieldCheck, desc: 'Review invite-only applications' }
         ] : []),
       ]
     },
 
     // 5. Finance: Hidden for Staff and Manager! (Only Owner & Admin)
-    ...(perms.canViewRevenue ? [{
+    ...(perms.canViewRevenue && can('org.finance.view') ? [{
       id: 'finance' as MainTab,
       label: 'Finance',
       icon: DollarSign,
       subtabs: [
         { id: 'sales', label: 'Sales summary', icon: DollarSign, desc: 'Gross volume & revenue breakdown' },
-        ...(perms.canManageBanking ? [
+        ...(perms.canManageBanking && can('org.finance.manage') ? [
           { id: 'payout', label: 'Payout details', icon: BarChart3, desc: 'Bank account & payout history' }
         ] : []),
       ]
     }] : []),
 
     // 6. Marketing: Hidden for Staff and Manager! (Only Owner & Admin)
-    ...(perms.canAccessMarketing ? [{
+    ...(perms.canAccessMarketing && can('org.events.update') ? [{
       id: 'marketing' as MainTab,
       label: 'Marketing',
       icon: Share2,
@@ -2199,14 +2202,14 @@ export const EventManage: React.FC = () => {
     }] : []),
 
     // 7. Settings: Hidden for Staff and Manager! (Only Owner & Admin)
-    ...(perms.canAccessSettings ? [{
+    ...(perms.canAccessSettings && can('org.events.update') ? [{
       id: 'settings' as MainTab,
       label: 'Settings',
       icon: AlertTriangle,
       subtabs: [
         { id: 'duplicate', label: 'Duplicate event', icon: Copy, desc: 'Clone event draft & tiers' },
         { id: 'archive', label: 'Archive listing', icon: Archive, desc: 'Hide from active management' },
-        ...(perms.canDeleteEvents ? [
+        ...(perms.canDeleteEvents && can('org.events.delete') ? [
           { id: 'delete', label: 'Delete event', icon: Trash2, desc: 'Danger zone & deletion restrictions' }
         ] : []),
       ]

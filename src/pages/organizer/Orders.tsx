@@ -11,6 +11,8 @@ import { useNotification } from '../../context/NotificationContext';
 import { eventApi } from '../../api/events';
 import { ordersApi } from '../../api/orders';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
+import { useCan } from '../../hooks/useCan';
+import { Can } from '../../components/auth/Can';
 import type { Order, Event, OrderStatus } from '../../types/api';
 import { 
   ShoppingBag, 
@@ -89,11 +91,12 @@ const normalizeOrder = (raw: any, fallbackEvents: Event[] = []): Order => {
 export const Orders: React.FC = () => {
   const { organizer } = useAuth();
   const { showNotification } = useNotification();
+  const { can } = useCan();
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
 
   // If role does not have order viewing rights, bounce to /organizer
-  if (!perms.canViewOrders) {
+  if (!perms.canViewOrders && !can(['org.attendees.view', 'org.events.view'])) {
     return <Navigate to="/organizer" replace />;
   }
 
@@ -405,15 +408,17 @@ export const Orders: React.FC = () => {
                 <span>Refresh</span>
               </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportCSV}
-                className="gap-2 bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white dark:text-white border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Export CSV</span>
-              </Button>
+              <Can permission={['org.attendees.manage', 'org.finance.view']}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportCSV}
+                  className="gap-2 bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white dark:text-white border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export CSV</span>
+                </Button>
+              </Can>
             </div>
           </div>
         </div>

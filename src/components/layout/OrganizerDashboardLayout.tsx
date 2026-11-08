@@ -27,6 +27,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { Logo } from '../ui/Logo';
 import { AuthenticatedMobileNav } from './AuthenticatedMobileNav';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
+import { useCan } from '../../hooks/useCan';
 import { getOrganizerLogo } from '../../utils/imageUrl';
 
 interface OrganizerDashboardLayoutProps {
@@ -36,6 +37,7 @@ interface OrganizerDashboardLayoutProps {
 export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> = ({ children }) => {
   const { user, organizer, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { can } = useCan();
   const navigate = useNavigate();
   const location = useLocation();
   const [userDropdown, setUserDropdown] = useState(false);
@@ -59,14 +61,24 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
   const navItems = [
     { to: '/organizer', label: 'Dashboard', icon: LayoutDashboard, end: true },
     { to: '/organizer/events', label: role === 'staff' ? 'Assigned Events' : 'My Events', icon: Calendar },
-    ...(perms.canViewOrders ? [{ to: '/organizer/orders', label: 'Orders & Sales', icon: ShoppingBag }] : []),
-    ...(isOrganization && perms.canManageTeam ? [{ to: '/organizer/team', label: 'Team Members', icon: Users }] : []),
-    ...(perms.canViewFinanceWallet ? [
-      { to: '/organizer/analytics', label: 'Finance & Wallet', icon: Wallet },
-      { to: '/organizer/credits', label: 'Credits & Billing', icon: Coins }
-    ] : []),
-    ...(perms.canEditOrganizerProfile ? [{ to: '/organizer/profile', label: 'Organizer Profile', icon: User }] : []),
-    ...(perms.canAccessSettings ? [{ to: '/organizer/settings', label: role === 'staff' ? 'Staff Settings' : 'Settings', icon: Settings }] : []),
+    ...(can(['org.attendees.view', 'org.events.view']) && perms.canViewOrders
+      ? [{ to: '/organizer/orders', label: 'Orders & Sales', icon: ShoppingBag }]
+      : []),
+    ...(isOrganization && can('org.members.view') && perms.canManageTeam
+      ? [{ to: '/organizer/team', label: 'Team Members', icon: Users }]
+      : []),
+    ...(can('org.finance.view') && perms.canViewFinanceWallet
+      ? [{ to: '/organizer/analytics', label: 'Finance & Wallet', icon: Wallet }]
+      : []),
+    ...(can(['org.finance.view', 'org.credits.manage']) && perms.canViewFinanceWallet
+      ? [{ to: '/organizer/credits', label: 'Credits & Billing', icon: Coins }]
+      : []),
+    ...(can('org.view') && perms.canEditOrganizerProfile
+      ? [{ to: '/organizer/profile', label: 'Organizer Profile', icon: User }]
+      : []),
+    ...(perms.canAccessSettings
+      ? [{ to: '/organizer/settings', label: role === 'staff' ? 'Staff Settings' : 'Settings', icon: Settings }]
+      : []),
   ];
 
   return (

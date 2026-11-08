@@ -167,3 +167,53 @@ export const getRolePermissions = (role: OrganizerRole): RolePermissions => {
       };
   }
 };
+
+/**
+ * Returns the default backend-compatible capability strings for a given role.
+ * Used as a fallback when the backend payload doesn't provide an explicit permissions array.
+ */
+export const getDefaultRolePermissionsList = (role: OrganizerRole): string[] => {
+  switch (role) {
+    case 'owner':
+      return ['*'];
+    case 'admin':
+      return [
+        'org.view',
+        'org.update',
+        'org.members.view',
+        'org.members.manage',
+        'org.finance.view',
+        'org.finance.manage',
+        'org.credits.manage',
+        'org.verification.view',
+        'org.verification.manage',
+        'org.events.view',
+        'org.events.create',
+        'org.events.update',
+        'org.attendees.view',
+        'org.attendees.manage',
+        'org.tickets.manage',
+        'org.audit_logs.view',
+      ];
+    case 'manager':
+      return [
+        'org.view',
+        'org.update',
+        'org.events.view',
+        'org.events.create',
+        'org.events.update',
+        'org.attendees.view',
+        'org.attendees.manage',
+        'org.tickets.manage',
+      ];
+    case 'staff':
+      return [
+        'org.view',
+        'org.events.view',
+        'org.attendees.view',
+      ];
+    default:
+      return [];
+  }
+};
+
