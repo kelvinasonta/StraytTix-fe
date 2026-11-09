@@ -127,10 +127,10 @@ print(res.json())`
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Sidebar Nav */}
           <div className="lg:col-span-3">
-            <div className="sticky top-28 space-y-6 bg-zinc-950/70 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
+            <div className="sticky top-28 space-y-6 bg-white dark:bg-zinc-950/70 border border-zinc-200 dark:border-white/10 rounded-3xl p-6 shadow-sm dark:shadow-none backdrop-blur-md">
               <div className="space-y-1">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold">API Navigation</span>
-                <h3 className="text-base font-bold text-white">Documentation</h3>
+                <h3 className="text-base font-bold text-zinc-950 dark:text-white">Documentation</h3>
               </div>
 
               <nav className="space-y-1">
@@ -143,8 +143,8 @@ print(res.json())`
                     }}
                     className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       activeSection === item.id
-                        ? 'bg-white text-zinc-950 shadow-md font-black'
-                        : 'text-zinc-400 hover:bg-white/[0.05] hover:text-white'
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-md font-black'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.05] hover:text-zinc-950 dark:hover:text-white'
                     }`}
                   >
                     {item.label}
@@ -152,12 +152,12 @@ print(res.json())`
                 ))}
               </nav>
 
-              <div className="pt-4 border-t border-white/10 space-y-2.5">
+              <div className="pt-4 border-t border-zinc-200 dark:border-white/10 space-y-2.5">
                 <a
                   href="https://github.com"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-between text-xs font-bold text-zinc-400 hover:text-[#E31B23] transition-colors"
+                  className="flex items-center justify-between text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-[#E31B23] transition-colors"
                 >
                   <span>OpenAPI 3.1 Spec</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -166,7 +166,7 @@ print(res.json())`
                   href="https://postman.com"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-between text-xs font-bold text-zinc-400 hover:text-[#E31B23] transition-colors"
+                  className="flex items-center justify-between text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-[#E31B23] transition-colors"
                 >
                   <span>Postman Collection</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -179,11 +179,11 @@ print(res.json())`
           <div className="lg:col-span-9 space-y-14">
             {/* Header */}
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-white text-xs font-bold">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-200/80 dark:bg-white/5 border border-zinc-300 dark:border-white/10 text-zinc-900 dark:text-white text-xs font-bold">
                 <Code2 className="w-3.5 h-3.5 text-[#E31B23]" />
                 StraytTix Developer Platform
               </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-950 dark:text-white tracking-tight">
                 REST API Documentation
               </h1>
               <p className="text-zinc-600 dark:text-zinc-400 text-sm sm:text-base leading-relaxed max-w-3xl font-normal">
@@ -192,8 +192,8 @@ print(res.json())`
             </div>
 
             {/* Language Switcher Bar */}
-            <div className="flex items-center justify-between bg-zinc-950/70 border border-white/10 rounded-2xl p-2 px-4 shadow-lg backdrop-blur-sm">
-              <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Example Language:</span>
+            <div className="flex items-center justify-between bg-white dark:bg-zinc-950/70 border border-zinc-200 dark:border-white/10 rounded-2xl p-2 px-4 shadow-sm dark:shadow-lg backdrop-blur-sm">
+              <span className="text-xs font-mono font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">Example Language:</span>
               <div className="flex items-center gap-1.5">
                 {(['curl', 'js', 'python'] as const).map((lang) => (
                   <button
@@ -202,7 +202,7 @@ print(res.json())`
                     className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       selectedLang === lang
                         ? 'bg-[#E31B23] text-white shadow-md shadow-[#E31B23]/30'
-                        : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/[0.05]'
                     }`}
                   >
                     {lang === 'curl' ? 'cURL' : lang === 'js' ? 'Node.js / Fetch' : 'Python'}
@@ -213,12 +213,12 @@ print(res.json())`
 
             {/* Section 1: Overview */}
             <section id="overview" className="space-y-4 pt-2">
-              <h2 className="text-2xl font-bold text-white tracking-tight">Overview & Base URL</h2>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+              <h2 className="text-2xl font-bold text-zinc-950 dark:text-white tracking-tight">Overview & Base URL</h2>
+              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
                 The StraytTix API is organized around REST. All requests communicate over HTTPS and respond with standard JSON bodies and HTTP status codes.
               </p>
 
-              <div className="bg-zinc-950 border border-white/10 rounded-2xl p-4 text-white flex items-center justify-between font-mono text-xs shadow-md">
+              <div className="bg-zinc-950 border border-zinc-800 dark:border-white/10 rounded-2xl p-4 text-white flex items-center justify-between font-mono text-xs shadow-md">
                 <div>
                   <span className="text-zinc-500">BASE URL: </span>
                   <span className="text-emerald-400 font-bold">{apiBaseUrl}</span>
@@ -234,32 +234,32 @@ print(res.json())`
             </section>
 
             {/* Section 2: Authentication */}
-            <section id="auth" className="space-y-4 pt-8 border-t border-white/10">
+            <section id="auth" className="space-y-4 pt-8 border-t border-zinc-200 dark:border-white/10">
               <div className="flex items-center gap-2">
                 <KeyRound className="w-5 h-5 text-[#E31B23]" />
-                <h2 className="text-2xl font-bold text-white tracking-tight">Authentication</h2>
+                <h2 className="text-2xl font-bold text-zinc-950 dark:text-white tracking-tight">Authentication</h2>
               </div>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
                 Authenticated endpoints require an API Bearer Token passed in the HTTP Authorization header. You can generate API tokens inside your Organizer Settings dashboard under <strong>API Keys</strong>.
               </p>
 
-              <div className="bg-zinc-950 border border-white/10 rounded-2xl p-4 font-mono text-xs text-white">
+              <div className="bg-zinc-950 border border-zinc-800 dark:border-white/10 rounded-2xl p-4 font-mono text-xs text-white">
                 <span className="text-zinc-500">Authorization: </span>
                 <span className="text-amber-400">Bearer eos_live_9f83829ad01b489aef</span>
               </div>
             </section>
 
             {/* Section 3: Explore Events API */}
-            <section id="explore-events" className="space-y-4 pt-8 border-t border-white/10">
+            <section id="explore-events" className="space-y-4 pt-8 border-t border-zinc-200 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-black">GET</span>
-                    <span className="font-mono text-xs sm:text-sm font-bold text-white">/v1/explore/events</span>
+                    <span className="px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-black">GET</span>
+                    <span className="font-mono text-xs sm:text-sm font-bold text-zinc-950 dark:text-white">/v1/explore/events</span>
                   </div>
-                  <p className="text-xs text-zinc-400 font-normal">List public published events with pagination and filters.</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 font-normal">List public published events with pagination and filters.</p>
                 </div>
-                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Public</span>
+                <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Public</span>
               </div>
 
               {/* Code display */}
@@ -313,37 +313,37 @@ print(res.json())`
             </section>
 
             {/* Section 4: Event Details by Slug */}
-            <section id="event-details" className="space-y-4 pt-8 border-t border-white/10">
+            <section id="event-details" className="space-y-4 pt-8 border-t border-zinc-200 dark:border-white/10">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-black">GET</span>
-                  <span className="font-mono text-xs sm:text-sm font-bold text-white">/v1/explore/events/{'{slug}'}</span>
+                  <span className="px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-black">GET</span>
+                  <span className="font-mono text-xs sm:text-sm font-bold text-zinc-950 dark:text-white">/v1/explore/events/{'{slug}'}</span>
                 </div>
-                <p className="text-xs text-zinc-400 font-normal">Retrieve rich event profile including active ticket tiers and organizer badges.</p>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 font-normal">Retrieve rich event profile including active ticket tiers and organizer badges.</p>
               </div>
 
-              <div className="bg-zinc-950 border border-white/10 rounded-2xl p-4 font-mono text-xs text-white">
+              <div className="bg-zinc-950 border border-zinc-800 dark:border-white/10 rounded-2xl p-4 font-mono text-xs text-white">
                 <span className="text-zinc-500">curl -X GET </span>
                 <span className="text-emerald-400">https://api.strayttix.live/v1/explore/events/lagos-tech-fest-2026</span>
               </div>
             </section>
 
             {/* Section 5: Organizer Events */}
-            <section id="organizer-events" className="space-y-4 pt-8 border-t border-white/10">
+            <section id="organizer-events" className="space-y-4 pt-8 border-t border-zinc-200 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-md bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 text-xs font-mono font-black">GET</span>
-                    <span className="font-mono text-xs sm:text-sm font-bold text-white">/v1/organizers/{'{organizerUuid}'}/events</span>
+                    <span className="px-2.5 py-1 rounded-md bg-indigo-500/15 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 text-xs font-mono font-black">GET</span>
+                    <span className="font-mono text-xs sm:text-sm font-bold text-zinc-950 dark:text-white">/v1/organizers/{'{organizerUuid}'}/events</span>
                   </div>
-                  <p className="text-xs text-zinc-400 font-normal">List all events managed by this organizer team, including drafts and sales statistics.</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 font-normal">List all events managed by this organizer team, including drafts and sales statistics.</p>
                 </div>
-                <span className="text-[11px] font-bold text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/30 uppercase tracking-wider font-mono">
+                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/30 uppercase tracking-wider font-mono">
                   Bearer Auth
                 </span>
               </div>
 
-              <div className="relative bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-lg">
+              <div className="relative bg-zinc-950 border border-zinc-800 dark:border-white/10 rounded-2xl overflow-hidden shadow-lg">
                 <div className="flex items-center justify-between px-4 py-2.5 bg-white/[0.03] border-b border-white/10 text-xs text-zinc-400 font-mono">
                   <span>Example Request ({selectedLang})</span>
                   <button
@@ -361,21 +361,21 @@ print(res.json())`
             </section>
 
             {/* Section 6: Create Event */}
-            <section id="create-event" className="space-y-4 pt-8 border-t border-white/10">
+            <section id="create-event" className="space-y-4 pt-8 border-t border-zinc-200 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-mono font-black">POST</span>
-                    <span className="font-mono text-xs sm:text-sm font-bold text-white">/v1/organizers/{'{organizerUuid}'}/events</span>
+                    <span className="px-2.5 py-1 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-mono font-black">POST</span>
+                    <span className="font-mono text-xs sm:text-sm font-bold text-zinc-950 dark:text-white">/v1/organizers/{'{organizerUuid}'}/events</span>
                   </div>
-                  <p className="text-xs text-zinc-400 font-normal">Create a new event record with multi-tier ticket definitions.</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 font-normal">Create a new event record with multi-tier ticket definitions.</p>
                 </div>
-                <span className="text-[11px] font-bold text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/30 uppercase tracking-wider font-mono">
+                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/30 uppercase tracking-wider font-mono">
                   Bearer Auth
                 </span>
               </div>
 
-              <div className="relative bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-lg">
+              <div className="relative bg-zinc-950 border border-zinc-800 dark:border-white/10 rounded-2xl overflow-hidden shadow-lg">
                 <div className="flex items-center justify-between px-4 py-2.5 bg-white/[0.03] border-b border-white/10 text-xs text-zinc-400 font-mono">
                   <span>Example Request ({selectedLang})</span>
                   <button
@@ -393,57 +393,57 @@ print(res.json())`
             </section>
 
             {/* Section 7: Webhooks */}
-            <section id="webhooks" className="space-y-4 pt-8 border-t border-white/10">
+            <section id="webhooks" className="space-y-4 pt-8 border-t border-zinc-200 dark:border-white/10">
               <div className="flex items-center gap-2">
                 <Webhook className="w-5 h-5 text-[#E31B23]" />
-                <h2 className="text-2xl font-bold text-white tracking-tight">Real-Time Webhooks</h2>
+                <h2 className="text-2xl font-bold text-zinc-950 dark:text-white tracking-tight">Real-Time Webhooks</h2>
               </div>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
                 Subscribe to real-time HTTPS callbacks whenever transactions occur. Every webhook payload is signed with a secret HMAC SHA-256 header (<code className="text-[#E31B23]">X-StraytTix-Signature</code>) for tamper verification.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-zinc-950/70 border border-white/10 p-5 rounded-2xl space-y-1.5 backdrop-blur-sm">
-                  <code className="text-xs font-bold text-emerald-400">order.completed</code>
-                  <p className="text-[11px] text-zinc-400 font-normal">Triggered immediately when customer payment clears.</p>
+                <div className="bg-white dark:bg-zinc-950/70 border border-zinc-200 dark:border-white/10 p-5 rounded-2xl space-y-1.5 shadow-xs dark:shadow-none backdrop-blur-sm">
+                  <code className="text-xs font-bold text-emerald-600 dark:text-emerald-400">order.completed</code>
+                  <p className="text-[11px] text-zinc-600 dark:text-zinc-400 font-normal">Triggered immediately when customer payment clears.</p>
                 </div>
-                <div className="bg-zinc-950/70 border border-white/10 p-5 rounded-2xl space-y-1.5 backdrop-blur-sm">
-                  <code className="text-xs font-bold text-indigo-400">ticket.scanned</code>
-                  <p className="text-[11px] text-zinc-400 font-normal">Triggered at the venue gate when attendee QR code is validated.</p>
+                <div className="bg-white dark:bg-zinc-950/70 border border-zinc-200 dark:border-white/10 p-5 rounded-2xl space-y-1.5 shadow-xs dark:shadow-none backdrop-blur-sm">
+                  <code className="text-xs font-bold text-indigo-600 dark:text-indigo-400">ticket.scanned</code>
+                  <p className="text-[11px] text-zinc-600 dark:text-zinc-400 font-normal">Triggered at the venue gate when attendee QR code is validated.</p>
                 </div>
-                <div className="bg-zinc-950/70 border border-white/10 p-5 rounded-2xl space-y-1.5 backdrop-blur-sm">
-                  <code className="text-xs font-bold text-amber-400">event.published</code>
-                  <p className="text-[11px] text-zinc-400 font-normal">Triggered when an organizer transitions an event to live.</p>
+                <div className="bg-white dark:bg-zinc-950/70 border border-zinc-200 dark:border-white/10 p-5 rounded-2xl space-y-1.5 shadow-xs dark:shadow-none backdrop-blur-sm">
+                  <code className="text-xs font-bold text-amber-600 dark:text-amber-400">event.published</code>
+                  <p className="text-[11px] text-zinc-600 dark:text-zinc-400 font-normal">Triggered when an organizer transitions an event to live.</p>
                 </div>
               </div>
             </section>
 
             {/* Section 8: Rate Limits & Errors */}
-            <section id="rate-limits" className="space-y-4 pt-8 border-t border-white/10">
-              <h2 className="text-2xl font-bold text-white tracking-tight">Rate Limits & Errors</h2>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+            <section id="rate-limits" className="space-y-4 pt-8 border-t border-zinc-200 dark:border-white/10">
+              <h2 className="text-2xl font-bold text-zinc-950 dark:text-white tracking-tight">Rate Limits & Errors</h2>
+              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
                 The standard API tier permits <strong>60 requests per minute</strong>. Enterprise tiers support up to <strong>100,000 requests per minute</strong> with dedicated IP peering.
               </p>
 
-              <div className="bg-zinc-950/80 border border-white/10 rounded-2xl overflow-hidden text-xs shadow-xl">
+              <div className="bg-white dark:bg-zinc-950/80 border border-zinc-200 dark:border-white/10 rounded-2xl overflow-hidden text-xs shadow-sm dark:shadow-xl">
                 <table className="w-full text-left">
-                  <thead className="bg-white/[0.04] border-b border-white/10 text-white font-bold">
+                  <thead className="bg-zinc-100 dark:bg-white/[0.04] border-b border-zinc-200 dark:border-white/10 text-zinc-950 dark:text-white font-bold">
                     <tr>
                       <th className="p-3.5">HTTP Code</th>
                       <th className="p-3.5">Description</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5 text-zinc-300 font-normal">
+                  <tbody className="divide-y divide-zinc-200 dark:divide-white/5 text-zinc-700 dark:text-zinc-300 font-normal">
                     <tr>
-                      <td className="p-3.5 font-mono font-bold text-emerald-400">200 OK</td>
+                      <td className="p-3.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">200 OK</td>
                       <td className="p-3.5">Request processed successfully.</td>
                     </tr>
                     <tr>
-                      <td className="p-3.5 font-mono font-bold text-amber-400">401 Unauthorized</td>
+                      <td className="p-3.5 font-mono font-bold text-amber-600 dark:text-amber-400">401 Unauthorized</td>
                       <td className="p-3.5">Invalid or missing API Bearer token.</td>
                     </tr>
                     <tr>
-                      <td className="p-3.5 font-mono font-bold text-amber-400">403 Forbidden</td>
+                      <td className="p-3.5 font-mono font-bold text-amber-600 dark:text-amber-400">403 Forbidden</td>
                       <td className="p-3.5">Your organizer role does not have permission for this action.</td>
                     </tr>
                     <tr>

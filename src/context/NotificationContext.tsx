@@ -36,6 +36,24 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [removeNotification]);
 
+  React.useEffect(() => {
+    const handleCustomToast = (event: Event) => {
+      const customEvent = event as CustomEvent<{ message: string; type?: NotificationType; duration?: number }>;
+      if (customEvent.detail && customEvent.detail.message) {
+        showNotification(
+          customEvent.detail.message,
+          customEvent.detail.type || 'error',
+          customEvent.detail.duration || 5000
+        );
+      }
+    };
+
+    window.addEventListener('app:show-notification', handleCustomToast);
+    return () => {
+      window.removeEventListener('app:show-notification', handleCustomToast);
+    };
+  }, [showNotification]);
+
   return (
     <NotificationContext.Provider value={{ notifications, showNotification, removeNotification }}>
       {children}

@@ -2,14 +2,17 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { resolveOrganizerRole, getRolePermissions, type RolePermissions } from '../utils/permissions';
+import { useCan } from '../hooks/useCan';
 
 interface OrganizerRouteProps {
   children: React.ReactNode;
   requiredPermission?: keyof RolePermissions;
+  capability?: string | string[];
 }
 
-export const OrganizerRoute: React.FC<OrganizerRouteProps> = ({ children, requiredPermission }) => {
+export const OrganizerRoute: React.FC<OrganizerRouteProps> = ({ children, requiredPermission, capability }) => {
   const { isAuthenticated, isEmailVerified, user, organizer, isLoading, token } = useAuth();
+  const { can } = useCan();
   const location = useLocation();
 
   if (isLoading && token) {
@@ -35,12 +38,17 @@ export const OrganizerRoute: React.FC<OrganizerRouteProps> = ({ children, requir
     return <Navigate to="/dashboard" replace />;
   }
 
+  // Check granular capability permission string(s)
+  if (capability && !can(capability)) {
+    return <Navigate to="/403" state={{ from: location }} replace />;
+  }
+
   // Check role-based permission if required
   if (requiredPermission) {
     const role = resolveOrganizerRole(organizer);
     const perms = getRolePermissions(role);
     if (!perms[requiredPermission]) {
-      return <Navigate to="/organizer" replace />;
+      return <Navigate to="/403" state={{ from: location }} replace />;
     }
   }
 

@@ -1463,8 +1463,8 @@ export const CreateEvent: React.FC = () => {
                           type="button"
                           onClick={() => setEventFormat(fmt)}
                           className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center truncate ${isSelected
-                            ? 'bg-zinc-950 text-white border-zinc-950 shadow-xs ring-1 ring-zinc-950'
-                            : 'bg-zinc-50 border-zinc-200 dark:border-white/10 text-zinc-700 hover:bg-zinc-100 hover:border-zinc-300'
+                            ? 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-zinc-950 dark:border-white shadow-xs ring-1 ring-zinc-950 dark:ring-white'
+                            : 'bg-zinc-50 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:border-zinc-300 dark:hover:border-white/20'
                             }`}
                         >
                           {fmt}
@@ -1588,11 +1588,17 @@ export const CreateEvent: React.FC = () => {
 
                 {/* Visibility & Spotlight Toggle */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  <div className="p-3.5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50/70 space-y-2">
-                    <label className="text-xs font-bold text-zinc-800 flex items-center justify-between">
-                      <span>Event Visibility</span>
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${visibility === 'public' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-200 text-zinc-700'
-                        }`}>
+                  <div className="p-3.5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.03] space-y-2">
+                    <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-[#E31B23]" />
+                        <span>Event Visibility</span>
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
+                        visibility === 'public' 
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' 
+                          : 'bg-zinc-200 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-white/10'
+                      }`}>
                         {visibility}
                       </span>
                     </label>
@@ -1600,34 +1606,36 @@ export const CreateEvent: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setVisibility('public')}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${visibility === 'public'
-                          ? 'bg-white text-zinc-950 dark:text-white border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
-                          : 'bg-zinc-100/80 border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100'
-                          }`}
+                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                          visibility === 'public'
+                            ? 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-zinc-950 dark:border-white shadow-xs ring-1 ring-zinc-950 dark:ring-white'
+                            : 'bg-white dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10'
+                        }`}
                       >
                         Public
                       </button>
                       <button
                         type="button"
                         onClick={() => setVisibility('private')}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${visibility === 'private'
-                          ? 'bg-white text-zinc-950 dark:text-white border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
-                          : 'bg-zinc-100/80 border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100'
-                          }`}
+                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                          visibility === 'private'
+                            ? 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-zinc-950 dark:border-white shadow-xs ring-1 ring-zinc-950 dark:ring-white'
+                            : 'bg-white dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10'
+                        }`}
                       >
                         Private
                       </button>
                     </div>
-                    <p className="text-[11px] text-zinc-500 font-medium">
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
                       {visibility === 'public'
-                        ? 'Listed on Eventa marketplace & indexed on search engines.'
-                        : 'Only accessible to users with the direct secret link.'}
+                        ? 'Listed on StraytTix public marketplace & discover directory.'
+                        : 'Unlisted: Only accessible to attendees with your direct secret link.'}
                     </p>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50/70 space-y-2">
+                  <div className="p-3.5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.03] space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
                         <span>Marketplace Spotlight</span>
                       </label>
@@ -1638,11 +1646,11 @@ export const CreateEvent: React.FC = () => {
                           onChange={(e) => setIsFeatured(e.target.checked)}
                           className="sr-only peer"
                         />
-                        <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E31B23]"></div>
+                        <div className="w-10 h-5 bg-zinc-200 dark:bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E31B23]"></div>
                       </label>
                     </div>
-                    <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
-                      Highlight in the "Featured & Spotlight" carousel on the Eventa homepage for increased attendee visibility.
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
+                      Spotlight this event on the StraytTix homepage hero carousel for elevated community discoverability.
                     </p>
                   </div>
                 </div>
@@ -2559,19 +2567,19 @@ export const CreateEvent: React.FC = () => {
                       <label className="text-xs font-bold text-zinc-900 block">Cover Photo & Event Flyer</label>
                       <span className="text-[11px] text-zinc-400">High-res 16:9 banner displayed across event discovery & passes</span>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-full border border-zinc-200 dark:border-white/10">
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 dark:bg-white/10 text-zinc-600 dark:text-zinc-300 rounded-full border border-zinc-200 dark:border-white/10">
                       16:9 Recommended
                     </span>
                   </div>
 
                   {/* Cover Mode Selector */}
-                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100/80 rounded-xl border border-zinc-200 dark:border-white/10/60 text-xs font-bold">
+                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100/80 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-bold">
                     <button
                       type="button"
                       onClick={() => setCoverMode('upload')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'upload'
-                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
-                        : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
+                        ? 'bg-white dark:bg-[#14151B] text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                         }`}
                     >
                       <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -2581,8 +2589,8 @@ export const CreateEvent: React.FC = () => {
                       type="button"
                       onClick={() => setCoverMode('preset')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'preset'
-                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
-                        : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
+                        ? 'bg-white dark:bg-[#14151B] text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                         }`}
                     >
                       <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -2592,8 +2600,8 @@ export const CreateEvent: React.FC = () => {
                       type="button"
                       onClick={() => setCoverMode('url')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'url'
-                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
-                        : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
+                        ? 'bg-white dark:bg-[#14151B] text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                         }`}
                     >
                       <ExternalLink className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -2622,7 +2630,7 @@ export const CreateEvent: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => coverFileInputRef.current?.click()}
-                              className="px-3.5 py-2 bg-white text-zinc-950 dark:text-white text-xs font-bold rounded-xl shadow-md hover:bg-zinc-100 transition-all flex items-center gap-1.5 cursor-pointer"
+                              className="px-3.5 py-2 bg-white text-zinc-950 text-xs font-bold rounded-xl shadow-md hover:bg-zinc-100 transition-all flex items-center gap-1.5 cursor-pointer"
                             >
                               <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
                               <span>Replace Flyer</span>

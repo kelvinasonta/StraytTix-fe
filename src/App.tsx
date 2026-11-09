@@ -49,6 +49,8 @@ import { CreateEvent as OrganizerCreateEvent } from './pages/organizer/CreateEve
 import { Orders as OrganizerOrders } from './pages/organizer/Orders';
 import { Attendees as OrganizerAttendees } from './pages/organizer/Attendees';
 import { Analytics as OrganizerAnalytics } from './pages/organizer/Analytics';
+import { Credits as OrganizerCredits } from './pages/organizer/Credits';
+import { CreditTopupCallback } from './pages/organizer/CreditTopupCallback';
 import { Profile as OrganizerProfileSettings } from './pages/organizer/Profile';
 import { Settings as OrganizerSettings } from './pages/organizer/Settings';
 import { TeamMembers as OrganizerTeamMembers } from './pages/organizer/TeamMembers';
@@ -57,6 +59,7 @@ import { EventManage as OrganizerEventManage } from './pages/organizer/EventMana
 import { PaymentCallback } from './pages/checkout/PaymentCallback';
 import { CheckoutPage } from './pages/checkout/CheckoutPage';
 import { NotFound } from './pages/NotFound';
+import { Forbidden } from './pages/Forbidden';
 import { ScrollToTop } from './components/layout/ScrollToTop';
 
 const OrganizerEditRedirect: React.FC = () => {
@@ -277,6 +280,30 @@ export const App: React.FC = () => {
               }
             />
             <Route
+              path="/organizer/credits"
+              element={
+                <OrganizerRoute requiredPermission="canViewRevenue">
+                  <OrganizerCredits />
+                </OrganizerRoute>
+              }
+            />
+            <Route
+              path="/organizer/credits/callback"
+              element={
+                <OrganizerRoute requiredPermission="canViewRevenue">
+                  <CreditTopupCallback />
+                </OrganizerRoute>
+              }
+            />
+            <Route
+              path="/credits/callback"
+              element={
+                <OrganizerRoute requiredPermission="canViewRevenue">
+                  <CreditTopupCallback />
+                </OrganizerRoute>
+              }
+            />
+            <Route
               path="/organizer/profile"
               element={
                 <OrganizerRoute requiredPermission="canEditOrganizerProfile">
@@ -303,6 +330,9 @@ export const App: React.FC = () => {
 
             {/* Public Organizer Profile (Supports direct /artful-media or /@artful-media) */}
             <Route path="/:slug" element={<OrganizerProfile />} />
+
+            {/* 403 Forbidden Access Page */}
+            <Route path="/403" element={<Forbidden />} />
 
             {/* Fallback 404 */}
             <Route path="*" element={<NotFound />} />

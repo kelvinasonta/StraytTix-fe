@@ -21,7 +21,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 
     return (
       <div className="flex flex-col gap-1.5 w-full">
-        <label htmlFor={selectId} className="text-sm font-semibold text-zinc-800">
+        <label htmlFor={selectId} className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
           {label}
           {required && <span className="text-brand-accent ml-1" aria-hidden="true">*</span>}
         </label>
@@ -31,9 +31,9 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             ref={ref}
             id={selectId}
             required={required}
-            className={`w-full bg-white border ${
-              error ? 'border-red-500 bg-red-50/50' : 'border-zinc-200 hover:border-zinc-300 focus:border-brand-accent focus:ring-brand-accent/25'
-            } text-zinc-900 text-sm rounded-lg px-4 py-2.5 transition-all outline-none focus:ring-2 disabled:opacity-50 disabled:bg-zinc-50 min-h-[44px] appearance-none ${className}`}
+            className={`w-full bg-white dark:bg-[#070709] border ${
+              error ? 'border-red-500 bg-red-50/50 dark:bg-red-500/10' : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 focus:border-brand-accent focus:ring-brand-accent/25'
+            } text-zinc-900 dark:text-white text-sm rounded-lg px-4 py-2.5 transition-all outline-none focus:ring-2 disabled:opacity-50 disabled:bg-zinc-50 dark:disabled:bg-white/5 min-h-[44px] appearance-none ${className}`}
             style={{
               backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2371717a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E")`,
               backgroundPosition: 'right 0.75rem center',
@@ -46,7 +46,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             {...props}
           >
             {options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
+              <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white">
                 {opt.label}
               </option>
             ))}
@@ -54,7 +54,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         </div>
 
         {hint && !error && (
-          <span id={hintId} className="text-xs text-zinc-500">
+          <span id={hintId} className="text-xs text-zinc-500 dark:text-zinc-400">
             {hint}
           </span>
         )}

@@ -16,14 +16,14 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   onAction,
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center text-center p-8 border border-red-100 rounded-2xl bg-red-50/10 max-w-md mx-auto my-12">
-      <div className="w-12 h-12 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center text-red-500 mb-4 shadow-xs">
+    <div className="flex flex-col items-center justify-center text-center p-8 border border-red-100 dark:border-red-500/20 rounded-2xl bg-red-50/10 dark:bg-red-500/5 max-w-md mx-auto my-12">
+      <div className="w-12 h-12 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-2xl flex items-center justify-center text-red-500 dark:text-red-400 mb-4 shadow-xs">
         <AlertTriangle className="w-6 h-6" />
       </div>
-      <h3 className="text-lg font-bold text-zinc-900 mb-1">{title}</h3>
-      <p className="text-zinc-600 text-sm mb-6 max-w-xs">{message}</p>
+      <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-1">{title}</h3>
+      <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-6 max-w-xs">{message}</p>
       {onAction && (
-        <Button variant="outline" fullWidth={false} onClick={onAction} className="px-6 border-red-200 hover:bg-red-50 hover:border-red-300 text-red-700">
+        <Button variant="outline" fullWidth={false} onClick={onAction} className="px-6 border-red-200 dark:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-300 text-red-700 dark:text-red-400">
           {actionText}
         </Button>
       )}

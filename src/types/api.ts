@@ -1,6 +1,6 @@
 export type AccountType = 'customer' | 'organizer';
 export type OrganizerType = 'individual' | 'organization';
-export type StaffRole = 'owner' | 'admin' | 'manager' | 'staff';
+export type StaffRole = 'owner' | 'admin' | 'finance' | 'manager' | 'staff';
 export type EventStatus = 'Draft' | 'Published' | 'Upcoming' | 'Completed' | 'Cancelled' | 'Archived' | 'Ended';
 export type TicketStatus = 'Upcoming' | 'Used' | 'Cancelled' | 'Expired';
 export type OrderStatus = 'pending' | 'processing' | 'paid' | 'cancelled' | 'refunded' | 'failed' | 'Paid' | 'Pending' | 'Failed' | 'Refunded';
@@ -77,11 +77,16 @@ export interface LoginHistoryPagination {
 
 export interface Organizer {
   id: string;
+  uuid?: string;
   name: string;
   slug: string;
   type: OrganizerType;
   role?: StaffRole;
+  role_label?: string;
   isOwner?: boolean;
+  is_owner?: boolean;
+  is_verified?: boolean;
+  permissions?: string[];
   bio?: string;
   description?: string;
   email?: string;
@@ -172,17 +177,90 @@ export interface StaffMemberSettings {
 }
 
 export interface TeamMember {
-  id: string;
+  id: string | number;
   uuid: string;
+  member_id?: number | string;
+  user_id?: string;
+  organizer_id?: string;
+  name?: string;
   firstName: string;
   lastName: string;
   email: string;
   role: StaffRole;
+  role_label?: string;
+  is_owner?: boolean;
+  permissions?: string[];
   phone?: string;
   duty?: string;
   station?: string;
   settings?: StaffMemberSettings;
   joinedAt: string;
+  joined_at?: string;
+}
+
+export interface RoleCatalogItem {
+  role: StaffRole;
+  label: string;
+  description: string;
+  level: number;
+  can_assign: boolean;
+  permissions: string[];
+}
+
+export interface OrganizerRolesResponse {
+  current_role: StaffRole;
+  permissions: string[];
+  roles: RoleCatalogItem[];
+}
+
+export interface CountryMeta {
+  code: string;
+  iso2: string;
+  iso3: string;
+  name: string;
+  dial_code: string;
+  currency: string;
+  currency_symbol: string;
+  flag: string;
+}
+
+export interface OrganizerPayoutsSummary {
+  organizer_uuid: string;
+  gross_revenue: number;
+  net_revenue: number;
+  total_revenue: number;
+  service_fees: number;
+  total_orders: number;
+  total_paid_out: number;
+  available_balance: number;
+  pending_balance: number;
+  currency: string;
+  summary?: {
+    gross_revenue: number;
+    net_revenue: number;
+    total_revenue: number;
+    service_fees: number;
+    total_orders: number;
+    total_paid_out: number;
+    available_balance: number;
+    pending_balance: number;
+    currency: string;
+  };
+  bank_account?: {
+    bank_name: string;
+    bank_code: string;
+    account_name: string;
+    account_number: string;
+    is_default: boolean;
+  } | null;
+  payouts: any[];
+  items: any[];
+  meta?: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
 }
 
 export interface StaffInvitation {
@@ -597,6 +675,8 @@ export interface Order {
   status: OrderStatus;
   reservedUntil?: string | null; // ISO Date string (15-min hold)
   paidAt?: string | null;
+  guestToken?: string | null;
+  guest_token?: string | null;
   createdAt: string;
   event?: {
     id: string;
@@ -715,5 +795,74 @@ export interface AppSettings {
   support_email?: string | null;
   timezone?: string | null;
   currency_id?: string | number | null;
+}
+
+// ============================================================================
+// ORGANIZER CREDITS & DOUBLE-ENTRY AUDIT LEDGER TYPES
+// ============================================================================
+
+export type CreditTxType = 'CREDIT' | 'DEBIT' | 'HOLD' | 'RELEASE';
+
+export type CreditTxReason =
+  | 'TOPUP'
+  | 'EMAIL_BROADCAST'
+  | 'SMS_BROADCAST'
+  | 'CUSTOM_DOMAIN_SUB'
+  | 'SCANNER_PASS'
+  | 'FAILED_DISPATCH_REFUND'
+  | 'ADMIN_ADJUSTMENT'
+  | string;
+
+export interface CreditWallet {
+  id?: string;
+  uuid?: string;
+  organizer_id?: string;
+  balance: number;
+  reserved_balance: number;
+  available_balance: number;
+  currency: string;
+  version: number;
+  updated_at?: string;
+}
+
+export interface CreditLedgerItem {
+  id: string | number;
+  uuid?: string;
+  wallet_id?: string;
+  organizer_id?: string;
+  event_id?: string | null;
+  type: CreditTxType;
+  reason: CreditTxReason;
+  amount: number;
+  balance_before: number;
+  balance_after: number;
+  reference: string;
+  idempotency_key?: string;
+  description: string;
+  metadata?: Record<string, any> | null;
+  created_at: string;
+}
+
+export interface TopupInitializeResponse {
+  reference: string;
+  authorization_url?: string;
+  checkout_url?: string;
+  access_code?: string;
+  amount_kobo?: number;
+  credits?: number;
+  amount_credits?: number;
+  currency?: string;
+}
+
+export interface ReconcileWalletResponse {
+  valid?: boolean;
+  is_valid?: boolean;
+  computed_balance: number;
+  stored_balance?: number;
+  recorded_balance?: number;
+  difference: number;
+  timestamp?: string;
+  status?: 'balanced' | 'discrepancy' | string;
+  message?: string;
 }
 

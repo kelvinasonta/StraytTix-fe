@@ -262,6 +262,8 @@ export const normalizeBackendEvent = (raw: any): Event => {
     },
     popularity: raw.popularity ?? 0,
     ticketsSold: (() => {
+      if (raw.soldQuantity !== undefined && raw.soldQuantity !== null) return Number(raw.soldQuantity);
+      if (raw.sold_quantity !== undefined && raw.sold_quantity !== null) return Number(raw.sold_quantity);
       if (raw.ticketsSold !== undefined && raw.ticketsSold !== null) return Number(raw.ticketsSold);
       if (raw.tickets_sold !== undefined && raw.tickets_sold !== null) return Number(raw.tickets_sold);
       if (raw.soldTickets !== undefined && raw.soldTickets !== null) return Number(raw.soldTickets);

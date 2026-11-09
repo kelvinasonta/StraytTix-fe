@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Logo } from '../ui/Logo';
-import { ArrowLeft, CheckCircle2, ShieldCheck, MapPin } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ShieldCheck, MapPin, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -11,31 +12,44 @@ interface AuthLayoutProps {
 }
 
 export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) => {
+  const { isDark, toggleTheme } = useTheme();
+
   return (
-    <div className="min-h-[100dvh] lg:h-[100dvh] lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12 bg-[#070709] text-white selection:bg-[#E31B23] selection:text-white antialiased">
+    <div className="min-h-[100dvh] lg:h-[100dvh] lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12 bg-white dark:bg-[#070709] text-zinc-900 dark:text-white selection:bg-[#E31B23] selection:text-white antialiased transition-colors duration-200">
       
-      {/* Left Form Area (5 cols on lg, 6 cols on xl) - Dark Cinema aesthetic */}
-      <div className="lg:col-span-6 xl:col-span-5 bg-[#070709] z-10 lg:h-full lg:overflow-y-auto border-r border-white/10">
+      {/* Left Form Area (5 cols on lg, 6 cols on xl) */}
+      <div className="lg:col-span-6 xl:col-span-5 bg-white dark:bg-[#070709] z-10 lg:h-full lg:overflow-y-auto border-r border-zinc-200 dark:border-white/10 transition-colors duration-200">
         <div className="min-h-full flex flex-col justify-between p-6 sm:p-10 md:p-14 lg:p-12 xl:p-16">
           {/* Header with Logo and Return Link */}
           <header className="flex items-center justify-between mb-8 sm:mb-10 shrink-0">
-            <Logo to="/" size="md" variant="light" />
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-white transition-colors group"
-            >
-              <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-              <span>Back to events</span>
-            </Link>
+            <Logo to="/" size="md" variant={isDark ? 'light' : 'dark'} />
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer border bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-700 dark:text-amber-300 border-zinc-200 dark:border-white/15"
+                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                aria-label="Toggle theme mode"
+              >
+                {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+              </button>
+              <Link
+                to="/"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors group"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+                <span>Back to events</span>
+              </Link>
+            </div>
           </header>
 
           {/* Form Container */}
           <div className="my-auto py-4 max-w-md w-full mx-auto space-y-6">
             <div className="space-y-1.5">
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-950 dark:text-white">
                 {title}
               </h1>
-              <p className="text-zinc-400 text-sm font-normal leading-relaxed">
+              <p className="text-zinc-600 dark:text-zinc-400 text-sm font-normal leading-relaxed">
                 {subtitle}
               </p>
             </div>
@@ -44,14 +58,14 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
           </div>
 
           {/* Clean Legal Footer */}
-          <footer className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-500 shrink-0">
+          <footer className="mt-10 pt-6 border-t border-zinc-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-500 shrink-0">
             <span>&copy; {new Date().getFullYear()} StraytTix Technologies</span>
             <div className="flex items-center gap-4">
-              <Link to="/terms" className="hover:text-zinc-300 transition-colors">Terms</Link>
+              <Link to="/terms" className="hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors">Terms</Link>
               <span>•</span>
-              <Link to="/privacy" className="hover:text-zinc-300 transition-colors">Privacy</Link>
+              <Link to="/privacy" className="hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors">Privacy</Link>
               <span>•</span>
-              <Link to="/contact" className="hover:text-zinc-300 transition-colors">Help</Link>
+              <Link to="/contact" className="hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors">Help</Link>
             </div>
           </footer>
         </div>

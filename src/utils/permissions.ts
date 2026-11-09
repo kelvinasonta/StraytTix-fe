@@ -1,4 +1,8 @@
-export type OrganizerRole = 'owner' | 'admin' | 'manager' | 'staff';
+export type OrganizerRole = 'owner' | 'admin' | 'finance' | 'manager' | 'staff';
+
+export function hasPermission(permissions: string[] = [], requiredPermission: string): boolean {
+  return permissions.includes('*') || permissions.includes(requiredPermission);
+}
 
 export interface RolePermissions {
   // Event Creation & Drafting
@@ -40,6 +44,7 @@ export const resolveOrganizerRole = (organizer: any): OrganizerRole => {
   const raw = String(organizer.role || organizer.member_role || organizer.user_role || '').toLowerCase().trim();
   if (raw === 'owner') return 'owner';
   if (raw === 'admin') return 'admin';
+  if (raw === 'finance') return 'finance';
   if (raw === 'manager') return 'manager';
   if (raw === 'staff') return 'staff';
   if (organizer.isOwner === true || organizer.is_owner === true) return 'owner';
@@ -98,6 +103,28 @@ export const getRolePermissions = (role: OrganizerRole): RolePermissions => {
         canAccessSettings: true,
         canManageLifecycle: false,
         canAccessMarketing: true,
+      };
+
+    case 'finance':
+      return {
+        canCreateEvents: false,
+        canPublishEvents: false,
+        canDeleteEvents: false,
+        canConfigureTickets: false,
+        canIssueRefunds: true,
+        canViewRevenue: true,
+        canViewFinanceWallet: true,
+        canManageBanking: true,
+        canManageTeam: false,
+        canAssignStaffToEvent: false,
+        canViewOrders: true,
+        canDownloadAttendees: true,
+        canMonitorCheckInCounts: true,
+        canScanGateTickets: false,
+        canEditOrganizerProfile: false,
+        canAccessSettings: true,
+        canManageLifecycle: false,
+        canAccessMarketing: false,
       };
 
     case 'manager':
@@ -167,3 +194,123 @@ export const getRolePermissions = (role: OrganizerRole): RolePermissions => {
       };
   }
 };
+
+/**
+ * Returns the default backend-compatible capability strings for a given role.
+ * Used as a fallback when the backend payload doesn't provide an explicit permissions array.
+ */
+export const getDefaultRolePermissionsList = (role: OrganizerRole): string[] => {
+  switch (role) {
+    case 'owner':
+      return ['*'];
+    case 'admin':
+      return [
+        'org.view',
+        'org.update',
+        'org.members.view',
+        'org.members.manage',
+        'org.finance.view',
+        'org.finance.manage',
+        'org.credits.manage',
+        'org.verification.view',
+        'org.verification.manage',
+        'org.events.view',
+        'org.events.create',
+        'org.events.update',
+        'org.attendees.view',
+        'org.attendees.manage',
+        'org.tickets.manage',
+        'org.audit_logs.view',
+      ];
+    case 'finance':
+      return [
+        'org.view',
+        'org.verification.view',
+        'org.members.view',
+        'org.finance.view',
+        'org.finance.manage',
+        'org.credits.manage',
+        'org.events.view',
+        'org.attendees.view',
+        'org.audit_logs.view',
+      ];
+    case 'manager':
+      return [
+        'org.view',
+        'org.update',
+        'org.events.view',
+        'org.events.create',
+        'org.events.update',
+        'org.attendees.view',
+        'org.attendees.manage',
+        'org.tickets.manage',
+      ];
+    case 'staff':
+      return [
+        'org.view',
+        'org.events.view',
+        'org.attendees.view',
+      ];
+    default:
+      return [];
+  }
+};
+
+export interface CapabilityItem {
+  key: string;
+  label: string;
+  description: string;
+}
+
+export interface CapabilityCategory {
+  category: string;
+  permissions: CapabilityItem[];
+}
+
+export const ALL_CAPABILITIES_DICTIONARY: CapabilityCategory[] = [
+  {
+    category: 'Organization & Workspace',
+    permissions: [
+      { key: 'org.view', label: 'View Organization', description: 'View profile, branding and general configuration' },
+      { key: 'org.update', label: 'Update Organization', description: 'Update profile details, branding and preferences' },
+      { key: 'org.delete', label: 'Delete Organization', description: 'Terminate and permanently delete the entire organization' },
+    ],
+  },
+  {
+    category: 'Events & Experiences',
+    permissions: [
+      { key: 'org.events.view', label: 'View Events', description: 'Inspect events catalog and event summaries' },
+      { key: 'org.events.create', label: 'Create Events', description: 'Draft and create new event listings' },
+      { key: 'org.events.update', label: 'Edit & Manage Events', description: 'Modify event schedules, lineup, ticket tiers, and publish status' },
+      { key: 'org.events.delete', label: 'Delete Events', description: 'Permanently remove event listings and drafts' },
+    ],
+  },
+  {
+    category: 'Attendees & Ticketing',
+    permissions: [
+      { key: 'org.attendees.view', label: 'View Attendees', description: 'View attendee names, orders and ticket passes' },
+      { key: 'org.attendees.manage', label: 'Manage & Export Attendees', description: 'Export attendee rosters, manage check-in passes and manual approvals' },
+      { key: 'org.tickets.manage', label: 'Manage Ticket Tiers', description: 'Configure pricing, quantities, promos and invite-only tiers' },
+    ],
+  },
+  {
+    category: 'Finance, Banking & Credits',
+    permissions: [
+      { key: 'org.finance.view', label: 'View Financials & Wallet', description: 'View gross revenues, sales analytics, and ledger balance' },
+      { key: 'org.finance.manage', label: 'Manage Bank Accounts & Payouts', description: 'Manage settlement accounts, withdraw funds and view bank statements' },
+      { key: 'org.credits.manage', label: 'Purchase & Top-Up Credits', description: 'Execute Paystack credit top-ups and ledger allocations' },
+    ],
+  },
+  {
+    category: 'Team & Compliance',
+    permissions: [
+      { key: 'org.members.view', label: 'View Team Members', description: 'See who has access to this workspace' },
+      { key: 'org.members.manage', label: 'Manage Team & Permissions', description: 'Invite members, modify roles, and grant granular permissions' },
+      { key: 'org.verification.view', label: 'View KYC & Verification', description: 'Inspect organization verification status' },
+      { key: 'org.verification.manage', label: 'Manage KYC & Submit Documents', description: 'Upload corporate verification and business records' },
+      { key: 'org.audit_logs.view', label: 'View Audit Logs', description: 'Access immutable security audit history and system events' },
+    ],
+  },
+];
+
+

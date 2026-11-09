@@ -83,12 +83,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
       const currentScrollY = window.scrollY || document.documentElement.scrollTop;
       const delta = currentScrollY - lastScrollY;
 
-      // Smooth threshold with 20px hysteresis to prevent border jitter
-      setIsScrolled((prev) => {
-        if (!prev && currentScrollY > 70) return true;
-        if (prev && currentScrollY < 50) return false;
-        return prev;
-      });
+      // Convert to pill when scrolled past top (activates at >20px)
+      setIsScrolled(currentScrollY > 20);
 
       if (currentScrollY <= MIN_PAGE_OFFSET) {
         setIsVisible(true);
@@ -121,7 +117,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
   const isDashboardView = isDashboard || hideNavLinks || location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/organizer');
   
   const isDarkCanvasPage = isDark;
-  const isDarkHeroPage = location.pathname === '/' || location.pathname === '/discover';
+  const isDarkHeroPage = location.pathname === '/';
+  const useLightNavText = isDarkCanvasPage || (!isDashboardView && isDarkHeroPage && !isScrolled);
 
   const handleLogout = async () => {
     await logout();
@@ -201,7 +198,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      className={`sticky top-0 z-40 transition-[transform,padding,background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isVisible 
           ? 'translate-y-0' 
           : '-translate-y-full pointer-events-none'
@@ -215,7 +212,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               ? 'bg-white/80 backdrop-blur-xl border-b border-zinc-200/80 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] py-1'
               : 'bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] py-0'
           : isScrolled
-            ? 'pt-2.5 sm:pt-3 pb-1.5 px-3 sm:px-6 bg-transparent border-b border-transparent pointer-events-none'
+            ? 'pt-2.5 sm:pt-3.5 pb-1.5 px-3 sm:px-6 bg-transparent border-b border-transparent pointer-events-none'
             : isDarkHeroPage
               ? 'pt-0 pb-0 px-0 bg-transparent border-b border-white/[0.06] backdrop-blur-[2px] pointer-events-auto'
               : isDarkCanvasPage
@@ -225,7 +222,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
     >
       <nav
         aria-label="Primary Navigation"
-        className={`pointer-events-auto mx-auto flex items-center justify-between transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`pointer-events-auto mx-auto flex items-center justify-between transition-[max-width,height,border-radius,background-color,border-color,box-shadow,padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           isDashboardView
             ? `max-w-7xl px-4 sm:px-6 ${isScrolled ? 'h-14' : 'h-16'}`
             : isScrolled
@@ -236,7 +233,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
         }`}
       >
         {/* Brand Logo */}
-        <Logo to={logoTarget} size="md" variant={isDarkCanvasPage ? 'light' : 'dark'} />
+        <Logo to={logoTarget} size="md" variant={useLightNavText ? 'light' : 'dark'} />
 
         {/* Center Desktop Navigation: Different for Guest vs Auth */}
         <div className={`hidden lg:flex items-center transition-[gap] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
@@ -252,7 +249,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                     `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                       isActive
                         ? 'text-[#E31B23] font-bold'
-                        : 'text-zinc-300 hover:text-[#E31B23]'
+                        : useLightNavText
+                          ? 'text-zinc-200 hover:text-[#E31B23]'
+                          : 'text-zinc-700 hover:text-[#E31B23]'
                     }`
                   }
                 >
@@ -268,7 +267,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                   className={`text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1 cursor-pointer select-none ${
                     isMoreDropdownActive || moreDropdown
                       ? 'text-[#E31B23] font-bold'
-                      : 'text-zinc-300 hover:text-[#E31B23]'
+                      : useLightNavText
+                        ? 'text-zinc-200 hover:text-[#E31B23]'
+                        : 'text-zinc-700 hover:text-[#E31B23]'
                   }`}
                   aria-expanded={moreDropdown}
                   aria-haspopup="true"
@@ -335,8 +336,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                   `text-xs xl:text-sm font-semibold tracking-wide transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                     isActive
                       ? 'text-[#E31B23] font-bold'
-                      : isDarkCanvasPage
-                        ? 'text-zinc-300 hover:text-[#E31B23]'
+                      : useLightNavText
+                        ? 'text-zinc-200 hover:text-[#E31B23]'
                         : 'text-zinc-700 hover:text-[#E31B23]'
                   }`
                 }
@@ -356,7 +357,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
               isDark
                 ? 'bg-white/5 hover:bg-white/10 text-amber-300 border-white/15'
-                : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
+                : useLightNavText
+                  ? 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
             }`}
             title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             aria-label="Toggle theme mode"
@@ -370,8 +373,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               {/* Notification Bell */}
               <button
                 className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
-                  isDarkCanvasPage
-                    ? 'text-zinc-400 hover:text-white hover:bg-white/10'
+                  useLightNavText
+                    ? 'text-zinc-300 hover:text-white hover:bg-white/10'
                     : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
                 }`}
                 title="Notifications"
@@ -550,9 +553,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
               <Link
                 to="/login"
                 className={`rounded-full font-bold transition-all duration-300 cursor-pointer whitespace-nowrap ${
-                  isDarkCanvasPage
-                    ? 'px-5 py-2 text-xs xl:text-sm text-zinc-300 hover:text-white border border-white/20 hover:border-white/40 hover:bg-white/5'
-                    : 'px-5 py-2 text-xs xl:text-sm text-zinc-700 hover:text-zinc-950 border border-zinc-200 hover:border-zinc-300'
+                  useLightNavText
+                    ? 'px-5 py-2 text-xs xl:text-sm text-zinc-200 hover:text-white border border-white/25 hover:border-white/40 hover:bg-white/10'
+                    : 'px-5 py-2 text-xs xl:text-sm text-zinc-700 hover:text-zinc-950 border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
                 }`}
               >
                 Log In
@@ -578,7 +581,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors border ${
               isDark
                 ? 'bg-white/5 text-amber-300 border-white/15'
-                : 'bg-zinc-100 text-zinc-700 border-zinc-200'
+                : useLightNavText
+                  ? 'bg-white/10 text-white border-white/20'
+                  : 'bg-zinc-100 text-zinc-700 border-zinc-200'
             }`}
             title="Toggle Theme"
           >
@@ -588,7 +593,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`p-2 rounded-xl focus:outline-none transition-colors ${
-              isDarkCanvasPage
+              useLightNavText
                 ? 'text-white hover:bg-white/10'
                 : 'text-zinc-700 hover:bg-zinc-100'
             }`}

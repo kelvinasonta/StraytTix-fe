@@ -14,6 +14,8 @@ import type { LoginSession, LoginHistoryItem } from '../../types/api';
 import { organizerApi } from '../../api/organizers';
 import { getApiErrorMessage } from '../../api/client';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
+import { useCan } from '../../hooks/useCan';
+import { Can } from '../../components/auth/Can';
 import {
   KeyRound,
   Shield,
@@ -105,6 +107,7 @@ const DEFAULT_STAFF_SCANS: StaffScanHistoryItem[] = [];
 export const Settings: React.FC = () => {
   const { user, organizer, logout, setActiveOrganizer, refreshUser } = useAuth();
   const { showNotification } = useNotification();
+  const { can, hasRole, isOwner } = useCan();
   const isOrganization = organizer?.type === 'organization';
 
   const role = resolveOrganizerRole(organizer);
@@ -776,11 +779,11 @@ export const Settings: React.FC = () => {
                   { id: 'profile', label: 'User Profile', icon: User },
                   { id: 'security', label: 'Security & Password', icon: KeyRound },
                   { id: 'sessions', label: 'Login Sessions', icon: Smartphone, count: sessions.length },
-                  { id: 'audit', label: 'Audit Logs', icon: History },
+                  ...(can('org.audit_logs.view') ? [{ id: 'audit', label: 'Audit Logs', icon: History }] : []),
                   { id: 'preferences', label: 'Preferences & Regional', icon: Globe },
                   { id: 'notifications', label: 'Notifications', icon: Bell },
                   { id: 'developer', label: 'API & Webhooks', icon: Code2 },
-                  ...(perms.canManageLifecycle ? [{ id: 'danger', label: 'Danger Zone', icon: AlertTriangle }] : [])
+                  ...(isOwner || role === 'owner' ? [{ id: 'danger', label: 'Danger Zone', icon: AlertTriangle }] : [])
                 ]
             ).map(tab => {
               const Icon = tab.icon;
@@ -2353,7 +2356,7 @@ export const Settings: React.FC = () => {
         {/* ========================================================================= */}
         {/* TAB 8: DANGER ZONE - Only Owner */}
         {/* ========================================================================= */}
-        {perms.canManageLifecycle && activeTab === 'danger' && (
+        {(isOwner || role === 'owner') && activeTab === 'danger' && (
           <div className="space-y-6 animate-fadeIn">
             {/* Export Archive Card */}
             <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">

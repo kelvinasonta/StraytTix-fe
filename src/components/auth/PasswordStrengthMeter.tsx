@@ -35,14 +35,14 @@ export const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({ pa
       {password.length > 0 && (
         <div className="space-y-1">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-zinc-500 font-semibold">Password Strength</span>
+            <span className="text-zinc-500 dark:text-zinc-400 font-semibold">Password Strength</span>
             <span className={`font-bold ${
-              score <= 2 ? 'text-red-600' : score <= 4 ? 'text-amber-600' : 'text-emerald-600'
+              score <= 2 ? 'text-red-600 dark:text-red-400' : score <= 4 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'
             }`}>
               {getStrengthLabel()}
             </span>
           </div>
-          <div className="h-1.5 w-full bg-zinc-150 rounded-full overflow-hidden">
+          <div className="h-1.5 w-full bg-zinc-200 dark:bg-white/10 rounded-full overflow-hidden">
             <div 
               className={`h-full transition-all duration-300 ${getBarColor()}`}
               style={{ width: `${(score / requirements.length) * 100}%` }}
@@ -52,15 +52,15 @@ export const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({ pa
       )}
 
       {/* Detail Checks */}
-      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-zinc-500 p-3 bg-zinc-50 border border-zinc-150 rounded-lg">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-zinc-500 dark:text-zinc-400 p-3 bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-lg">
         {requirements.map((req, idx) => (
           <li key={idx} className="flex items-center gap-1.5">
             {req.met ? (
-              <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" aria-hidden="true" />
+              <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" aria-hidden="true" />
             ) : (
-              <X className="w-3.5 h-3.5 text-zinc-350 flex-shrink-0" aria-hidden="true" />
+              <X className="w-3.5 h-3.5 text-zinc-350 dark:text-zinc-600 flex-shrink-0" aria-hidden="true" />
             )}
-            <span className={req.met ? 'text-zinc-800 font-bold' : ''}>{req.label}</span>
+            <span className={req.met ? 'text-zinc-800 dark:text-zinc-200 font-bold' : ''}>{req.label}</span>
           </li>
         ))}
       </ul>

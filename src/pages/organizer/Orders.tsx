@@ -11,6 +11,8 @@ import { useNotification } from '../../context/NotificationContext';
 import { eventApi } from '../../api/events';
 import { ordersApi } from '../../api/orders';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
+import { useCan } from '../../hooks/useCan';
+import { Can } from '../../components/auth/Can';
 import type { Order, Event, OrderStatus } from '../../types/api';
 import { 
   ShoppingBag, 
@@ -89,11 +91,12 @@ const normalizeOrder = (raw: any, fallbackEvents: Event[] = []): Order => {
 export const Orders: React.FC = () => {
   const { organizer } = useAuth();
   const { showNotification } = useNotification();
+  const { can } = useCan();
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
 
   // If role does not have order viewing rights, bounce to /organizer
-  if (!perms.canViewOrders) {
+  if (!perms.canViewOrders && !can(['org.attendees.view', 'org.events.view'])) {
     return <Navigate to="/organizer" replace />;
   }
 
@@ -405,15 +408,17 @@ export const Orders: React.FC = () => {
                 <span>Refresh</span>
               </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportCSV}
-                className="gap-2 bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white dark:text-white border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Export CSV</span>
-              </Button>
+              <Can permission={['org.attendees.manage', 'org.finance.view']}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportCSV}
+                  className="gap-2 bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white dark:text-white border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export CSV</span>
+                </Button>
+              </Can>
             </div>
           </div>
         </div>
@@ -875,19 +880,19 @@ export const Orders: React.FC = () => {
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                     Issued Tickets & Passes ({selectedOrder.tickets.length})
                   </h4>
-                  <div className="rounded-xl border border-zinc-200 overflow-hidden bg-white divide-y divide-zinc-100 dark:divide-white/10 text-xs">
+                  <div className="rounded-xl border border-zinc-200 dark:border-white/10 overflow-hidden bg-white dark:bg-[#070709] divide-y divide-zinc-100 dark:divide-white/10 text-xs">
                     {selectedOrder.tickets.map((tkt, idx) => (
                       <div key={tkt.id || idx} className="p-3 flex items-center justify-between">
                         <div>
                           <p className="font-mono font-bold text-zinc-900 dark:text-white">{tkt.ticketNumber}</p>
-                          <p className="text-[11px] text-zinc-500">
+                          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
                             {tkt.attendeeName || selectedOrder.customerName} {tkt.attendeeEmail ? `(${tkt.attendeeEmail})` : ''}
                           </p>
                         </div>
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                           tkt.status === 'used' || tkt.checkedInAt 
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                            : 'bg-zinc-100 text-zinc-700'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50' 
+                            : 'bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300'
                         }`}>
                           {tkt.status === 'used' || tkt.checkedInAt ? 'Checked In' : 'Valid Entry'}
                         </span>
@@ -920,7 +925,7 @@ export const Orders: React.FC = () => {
                         setOrderToRefund(selectedOrder);
                         setIsRefundModalOpen(true);
                       }}
-                      className="text-rose-600 border-rose-200 hover:bg-rose-50 gap-1.5"
+                      className="text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800/50 hover:bg-rose-50 dark:hover:bg-rose-950/50 gap-1.5"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
                       <span>Issue Refund</span>
@@ -969,28 +974,28 @@ export const Orders: React.FC = () => {
               </div>
 
               {/* Order Summary */}
-              <div className="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 space-y-1.5 text-xs">
+              <div className="p-3.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.03] space-y-1.5 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Attendee:</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">Attendee:</span>
                   <span className="font-bold text-zinc-900 dark:text-white">{orderToRefund.customerName} ({orderToRefund.customerEmail})</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Refund Amount:</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">Refund Amount:</span>
                   <span className="font-mono font-bold text-zinc-950 dark:text-white text-sm">{formatCurrency(orderToRefund.amount)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Tickets Cancelled:</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">Tickets Cancelled:</span>
                   <span className="font-bold text-zinc-900 dark:text-white">{orderToRefund.ticketQuantity} ticket(s)</span>
                 </div>
               </div>
 
               {/* Reason Selection */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-zinc-700">Reason for Refund</label>
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Reason for Refund</label>
                 <select
                   value={refundReason}
                   onChange={(e) => setRefundReason(e.target.value)}
-                  className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2 text-xs font-semibold text-zinc-900 dark:text-white outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20"
+                  className="w-full bg-white dark:bg-[#14151B] border border-zinc-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-zinc-900 dark:text-white outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20"
                 >
                   <option value="Attendee Requested Cancellation">Attendee Requested Cancellation</option>
                   <option value="Event Rescheduled or Venue Change">Event Rescheduled or Venue Change</option>
@@ -1002,13 +1007,13 @@ export const Orders: React.FC = () => {
 
               {/* Optional Notes */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-zinc-700">Internal Audit Note (Optional)</label>
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Internal Audit Note (Optional)</label>
                 <textarea
                   rows={2}
                   value={refundCustomNotes}
                   onChange={(e) => setRefundCustomNotes(e.target.value)}
                   placeholder="Additional context for your organization records..."
-                  className="w-full bg-white border border-zinc-200 rounded-xl p-3 text-xs outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 text-zinc-900 dark:text-white resize-none"
+                  className="w-full bg-white dark:bg-[#14151B] border border-zinc-200 dark:border-white/10 rounded-xl p-3 text-xs outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 text-zinc-900 dark:text-white resize-none"
                 />
               </div>
 

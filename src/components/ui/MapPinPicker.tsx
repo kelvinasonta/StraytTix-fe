@@ -610,7 +610,7 @@ export const MapPinPicker: React.FC<MapPinPickerProps> = ({
 
       {/* Map Outer Canvas Frame */}
       <div 
-        className={`relative h-72 sm:h-96 w-full rounded-2xl overflow-hidden border border-zinc-200 shadow-sm group select-none bg-zinc-100 ${
+        className={`relative h-72 sm:h-96 w-full rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 shadow-sm group select-none bg-zinc-100 dark:bg-zinc-900 ${
           isDragging ? 'is-dragging-state' : ''
         }`}
       >
@@ -622,7 +622,7 @@ export const MapPinPicker: React.FC<MapPinPickerProps> = ({
 
         {/* Loading Spinner */}
         {isLoading && (
-          <div className="absolute inset-0 z-30 bg-zinc-50 flex flex-col items-center justify-center gap-2 text-zinc-500">
+          <div className="absolute inset-0 z-30 bg-zinc-50 dark:bg-[#0F0F14] flex flex-col items-center justify-center gap-2 text-zinc-500 dark:text-zinc-400">
             <Loader2 className="w-6 h-6 animate-spin text-[#E31B23]" />
             <span className="text-xs font-bold">Loading Google Maps...</span>
           </div>
@@ -630,18 +630,18 @@ export const MapPinPicker: React.FC<MapPinPickerProps> = ({
 
         {/* Error Fallback State */}
         {loadError && !isLoading && (
-          <div className="absolute inset-0 z-30 bg-zinc-50/95 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-red-50 border border-red-200 flex items-center justify-center text-[#E31B23]">
+          <div className="absolute inset-0 z-30 bg-zinc-50/95 dark:bg-[#0F0F14]/95 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-center justify-center text-[#E31B23]">
               <AlertCircle className="w-5 h-5" />
             </div>
-            <p className="text-xs font-bold text-zinc-800 max-w-sm">{loadError}</p>
+            <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200 max-w-sm">{loadError}</p>
             <button
               type="button"
               onClick={() => {
                 googleMapsPromise = null;
                 initMap();
               }}
-              className="px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-bold inline-flex items-center gap-1.5 hover:bg-zinc-800 cursor-pointer"
+              className="px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Retry Loading Map</span>
@@ -652,21 +652,21 @@ export const MapPinPicker: React.FC<MapPinPickerProps> = ({
         {/* ================= FLOATING TOP HEADER HUD ================= */}
         <div className="absolute top-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 z-[20] pointer-events-none">
           {/* Active Marker Status Pill */}
-          <div className="bg-white/95 backdrop-blur-md border border-zinc-200/90 py-1.5 px-3 rounded-xl shadow-md flex items-center gap-2.5 pointer-events-auto">
-            <div className="w-6 h-6 rounded-lg bg-red-50 border border-red-200 flex items-center justify-center text-[#E31B23] flex-shrink-0">
+          <div className="bg-white/95 dark:bg-[#0F0F14]/95 backdrop-blur-md border border-zinc-200/90 dark:border-white/10 py-1.5 px-3 rounded-xl shadow-md flex items-center gap-2.5 pointer-events-auto">
+            <div className="w-6 h-6 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-center justify-center text-[#E31B23] flex-shrink-0">
               {isResolving ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <MapPin className="w-3.5 h-3.5 fill-red-100" />
+                <MapPin className="w-3.5 h-3.5 fill-red-100 dark:fill-red-500/20" />
               )}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className={`inline-block w-1.5 h-1.5 rounded-full ${isResolving ? 'bg-amber-500 animate-spin' : 'bg-emerald-500 animate-pulse'}`} />
-                <span className="text-[10px] font-black uppercase tracking-wider text-zinc-900 truncate max-w-[130px] sm:max-w-[200px]">
+                <span className="text-[10px] font-black uppercase tracking-wider text-zinc-900 dark:text-white truncate max-w-[130px] sm:max-w-[200px]">
                   {isResolving ? 'Resolving Address...' : resolvedHeading}
                 </span>
-                <span className="text-[10px] font-mono text-zinc-500 font-semibold">
+                <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 font-semibold">
                   ({currentDisplayLat}°, {currentDisplayLng}°)
                 </span>
               </div>
@@ -674,10 +674,10 @@ export const MapPinPicker: React.FC<MapPinPickerProps> = ({
             <button
               type="button"
               onClick={handleCopyCoords}
-              className="ml-1 p-1 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 rounded-md transition-colors cursor-pointer"
+              className="ml-1 p-1 hover:bg-zinc-100 dark:hover:bg-white/10 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-md transition-colors cursor-pointer"
               title="Copy GPS coordinates"
             >
-              {copiedCoords ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedCoords ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
           </div>
 
@@ -691,14 +691,14 @@ export const MapPinPicker: React.FC<MapPinPickerProps> = ({
         {/* ================= FLOATING MAP CONTROLS ================= */}
         <div className="absolute right-3 bottom-3 flex flex-col items-end gap-2 z-[20] pointer-events-auto">
           {/* Style Switcher (Roadmap vs Satellite) */}
-          <div className="bg-white/95 backdrop-blur-md border border-zinc-200 p-1 rounded-xl shadow-md flex items-center gap-1 text-[10px] font-bold">
+          <div className="bg-white/95 dark:bg-[#0F0F14]/95 backdrop-blur-md border border-zinc-200 dark:border-white/10 p-1 rounded-xl shadow-md flex items-center gap-1 text-[10px] font-bold">
             <button
               type="button"
               onClick={() => handleToggleMapStyle('roadmap')}
               className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
                 mapStyle === 'roadmap'
-                  ? 'bg-zinc-950 text-white shadow-2xs font-black'
-                  : 'text-zinc-600 hover:text-zinc-950'
+                  ? 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 shadow-2xs font-black'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
               }`}
             >
               Roadmap
@@ -708,8 +708,8 @@ export const MapPinPicker: React.FC<MapPinPickerProps> = ({
               onClick={() => handleToggleMapStyle('satellite')}
               className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
                 mapStyle === 'satellite'
-                  ? 'bg-zinc-950 text-white shadow-2xs font-black'
-                  : 'text-zinc-600 hover:text-zinc-950'
+                  ? 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 shadow-2xs font-black'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
               }`}
             >
               Satellite
@@ -717,12 +717,12 @@ export const MapPinPicker: React.FC<MapPinPickerProps> = ({
           </div>
 
           {/* Zoom & Recenter Controls */}
-          <div className="flex flex-col bg-white/95 backdrop-blur-md border border-zinc-200 rounded-xl shadow-md overflow-hidden divide-y divide-zinc-100">
+          <div className="flex flex-col bg-white/95 dark:bg-[#0F0F14]/95 backdrop-blur-md border border-zinc-200 dark:border-white/10 rounded-xl shadow-md overflow-hidden divide-y divide-zinc-100 dark:divide-white/10">
             <button
               type="button"
               onClick={handleCenterOnPin}
               title="Recenter Map on Pin"
-              className="p-2 hover:bg-zinc-100 text-zinc-700 transition-colors cursor-pointer"
+              className="p-2 hover:bg-zinc-100 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer"
             >
               <Crosshair className="w-4 h-4 text-[#E31B23]" />
             </button>
@@ -730,7 +730,7 @@ export const MapPinPicker: React.FC<MapPinPickerProps> = ({
               type="button"
               onClick={handleZoomIn}
               title="Zoom In"
-              className="p-2 hover:bg-zinc-100 text-zinc-700 transition-colors cursor-pointer"
+              className="p-2 hover:bg-zinc-100 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer"
             >
               <ZoomIn className="w-4 h-4" />
             </button>
@@ -738,7 +738,7 @@ export const MapPinPicker: React.FC<MapPinPickerProps> = ({
               type="button"
               onClick={handleZoomOut}
               title="Zoom Out"
-              className="p-2 hover:bg-zinc-100 text-zinc-700 transition-colors cursor-pointer"
+              className="p-2 hover:bg-zinc-100 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer"
             >
               <ZoomOut className="w-4 h-4" />
             </button>
@@ -760,11 +760,11 @@ export const MapPinPicker: React.FC<MapPinPickerProps> = ({
       </div>
 
       {/* Helper caption row with live detected venue/street */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-zinc-500 font-medium px-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-zinc-500 dark:text-zinc-400 font-medium px-1">
         <span className="flex items-center gap-1 truncate">
           <MapPin className="w-3 h-3 text-[#E31B23] flex-shrink-0" />
           {lastResolvedLocation?.venue || lastResolvedLocation?.streetAddress ? (
-            <span className="text-zinc-800 font-bold">
+            <span className="text-zinc-800 dark:text-zinc-200 font-bold">
               Detected: {[lastResolvedLocation.venue, lastResolvedLocation.streetAddress].filter(Boolean).join(' • ')}
             </span>
           ) : (

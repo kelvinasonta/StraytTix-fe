@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import OrganizerDashboardLayout from '../../components/layout/OrganizerDashboardLayout';
-import { formatCurrency, formatDate } from '../../utils/format';
+import { formatCurrency, formatDate, getGreeting } from '../../utils/format';
 import {
   Calendar,
   Ticket,
@@ -18,11 +18,15 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { eventApi, normalizeBackendEvent } from '../../api/events';
+import { normalizeOrder } from '../../utils/order';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
+import { useCan } from '../../hooks/useCan';
+import { Can } from '../../components/auth/Can';
 import type { Event, Order } from '../../types/api';
 
 export const Overview: React.FC = () => {
   const { user, organizer } = useAuth();
+  const { can } = useCan();
   const [events, setEvents] = useState<Event[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +47,8 @@ export const Overview: React.FC = () => {
           : Array.isArray((rawEvents as any)?.data)
             ? (rawEvents as any).data
             : [];
-        setEvents(eventItems.map(normalizeBackendEvent));
+        const normalizedEvents = eventItems.map(normalizeBackendEvent);
+        setEvents(normalizedEvents);
 
         const rawOrders = ordersRes.data;
         const orderItems = Array.isArray(rawOrders)
@@ -51,7 +56,7 @@ export const Overview: React.FC = () => {
           : Array.isArray((rawOrders as any)?.data)
             ? (rawOrders as any).data
             : [];
-        setOrders(orderItems);
+        setOrders(orderItems.map((o: any) => normalizeOrder(o, normalizedEvents)));
       })
       .finally(() => {
         setIsLoading(false);
@@ -80,7 +85,7 @@ export const Overview: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-black text-zinc-950 dark:text-white tracking-tight flex items-center gap-2">
-              Good morning, {firstName} <Sparkles className="w-5 h-5 text-amber-500 fill-amber-400 inline-block" />
+              {getGreeting(user?.timezone)}, {firstName} <Sparkles className="w-5 h-5 text-amber-500 fill-amber-400 inline-block" />
             </h1>
             <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium mt-1">
               {role === 'staff'
@@ -90,22 +95,24 @@ export const Overview: React.FC = () => {
           </div>
 
           {/* Top Right Red Promo Action Card - ONLY if user can create events */}
-          {perms.canCreateEvents && (
-            <Link
-              to="/organizer/events/create"
-              className="flex items-center justify-between gap-6 p-4 bg-[#E31B23] hover:bg-[#B91C1C] text-white rounded-2xl transition-all shadow-md hover:shadow-lg group flex-shrink-0"
-            >
-              <div className="space-y-0.5">
-                <h3 className="text-sm font-bold leading-tight">Create Event</h3>
-                <p className="text-[11px] text-red-100 font-medium">
-                  Get your event in front of thousands of people.
-                </p>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-white text-[#E31B23] flex items-center justify-center group-hover:translate-x-1 transition-transform flex-shrink-0 shadow-xs">
-                <ArrowRight className="w-4 h-4" />
-              </div>
-            </Link>
-          )}
+          <Can permission="org.events.create">
+            {perms.canCreateEvents && (
+              <Link
+                to="/organizer/events/create"
+                className="flex items-center justify-between gap-6 p-4 bg-[#E31B23] hover:bg-[#B91C1C] text-white rounded-2xl transition-all shadow-md hover:shadow-lg group flex-shrink-0"
+              >
+                <div className="space-y-0.5">
+                  <h3 className="text-sm font-bold leading-tight">Create Event</h3>
+                  <p className="text-[11px] text-red-100 font-medium">
+                    Get your event in front of thousands of people.
+                  </p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-white text-[#E31B23] flex items-center justify-center group-hover:translate-x-1 transition-transform flex-shrink-0 shadow-xs">
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </Link>
+            )}
+          </Can>
         </div>
 
         {/* ========================================================================= */}

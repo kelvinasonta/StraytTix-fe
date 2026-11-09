@@ -245,6 +245,11 @@ export const VenueAutocompleteInput: React.FC<VenueAutocompleteInputProps> = ({
           margin-top: 6px !important;
           padding: 6px 0 !important;
         }
+        html.dark .pac-container {
+          background-color: #0F0F14 !important;
+          border: 1px solid rgba(255, 255, 255, 0.12) !important;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
+        }
         .pac-item {
           padding: 10px 14px !important;
           font-size: 13px !important;
@@ -252,14 +257,25 @@ export const VenueAutocompleteInput: React.FC<VenueAutocompleteInputProps> = ({
           cursor: pointer !important;
           border-top: 1px solid #f4f4f5 !important;
           transition: background-color 0.15s ease !important;
+          color: #52525b !important;
+        }
+        html.dark .pac-item {
+          border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+          color: #a1a1aa !important;
         }
         .pac-item:hover, .pac-item-selected {
           background-color: #fef2f2 !important;
+        }
+        html.dark .pac-item:hover, html.dark .pac-item-selected {
+          background-color: rgba(227, 27, 35, 0.12) !important;
         }
         .pac-item-query {
           font-size: 13px !important;
           font-weight: 800 !important;
           color: #09090b !important;
+        }
+        html.dark .pac-item-query {
+          color: #ffffff !important;
         }
         .pac-icon {
           margin-top: 3px !important;
@@ -281,7 +297,7 @@ export const VenueAutocompleteInput: React.FC<VenueAutocompleteInputProps> = ({
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-11 pr-24 py-3.5 bg-white border-2 border-zinc-200 hover:border-zinc-300 focus:border-[#E31B23] focus:ring-4 focus:ring-[#E31B23]/10 rounded-2xl text-xs sm:text-sm font-bold text-zinc-950 placeholder:text-zinc-400 outline-none transition-all shadow-xs"
+          className="w-full pl-11 pr-24 py-3.5 bg-white dark:bg-[#070709] border-2 border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 focus:border-[#E31B23] focus:ring-4 focus:ring-[#E31B23]/10 rounded-2xl text-xs sm:text-sm font-bold text-zinc-950 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none transition-all shadow-xs"
         />
 
         <div className="absolute right-3 flex items-center gap-1.5">
@@ -289,14 +305,14 @@ export const VenueAutocompleteInput: React.FC<VenueAutocompleteInputProps> = ({
             <button
               type="button"
               onClick={handleClear}
-              className="p-1 rounded-full text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer"
+              className="p-1 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
               title="Clear search"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           )}
 
-          <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-zinc-100 border border-zinc-200/80 text-[10px] font-black uppercase tracking-wider text-zinc-500 select-none">
+          <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-zinc-100 dark:bg-white/10 border border-zinc-200/80 dark:border-white/10 text-[10px] font-black uppercase tracking-wider text-zinc-500 dark:text-zinc-400 select-none">
             <span>Google</span>
           </div>
         </div>

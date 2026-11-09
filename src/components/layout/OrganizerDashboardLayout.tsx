@@ -5,6 +5,7 @@ import {
   Calendar,
   ShoppingBag,
   Wallet,
+  Coins,
   User,
   Users,
   Settings,
@@ -18,6 +19,8 @@ import {
   Ticket,
   ArrowRight,
   Shield,
+  Building2,
+  Check,
   Sun,
   Moon
 } from 'lucide-react';
@@ -26,6 +29,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { Logo } from '../ui/Logo';
 import { AuthenticatedMobileNav } from './AuthenticatedMobileNav';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
+import { useCan } from '../../hooks/useCan';
 import { getOrganizerLogo } from '../../utils/imageUrl';
 
 interface OrganizerDashboardLayoutProps {
@@ -33,10 +37,12 @@ interface OrganizerDashboardLayoutProps {
 }
 
 export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> = ({ children }) => {
-  const { user, organizer, logout } = useAuth();
+  const { user, organizer, organizations, switchOrganization, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { can } = useCan();
   const navigate = useNavigate();
   const location = useLocation();
+  const [orgDropdownOpen, setOrgDropdownOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
 
   const handleLogout = async () => {
@@ -58,11 +64,24 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
   const navItems = [
     { to: '/organizer', label: 'Dashboard', icon: LayoutDashboard, end: true },
     { to: '/organizer/events', label: role === 'staff' ? 'Assigned Events' : 'My Events', icon: Calendar },
-    ...(perms.canViewOrders ? [{ to: '/organizer/orders', label: 'Orders & Sales', icon: ShoppingBag }] : []),
-    ...(isOrganization && perms.canManageTeam ? [{ to: '/organizer/team', label: 'Team Members', icon: Users }] : []),
-    ...(perms.canViewFinanceWallet ? [{ to: '/organizer/analytics', label: 'Finance & Wallet', icon: Wallet }] : []),
-    ...(perms.canEditOrganizerProfile ? [{ to: '/organizer/profile', label: 'Organizer Profile', icon: User }] : []),
-    ...(perms.canAccessSettings ? [{ to: '/organizer/settings', label: role === 'staff' ? 'Staff Settings' : 'Settings', icon: Settings }] : []),
+    ...(can(['org.attendees.view', 'org.events.view']) && perms.canViewOrders
+      ? [{ to: '/organizer/orders', label: 'Orders & Sales', icon: ShoppingBag }]
+      : []),
+    ...(isOrganization && can('org.members.view') && perms.canManageTeam
+      ? [{ to: '/organizer/team', label: 'Team Members', icon: Users }]
+      : []),
+    ...(can('org.finance.view') && perms.canViewFinanceWallet
+      ? [{ to: '/organizer/analytics', label: 'Finance & Wallet', icon: Wallet }]
+      : []),
+    ...(can(['org.finance.view', 'org.credits.manage']) && perms.canViewFinanceWallet
+      ? [{ to: '/organizer/credits', label: 'Credits & Billing', icon: Coins }]
+      : []),
+    ...(can('org.view') && perms.canEditOrganizerProfile
+      ? [{ to: '/organizer/profile', label: 'Organizer Profile', icon: User }]
+      : []),
+    ...(perms.canAccessSettings
+      ? [{ to: '/organizer/settings', label: role === 'staff' ? 'Staff Settings' : 'Settings', icon: Settings }]
+      : []),
   ];
 
   return (
@@ -77,29 +96,73 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
           <div className="px-2 pt-1 pb-1 flex items-center justify-between">
             <Logo to="/organizer" size="md" />
             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${roleBadgeStyles[role] || 'bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-white/10'}`}>
-              {role}
+              {organizer?.role_label || role}
             </span>
           </div>
 
-          {/* Switch to Attendee Account Button */}
-          <Link
-            to="/dashboard"
-            className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-white/5 hover:bg-zinc-100/90 dark:hover:bg-white/10 border border-zinc-200/80 dark:border-white/10 text-zinc-900 dark:text-white transition-all group cursor-pointer shadow-2xs"
-            title="Switch to personal attendee account (tickets & favorites)"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-500/10 text-[#E31B23] flex items-center justify-center font-bold flex-shrink-0">
-                <Ticket className="w-4 h-4" />
-              </div>
-              <div className="text-left">
-                <p className="text-xs font-bold text-zinc-950 dark:text-white flex items-center gap-1.5 leading-tight">
-                  Attendee Account
-                </p>
-                <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">Tickets, saves & orders</p>
-              </div>
+          {/* Organization Switcher Dropdown */}
+          {organizations.length > 0 && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
+                className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 transition-all text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-black text-xs flex items-center justify-center flex-shrink-0">
+                    {organizer?.name?.[0] || 'O'}
+                  </div>
+                  <div className="truncate">
+                    <p className="text-xs font-bold text-zinc-950 dark:text-white truncate">
+                      {organizer?.name || 'My Organization'}
+                    </p>
+                    <p className="text-[10px] text-zinc-500 font-medium capitalize truncate">
+                      {organizer?.role_label || role}
+                    </p>
+                  </div>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${orgDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {orgDropdownOpen && (
+                <div className="absolute top-full left-0 right-0 mt-1.5 p-1.5 bg-white dark:bg-[#15151C] border border-zinc-200 dark:border-white/15 rounded-2xl shadow-xl z-50 space-y-1 animate-scaleUp">
+                  <p className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-zinc-400">
+                    Switch Workspace
+                  </p>
+                  <div className="max-h-56 overflow-y-auto space-y-0.5">
+                    {organizations.map((org) => {
+                      const orgId = org.uuid || org.id;
+                      const isCurrent = (organizer?.uuid || organizer?.id) === orgId;
+                      return (
+                        <button
+                          key={orgId}
+                          type="button"
+                          onClick={async () => {
+                            setOrgDropdownOpen(false);
+                            if (!isCurrent) {
+                              await switchOrganization(orgId);
+                            }
+                          }}
+                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-left text-xs transition-colors cursor-pointer ${
+                            isCurrent
+                              ? 'bg-red-50 dark:bg-red-500/10 text-[#E31B23] font-bold'
+                              : 'hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300'
+                          }`}
+                        >
+                          <div className="truncate pr-2">
+                            <span className="block font-bold truncate">{org.name}</span>
+                            <span className="text-[10px] text-zinc-400 capitalize">{org.role_label || org.role || 'Member'}</span>
+                          </div>
+                          {isCurrent && <Check className="w-3.5 h-3.5 text-[#E31B23] flex-shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-            <ArrowRight className="w-4 h-4 text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-950 dark:group-hover:text-white group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-          </Link>
+          )}
+
 
           {/* Navigation Links */}
           <nav className="space-y-1.5">

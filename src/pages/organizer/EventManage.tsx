@@ -11,6 +11,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { formatCurrency, formatDate } from '../../utils/format';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
+import { useCan } from '../../hooks/useCan';
+import { Can } from '../../components/auth/Can';
 import type { Event, TicketType, ScheduleSession, LineupMember, EventStats, FaqItem, EventStaffAssignment, TeamMember, CheckInStats, TicketAttendee } from '../../types/api';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
@@ -19,6 +21,8 @@ import FileUploader from '../../components/ui/FileUploader';
 import { uploadApi } from '../../api/upload';
 import HeroHeaderPicker, { type HeroBannerStyle } from '../../components/events/HeroHeaderPicker';
 import CameraQrScannerModal from '../../components/events/CameraQrScannerModal';
+import { CreditCheckPill, CreditTopupModal } from '../../components/credits';
+import { creditsApi } from '../../api/credits';
 import { EVENT_FORMATS, POPULAR_CATEGORY_TAGS, SYSTEM_AVATARS, PRESET_CATEGORIES, PRESET_COVERS } from './CreateEvent';
 import {
   Calendar,
@@ -101,6 +105,7 @@ export const EventManage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { organizer, user } = useAuth();
   const { showNotification } = useNotification();
+  const { can, hasRole } = useCan();
 
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
@@ -131,19 +136,19 @@ export const EventManage: React.FC = () => {
     }
     if (qTab) {
       // Validate tab permission
-      if (qTab === 'setup' && (!perms.canCreateEvents || isStaffOnly)) return;
-      if (qTab === 'tickets' && !perms.canConfigureTickets) return;
+      if (qTab === 'setup' && (!perms.canCreateEvents || !can(['org.events.update', 'org.events.create']) || isStaffOnly)) return;
+      if (qTab === 'tickets' && (!perms.canConfigureTickets || !can('org.tickets.manage'))) return;
       if (qTab === 'policies' && (!perms.canIssueRefunds || isStaffOnly)) return;
-      if (qTab === 'finance' && !perms.canViewRevenue) return;
-      if (qTab === 'marketing' && !perms.canAccessMarketing) return;
-      if (qTab === 'settings' && !perms.canAccessSettings) return;
+      if (qTab === 'finance' && (!perms.canViewRevenue || !can('org.finance.view'))) return;
+      if (qTab === 'marketing' && (!perms.canAccessMarketing || !can('org.events.update'))) return;
+      if (qTab === 'settings' && (!perms.canAccessSettings || !can('org.events.update'))) return;
 
       setActiveTab(qTab);
       if (qSub) {
         if (qTab === 'attendees') {
-          if (qSub === 'staff' && !perms.canAssignStaffToEvent) return;
-          if (qSub === 'invite_approval' && !perms.canConfigureTickets) return;
-          if (qSub === 'view' && !perms.canDownloadAttendees) return;
+          if (qSub === 'staff' && (!perms.canAssignStaffToEvent || !can('org.members.manage'))) return;
+          if (qSub === 'invite_approval' && (!perms.canConfigureTickets || !can('org.tickets.manage'))) return;
+          if (qSub === 'view' && (!perms.canDownloadAttendees || !can(['org.attendees.view', 'org.attendees.manage']))) return;
           setAttendeesSubtab(qSub as any);
         } else if (qTab === 'setup') {
           setSetupSubtab(qSub as any);
@@ -152,12 +157,12 @@ export const EventManage: React.FC = () => {
         } else if (qTab === 'policies') {
           setPoliciesSubtab(qSub as any);
         } else if (qTab === 'finance') {
-          if (qSub === 'payout' && !perms.canManageBanking) return;
+          if (qSub === 'payout' && (!perms.canManageBanking || !can('org.finance.manage'))) return;
           setFinanceSubtab(qSub as any);
         } else if (qTab === 'marketing') {
           setMarketingSubtab(qSub as any);
         } else if (qTab === 'settings') {
-          if (qSub === 'delete' && !perms.canDeleteEvents) return;
+          if (qSub === 'delete' && (!perms.canDeleteEvents || !can('org.events.delete'))) return;
           setSettingsSubtab(qSub as any);
         }
       }
@@ -206,6 +211,25 @@ export const EventManage: React.FC = () => {
   // Gallery & Media State
   const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
   const [newGalleryUrl, setNewGalleryUrl] = useState('');
+
+  // Credits & Broadcast Gate State
+  const [creditsWalletBalance, setCreditsWalletBalance] = useState<number>(() => {
+    return Number(localStorage.getItem('strayttix_organizer_credits') || 500);
+  });
+  const [isTopupModalOpen, setIsTopupModalOpen] = useState(false);
+
+  useEffect(() => {
+    creditsApi.getWallet(organizer?.id)
+      .then(res => {
+        const data = res.data || (res as any);
+        if (typeof data?.available_balance === 'number') {
+          setCreditsWalletBalance(data.available_balance);
+        } else if (typeof data?.balance === 'number') {
+          setCreditsWalletBalance(data.balance - (data.reserved_balance || 0));
+        }
+      })
+      .catch(() => {});
+  }, [organizer?.id]);
 
   // Navigation Dropdowns State
   const [openDropdownTab, setOpenDropdownTab] = useState<MainTab | null>(null);
@@ -2138,34 +2162,34 @@ export const EventManage: React.FC = () => {
       icon: isStaffOnly ? QrCode : Users,
       count: attendees.length,
       subtabs: [
-        ...(perms.canDownloadAttendees ? [
+        ...(perms.canDownloadAttendees && can(['org.attendees.view', 'org.attendees.manage']) ? [
           { id: 'view', label: 'View attendees', icon: Users, desc: 'Search & manage ticket holders' }
         ] : []),
         { id: 'checkin', label: 'Check-in scanner', icon: QrCode, desc: 'Real-time gate check-in & verification' },
-        ...(perms.canAssignStaffToEvent ? [
+        ...(perms.canAssignStaffToEvent && can('org.members.manage') ? [
           { id: 'staff', label: 'Event staff & crew', icon: UserCheck, desc: 'Assign staff, gate scanners & duties' }
         ] : []),
-        ...(perms.canConfigureTickets ? [
+        ...(perms.canConfigureTickets && can('org.tickets.manage') ? [
           { id: 'invite_approval', label: 'Ticket approvals', icon: ShieldCheck, desc: 'Review invite-only applications' }
         ] : []),
       ]
     },
 
     // 5. Finance: Hidden for Staff and Manager! (Only Owner & Admin)
-    ...(perms.canViewRevenue ? [{
+    ...(perms.canViewRevenue && can('org.finance.view') ? [{
       id: 'finance' as MainTab,
       label: 'Finance',
       icon: DollarSign,
       subtabs: [
         { id: 'sales', label: 'Sales summary', icon: DollarSign, desc: 'Gross volume & revenue breakdown' },
-        ...(perms.canManageBanking ? [
+        ...(perms.canManageBanking && can('org.finance.manage') ? [
           { id: 'payout', label: 'Payout details', icon: BarChart3, desc: 'Bank account & payout history' }
         ] : []),
       ]
     }] : []),
 
     // 6. Marketing: Hidden for Staff and Manager! (Only Owner & Admin)
-    ...(perms.canAccessMarketing ? [{
+    ...(perms.canAccessMarketing && can('org.events.update') ? [{
       id: 'marketing' as MainTab,
       label: 'Marketing',
       icon: Share2,
@@ -2178,14 +2202,14 @@ export const EventManage: React.FC = () => {
     }] : []),
 
     // 7. Settings: Hidden for Staff and Manager! (Only Owner & Admin)
-    ...(perms.canAccessSettings ? [{
+    ...(perms.canAccessSettings && can('org.events.update') ? [{
       id: 'settings' as MainTab,
       label: 'Settings',
       icon: AlertTriangle,
       subtabs: [
         { id: 'duplicate', label: 'Duplicate event', icon: Copy, desc: 'Clone event draft & tiers' },
         { id: 'archive', label: 'Archive listing', icon: Archive, desc: 'Hide from active management' },
-        ...(perms.canDeleteEvents ? [
+        ...(perms.canDeleteEvents && can('org.events.delete') ? [
           { id: 'delete', label: 'Delete event', icon: Trash2, desc: 'Danger zone & deletion restrictions' }
         ] : []),
       ]
@@ -2256,12 +2280,12 @@ export const EventManage: React.FC = () => {
           <nav className="flex items-center gap-2 text-sm text-zinc-500 font-medium">
             <Link
               to="/organizer/events"
-              className="inline-flex items-center gap-1.5 hover:text-zinc-900 transition-colors font-semibold"
+              className="inline-flex items-center gap-1.5 hover:text-zinc-900 dark:text-white transition-colors font-semibold"
             >
               <ArrowLeft className="w-4 h-4" /> Events
             </Link>
             <ChevronRight className="w-4 h-4 text-zinc-400" />
-            <span className="text-zinc-900 font-bold truncate max-w-[200px] sm:max-w-md">{event.title}</span>
+            <span className="text-zinc-900 dark:text-white font-bold truncate max-w-[200px] sm:max-w-md">{event.title}</span>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -2270,7 +2294,7 @@ export const EventManage: React.FC = () => {
         </div>
 
         {/* HERO EVENT MANAGEMENT BANNER */}
-        <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs relative overflow-hidden">
+        <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs relative overflow-hidden">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
 
             <div className="flex items-start sm:items-center gap-5">
@@ -2281,9 +2305,14 @@ export const EventManage: React.FC = () => {
               />
               <div className="space-y-1.5 min-w-0">
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <span className="text-xs font-bold px-3 py-0.5 rounded-full bg-zinc-100 text-zinc-700">
+                  <span className="text-xs font-bold px-3 py-0.5 rounded-full bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300">
                     {extractNameOrString(event.category) || 'General'}
                   </span>
+                  {event.eventFormat && (
+                    <span className="text-xs font-bold px-3 py-0.5 rounded-full bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-white/10">
+                      {event.eventFormat}
+                    </span>
+                  )}
                   <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-0.5 rounded-full border ${statusBadgeStyle}`}>
                     <span className={`w-2 h-2 rounded-full ${statusDotStyle}`} />
                     {event.status}
@@ -2324,7 +2353,7 @@ export const EventManage: React.FC = () => {
                   href={`/events/${event.slug || event.id}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-zinc-700 hover:bg-zinc-50 dark:hover:bg-white/5 text-xs font-bold transition-all shadow-2xs"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5 text-xs font-bold transition-all shadow-2xs"
                 >
                   <Eye className="w-4 h-4 text-zinc-500" />
                   <span>Preview Page</span>
@@ -2338,7 +2367,7 @@ export const EventManage: React.FC = () => {
                   type="button"
                   onClick={handleDuplicateEvent}
                   disabled={isDuplicating}
-                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-zinc-700 hover:bg-zinc-50 dark:hover:bg-white/5 text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-50"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5 text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-50"
                   title="Duplicate event listing"
                 >
                   {isDuplicating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Copy className="w-3.5 h-3.5 text-zinc-500" />}
@@ -2391,7 +2420,7 @@ export const EventManage: React.FC = () => {
         <div className={`grid grid-cols-1 sm:grid-cols-2 ${perms.canViewRevenue ? 'lg:grid-cols-4' : (isStaffOnly ? 'lg:grid-cols-1 max-w-sm' : 'lg:grid-cols-3')} gap-4`}>
           {/* 1. Gross Revenue - ONLY for Owner & Admin */}
           {perms.canViewRevenue && (
-            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Gross Revenue</span>
                 <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -2411,7 +2440,7 @@ export const EventManage: React.FC = () => {
 
           {/* 2. Tickets Sold - Only if not staff and can view orders */}
           {!isStaffOnly && perms.canViewOrders && (
-            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Tickets Sold</span>
                 <div className="w-9 h-9 rounded-xl bg-red-50 text-[#E31B23] flex items-center justify-center">
@@ -2431,7 +2460,7 @@ export const EventManage: React.FC = () => {
                   )}
                 </div>
                 {!isUnlimited && capacityNum > 0 ? (
-                  <div className="w-full bg-zinc-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                  <div className="w-full bg-zinc-100 dark:bg-white/10 rounded-full h-1.5 mt-2 overflow-hidden">
                     <div
                       className="bg-[#E31B23] h-1.5 rounded-full transition-all duration-500"
                       style={{ width: `${soldPercent}%` }}
@@ -2445,7 +2474,7 @@ export const EventManage: React.FC = () => {
           )}
 
           {/* 3. Check-In Rate / Gate Progress */}
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
                 {isStaffOnly ? 'Gate Check-in Progress' : 'Check-In Rate'}
@@ -2463,7 +2492,7 @@ export const EventManage: React.FC = () => {
                   {checkedIn} / {soldTickets || 0} checked in
                 </span>
               </div>
-              <div className="w-full bg-zinc-100 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div className="w-full bg-zinc-100 dark:bg-white/10 rounded-full h-1.5 mt-2 overflow-hidden">
                 <div
                   className="bg-indigo-600 h-1.5 rounded-full transition-all duration-500"
                   style={{ width: `${checkInRate}%` }}
@@ -2474,7 +2503,7 @@ export const EventManage: React.FC = () => {
 
           {/* 4. Community Saves - Only for non-staff */}
           {!isStaffOnly && (
-            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Community Saves</span>
                 <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
@@ -2494,30 +2523,30 @@ export const EventManage: React.FC = () => {
         </div>
 
 
-        {/* PRIMARY NAVIGATION DROPDOWNS (Matches user-specified layout: 2-col grid on mobile, flex row on desktop) */}
-        <div className="relative z-30 pt-2 pb-4 mt-2 border-b border-zinc-200 dark:border-white/10 dark:border-white/10/80">
-          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-6 sm:overflow-x-auto sm:no-scrollbar py-1">
+        {/* PRIMARY NAVIGATION TABS (Sticky horizontal pill bar with dark mode & mobile support) */}
+        <div className="sticky top-16 z-30 -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 py-3 bg-white/90 dark:bg-[#070709]/90 backdrop-blur-md border-b border-zinc-200 dark:border-white/10 transition-colors">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
             {navSections.map(tab => {
               const isActive = activeTab === tab.id;
               const isDropdownOpen = openDropdownTab === tab.id;
 
               return (
-                <div key={tab.id} className="relative sm:flex-shrink-0">
+                <div key={tab.id} className="relative flex-shrink-0">
                   <button
                     ref={el => { tabButtonRefs.current[tab.id] = el; }}
                     type="button"
                     onClick={(e) => handleTabButtonClick(tab.id, e)}
-                    className={`w-full justify-between sm:w-auto sm:justify-start inline-flex items-center gap-1.5 py-1.5 px-3 rounded-md text-sm font-semibold transition-all cursor-pointer ${isActive
-                      ? 'text-[#E31B23] border border-[#E31B23] bg-white'
+                    className={`inline-flex items-center gap-1.5 py-2 px-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${isActive
+                      ? 'text-[#E31B23] bg-red-500/10 border border-[#E31B23]/40 shadow-xs'
                       : isDropdownOpen
-                        ? 'text-zinc-950 dark:text-white bg-zinc-100/80 border border-zinc-200 dark:border-white/10'
-                        : 'text-zinc-800 hover:text-zinc-950 dark:text-white border border-zinc-200 dark:border-white/10/60 sm:border-transparent hover:border-zinc-200 dark:border-white/10'
+                        ? 'text-zinc-950 dark:text-white bg-zinc-100 dark:bg-white/10 border border-zinc-300 dark:border-white/20'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20'
                       }`}
                   >
                     <span>{tab.label}</span>
                     <ChevronDown
-                      className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-150 ${isDropdownOpen ? 'rotate-180' : ''
-                        } ${isActive ? 'text-[#E31B23]' : 'text-zinc-800'}`}
+                      className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''
+                        } ${isActive ? 'text-[#E31B23]' : 'text-zinc-400 dark:text-zinc-500'}`}
                     />
                   </button>
                 </div>
@@ -2536,9 +2565,9 @@ export const EventManage: React.FC = () => {
               left: dropdownCoords.left,
               zIndex: 9999,
             }}
-            className="w-56 bg-white rounded-xl shadow-xl border border-zinc-200 dark:border-white/10/90 py-1.5 animate-in fade-in zoom-in-95 duration-100 select-none"
+            className="w-56 bg-white dark:bg-[#0F0F14] rounded-2xl shadow-2xl border border-zinc-200 dark:border-white/10 py-1.5 animate-in fade-in zoom-in-95 duration-100 select-none backdrop-blur-xl"
           >
-            <div className="space-y-0.5">
+            <div className="space-y-0.5 px-1">
               {navSections
                 .find(tab => tab.id === openDropdownTab)
                 ?.subtabs.map(sub => {
@@ -2549,9 +2578,9 @@ export const EventManage: React.FC = () => {
                       key={sub.id}
                       type="button"
                       onClick={() => handleSelectSubtab(openDropdownTab, sub.id)}
-                      className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer ${isSubActive
-                        ? 'text-[#E31B23] font-medium'
-                        : 'text-zinc-800 hover:text-zinc-950 dark:text-white hover:bg-zinc-50 dark:hover:bg-white/5 font-normal'
+                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${isSubActive
+                        ? 'text-white bg-[#E31B23] font-bold shadow-xs'
+                        : 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:bg-white/10 dark:hover:bg-white/10'
                         }`}
                     >
                       {sub.label}
@@ -2566,12 +2595,12 @@ export const EventManage: React.FC = () => {
         {/* TAB 1: EVENT SETUP */}
         {/* ========================================================================= */}
         {perms.canCreateEvents && !isStaffOnly && activeTab === 'setup' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-8 mt-2">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-8 mt-2">
 
             {/* EDIT DETAILS */}
             {setupSubtab === 'edit' && (
               <div className="space-y-8">
-                <div className="border-b border-zinc-100 dark:border-white/10 dark:border-white/10 pb-4">
+                <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
                   <h3 className="text-xl font-black text-zinc-950 dark:text-white tracking-tight">Edit Event Core Details</h3>
                   <p className="text-xs text-zinc-500 mt-1">Update event title, format, categories, description, schedule{isPhysical || isHybrid ? ', and venue' : ''}.</p>
                 </div>
@@ -2579,24 +2608,27 @@ export const EventManage: React.FC = () => {
                 <div className="space-y-7">
                   {/* Event Title */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-zinc-800 block">Event Title *</label>
+                    <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">Event Title *</label>
                     <input
                       type="text"
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
                       placeholder="e.g. Lagos Tech Summit 2026"
-                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-semibold text-zinc-950 dark:text-white placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white transition-all shadow-2xs"
+                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-semibold text-zinc-950 dark:text-white placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white dark:focus:bg-[#070709] transition-all shadow-2xs"
                     />
                   </div>
 
                   {/* Event Format Selector */}
-                  <div className="space-y-3 pt-3 border-t border-zinc-100 dark:border-white/10 dark:border-white/10">
+                  <div className="space-y-3 pt-3 border-t border-zinc-100 dark:border-white/10">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
                         <Layers className="w-3.5 h-3.5 text-[#E31B23]" />
-                        <span>Event Format *</span>
+                        <span>Event Format</span>
+                        <span className="text-[#E31B23] font-bold">*</span>
                       </label>
-                      <span className="text-[11px] font-semibold text-zinc-400">Selected: {editFormat}</span>
+                      <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                        Selected: <strong className="text-zinc-950 dark:text-white font-bold">{editFormat}</strong>
+                      </span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                       {availableFormats.map((fmtItem) => {
@@ -2609,8 +2641,8 @@ export const EventManage: React.FC = () => {
                             type="button"
                             onClick={() => setEditFormat(fmt)}
                             className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center truncate ${isSelected
-                              ? 'bg-zinc-950 text-white border-zinc-950 shadow-xs ring-1 ring-zinc-950'
-                              : 'bg-zinc-50 border-zinc-200 dark:border-white/10 text-zinc-700 hover:bg-zinc-100 hover:border-zinc-300'
+                              ? 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-zinc-950 dark:border-white shadow-xs ring-1 ring-zinc-950 dark:ring-white'
+                              : 'bg-zinc-50 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:bg-white/10 dark:hover:bg-white/10 hover:border-zinc-300 dark:hover:border-white/20'
                               }`}
                           >
                             {fmt}
@@ -2621,9 +2653,9 @@ export const EventManage: React.FC = () => {
                   </div>
 
                   {/* Categories Multi-Select Chips */}
-                  <div className="space-y-3 pt-3 border-t border-zinc-100 dark:border-white/10 dark:border-white/10">
+                  <div className="space-y-3 pt-3 border-t border-zinc-100 dark:border-white/10">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
                         <Tag className="w-3.5 h-3.5 text-[#E31B23]" />
                         <span>Event Categories & Tags *</span>
                       </label>
@@ -2640,7 +2672,7 @@ export const EventManage: React.FC = () => {
                         return (
                           <span
                             key={cat}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-zinc-300 text-zinc-900 rounded-xl text-xs font-bold shadow-2xs"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-white/10 border border-zinc-300 dark:border-white/20 text-zinc-900 dark:text-white rounded-xl text-xs font-bold shadow-2xs"
                           >
                             <span>{cat}</span>
                             <button
@@ -2668,7 +2700,7 @@ export const EventManage: React.FC = () => {
                             }
                           }}
                           placeholder="+ Add tag (press Enter)"
-                          className="px-2.5 py-1 text-xs font-semibold bg-transparent outline-none placeholder-zinc-400 text-zinc-900 w-36"
+                          className="px-2.5 py-1 text-xs font-semibold bg-transparent outline-none placeholder-zinc-400 text-zinc-900 dark:text-white w-36"
                         />
                         {customCategoryInput.trim() && (
                           <button
@@ -2709,7 +2741,7 @@ export const EventManage: React.FC = () => {
                               }}
                               className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${isAdded
                                 ? 'bg-red-50 border-red-200 text-[#E31B23]'
-                                : 'bg-white border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-50 dark:hover:bg-white/5 hover:border-zinc-300'
+                                : 'bg-white border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5 hover:border-zinc-300'
                                 }`}
                             >
                               <span>{tag}</span>
@@ -2722,9 +2754,9 @@ export const EventManage: React.FC = () => {
                   </div>
 
                   {/* Description Rich Text Editor */}
-                  <div className="space-y-2 pt-3 border-t border-zinc-100 dark:border-white/10 dark:border-white/10">
+                  <div className="space-y-2 pt-3 border-t border-zinc-100 dark:border-white/10">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-zinc-800 block">Description / Experience Story *</label>
+                      <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">Description / Experience Story *</label>
                       {!isDescriptionFilled && (
                         <span className="text-[11px] font-semibold text-amber-600 flex items-center gap-1">
                           <AlertCircle className="w-3 h-3" /> Required for Location & Schedule
@@ -2742,13 +2774,20 @@ export const EventManage: React.FC = () => {
                   </div>
 
                   {/* Visibility & Spotlight Toggle */}
-                  <div className="pt-3 border-t border-zinc-100 dark:border-white/10 dark:border-white/10">
+                  <div className="pt-3 border-t border-zinc-100 dark:border-white/10">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50/70 space-y-3">
-                        <label className="text-xs font-bold text-zinc-800 flex items-center justify-between">
-                          <span>Event Visibility</span>
-                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${visibility === 'public' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-200 text-zinc-700'
-                            }`}>
+                      {/* Event Visibility Card */}
+                      <div className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.03] space-y-3">
+                        <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <Globe className="w-3.5 h-3.5 text-[#E31B23]" />
+                            <span>Event Visibility</span>
+                          </span>
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
+                            visibility === 'public' 
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' 
+                              : 'bg-zinc-200 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-white/10'
+                          }`}>
                             {visibility}
                           </span>
                         </label>
@@ -2756,34 +2795,37 @@ export const EventManage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => setVisibility('public')}
-                            className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${visibility === 'public'
-                              ? 'bg-white text-zinc-950 dark:text-white border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
-                              : 'bg-zinc-100/80 border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100'
-                              }`}
+                            className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                              visibility === 'public'
+                                ? 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-zinc-950 dark:border-white shadow-xs ring-1 ring-zinc-950 dark:ring-white'
+                                : 'bg-white dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10'
+                            }`}
                           >
                             Public
                           </button>
                           <button
                             type="button"
                             onClick={() => setVisibility('private')}
-                            className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${visibility === 'private'
-                              ? 'bg-white text-zinc-950 dark:text-white border-zinc-900 shadow-2xs ring-1 ring-zinc-900'
-                              : 'bg-zinc-100/80 border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100'
-                              }`}
+                            className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                              visibility === 'private'
+                                ? 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-zinc-950 dark:border-white shadow-xs ring-1 ring-zinc-950 dark:ring-white'
+                                : 'bg-white dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10'
+                            }`}
                           >
                             Private
                           </button>
                         </div>
-                        <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
                           {visibility === 'public'
-                            ? 'Listed on Eventa marketplace & indexed on search engines.'
-                            : 'Only accessible to users with the direct secret link.'}
+                            ? 'Listed on StraytTix public marketplace & discover directory.'
+                            : 'Unlisted: Only accessible to attendees with your direct secret link.'}
                         </p>
                       </div>
 
-                      <div className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50/70 space-y-3">
+                      {/* Marketplace Spotlight Card */}
+                      <div className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.03] space-y-3">
                         <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+                          <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
                             <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
                             <span>Marketplace Spotlight</span>
                           </label>
@@ -2794,18 +2836,18 @@ export const EventManage: React.FC = () => {
                               onChange={(e) => setIsFeatured(e.target.checked)}
                               className="sr-only peer"
                             />
-                            <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E31B23]"></div>
+                            <div className="w-10 h-5 bg-zinc-200 dark:bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E31B23]"></div>
                           </label>
                         </div>
-                        <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
-                          Highlight in the "Featured & Spotlight" carousel on the Eventa homepage for increased attendee visibility.
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
+                          Spotlight this event on the StraytTix homepage hero carousel for elevated community discoverability.
                         </p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-zinc-100 dark:border-white/10 dark:border-white/10 flex items-center justify-between mt-8">
+                <div className="pt-6 border-t border-zinc-100 dark:border-white/10 flex items-center justify-between mt-8">
                   <p className="text-xs text-zinc-400 font-medium">Changes will immediately reflect on the live event page.</p>
                   <button
                     disabled={isSaving}
@@ -2842,7 +2884,7 @@ export const EventManage: React.FC = () => {
                     onClick={() => setEditScheduleType('single')}
                     className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${editScheduleType === 'single'
                       ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
-                      : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5'
+                      : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5'
                       }`}
                   >
                     <Calendar className={`w-5 h-5 mb-2 ${editScheduleType === 'single' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
@@ -2855,7 +2897,7 @@ export const EventManage: React.FC = () => {
                     onClick={() => setEditScheduleType('recurring')}
                     className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${editScheduleType === 'recurring'
                       ? 'border-[#E31B23] bg-red-50/50 shadow-xs ring-1 ring-[#E31B23]/30'
-                      : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5'
+                      : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5'
                       }`}
                   >
                     <RefreshCw className={`w-5 h-5 mb-2 ${editScheduleType === 'recurring' ? 'text-[#E31B23]' : 'text-zinc-400'}`} />
@@ -2867,20 +2909,20 @@ export const EventManage: React.FC = () => {
                 {/* Recurring Configuration Fields */}
                 {editScheduleType === 'recurring' && (
                   <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-3">
-                    <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-white/10 dark:border-white/10/80 pb-2.5">
+                    <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-white/10 pb-2.5">
                       <RefreshCw className="w-4 h-4 text-[#E31B23]" />
-                      <h4 className="text-xs font-black text-zinc-900 uppercase tracking-wider">
+                      <h4 className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-wider">
                         Recurring Series Parameters
                       </h4>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-zinc-800">Frequency</label>
+                        <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Frequency</label>
                         <select
                           value={editEventFrequency}
                           onChange={(e) => setEditEventFrequency(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                          className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
                         >
                           <option value="weekly">Weekly</option>
                           <option value="daily">Daily</option>
@@ -2889,11 +2931,11 @@ export const EventManage: React.FC = () => {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-zinc-800">End Condition</label>
+                        <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200">End Condition</label>
                         <select
                           value={editRecurringEndType}
                           onChange={(e) => setEditRecurringEndType(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                          className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
                         >
                           <option value="after_occurrences">After set number of occurrences</option>
                           <option value="on_date">On specific end date</option>
@@ -2901,14 +2943,14 @@ export const EventManage: React.FC = () => {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-zinc-800">Occurrences Count</label>
+                        <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Occurrences Count</label>
                         <input
                           type="number"
                           min={1}
                           max={52}
                           value={editRecurringOccurrences}
                           onChange={(e) => setEditRecurringOccurrences(Math.max(1, parseInt(e.target.value) || 1))}
-                          className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                          className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
                         />
                       </div>
                     </div>
@@ -2919,14 +2961,14 @@ export const EventManage: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
                         <Globe className="w-3.5 h-3.5 text-[#E31B23]" />
                         <span>Event Timezone</span>
                       </label>
                       <select
                         value={editScheduleTimezone}
                         onChange={(e) => setEditScheduleTimezone(e.target.value)}
-                        className="px-3.5 py-2 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                        className="px-3.5 py-2 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
                       >
                         <option value="Africa/Lagos">Africa/Lagos (WAT, GMT+1)</option>
                         <option value="Africa/Accra">Africa/Accra (GMT)</option>
@@ -2944,28 +2986,28 @@ export const EventManage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => applyDatePreset(3)}
-                          className="px-2.5 py-1.5 bg-white hover:bg-zinc-100 border border-zinc-200 dark:border-white/10 text-zinc-700 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                          className="px-2.5 py-1.5 bg-white hover:bg-zinc-100 dark:bg-white/10 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-lg transition-colors cursor-pointer"
                         >
                           In 3 Days
                         </button>
                         <button
                           type="button"
                           onClick={() => applyDatePreset(7)}
-                          className="px-2.5 py-1.5 bg-white hover:bg-zinc-100 border border-zinc-200 dark:border-white/10 text-zinc-700 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                          className="px-2.5 py-1.5 bg-white hover:bg-zinc-100 dark:bg-white/10 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-lg transition-colors cursor-pointer"
                         >
                           Next Week
                         </button>
                         <button
                           type="button"
                           onClick={() => applyDatePreset(14)}
-                          className="px-2.5 py-1.5 bg-white hover:bg-zinc-100 border border-zinc-200 dark:border-white/10 text-zinc-700 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                          className="px-2.5 py-1.5 bg-white hover:bg-zinc-100 dark:bg-white/10 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-lg transition-colors cursor-pointer"
                         >
                           In 2 Weeks
                         </button>
                         <button
                           type="button"
                           onClick={() => applyDatePreset(30)}
-                          className="px-2.5 py-1.5 bg-white hover:bg-zinc-100 border border-zinc-200 dark:border-white/10 text-zinc-700 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                          className="px-2.5 py-1.5 bg-white hover:bg-zinc-100 dark:bg-white/10 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-lg transition-colors cursor-pointer"
                         >
                           In 1 Month
                         </button>
@@ -2977,21 +3019,21 @@ export const EventManage: React.FC = () => {
                 {/* Start Date & Time */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold text-zinc-700 block mb-1.5">Start Date *</label>
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1.5">Start Date *</label>
                     <input
                       type="date"
                       value={editStartDate}
                       onChange={(e) => setEditStartDate(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white focus:border-[#E31B23] transition-all"
+                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-[#070709] focus:border-[#E31B23] transition-all"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-zinc-700 block mb-1.5">Start Time (24h H:i) *</label>
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1.5">Start Time (24h H:i) *</label>
                     <input
                       type="time"
                       value={editStartTime}
                       onChange={(e) => setEditStartTime(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white focus:border-[#E31B23] transition-all"
+                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-[#070709] focus:border-[#E31B23] transition-all"
                     />
                   </div>
                 </div>
@@ -2999,30 +3041,30 @@ export const EventManage: React.FC = () => {
                 {/* End Date & Time */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold text-zinc-700 block mb-1.5">End Date</label>
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1.5">End Date</label>
                     <input
                       type="date"
                       value={editEndDate}
                       onChange={(e) => setEditEndDate(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white focus:border-[#E31B23] transition-all"
+                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-[#070709] focus:border-[#E31B23] transition-all"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-zinc-700 block mb-1.5">End Time (24h H:i)</label>
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1.5">End Time (24h H:i)</label>
                     <input
                       type="time"
                       value={editEndTime}
                       onChange={(e) => setEditEndTime(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white focus:border-[#E31B23] transition-all"
+                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-[#070709] focus:border-[#E31B23] transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Event Agenda & Sessions */}
-                <div className="pt-4 border-t border-zinc-100 dark:border-white/10 dark:border-white/10 space-y-4">
+                <div className="pt-4 border-t border-zinc-100 dark:border-white/10 space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
                         <Clock className="w-4 h-4 text-[#E31B23]" />
                         <span>Event Agenda & Sessions ({editSchedules.length})</span>
                       </h4>
@@ -3042,7 +3084,7 @@ export const EventManage: React.FC = () => {
                   </div>
 
                   {editSchedules.length === 0 ? (
-                    <div className="p-6 rounded-2xl border border-dashed border-zinc-200 dark:border-white/10 text-center bg-zinc-50/50">
+                    <div className="p-6 rounded-2xl border border-dashed border-zinc-200 dark:border-white/10 text-center bg-zinc-50 dark:bg-white/5">
                       <Clock className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
                       <p className="text-xs font-bold text-zinc-600">No sessions or agenda items added yet.</p>
                       <p className="text-[11px] text-zinc-400 mt-0.5">Click "Add Session" above to define tracks or speaking segments.</p>
@@ -3052,9 +3094,9 @@ export const EventManage: React.FC = () => {
                       {editSchedules.map((item, idx) => (
                         <div
                           key={idx}
-                          className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200 dark:border-white/10 space-y-3 relative hover:border-zinc-300 transition-colors"
+                          className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-3 relative hover:border-zinc-300 transition-colors"
                         >
-                          <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 dark:border-white/10/80 pb-2">
+                          <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 pb-2">
                             <div className="flex items-center gap-2">
                               <span className="w-5 h-5 rounded-md bg-zinc-900 text-white flex items-center justify-center text-[10px] font-black">
                                 {idx + 1}
@@ -3064,7 +3106,7 @@ export const EventManage: React.FC = () => {
                                 value={item.day || `Session ${idx + 1}`}
                                 onChange={(e) => handleScheduleSessionChange(idx, 'day', e.target.value)}
                                 placeholder="e.g. Session 1 or Morning Track"
-                                className="text-xs font-bold text-zinc-900 bg-transparent border-b border-dashed border-zinc-300 focus:border-[#E31B23] outline-none px-1 py-0.5 w-32"
+                                className="text-xs font-bold text-zinc-900 dark:text-white bg-transparent border-b border-dashed border-zinc-300 focus:border-[#E31B23] outline-none px-1 py-0.5 w-32"
                                 readOnly />
                             </div>
 
@@ -3085,7 +3127,7 @@ export const EventManage: React.FC = () => {
                                 type="time"
                                 value={item.startTime}
                                 onChange={(e) => handleScheduleSessionChange(idx, 'startTime', e.target.value)}
-                                className="w-full px-3 py-1.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                                className="w-full px-3 py-1.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
                               />
                             </div>
                             <div className="space-y-1">
@@ -3094,7 +3136,7 @@ export const EventManage: React.FC = () => {
                                 type="time"
                                 value={item.endTime}
                                 onChange={(e) => handleScheduleSessionChange(idx, 'endTime', e.target.value)}
-                                className="w-full px-3 py-1.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                                className="w-full px-3 py-1.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
                               />
                             </div>
                           </div>
@@ -3106,7 +3148,7 @@ export const EventManage: React.FC = () => {
                               value={item.title}
                               onChange={(e) => handleScheduleSessionChange(idx, 'title', e.target.value)}
                               placeholder="e.g. Opening Keynote & Architecture Overview"
-                              className="w-full px-3 py-2 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23]"
+                              className="w-full px-3 py-2 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
                             />
                           </div>
 
@@ -3117,7 +3159,7 @@ export const EventManage: React.FC = () => {
                               value={item.description || ''}
                               onChange={(e) => handleScheduleSessionChange(idx, 'description', e.target.value)}
                               placeholder="Session details, speaker overview, and expected attendee takeaways..."
-                              className="w-full px-3 py-2 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-800 outline-none focus:border-[#E31B23]"
+                              className="w-full px-3 py-2 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-800 dark:text-zinc-200 outline-none focus:border-[#E31B23]"
                             />
                           </div>
                         </div>
@@ -3126,7 +3168,7 @@ export const EventManage: React.FC = () => {
                   )}
                 </div>
 
-                <div className="pt-6 border-t border-zinc-100 dark:border-white/10 dark:border-white/10 flex items-center justify-between mt-8">
+                <div className="pt-6 border-t border-zinc-100 dark:border-white/10 flex items-center justify-between mt-8">
                   <p className="text-xs text-zinc-400 font-medium">Schedule changes reflect on attendee tickets and calendar reminders.</p>
                   <button
                     disabled={isSaving}
@@ -3162,7 +3204,7 @@ export const EventManage: React.FC = () => {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-zinc-700 block mb-1">Venue Name</label>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Venue Name</label>
                       <input
                         type="text"
                         value={editVenue}
@@ -3172,7 +3214,7 @@ export const EventManage: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-zinc-700 block mb-1">Street Address</label>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Street Address</label>
                       <input
                         type="text"
                         value={editAddress}
@@ -3185,7 +3227,7 @@ export const EventManage: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-zinc-700 block mb-1">City</label>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">City</label>
                       <input
                         type="text"
                         value={editCity}
@@ -3195,7 +3237,7 @@ export const EventManage: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-zinc-700 block mb-1">State / Province</label>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">State / Province</label>
                       <input
                         type="text"
                         value={editState}
@@ -3235,21 +3277,21 @@ export const EventManage: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <label className="text-xs font-bold text-zinc-900 block">Cover Photo & Event Flyer</label>
+                      <label className="text-xs font-bold text-zinc-900 dark:text-white block">Cover Photo & Event Flyer</label>
                       <span className="text-[11px] text-zinc-400">High-res 16:9 banner displayed across event discovery & passes</span>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-full border border-zinc-200 dark:border-white/10">
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 dark:bg-white/10 text-zinc-600 rounded-full border border-zinc-200 dark:border-white/10">
                       16:9 Recommended
                     </span>
                   </div>
 
                   {/* Cover Mode Selector */}
-                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100/80 rounded-xl border border-zinc-200 dark:border-white/10/60 text-xs font-bold">
+                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100 dark:bg-white/10 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-bold">
                     <button
                       type="button"
                       onClick={() => setCoverMode('upload')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'upload'
-                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        ? 'bg-white dark:bg-white/20 text-zinc-950 dark:text-white shadow-2xs font-extrabold'
                         : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
                         }`}
                     >
@@ -3260,7 +3302,7 @@ export const EventManage: React.FC = () => {
                       type="button"
                       onClick={() => setCoverMode('preset')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'preset'
-                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        ? 'bg-white dark:bg-white/20 text-zinc-950 dark:text-white shadow-2xs font-extrabold'
                         : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
                         }`}
                     >
@@ -3271,7 +3313,7 @@ export const EventManage: React.FC = () => {
                       type="button"
                       onClick={() => setCoverMode('url')}
                       className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${coverMode === 'url'
-                        ? 'bg-white text-zinc-950 dark:text-white shadow-2xs font-extrabold'
+                        ? 'bg-white dark:bg-white/20 text-zinc-950 dark:text-white shadow-2xs font-extrabold'
                         : 'text-zinc-600 hover:text-zinc-950 dark:text-white'
                         }`}
                     >
@@ -3301,7 +3343,7 @@ export const EventManage: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => coverFileInputRef.current?.click()}
-                              className="px-3.5 py-2 bg-white text-zinc-950 dark:text-white text-xs font-bold rounded-xl shadow-md hover:bg-zinc-100 transition-all flex items-center gap-1.5 cursor-pointer"
+                              className="px-3.5 py-2 bg-white text-zinc-950 dark:text-white text-xs font-bold rounded-xl shadow-md hover:bg-zinc-100 dark:bg-white/10 transition-all flex items-center gap-1.5 cursor-pointer"
                             >
                               <Upload className="w-3.5 h-3.5 text-[#E31B23]" />
                               <span>Replace Flyer</span>
@@ -3338,13 +3380,13 @@ export const EventManage: React.FC = () => {
                           onClick={() => coverFileInputRef.current?.click()}
                           className={`h-44 sm:h-48 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all ${isDraggingCover
                             ? 'border-[#E31B23] bg-red-50/40 ring-4 ring-red-100'
-                            : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5/70 bg-zinc-50/40'
+                            : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5/70 bg-zinc-50 dark:bg-white/5/40'
                             }`}
                         >
                           {isUploadingCover ? (
                             <div className="flex flex-col items-center gap-2">
                               <Loader2 className="w-8 h-8 text-[#E31B23] animate-spin" />
-                              <span className="text-xs font-bold text-zinc-700">
+                              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
                                 Sanitizing & uploading flyer... {coverUploadProgress !== null ? `${coverUploadProgress}%` : ''}
                               </span>
                             </div>
@@ -3353,7 +3395,7 @@ export const EventManage: React.FC = () => {
                               <div className="w-12 h-12 rounded-2xl bg-red-50 text-[#E31B23] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-105 transition-transform">
                                 <Upload className="w-6 h-6" />
                               </div>
-                              <span className="text-xs font-bold text-zinc-900">
+                              <span className="text-xs font-bold text-zinc-900 dark:text-white">
                                 Click to browse or drag & drop event banner flyer
                               </span>
                               <span className="text-[11px] text-zinc-400 mt-1 max-w-xs">
@@ -3368,10 +3410,10 @@ export const EventManage: React.FC = () => {
 
                   {/* TAB 2: PRESET GALLERY (50 CURATED PRESETS) */}
                   {coverMode === 'preset' && (
-                    <div className="space-y-3 bg-zinc-50/60 p-3.5 rounded-2xl border border-zinc-200 dark:border-white/10/80">
+                    <div className="space-y-3 bg-zinc-50 dark:bg-white/5/60 p-3.5 rounded-2xl border border-zinc-200 dark:border-white/10">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-black text-zinc-900">
+                          <span className="text-xs font-black text-zinc-900 dark:text-white">
                             Curated Photography Studio
                           </span>
                           <span className="text-[10px] font-black px-2 py-0.5 bg-red-100/70 text-[#E31B23] rounded-full border border-red-200">
@@ -3387,13 +3429,13 @@ export const EventManage: React.FC = () => {
                             value={presetSearchQuery}
                             onChange={(e) => setPresetSearchQuery(e.target.value)}
                             placeholder="Filter presets..."
-                            className="w-full pl-8 pr-7 py-1.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:border-[#E31B23]"
+                            className="w-full pl-8 pr-7 py-1.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs text-zinc-900 dark:text-white placeholder-zinc-400 outline-none focus:border-[#E31B23]"
                           />
                           {presetSearchQuery && (
                             <button
                               type="button"
                               onClick={() => setPresetSearchQuery('')}
-                              className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 cursor-pointer"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:text-zinc-300 cursor-pointer"
                             >
                               <X className="w-3 h-3" />
                             </button>
@@ -3416,7 +3458,7 @@ export const EventManage: React.FC = () => {
                               onClick={() => setPresetCategoryFilter(cat)}
                               className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer ${isSelected
                                 ? 'bg-zinc-900 text-white shadow-2xs'
-                                : 'bg-white border border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100'
+                                : 'bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100 dark:bg-white/10'
                                 }`}
                             >
                               {cat} ({count})
@@ -3476,10 +3518,10 @@ export const EventManage: React.FC = () => {
                           setEditFlyerUrl(e.target.value);
                         }}
                         placeholder="https://images.unsplash.com/..."
-                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-mono text-zinc-800 placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white transition-all"
+                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-mono text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 outline-none focus:border-[#E31B23] focus:bg-white dark:focus:bg-[#070709] transition-all"
                       />
                       {editBannerUrl && !editBannerUrl.startsWith('data:image') && (
-                        <div className="relative rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 h-32 bg-zinc-100">
+                        <div className="relative rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 h-32 bg-zinc-100 dark:bg-white/10">
                           <img src={editBannerUrl} alt="Cover Preview" className="w-full h-full object-cover" />
                         </div>
                       )}
@@ -3522,7 +3564,7 @@ export const EventManage: React.FC = () => {
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-xs font-bold text-zinc-700 block mb-1">Streaming Provider</label>
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Streaming Provider</label>
                     <select
                       value={streamProvider}
                       onChange={(e) => setStreamProvider(e.target.value)}
@@ -3536,7 +3578,7 @@ export const EventManage: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-zinc-700 block mb-1">Meeting / Stream Link URL</label>
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Meeting / Stream Link URL</label>
                     <input
                       type="url"
                       placeholder="https://..."
@@ -3546,7 +3588,7 @@ export const EventManage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-zinc-700 block mb-1">Viewer Instructions</label>
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Viewer Instructions</label>
                     <textarea
                       rows={3}
                       value={streamInstructions}
@@ -3576,7 +3618,7 @@ export const EventManage: React.FC = () => {
 
                 <div className="space-y-3">
                   {lineup.length === 0 ? (
-                    <div className="p-8 rounded-2xl border border-dashed border-zinc-200 dark:border-white/10 text-center bg-zinc-50/50">
+                    <div className="p-8 rounded-2xl border border-dashed border-zinc-200 dark:border-white/10 text-center bg-zinc-50 dark:bg-white/5">
                       <Users className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
                       <p className="text-xs font-bold text-zinc-600">No lineup members added yet.</p>
                       <p className="text-[11px] text-zinc-400 mt-0.5">Add keynote presenters or performers below.</p>
@@ -3587,18 +3629,18 @@ export const EventManage: React.FC = () => {
 
                       if (isEditing) {
                         return (
-                          <div key={idx} className="p-5 rounded-2xl bg-white border-2 border-[#E31B23] shadow-xs space-y-4 animate-in fade-in duration-150">
-                            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-white/10 dark:border-white/10 pb-2.5">
+                          <div key={idx} className="p-5 rounded-2xl bg-white dark:bg-[#0F0F14] border-2 border-[#E31B23] shadow-xs space-y-4 animate-in fade-in duration-150">
+                            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-white/10 pb-2.5">
                               <div className="flex items-center gap-2">
                                 <Edit3 className="w-4 h-4 text-[#E31B23]" />
-                                <h4 className="text-xs font-bold text-zinc-900 uppercase tracking-wider">
+                                <h4 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
                                   Edit Speaker: {p.name}
                                 </h4>
                               </div>
                               <button
                                 type="button"
                                 onClick={handleCancelEditLineup}
-                                className="text-zinc-400 hover:text-zinc-700 p-1 cursor-pointer"
+                                className="text-zinc-400 hover:text-zinc-700 dark:text-zinc-300 p-1 cursor-pointer"
                                 title="Cancel editing"
                               >
                                 <X className="w-4 h-4" />
@@ -3613,7 +3655,7 @@ export const EventManage: React.FC = () => {
                                   value={editMemberData.name}
                                   onChange={(e) => setEditMemberData({ ...editMemberData, name: e.target.value })}
                                   placeholder="e.g. Alex Mercer"
-                                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white transition-colors"
+                                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:bg-white dark:focus:bg-[#070709] transition-colors"
                                 />
                               </div>
 
@@ -3624,7 +3666,7 @@ export const EventManage: React.FC = () => {
                                   value={editMemberData.role || ''}
                                   onChange={(e) => setEditMemberData({ ...editMemberData, role: e.target.value })}
                                   placeholder="e.g. Keynote Speaker"
-                                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 outline-none focus:border-[#E31B23] focus:bg-white transition-colors"
+                                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:bg-white dark:focus:bg-[#070709] transition-colors"
                                 />
                               </div>
                             </div>
@@ -3636,12 +3678,12 @@ export const EventManage: React.FC = () => {
                                 value={editMemberData.bio || ''}
                                 onChange={(e) => setEditMemberData({ ...editMemberData, bio: e.target.value })}
                                 placeholder="Brief background or credentials..."
-                                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-800 outline-none focus:border-[#E31B23] focus:bg-white transition-colors"
+                                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-800 dark:text-zinc-200 outline-none focus:border-[#E31B23] focus:bg-white dark:focus:bg-[#070709] transition-colors"
                               />
                             </div>
 
                             {/* Avatar & Photo Section */}
-                            <div className="p-3.5 bg-zinc-50/70 rounded-xl border border-zinc-200 dark:border-white/10 space-y-3">
+                            <div className="p-3.5 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/10 space-y-3">
                               <div className="flex items-center justify-between">
                                 <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
                                   <User className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -3667,7 +3709,7 @@ export const EventManage: React.FC = () => {
                                       className="w-12 h-12 rounded-xl object-cover border-2 border-zinc-200 dark:border-white/10 shadow-2xs"
                                     />
                                   ) : (
-                                    <div className="w-12 h-12 rounded-xl bg-zinc-100 text-zinc-400 flex items-center justify-center border-2 border-dashed border-zinc-200 dark:border-white/10">
+                                    <div className="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-white/10 text-zinc-400 flex items-center justify-center border-2 border-dashed border-zinc-200 dark:border-white/10">
                                       <User className="w-5 h-5" />
                                     </div>
                                   )}
@@ -3680,7 +3722,7 @@ export const EventManage: React.FC = () => {
 
                                 <div className="flex-1 flex flex-wrap items-center gap-2">
                                   {/* Upload Image */}
-                                  <label className={`px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-100 border border-zinc-200 dark:border-white/10 text-zinc-800 text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-2xs ${isUploadingEditAvatar ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
+                                  <label className={`px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-100 dark:bg-white/10 border border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-zinc-200 text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-2xs ${isUploadingEditAvatar ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
                                     {isUploadingEditAvatar ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E31B23]" /> : <Upload className="w-3.5 h-3.5 text-[#E31B23]" />}
                                     <span>{isUploadingEditAvatar ? 'Uploading...' : 'Upload Photo'}</span>
                                     <input
@@ -3702,7 +3744,7 @@ export const EventManage: React.FC = () => {
                                     onClick={() => setIsEditMemberAvatarOpen(!isEditMemberAvatarOpen)}
                                     className={`px-3 py-1.5 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-all ${isEditMemberAvatarOpen
                                       ? 'bg-[#E31B23] text-white shadow-xs'
-                                      : 'bg-white hover:bg-zinc-100 border border-zinc-200 dark:border-white/10 text-zinc-800 shadow-2xs'
+                                      : 'bg-white hover:bg-zinc-100 dark:bg-white/10 border border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-zinc-200 shadow-2xs'
                                       }`}
                                   >
                                     <ImageIcon className="w-3.5 h-3.5" />
@@ -3713,9 +3755,9 @@ export const EventManage: React.FC = () => {
 
                               {/* System Avatar Grid */}
                               {isEditMemberAvatarOpen && (
-                                <div className="p-3 bg-white rounded-xl border border-zinc-200 dark:border-white/10 space-y-2 animate-in fade-in duration-150">
+                                <div className="p-3 bg-white dark:bg-[#070709] rounded-xl border border-zinc-200 dark:border-white/10 space-y-2 animate-in fade-in duration-150">
                                   <div className="flex items-center justify-between">
-                                    <span className="text-[11px] font-bold text-zinc-700">Choose a System Avatar</span>
+                                    <span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300">Choose a System Avatar</span>
                                     <span className="text-[10px] text-zinc-400">{SYSTEM_AVATARS.length} presets</span>
                                   </div>
                                   <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
@@ -3729,7 +3771,7 @@ export const EventManage: React.FC = () => {
                                             setEditMemberData({ ...editMemberData, avatarUrl: av.url });
                                             setIsEditMemberAvatarOpen(false);
                                           }}
-                                          className={`relative rounded-xl overflow-hidden p-1 border-2 transition-all cursor-pointer aspect-square ${isSelected ? 'border-[#E31B23] bg-red-50 ring-2 ring-[#E31B23]/30' : 'border-zinc-200 dark:border-white/10 hover:border-zinc-400 bg-zinc-50'
+                                          className={`relative rounded-xl overflow-hidden p-1 border-2 transition-all cursor-pointer aspect-square ${isSelected ? 'border-[#E31B23] bg-red-50 ring-2 ring-[#E31B23]/30' : 'border-zinc-200 dark:border-white/10 hover:border-zinc-400 bg-zinc-50 dark:bg-white/5'
                                             }`}
                                           title={av.name}
                                         >
@@ -3748,7 +3790,7 @@ export const EventManage: React.FC = () => {
                             </div>
 
                             {/* Social Links Sub-list */}
-                            <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-white/10 dark:border-white/10">
+                            <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-white/10">
                               <div className="flex items-center justify-between">
                                 <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
                                   Social & Profile Links
@@ -3770,7 +3812,7 @@ export const EventManage: React.FC = () => {
                                       <select
                                         value={link.platform}
                                         onChange={(e) => handleEditMemberLinkChange(lIdx, 'platform', e.target.value)}
-                                        className="px-2.5 py-1.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-lg text-xs font-bold text-zinc-800 outline-none focus:border-[#E31B23]"
+                                        className="px-2.5 py-1.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-lg text-xs font-bold text-zinc-800 dark:text-zinc-200 outline-none focus:border-[#E31B23]"
                                       >
                                         <option value="linkedin">LinkedIn</option>
                                         <option value="twitter">Twitter / X</option>
@@ -3784,7 +3826,7 @@ export const EventManage: React.FC = () => {
                                         value={link.url}
                                         onChange={(e) => handleEditMemberLinkChange(lIdx, 'url', e.target.value)}
                                         placeholder="https://..."
-                                        className="flex-1 px-3 py-1.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-lg text-xs font-medium text-zinc-900 outline-none focus:border-[#E31B23]"
+                                        className="flex-1 px-3 py-1.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-lg text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
                                       />
                                       <button
                                         type="button"
@@ -3801,11 +3843,11 @@ export const EventManage: React.FC = () => {
                             </div>
 
                             {/* Form Actions */}
-                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-white/10 dark:border-white/10">
+                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-white/10">
                               <button
                                 type="button"
                                 onClick={handleCancelEditLineup}
-                                className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-bold rounded-xl cursor-pointer transition-colors"
+                                className="px-4 py-2 bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-xl cursor-pointer transition-colors"
                               >
                                 Cancel
                               </button>
@@ -3839,12 +3881,12 @@ export const EventManage: React.FC = () => {
                                 </div>
                               )}
                               <div>
-                                <p className="text-sm font-bold text-zinc-900">{p.name}</p>
+                                <p className="text-sm font-bold text-zinc-900 dark:text-white">{p.name}</p>
                                 <p className="text-xs text-zinc-500">{p.role || 'Guest'} {p.bio ? `• ${p.bio}` : ''}</p>
                                 {p.links && p.links.length > 0 && (
                                   <div className="flex items-center gap-1.5 mt-1">
                                     {p.links.map((link, lIdx) => (
-                                      <span key={lIdx} className="px-1.5 py-0.5 bg-zinc-200/80 text-zinc-700 rounded text-[10px] font-bold uppercase">
+                                      <span key={lIdx} className="px-1.5 py-0.5 bg-zinc-200/80 text-zinc-700 dark:text-zinc-300 rounded text-[10px] font-bold uppercase">
                                         {link.platform}
                                       </span>
                                     ))}
@@ -3857,7 +3899,7 @@ export const EventManage: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleStartEditLineup(idx)}
-                                className="px-3 py-1.5 text-xs font-bold rounded-lg bg-white border border-zinc-200 dark:border-white/10 hover:border-zinc-300 text-zinc-800 inline-flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
+                                className="px-3 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 text-zinc-800 dark:text-zinc-200 inline-flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
                               >
                                 <Edit3 className="w-3.5 h-3.5 text-[#E31B23]" />
                                 <span>Edit</span>
@@ -3883,7 +3925,7 @@ export const EventManage: React.FC = () => {
 
                 {/* Add Lineup Member Form */}
                 <div className="p-5 rounded-2xl bg-[#F8F9FB] border border-zinc-200 dark:border-white/10 space-y-4">
-                  <h4 className="text-xs font-bold text-zinc-800 uppercase tracking-wider">Add Lineup Member</h4>
+                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">Add Lineup Member</h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <input
@@ -3891,14 +3933,14 @@ export const EventManage: React.FC = () => {
                       placeholder="Performer / Speaker Name *"
                       value={newPerformerName}
                       onChange={(e) => setNewPerformerName(e.target.value)}
-                      className="px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] outline-none"
+                      className="px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] outline-none"
                     />
                     <input
                       type="text"
                       placeholder="Role (e.g. Keynote Speaker, Headliner)"
                       value={newPerformerRole}
                       onChange={(e) => setNewPerformerRole(e.target.value)}
-                      className="px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] outline-none"
+                      className="px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] outline-none"
                     />
                   </div>
 
@@ -3907,11 +3949,11 @@ export const EventManage: React.FC = () => {
                     placeholder="Short bio or credentials (optional)"
                     value={newPerformerBio}
                     onChange={(e) => setNewPerformerBio(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] outline-none"
                   />
 
                   {/* Avatar Picker for New Member */}
-                  <div className="p-3.5 bg-white rounded-xl border border-zinc-200 dark:border-white/10 space-y-3">
+                  <div className="p-3.5 bg-white dark:bg-[#070709] rounded-xl border border-zinc-200 dark:border-white/10 space-y-3">
                     <div className="flex items-center justify-between">
                       <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
                         <User className="w-3.5 h-3.5 text-[#E31B23]" />
@@ -3937,7 +3979,7 @@ export const EventManage: React.FC = () => {
                             className="w-12 h-12 rounded-xl object-cover border-2 border-zinc-200 dark:border-white/10 shadow-2xs"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-xl bg-zinc-100 text-zinc-400 flex items-center justify-center border-2 border-dashed border-zinc-200 dark:border-white/10">
+                          <div className="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-white/10 text-zinc-400 flex items-center justify-center border-2 border-dashed border-zinc-200 dark:border-white/10">
                             <User className="w-5 h-5" />
                           </div>
                         )}
@@ -3950,7 +3992,7 @@ export const EventManage: React.FC = () => {
 
                       <div className="flex-1 flex flex-wrap items-center gap-2">
                         {/* Upload Image Button */}
-                        <label className={`px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-2xs ${isUploadingPerformerAvatar ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
+                        <label className={`px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 text-zinc-800 dark:text-zinc-200 text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-2xs ${isUploadingPerformerAvatar ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
                           {isUploadingPerformerAvatar ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E31B23]" /> : <Upload className="w-3.5 h-3.5 text-[#E31B23]" />}
                           <span>{isUploadingPerformerAvatar ? 'Uploading...' : 'Upload Image'}</span>
                           <input
@@ -3972,7 +4014,7 @@ export const EventManage: React.FC = () => {
                           onClick={() => setIsNewPerformerAvatarOpen(!isNewPerformerAvatarOpen)}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-all ${isNewPerformerAvatarOpen
                             ? 'bg-[#E31B23] text-white shadow-xs'
-                            : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800 shadow-2xs'
+                            : 'bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 text-zinc-800 dark:text-zinc-200 shadow-2xs'
                             }`}
                         >
                           <ImageIcon className="w-3.5 h-3.5" />
@@ -3983,9 +4025,9 @@ export const EventManage: React.FC = () => {
 
                     {/* System Avatar Grid for New Member */}
                     {isNewPerformerAvatarOpen && (
-                      <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 dark:border-white/10 space-y-2 animate-in fade-in duration-150">
+                      <div className="p-3 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/10 space-y-2 animate-in fade-in duration-150">
                         <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-zinc-700">Choose a System Avatar</span>
+                          <span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300">Choose a System Avatar</span>
                           <span className="text-[10px] text-zinc-400">{SYSTEM_AVATARS.length} presets available</span>
                         </div>
                         <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
@@ -3999,7 +4041,7 @@ export const EventManage: React.FC = () => {
                                   setNewPerformerAvatar(av.url);
                                   setIsNewPerformerAvatarOpen(false);
                                 }}
-                                className={`relative rounded-xl overflow-hidden p-1 border-2 transition-all cursor-pointer aspect-square ${isSelected ? 'border-[#E31B23] bg-red-50 ring-2 ring-[#E31B23]/30' : 'border-zinc-200 dark:border-white/10 hover:border-zinc-400 bg-white'
+                                className={`relative rounded-xl overflow-hidden p-1 border-2 transition-all cursor-pointer aspect-square ${isSelected ? 'border-[#E31B23] bg-red-50 ring-2 ring-[#E31B23]/30' : 'border-zinc-200 dark:border-white/10 hover:border-zinc-400 bg-white dark:bg-[#070709]'
                                   }`}
                                 title={av.name}
                               >
@@ -4055,7 +4097,7 @@ export const EventManage: React.FC = () => {
             {/* FAQS SUBTAB */}
             {setupSubtab === 'faqs' && (
               <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 dark:border-white/10 pb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
                   <div>
                     <h3 className="text-xl font-black text-zinc-950 dark:text-white tracking-tight">Frequently Asked Questions</h3>
                     <p className="text-xs text-zinc-500 mt-0.5">Help attendees find answers to common queries on your public event page.</p>
@@ -4075,12 +4117,12 @@ export const EventManage: React.FC = () => {
                 </div>
 
                 {faqs.length === 0 ? (
-                  <div className="py-12 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/10 bg-zinc-50/50 space-y-3">
-                    <div className="w-12 h-12 rounded-2xl bg-zinc-100 text-zinc-400 flex items-center justify-center mx-auto">
+                  <div className="py-12 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-white/10 text-zinc-400 flex items-center justify-center mx-auto">
                       <HelpCircle className="w-6 h-6" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-bold text-zinc-900">No FAQs added yet</p>
+                      <p className="text-sm font-bold text-zinc-900 dark:text-white">No FAQs added yet</p>
                       <p className="text-xs text-zinc-500 max-w-sm mx-auto">Add questions and answers about parking, dress code, tickets, or directions to assist attendees.</p>
                     </div>
                     <button
@@ -4101,7 +4143,7 @@ export const EventManage: React.FC = () => {
                     {faqs.map((faq, idx) => (
                       <div
                         key={idx}
-                        className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10/90 bg-white hover:border-zinc-300 shadow-2xs transition-all space-y-2"
+                        className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0F0F14] hover:border-zinc-300 dark:hover:border-white/20 shadow-2xs transition-all space-y-2"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-2.5">
@@ -4109,7 +4151,7 @@ export const EventManage: React.FC = () => {
                               Q
                             </span>
                             <div>
-                              <h4 className="text-sm font-bold text-zinc-900">{faq.question}</h4>
+                              <h4 className="text-sm font-bold text-zinc-900 dark:text-white">{faq.question}</h4>
                               <p className="text-xs text-zinc-600 mt-1 leading-relaxed whitespace-pre-line">{faq.answer}</p>
                             </div>
                           </div>
@@ -4122,7 +4164,7 @@ export const EventManage: React.FC = () => {
                                 setNewFaqAnswer(faq.answer);
                                 setIsFaqModalOpen(true);
                               }}
-                              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors cursor-pointer"
+                              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 dark:text-white hover:bg-zinc-100 dark:bg-white/10 transition-colors cursor-pointer"
                               title="Edit FAQ"
                             >
                               <Edit3 className="w-4 h-4" />
@@ -4151,31 +4193,34 @@ export const EventManage: React.FC = () => {
             {/* GALLERY & MEDIA SUBTAB */}
             {setupSubtab === 'gallery' && (
               <div className="space-y-6">
-                <div className="border-b border-zinc-100 dark:border-white/10 dark:border-white/10 pb-4">
+                <div className="border-b border-zinc-100 dark:border-white/10 pb-4">
                   <h3 className="text-xl font-black text-zinc-950 dark:text-white tracking-tight">Gallery & Media Showcase</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">Showcase high-resolution photos of past editions, venue amenities, and stage production.</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Showcase high-resolution photos of past editions, venue amenities, and stage production.</p>
                 </div>
 
                 {/* Main Hero Banner Preview */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-zinc-700 uppercase tracking-wider block">Main Event Banner</label>
-                  <div className="relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 aspect-[21/9] max-h-56 bg-zinc-100">
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider block">Main Event Banner</label>
+                  <div className="relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 aspect-[21/9] max-h-56 bg-zinc-100 dark:bg-[#070709]">
                     <img
                       src={editBannerUrl || event.bannerUrl || event.imageUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'}
                       alt="Banner Preview"
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4">
-                      <span className="text-white text-xs font-bold">Featured Main Flyer / Hero Cover</span>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
+                      <span className="text-white text-xs font-bold flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#E31B23]"></span>
+                        Featured Main Flyer / Hero Cover
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Add New Gallery Image */}
-                <div className="p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50/50 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-zinc-800 uppercase tracking-wider block">Add Photo to Gallery</label>
-                    <label className={`px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-100 border border-zinc-200 dark:border-white/10 text-zinc-800 text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-2xs ${isUploadingGallery ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
+                <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.03] space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider block">Add Photo to Gallery</label>
+                    <label className={`px-3.5 py-1.5 rounded-xl bg-white hover:bg-zinc-100 dark:bg-white/10 dark:hover:bg-white/15 border border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-zinc-200 text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-2xs self-start sm:self-auto ${isUploadingGallery ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
                       {isUploadingGallery ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E31B23]" /> : <Upload className="w-3.5 h-3.5 text-[#E31B23]" />}
                       <span>{isUploadingGallery ? 'Uploading...' : 'Upload Image File'}</span>
                       <input
@@ -4208,7 +4253,7 @@ export const EventManage: React.FC = () => {
                       value={newGalleryUrl}
                       onChange={(e) => setNewGalleryUrl(e.target.value)}
                       placeholder="Or enter direct image URL (https://...)"
-                      className="w-full flex-1 px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs text-zinc-900 outline-none focus:border-[#E31B23]"
+                      className="w-full flex-1 px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-colors"
                     />
                     <button
                       type="button"
@@ -4220,7 +4265,7 @@ export const EventManage: React.FC = () => {
                         setNewGalleryUrl('');
                         await saveEventToBackend({ galleryUrls: updated }, {}, 'Photo added to gallery!');
                       }}
-                      className="w-full sm:w-auto px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 whitespace-nowrap"
+                      className="w-full sm:w-auto px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 whitespace-nowrap shadow-sm"
                     >
                       {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                       <span>Add URL</span>
@@ -4229,32 +4274,32 @@ export const EventManage: React.FC = () => {
                 </div>
 
                 {/* Gallery Grid */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-zinc-700 uppercase tracking-wider">
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
                       Event Photos ({galleryUrls.length})
                     </label>
                     {galleryUrls.length > 0 && (
-                      <span className="text-[11px] text-zinc-400">Click trash icon to remove photo</span>
+                      <span className="text-[11px] text-zinc-400 dark:text-zinc-500">Click trash icon to remove photo</span>
                     )}
                   </div>
 
                   {galleryUrls.length === 0 ? (
-                    <div className="py-10 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/10 bg-zinc-50/40 space-y-2">
-                      <ImageIcon className="w-8 h-8 text-zinc-300 mx-auto" />
-                      <p className="text-xs font-bold text-zinc-600">No gallery photos added</p>
-                      <p className="text-[11px] text-zinc-400">Add URLs above to showcase images in the attendee public gallery.</p>
+                    <div className="py-12 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.02] space-y-2">
+                      <ImageIcon className="w-8 h-8 text-zinc-300 dark:text-zinc-600 mx-auto" />
+                      <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300">No gallery photos added yet</p>
+                      <p className="text-[11px] text-zinc-400 dark:text-zinc-500">Upload or add URLs above to showcase images in your public event gallery.</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                       {galleryUrls.map((url, gIdx) => (
-                        <div key={gIdx} className="relative group rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 aspect-video bg-zinc-100">
+                        <div key={gIdx} className="relative group rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 aspect-video bg-zinc-100 dark:bg-[#070709] hover:border-zinc-400 dark:hover:border-white/30 transition-all">
                           <img
                             src={url}
                             alt={`Gallery photo ${gIdx + 1}`}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                             <button
                               type="button"
                               onClick={async () => {
@@ -4262,10 +4307,10 @@ export const EventManage: React.FC = () => {
                                 setGalleryUrls(updated);
                                 await saveEventToBackend({ galleryUrls: updated }, {}, 'Photo removed from gallery');
                               }}
-                              className="p-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors shadow-xs cursor-pointer"
+                              className="p-2 rounded-lg bg-[#E31B23] text-white hover:bg-[#B91C1C] transition-colors shadow-xs cursor-pointer"
                               title="Delete photo"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
@@ -4281,14 +4326,14 @@ export const EventManage: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Event status message</h3>
-                  <p className="text-xs text-zinc-500 max-w-2xl mt-0.5">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-2xl mt-0.5">
                     You can use this feature to put up your event page before you’re ready to start sales or display a custom message after sales have ended.
                   </p>
                 </div>
 
                 {/* Choose a message */}
                 <div className="space-y-3">
-                  <label className="text-xs font-bold text-zinc-800 uppercase tracking-wider block">
+                  <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider block">
                     Choose a message
                   </label>
 
@@ -4301,23 +4346,23 @@ export const EventManage: React.FC = () => {
                         setIsStatusMsgEnabled(false);
                       }}
                       className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${statusMessageType === 'none'
-                        ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-white'
+                        ? 'border-[#E31B23] bg-red-500/10 ring-1 ring-[#E31B23]'
+                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-white dark:bg-[#070709]'
                         }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'none' ? 'bg-red-100 text-[#E31B23]' : 'bg-zinc-100 text-zinc-500'
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'none' ? 'bg-red-500/15 text-[#E31B23]' : 'bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400'
                           }`}>
                           <MinusCircle className="w-4 h-4" />
                         </div>
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'none' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'none' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 dark:border-white/20 bg-white dark:bg-[#070709]'
                           }`}>
                           {statusMessageType === 'none' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
                       </div>
                       <div>
-                        <span className="text-sm font-bold text-zinc-900 block">None</span>
-                        <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
+                        <span className="text-sm font-bold text-zinc-900 dark:text-white block">None</span>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
                           Standard event page with regular ticket purchasing active.
                         </p>
                       </div>
@@ -4331,23 +4376,23 @@ export const EventManage: React.FC = () => {
                         setIsStatusMsgEnabled(true);
                       }}
                       className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${statusMessageType === 'pre_sale'
-                        ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-white'
+                        ? 'border-[#E31B23] bg-red-500/10 ring-1 ring-[#E31B23]'
+                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-white dark:bg-[#070709]'
                         }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'pre_sale' ? 'bg-amber-100 text-amber-600' : 'bg-zinc-100 text-zinc-500'
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'pre_sale' ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' : 'bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400'
                           }`}>
                           <Clock className="w-4 h-4" />
                         </div>
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'pre_sale' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'pre_sale' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 dark:border-white/20 bg-white dark:bg-[#070709]'
                           }`}>
                           {statusMessageType === 'pre_sale' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
                       </div>
                       <div>
-                        <span className="text-sm font-bold text-zinc-900 block">Show a pre sale message</span>
-                        <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
+                        <span className="text-sm font-bold text-zinc-900 dark:text-white block">Show a pre sale message</span>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
                           Display a custom announcement on your event page before sales open.
                         </p>
                       </div>
@@ -4361,23 +4406,23 @@ export const EventManage: React.FC = () => {
                         setIsStatusMsgEnabled(true);
                       }}
                       className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${statusMessageType === 'post_sales'
-                        ? 'border-[#E31B23] bg-red-50/20 ring-2 ring-red-100'
-                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 bg-white'
+                        ? 'border-[#E31B23] bg-red-500/10 ring-1 ring-[#E31B23]'
+                        : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-white dark:bg-[#070709]'
                         }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'post_sales' ? 'bg-rose-100 text-rose-600' : 'bg-zinc-100 text-zinc-500'
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${statusMessageType === 'post_sales' ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400' : 'bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400'
                           }`}>
                           <AlertCircle className="w-4 h-4" />
                         </div>
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'post_sales' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 bg-white'
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${statusMessageType === 'post_sales' ? 'border-[#E31B23] bg-[#E31B23]' : 'border-zinc-300 dark:border-white/20 bg-white dark:bg-[#070709]'
                           }`}>
                           {statusMessageType === 'post_sales' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
                       </div>
                       <div>
-                        <span className="text-sm font-bold text-zinc-900 block">Show a post sales message</span>
-                        <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
+                        <span className="text-sm font-bold text-zinc-900 dark:text-white block">Show a post sales message</span>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
                           Display a notice on your event page after ticket sales have ended.
                         </p>
                       </div>
@@ -4387,13 +4432,13 @@ export const EventManage: React.FC = () => {
 
                 {/* Pre Sale Message Editor */}
                 {statusMessageType === 'pre_sale' && (
-                  <div className="p-5 rounded-2xl bg-amber-50/40 border border-amber-200/80 space-y-4 animate-in fade-in duration-200">
+                  <div className="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20 space-y-4 animate-in fade-in duration-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-amber-600" />
-                        <label className="text-xs font-bold text-zinc-900">Pre-sale Announcement Message</label>
+                        <Sparkles className="w-4 h-4 text-amber-500" />
+                        <label className="text-xs font-bold text-zinc-900 dark:text-white">Pre-sale Announcement Message</label>
                       </div>
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20">
                         Pre-Sale Mode Active
                       </span>
                     </div>
@@ -4406,7 +4451,7 @@ export const EventManage: React.FC = () => {
                         setStatusMessage(e.target.value);
                       }}
                       placeholder="e.g. Tickets will go on sale on Friday at 10:00 AM. Join the waitlist to get early access!"
-                      className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-amber-500 shadow-2xs leading-relaxed"
+                      className="w-full px-4 py-3 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] leading-relaxed transition-colors"
                     />
 
                     {/* Quick suggestion pills */}
@@ -4425,7 +4470,7 @@ export const EventManage: React.FC = () => {
                               setPreSaleMessage(suggestion);
                               setStatusMessage(suggestion);
                             }}
-                            className="px-2.5 py-1 bg-white border border-amber-200 hover:border-amber-400 rounded-lg text-[11px] font-semibold text-zinc-700 hover:text-amber-800 transition-colors cursor-pointer"
+                            className="px-2.5 py-1 bg-white dark:bg-white/[0.04] border border-zinc-200 dark:border-white/10 hover:border-amber-400 dark:hover:border-amber-400/50 rounded-lg text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 hover:text-amber-800 dark:hover:text-amber-300 transition-colors cursor-pointer"
                           >
                             + {suggestion}
                           </button>
@@ -4434,13 +4479,13 @@ export const EventManage: React.FC = () => {
                     </div>
 
                     {/* Live Preview Box */}
-                    <div className="pt-2 border-t border-amber-200/60">
+                    <div className="pt-2 border-t border-amber-500/20">
                       <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-2">Attendee Page Preview</span>
-                      <div className="p-3.5 rounded-xl bg-amber-100/70 border border-amber-300/80 text-amber-950 flex items-start gap-3 shadow-2xs">
-                        <Clock className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+                      <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-zinc-900 dark:text-white flex items-start gap-3">
+                        <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                         <div className="text-xs">
-                          <span className="font-bold block text-amber-900 text-[11px] uppercase tracking-wide">Pre-Sale Announcement</span>
-                          <p className="mt-0.5 text-zinc-800 font-medium">{preSaleMessage || 'Tickets will go on sale soon.'}</p>
+                          <span className="font-bold block text-amber-700 dark:text-amber-400 text-[11px] uppercase tracking-wide">Pre-Sale Announcement</span>
+                          <p className="mt-0.5 text-zinc-800 dark:text-zinc-200 font-medium">{preSaleMessage || 'Tickets will go on sale soon.'}</p>
                         </div>
                       </div>
                     </div>
@@ -4449,13 +4494,13 @@ export const EventManage: React.FC = () => {
 
                 {/* Post Sales Message Editor */}
                 {statusMessageType === 'post_sales' && (
-                  <div className="p-5 rounded-2xl bg-rose-50/40 border border-rose-200/80 space-y-4 animate-in fade-in duration-200">
+                  <div className="p-5 rounded-2xl bg-rose-500/5 border border-rose-500/20 space-y-4 animate-in fade-in duration-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 text-rose-600" />
-                        <label className="text-xs font-bold text-zinc-900">Post-sales Notice Message</label>
+                        <AlertCircle className="w-4 h-4 text-rose-500" />
+                        <label className="text-xs font-bold text-zinc-900 dark:text-white">Post-sales Notice Message</label>
                       </div>
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800">
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/20">
                         Post-Sales Mode Active
                       </span>
                     </div>
@@ -4468,7 +4513,7 @@ export const EventManage: React.FC = () => {
                         setStatusMessage(e.target.value);
                       }}
                       placeholder="e.g. Ticket sales have officially ended. Thank you for your support, and we look forward to seeing you at the event!"
-                      className="w-full px-4 py-3 bg-white border border-rose-200 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-rose-500 shadow-2xs leading-relaxed"
+                      className="w-full px-4 py-3 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] leading-relaxed transition-colors"
                     />
 
                     {/* Quick suggestion pills */}
@@ -4487,7 +4532,7 @@ export const EventManage: React.FC = () => {
                               setPostSaleMessage(suggestion);
                               setStatusMessage(suggestion);
                             }}
-                            className="px-2.5 py-1 bg-white border border-rose-200 hover:border-rose-400 rounded-lg text-[11px] font-semibold text-zinc-700 hover:text-rose-800 transition-colors cursor-pointer"
+                            className="px-2.5 py-1 bg-white dark:bg-white/[0.04] border border-zinc-200 dark:border-white/10 hover:border-rose-400 dark:hover:border-rose-400/50 rounded-lg text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 hover:text-rose-800 dark:hover:text-rose-300 transition-colors cursor-pointer"
                           >
                             + {suggestion}
                           </button>
@@ -4496,13 +4541,13 @@ export const EventManage: React.FC = () => {
                     </div>
 
                     {/* Live Preview Box */}
-                    <div className="pt-2 border-t border-rose-200/60">
+                    <div className="pt-2 border-t border-rose-500/20">
                       <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-2">Attendee Page Preview</span>
-                      <div className="p-3.5 rounded-xl bg-rose-100/70 border border-rose-300/80 text-rose-950 flex items-start gap-3 shadow-2xs">
-                        <AlertCircle className="w-4 h-4 text-rose-700 flex-shrink-0 mt-0.5" />
+                      <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-zinc-900 dark:text-white flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" />
                         <div className="text-xs">
-                          <span className="font-bold block text-rose-900 text-[11px] uppercase tracking-wide">Sales Concluded Notice</span>
-                          <p className="mt-0.5 text-zinc-800 font-medium">{postSaleMessage || 'Ticket sales have ended.'}</p>
+                          <span className="font-bold block text-rose-700 dark:text-rose-400 text-[11px] uppercase tracking-wide">Sales Concluded Notice</span>
+                          <p className="mt-0.5 text-zinc-800 dark:text-zinc-200 font-medium">{postSaleMessage || 'Ticket sales have ended.'}</p>
                         </div>
                       </div>
                     </div>
@@ -4511,7 +4556,7 @@ export const EventManage: React.FC = () => {
 
                 {/* Status None Info */}
                 {statusMessageType === 'none' && (
-                  <div className="p-4 rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center gap-3 text-xs text-zinc-600">
+                  <div className="p-4 rounded-xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 flex items-center gap-3 text-xs text-zinc-600 dark:text-zinc-400">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                     <span>No status message active. Attendees can view tickets and complete checkout as usual.</span>
                   </div>
@@ -4550,7 +4595,7 @@ export const EventManage: React.FC = () => {
         {/* TAB 2: TICKETS */}
         {/* ========================================================================= */}
         {perms.canConfigureTickets && activeTab === 'tickets' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
 
             {/* TICKET TIERS */}
             {ticketsSubtab === 'edit' && (
@@ -4585,7 +4630,7 @@ export const EventManage: React.FC = () => {
                     <div className="w-12 h-12 rounded-2xl bg-red-50 text-[#E31B23] flex items-center justify-center mx-auto">
                       <Ticket className="w-6 h-6" />
                     </div>
-                    <h4 className="text-base font-bold text-zinc-900">No tickets created yet</h4>
+                    <h4 className="text-base font-bold text-zinc-900 dark:text-white">No tickets created yet</h4>
                     <p className="text-xs text-zinc-500 max-w-sm mx-auto">
                       Add admission passes, VIP access, or group packages for attendees to book.
                     </p>
@@ -4601,7 +4646,7 @@ export const EventManage: React.FC = () => {
                     {event.tickets.map((t) => (
                       <div
                         key={t.id || t.name}
-                        className="p-5 rounded-2xl border border-zinc-200 dark:border-white/10/80 bg-zinc-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                        className="p-5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                       >
                         <div className="space-y-1.5 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -4625,7 +4670,7 @@ export const EventManage: React.FC = () => {
                           {t.perks && t.perks.length > 0 && (
                             <div className="flex items-center gap-1.5 flex-wrap pt-1">
                               {t.perks.map((perk, pIdx) => (
-                                <span key={pIdx} className="inline-flex items-center gap-1 text-[11px] font-semibold bg-white border border-zinc-200 dark:border-white/10 text-zinc-700 px-2 py-0.5 rounded-md">
+                                <span key={pIdx} className="inline-flex items-center gap-1 text-[11px] font-semibold bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 px-2 py-0.5 rounded-md">
                                   <Sparkles className="w-3 h-3 text-[#E31B23]" />
                                   {perk}
                                 </span>
@@ -4664,7 +4709,7 @@ export const EventManage: React.FC = () => {
                                     setTicketToDelete({ id: (t.id || t.uuid || ''), name: t.name });
                                   }}
                                   className={`p-2 rounded-lg transition-colors cursor-pointer ${isLastTicketOnPublished
-                                    ? 'text-zinc-300 hover:text-zinc-400 hover:bg-zinc-100 cursor-not-allowed'
+                                    ? 'text-zinc-300 hover:text-zinc-400 hover:bg-zinc-100 dark:bg-white/10 cursor-not-allowed'
                                     : 'text-zinc-400 hover:text-red-600 hover:bg-red-50'
                                     }`}
                                   title={isLastTicketOnPublished ? "Cannot delete the only ticket on a published event" : "Delete Ticket Tier"}
@@ -4690,7 +4735,7 @@ export const EventManage: React.FC = () => {
                   <p className="text-xs text-zinc-500">Sent instantly to attendees upon completing their booking.</p>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-zinc-700 block mb-1">Message to Ticket Holders</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Message to Ticket Holders</label>
                   <textarea
                     rows={5}
                     value={confirmationEmailMsg}
@@ -4714,28 +4759,29 @@ export const EventManage: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Attendee Custom Questions</h3>
-                  <p className="text-xs text-zinc-500">Collect attendee details during checkout (e.g. Dietary preference, T-Shirt size, company name).</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Collect attendee details during checkout (e.g. Dietary preference, T-Shirt size, company name).</p>
                 </div>
 
                 <div className="space-y-3">
                   {customQuestions.length === 0 ? (
-                    <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-center text-xs text-zinc-500">
-                      No custom questions configured yet. Add questions below to collect attendee responses at checkout.
+                    <div className="p-8 rounded-2xl bg-zinc-50 dark:bg-white/[0.02] border border-dashed border-zinc-300 dark:border-white/10 text-center space-y-1">
+                      <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">No custom questions configured yet</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">Add questions below to collect attendee responses at checkout.</p>
                     </div>
                   ) : (
                     customQuestions.map(q => (
-                      <div key={q.id || q.uuid} className="p-4 rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-between gap-3">
+                      <div key={q.id || q.uuid} className="p-4 rounded-xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 flex items-center justify-between gap-3 hover:border-zinc-300 dark:hover:border-white/20 transition-all">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-bold text-zinc-900">{q.question}</p>
+                            <p className="text-sm font-bold text-zinc-900 dark:text-white">{q.question}</p>
                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${(q.isRequired || q.is_required)
-                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                              : 'bg-zinc-200 text-zinc-700'
+                              ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20'
+                              : 'bg-zinc-200 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-transparent dark:border-white/10'
                               }`}>
                               {(q.isRequired || q.is_required) ? 'Required' : 'Optional'}
                             </span>
                           </div>
-                          <p className="text-xs text-zinc-500">Type: <span className="font-semibold text-zinc-700">{q.type}</span> {q.options ? `• Options: ${q.options}` : ''}</p>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">Type: <span className="font-semibold text-zinc-700 dark:text-zinc-200">{q.type}</span> {q.options ? `• Options: ${q.options}` : ''}</p>
                         </div>
                         <button
                           onClick={async () => {
@@ -4743,7 +4789,7 @@ export const EventManage: React.FC = () => {
                             setCustomQuestions(updated);
                             await saveEventToBackend({ customQuestions: updated }, { customQuestions: updated }, 'Question removed.');
                           }}
-                          className="p-2 text-zinc-400 hover:text-red-600 rounded-lg cursor-pointer transition-colors"
+                          className="p-2 text-zinc-400 hover:text-[#E31B23] dark:hover:text-[#E31B23] hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg cursor-pointer transition-colors"
                           title="Delete Question"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -4753,25 +4799,25 @@ export const EventManage: React.FC = () => {
                   )}
                 </div>
 
-                <div className="p-5 rounded-2xl bg-[#F8F9FB] border border-zinc-200 dark:border-white/10 space-y-4">
-                  <h4 className="text-xs font-bold text-zinc-800 uppercase tracking-wider">Add New Question</h4>
+                <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 space-y-4">
+                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">Add New Question</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="sm:col-span-2">
-                      <label className="text-[11px] font-bold text-zinc-600 block mb-1">Question Prompt</label>
+                      <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 block mb-1">Question Prompt</label>
                       <input
                         type="text"
                         placeholder="e.g. Dietary restrictions or allergies?"
                         value={newQuestionText}
                         onChange={(e) => setNewQuestionText(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] outline-none"
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] outline-none transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold text-zinc-600 block mb-1">Answer Format</label>
+                      <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 block mb-1">Answer Format</label>
                       <select
                         value={newQuestionType}
                         onChange={(e) => setNewQuestionType(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] outline-none cursor-pointer"
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] outline-none cursor-pointer transition-colors"
                       >
                         <option value="Text">Short Text</option>
                         <option value="Textarea">Long Paragraph</option>
@@ -4783,24 +4829,24 @@ export const EventManage: React.FC = () => {
 
                   {(newQuestionType === 'Select' || newQuestionType === 'Checkbox') && (
                     <div>
-                      <label className="text-[11px] font-bold text-zinc-600 block mb-1">Dropdown Options (Comma-separated)</label>
+                      <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 block mb-1">Dropdown Options (Comma-separated)</label>
                       <input
                         type="text"
                         placeholder="e.g. Vegan, Vegetarian, Halal, Gluten-Free, None"
                         value={newQuestionOptions}
                         onChange={(e) => setNewQuestionOptions(e.target.value)}
-                        className="w-full px-3.5 py-2 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] outline-none"
+                        className="w-full px-3.5 py-2 bg-white dark:bg-[#070709] text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] outline-none transition-colors"
                       />
                     </div>
                   )}
 
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                    <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-700">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-700 dark:text-zinc-300">
                       <input
                         type="checkbox"
                         checked={newQuestionRequired}
                         onChange={(e) => setNewQuestionRequired(e.target.checked)}
-                        className="w-4 h-4 text-[#E31B23] rounded border-zinc-300 focus:ring-0 cursor-pointer"
+                        className="w-4 h-4 text-[#E31B23] accent-[#E31B23] rounded border-zinc-300 dark:border-white/20 focus:ring-0 cursor-pointer"
                       />
                       <span>Mandatory (Attendees must answer to complete checkout)</span>
                     </label>
@@ -4829,7 +4875,7 @@ export const EventManage: React.FC = () => {
                         setNewQuestionRequired(false);
                         await saveEventToBackend({ customQuestions: updated }, { customQuestions: updated }, 'Question added!');
                       }}
-                      className="px-5 py-2.5 bg-zinc-900 text-white text-xs font-bold rounded-xl hover:bg-zinc-800 cursor-pointer transition-colors"
+                      className="px-5 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 text-xs font-bold rounded-xl cursor-pointer transition-colors shadow-sm"
                     >
                       + Add Question
                     </button>
@@ -4846,18 +4892,18 @@ export const EventManage: React.FC = () => {
                   <p className="text-xs text-zinc-500">Allow customers to safely transfer or re-list tickets within your safety caps.</p>
                 </div>
                 <div className="space-y-3">
-                  <label className="flex items-center gap-3 p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 cursor-pointer">
+                  <label className="flex items-center gap-3 p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 cursor-pointer">
                     <input type="checkbox" defaultChecked className="w-4 h-4 accent-[#E31B23]" />
                     <div>
-                      <span className="text-sm font-bold text-zinc-900 block">Allow Attendee-to-Attendee Transfers</span>
+                      <span className="text-sm font-bold text-zinc-900 dark:text-white block">Allow Attendee-to-Attendee Transfers</span>
                       <span className="text-xs text-zinc-500">Buyers can reassign their ticket stub to a friend’s email address.</span>
                     </div>
                   </label>
 
-                  <label className="flex items-center gap-3 p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 cursor-pointer">
+                  <label className="flex items-center gap-3 p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 cursor-pointer">
                     <input type="checkbox" defaultChecked className="w-4 h-4 accent-[#E31B23]" />
                     <div>
-                      <span className="text-sm font-bold text-zinc-900 block">Cap Secondary Resale at Face Value</span>
+                      <span className="text-sm font-bold text-zinc-900 dark:text-white block">Cap Secondary Resale at Face Value</span>
                       <span className="text-xs text-zinc-500">Prevents ticket scalping by enforcing maximum 100% face-value resale.</span>
                     </div>
                   </label>
@@ -4880,14 +4926,14 @@ export const EventManage: React.FC = () => {
         {/* TAB 3: POLICIES & RULES (User requested: create policies here) */}
         {/* ========================================================================= */}
         {!isStaffOnly && perms.canIssueRefunds && activeTab === 'policies' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
 
             {/* REFUND POLICY */}
             {policiesSubtab === 'refund' && perms.canIssueRefunds && (
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Refund Policy Settings</h3>
-                  <p className="text-xs text-zinc-500">Choose the terms under which buyers can request ticket refunds.</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Choose the terms under which buyers can request ticket refunds.</p>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -4901,7 +4947,9 @@ export const EventManage: React.FC = () => {
                       key={item.id}
                       type="button"
                       onClick={() => setRefundOption(item.id as any)}
-                      className={`p-3 rounded-xl border text-xs font-bold cursor-pointer transition-all ${refundOption === item.id ? 'border-[#E31B23] bg-red-50/50 text-[#E31B23]' : 'border-zinc-200 dark:border-white/10 text-zinc-700'
+                      className={`p-3 rounded-xl border text-xs font-bold cursor-pointer transition-all ${refundOption === item.id 
+                        ? 'border-[#E31B23] bg-red-500/10 text-[#E31B23] ring-1 ring-[#E31B23]' 
+                        : 'border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-white/[0.03] text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-white/20'
                         }`}
                     >
                       {item.label}
@@ -4910,12 +4958,12 @@ export const EventManage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-zinc-700 block mb-1">Custom Refund Terms & Guarantee</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Custom Refund Terms & Guarantee</label>
                   <textarea
                     rows={4}
                     value={customRefundTerms}
                     onChange={(e) => setCustomRefundTerms(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium"
+                    className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-[#070709] text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] outline-none transition-colors"
                     placeholder="Specify your exact refund, cancellation, or transfer policies..."
                   />
                 </div>
@@ -4923,7 +4971,7 @@ export const EventManage: React.FC = () => {
                 <button
                   disabled={isSaving}
                   onClick={() => saveEventToBackend({ refundPolicy: customRefundTerms }, { refundOption }, 'Refund policy saved!')}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50 transition-colors shadow-sm"
                 >
                   {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Save Refund Policy
@@ -4936,7 +4984,7 @@ export const EventManage: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Age Restriction</h3>
-                  <p className="text-xs text-zinc-500">Define age criteria and guardian requirements for entry.</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Define age criteria and guardian requirements for entry.</p>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -4950,11 +4998,13 @@ export const EventManage: React.FC = () => {
                       key={opt.label}
                       type="button"
                       onClick={() => setAgeRestriction(opt.label)}
-                      className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${ageRestriction === opt.label ? 'border-[#E31B23] bg-red-50 text-[#E31B23]' : 'border-zinc-200 dark:border-white/10'
+                      className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${ageRestriction === opt.label 
+                        ? 'border-[#E31B23] bg-red-500/10 text-[#E31B23] ring-1 ring-[#E31B23]' 
+                        : 'border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-white/[0.03] text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-white/20'
                         }`}
                     >
                       <p className="text-sm font-black">{opt.label}</p>
-                      <p className="text-xs text-zinc-400 mt-0.5">{opt.desc}</p>
+                      <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{opt.desc}</p>
                     </button>
                   ))}
                 </div>
@@ -4962,7 +5012,7 @@ export const EventManage: React.FC = () => {
                 <button
                   disabled={isSaving}
                   onClick={() => saveEventToBackend({ ageRestriction }, {}, 'Age restriction saved!')}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50 transition-colors shadow-sm"
                 >
                   {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Save Age Policy
@@ -4975,7 +5025,7 @@ export const EventManage: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Dress Code Guidelines</h3>
-                  <p className="text-xs text-zinc-500">Set the tone and expectations for guest attire.</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Set the tone and expectations for guest attire.</p>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -4984,7 +5034,9 @@ export const EventManage: React.FC = () => {
                       key={code}
                       type="button"
                       onClick={() => setDressCode(code)}
-                      className={`p-3.5 rounded-xl border text-xs font-bold cursor-pointer transition-all ${dressCode === code ? 'border-[#E31B23] bg-red-50 text-[#E31B23]' : 'border-zinc-200 dark:border-white/10 text-zinc-700'
+                      className={`p-3.5 rounded-xl border text-xs font-bold cursor-pointer transition-all ${dressCode === code 
+                        ? 'border-[#E31B23] bg-red-500/10 text-[#E31B23] ring-1 ring-[#E31B23]' 
+                        : 'border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-white/[0.03] text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-white/20'
                         }`}
                     >
                       {code}
@@ -4995,7 +5047,7 @@ export const EventManage: React.FC = () => {
                 <button
                   disabled={isSaving}
                   onClick={() => saveEventToBackend({ dressCode }, {}, 'Dress code guidelines saved!')}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50 transition-colors shadow-sm"
                 >
                   {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Save Dress Code
@@ -5008,16 +5060,16 @@ export const EventManage: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Event Rules & Code of Conduct</h3>
-                  <p className="text-xs text-zinc-500">Set boundaries, prohibited items, and attendee security policies.</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Set boundaries, prohibited items, and attendee security policies.</p>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-zinc-700 block mb-1">Code of Conduct & Prohibited Items</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Code of Conduct & Prohibited Items</label>
                   <textarea
                     rows={5}
                     value={eventRules}
                     onChange={(e) => setEventRules(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium"
+                    className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-[#070709] text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] outline-none transition-colors"
                     placeholder="e.g. No outside beverages, no recording gear, bags subject to security screening..."
                   />
                 </div>
@@ -5025,7 +5077,7 @@ export const EventManage: React.FC = () => {
                 <button
                   disabled={isSaving}
                   onClick={() => saveEventToBackend({ eventRules }, {}, 'Event rules & conduct saved!')}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50 transition-colors shadow-sm"
                 >
                   {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Save Rules
@@ -5038,7 +5090,7 @@ export const EventManage: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Venue Amenities & Accessibility</h3>
-                  <p className="text-xs text-zinc-500">Highlight conveniences and support features for guests.</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Highlight conveniences and support features for guests.</p>
                 </div>
 
                 <div className="space-y-3">
@@ -5049,16 +5101,16 @@ export const EventManage: React.FC = () => {
                     { key: 'security', label: 'Licensed Security Personnel On-Site', icon: Shield },
                     { key: 'medical', label: 'First Aid & Medical Station', icon: HeartPulse },
                   ].map(item => (
-                    <label key={item.key} className="flex items-center justify-between p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50/70 cursor-pointer">
+                    <label key={item.key} className="flex items-center justify-between p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.03] hover:border-zinc-300 dark:hover:border-white/20 transition-all cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <item.icon className="w-4 h-4 text-zinc-500" />
-                        <span className="text-sm font-bold text-zinc-800">{item.label}</span>
+                        <item.icon className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+                        <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{item.label}</span>
                       </div>
                       <input
                         type="checkbox"
                         checked={amenities[item.key as keyof typeof amenities]}
                         onChange={(e) => setAmenities(prev => ({ ...prev, [item.key]: e.target.checked }))}
-                        className="w-4 h-4 accent-[#E31B23]"
+                        className="w-4 h-4 text-[#E31B23] accent-[#E31B23] rounded border-zinc-300 dark:border-white/20 focus:ring-0 cursor-pointer"
                       />
                     </label>
                   ))}
@@ -5067,7 +5119,7 @@ export const EventManage: React.FC = () => {
                 <button
                   disabled={isSaving}
                   onClick={() => saveEventToBackend({ amenities }, {}, 'Amenities & accessibility saved!')}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50 transition-colors shadow-sm"
                 >
                   {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Save Amenities
@@ -5082,7 +5134,7 @@ export const EventManage: React.FC = () => {
         {/* TAB 4: ATTENDEES */}
         {/* ========================================================================= */}
         {activeTab === 'attendees' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
 
             {/* VIEW ATTENDEES */}
             {attendeesSubtab === 'view' && perms.canDownloadAttendees && (
@@ -5095,9 +5147,9 @@ export const EventManage: React.FC = () => {
                 </div>
 
                 {attendees.length === 0 ? (
-                  <div className="py-14 text-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10/80 rounded-2xl space-y-3">
+                  <div className="py-14 text-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl space-y-3">
                     <Users className="w-8 h-8 text-zinc-400 mx-auto" />
-                    <p className="text-sm font-bold text-zinc-700">No attendees registered yet</p>
+                    <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">No attendees registered yet</p>
                     <p className="text-xs text-zinc-500 max-w-sm mx-auto">
                       When attendees purchase tickets or RSVP, their registration details and ticket credentials will appear here.
                     </p>
@@ -5106,7 +5158,7 @@ export const EventManage: React.FC = () => {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                       <thead>
-                        <tr className="bg-zinc-50 text-zinc-500 font-bold uppercase text-xs border-b border-zinc-150 dark:border-white/10">
+                        <tr className="bg-zinc-50 dark:bg-white/5 text-zinc-500 font-bold uppercase text-xs border-b border-zinc-150 dark:border-white/10">
                           <th className="p-3.5">Attendee</th>
                           <th className="p-3.5">Ticket Tier</th>
                           <th className="p-3.5">Order ID</th>
@@ -5116,15 +5168,15 @@ export const EventManage: React.FC = () => {
                       </thead>
                       <tbody className="divide-y divide-zinc-100 dark:divide-white/10 font-medium">
                         {attendees.map(att => (
-                          <tr key={att.id} className="hover:bg-zinc-50 dark:hover:bg-white/5/50">
+                          <tr key={att.id} className="hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5/50">
                             <td className="p-3.5">
                               <p className="font-bold text-zinc-950 dark:text-white">{att.name}</p>
                               <p className="text-xs text-zinc-400">{att.email}</p>
                             </td>
-                            <td className="p-3.5 text-zinc-800 font-semibold">{att.ticket}</td>
+                            <td className="p-3.5 text-zinc-800 dark:text-zinc-200 font-semibold">{att.ticket}</td>
                             <td className="p-3.5 font-mono text-xs text-zinc-500">{att.orderId}</td>
                             <td className="p-3.5">
-                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${att.checkedIn ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-600'
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${att.checkedIn ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 dark:bg-white/10 text-zinc-600'
                                 }`}>
                                 {att.checkedIn ? 'Checked In' : 'Not Checked In'}
                               </span>
@@ -5132,7 +5184,7 @@ export const EventManage: React.FC = () => {
                             <td className="p-3.5 text-right">
                               <button
                                 onClick={() => handleToggleCheckIn(att.id)}
-                                className={`px-3 py-1 rounded-xl text-xs font-bold cursor-pointer transition-colors ${att.checkedIn ? 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200' : 'bg-[#E31B23] text-white hover:bg-[#B91C1C]'
+                                className={`px-3 py-1 rounded-xl text-xs font-bold cursor-pointer transition-colors ${att.checkedIn ? 'bg-zinc-100 dark:bg-white/10 text-zinc-600 hover:bg-zinc-200' : 'bg-[#E31B23] text-white hover:bg-[#B91C1C]'
                                   }`}
                               >
                                 {att.checkedIn ? 'Undo Check-In' : 'Check In'}
@@ -5159,7 +5211,7 @@ export const EventManage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => fetchGateStats()}
-                      className="px-3.5 py-2 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors flex items-center gap-1.5 cursor-pointer"
+                      className="px-3.5 py-2 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5 transition-colors flex items-center gap-1.5 cursor-pointer"
                     >
                       <RotateCcw className={`w-3.5 h-3.5 ${isLoadingGateStats ? 'animate-spin text-[#E31B23]' : ''}`} />
                       Refresh Stats
@@ -5270,7 +5322,7 @@ export const EventManage: React.FC = () => {
 
                 {/* Attendees Check-In List */}
                 {attendees.length === 0 ? (
-                  <div className="py-14 text-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10/80 rounded-2xl space-y-3">
+                  <div className="py-14 text-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl space-y-3">
                     <QrCode className="w-8 h-8 text-zinc-400 mx-auto" />
                     <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Check-in roster is empty</p>
                     <p className="text-xs text-zinc-500 max-w-sm mx-auto">
@@ -5291,7 +5343,7 @@ export const EventManage: React.FC = () => {
                         );
                       })
                       .map(att => (
-                        <div key={att.id} className="p-4 flex items-center justify-between hover:bg-zinc-50 dark:hover:bg-white/5/50">
+                        <div key={att.id} className="p-4 flex items-center justify-between hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5/50">
                           <div>
                             <p className="font-bold text-zinc-950 dark:text-white text-sm">{att.name}</p>
                             <p className="text-xs text-zinc-500">{att.ticket} • {att.orderId}</p>
@@ -5335,9 +5387,9 @@ export const EventManage: React.FC = () => {
                 </div>
 
                 {inviteApplicants.length === 0 ? (
-                  <div className="py-14 text-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10/80 rounded-2xl space-y-3">
+                  <div className="py-14 text-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl space-y-3">
                     <UserCheck className="w-8 h-8 text-zinc-400 mx-auto" />
-                    <p className="text-sm font-bold text-zinc-700">No pending guest applications</p>
+                    <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">No pending guest applications</p>
                     <p className="text-xs text-zinc-500 max-w-sm mx-auto">
                       Applications for private or invite-only ticket tiers will appear here for your review and approval.
                     </p>
@@ -5356,7 +5408,7 @@ export const EventManage: React.FC = () => {
                             </span>
                           </div>
                           <p className="text-xs text-zinc-500">{app.email} • Applied on {app.date}</p>
-                          <p className="text-xs font-medium text-zinc-700 bg-white p-2.5 rounded-xl border border-zinc-150 dark:border-white/10 mt-2">
+                          <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-[#070709] p-2.5 rounded-xl border border-zinc-150 dark:border-white/10 mt-2">
                             "{app.reason}"
                           </p>
                         </div>
@@ -5371,7 +5423,7 @@ export const EventManage: React.FC = () => {
                             </button>
                             <button
                               onClick={() => handleDeclineApplicant(app.id)}
-                              className="px-4 py-2 border border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100 text-xs font-bold rounded-xl cursor-pointer"
+                              className="px-4 py-2 border border-zinc-200 dark:border-white/10 text-zinc-600 hover:bg-zinc-100 dark:bg-white/10 text-xs font-bold rounded-xl cursor-pointer"
                             >
                               Decline
                             </button>
@@ -5392,11 +5444,11 @@ export const EventManage: React.FC = () => {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Event Staff & Operations Crew</h3>
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-zinc-100 text-zinc-700">
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300">
                         {eventStaff.length} Assigned
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-500 mt-0.5">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
                       Assign team members to this event with specific operational duties and gate ticket-scanning permissions.
                     </p>
                   </div>
@@ -5418,8 +5470,8 @@ export const EventManage: React.FC = () => {
                       <span>Assign Staff Member</span>
                     </button>
                   ) : (
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold self-start sm:self-auto">
-                      <Shield className="w-3.5 h-3.5 text-amber-600" />
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-semibold self-start sm:self-auto">
+                      <Shield className="w-3.5 h-3.5 text-amber-500" />
                       <span>View-Only (Admin/Manager assigned)</span>
                     </div>
                   )}
@@ -5427,27 +5479,27 @@ export const EventManage: React.FC = () => {
 
                 {/* KPI Metrics */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-2xl bg-[#F8F9FB] border border-zinc-200 dark:border-white/10/80 space-y-1">
+                  <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 space-y-1">
                     <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Assigned Event Crew</p>
                     <p className="text-2xl font-black text-zinc-950 dark:text-white">{eventStaff.length}</p>
-                    <p className="text-[11px] text-zinc-500 font-medium">On-duty staff & managers</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">On-duty staff & managers</p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#F8F9FB] border border-zinc-200 dark:border-white/10/80 space-y-1">
+                  <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 space-y-1">
                     <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Active Gate Scanners</p>
                     <div className="flex items-center gap-2">
-                      <p className="text-2xl font-black text-emerald-600">
+                      <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
                         {eventStaff.filter(s => s.canScanTickets).length}
                       </p>
-                      <QrCode className="w-4 h-4 text-emerald-600" />
+                      <QrCode className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <p className="text-[11px] text-zinc-500 font-medium">Authorized to validate QR codes</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Authorized to validate QR codes</p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#F8F9FB] border border-zinc-200 dark:border-white/10/80 space-y-1">
+                  <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 space-y-1">
                     <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Organization Roster</p>
                     <p className="text-2xl font-black text-zinc-950 dark:text-white">{orgTeamMembers.length}</p>
-                    <p className="text-[11px] text-zinc-500 font-medium">Available team members</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Available team members</p>
                   </div>
                 </div>
 
@@ -5460,14 +5512,14 @@ export const EventManage: React.FC = () => {
                       placeholder="Search assigned staff by name or email..."
                       value={staffSearchQuery}
                       onChange={(e) => setStaffSearchQuery(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-[#E31B23]"
+                      className="w-full pl-9 pr-4 py-2 bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-colors"
                     />
                   </div>
 
                   <select
                     value={staffDutyFilter}
                     onChange={(e) => setStaffDutyFilter(e.target.value)}
-                    className="px-3.5 py-2 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-semibold text-zinc-700 outline-none focus:border-[#E31B23]"
+                    className="px-3.5 py-2 bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] cursor-pointer transition-colors"
                   >
                     <option value="all">All Duties</option>
                     <option value="Gate Check-in">Gate Check-in</option>
@@ -5485,12 +5537,12 @@ export const EventManage: React.FC = () => {
                   </div>
                 ) : eventStaff.length === 0 ? (
                   <div className="py-16 text-center border-2 border-dashed border-zinc-200 dark:border-white/10 rounded-2xl p-8 space-y-4">
-                    <div className="w-12 h-12 rounded-2xl bg-red-50 text-[#E31B23] mx-auto flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-[#E31B23] mx-auto flex items-center justify-center">
                       <Users className="w-6 h-6" />
                     </div>
                     <div className="space-y-1 max-w-sm mx-auto">
-                      <h4 className="text-sm font-bold text-zinc-900">No staff assigned to this event yet</h4>
-                      <p className="text-xs text-zinc-500">
+                      <h4 className="text-sm font-bold text-zinc-900 dark:text-white">No staff assigned to this event yet</h4>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
                         Assign team members to supervise doors, scan ticket QR codes, and assist attendees on-site.
                       </p>
                     </div>
@@ -5516,7 +5568,7 @@ export const EventManage: React.FC = () => {
                   <div className="overflow-x-auto border border-zinc-150 dark:border-white/10 rounded-2xl">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-zinc-50 text-zinc-500 font-bold uppercase tracking-wider border-b border-zinc-150 dark:border-white/10">
+                        <tr className="bg-zinc-50 dark:bg-white/5 text-zinc-500 font-bold uppercase tracking-wider border-b border-zinc-150 dark:border-white/10">
                           <th className="p-3.5">Staff Member</th>
                           <th className="p-3.5">Org Role</th>
                           <th className="p-3.5">Assigned Duty</th>
@@ -5526,7 +5578,7 @@ export const EventManage: React.FC = () => {
                           {canManageStaff && <th className="p-3.5 text-right">Actions</th>}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-100 dark:divide-white/10 font-semibold text-zinc-700">
+                      <tbody className="divide-y divide-zinc-100 dark:divide-white/10 font-semibold text-zinc-700 dark:text-zinc-300">
                         {eventStaff
                           .filter(s => {
                             const matchQuery = !staffSearchQuery ||
@@ -5536,10 +5588,10 @@ export const EventManage: React.FC = () => {
                             return matchQuery && matchDuty;
                           })
                           .map((staff) => (
-                            <tr key={staff.id} className="hover:bg-zinc-50 dark:hover:bg-white/5/60 transition-colors">
+                            <tr key={staff.id} className="hover:bg-zinc-50 dark:hover:bg-white/[0.04] transition-colors">
                               <td className="p-3.5">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-zinc-900 text-white font-black text-xs flex items-center justify-center flex-shrink-0">
+                                  <div className="w-8 h-8 rounded-full bg-zinc-900 dark:bg-white/10 text-white font-black text-xs flex items-center justify-center flex-shrink-0">
                                     {staff.memberName.charAt(0).toUpperCase()}
                                   </div>
                                   <div>
@@ -5550,29 +5602,29 @@ export const EventManage: React.FC = () => {
                               </td>
 
                               <td className="p-3.5">
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${staff.role === 'owner' ? 'bg-purple-100 text-purple-800' :
-                                  staff.role === 'admin' ? 'bg-indigo-100 text-indigo-800' :
-                                    staff.role === 'manager' ? 'bg-blue-100 text-blue-800' :
-                                      'bg-zinc-100 text-zinc-700'
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${staff.role === 'owner' ? 'bg-purple-100 dark:bg-purple-500/10 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-500/20' :
+                                  staff.role === 'admin' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20' :
+                                    staff.role === 'manager' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-500/20' :
+                                      'bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-transparent dark:border-white/10'
                                   }`}>
                                   {staff.role}
                                 </span>
                               </td>
 
                               <td className="p-3.5">
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-zinc-100 text-zinc-800">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
                                   {staff.duty}
                                 </span>
                               </td>
 
-                              <td className="p-3.5 text-zinc-600 font-medium text-xs">
+                              <td className="p-3.5 text-zinc-600 dark:text-zinc-400 font-medium text-xs">
                                 {staff.station || 'General'}
                               </td>
 
                               <td className="p-3.5">
                                 {staff.canScanTickets ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    <QrCode className="w-3 h-3 text-emerald-600" />
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                    <QrCode className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                                     <span>Active Scanner</span>
                                   </span>
                                 ) : (
@@ -5580,9 +5632,9 @@ export const EventManage: React.FC = () => {
                                 )}
                               </td>
 
-                              <td className="p-3.5 text-[11px] text-zinc-500 font-medium">
+                              <td className="p-3.5 text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
                                 <p>{staff.assignedBy || 'Manager'}</p>
-                                <p className="text-[10px] text-zinc-400">{formatDate(staff.assignedAt)}</p>
+                                <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{formatDate(staff.assignedAt)}</p>
                               </td>
 
                               {canManageStaff && (
@@ -5591,7 +5643,7 @@ export const EventManage: React.FC = () => {
                                     <button
                                       type="button"
                                       onClick={() => handleOpenEditDuty(staff)}
-                                      className="px-2.5 py-1 text-xs font-bold text-zinc-600 hover:text-zinc-950 dark:text-white hover:bg-zinc-100 rounded-lg transition-colors cursor-pointer"
+                                      className="px-2.5 py-1 text-xs font-bold text-zinc-600 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
                                       title="Edit duty & permissions"
                                     >
                                       Edit
@@ -5602,7 +5654,7 @@ export const EventManage: React.FC = () => {
                                         setStaffToUnassign(staff);
                                         setIsUnassignConfirmOpen(true);
                                       }}
-                                      className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                      className="p-1.5 text-zinc-400 hover:text-[#E31B23] hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
                                       title="Unassign from event"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
@@ -5626,25 +5678,25 @@ export const EventManage: React.FC = () => {
         {/* TAB 5: FINANCE */}
         {/* ========================================================================= */}
         {perms.canViewRevenue && activeTab === 'finance' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
             {financeSubtab === 'sales' && (
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Financial Sales Summary</h3>
-                  <p className="text-xs text-zinc-500">Gross revenue, processing charges, and net earnings.</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Gross revenue, processing charges, and net earnings.</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10">
-                    <span className="text-xs font-bold text-zinc-500 uppercase">Gross Revenue</span>
+                  <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10">
+                    <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Gross Revenue</span>
                     <p className="text-2xl font-black text-zinc-950 dark:text-white mt-1">{formatCurrency(event.revenue || 2450000)}</p>
                   </div>
-                  <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10">
-                    <span className="text-xs font-bold text-zinc-500 uppercase">Platform Fee (2.5%)</span>
-                    <p className="text-2xl font-black text-zinc-600 mt-1">{formatCurrency((event.revenue || 2450000) * 0.025)}</p>
+                  <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10">
+                    <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Platform Fee (2.5%)</span>
+                    <p className="text-2xl font-black text-zinc-600 dark:text-zinc-400 mt-1">{formatCurrency((event.revenue || 2450000) * 0.025)}</p>
                   </div>
-                  <div className="p-5 rounded-2xl bg-[#FEF2F2] border border-red-100">
-                    <span className="text-xs font-bold text-[#E31B23] uppercase">Net Payout</span>
+                  <div className="p-5 rounded-2xl bg-[#FEF2F2] dark:bg-red-500/10 border border-red-100 dark:border-red-500/20">
+                    <span className="text-xs font-bold text-[#E31B23] uppercase tracking-wider">Net Payout</span>
                     <p className="text-2xl font-black text-[#E31B23] mt-1">{formatCurrency((event.revenue || 2450000) * 0.975)}</p>
                   </div>
                 </div>
@@ -5655,21 +5707,21 @@ export const EventManage: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Payout Settlement Account</h3>
-                  <p className="text-xs text-zinc-500">Commercial settlement bank account for automatic transfers.</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Commercial settlement bank account for automatic transfers.</p>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-3">
-                  <div className="flex justify-between items-center border-b border-zinc-200 dark:border-white/10 dark:border-white/10 pb-3">
-                    <span className="text-xs text-zinc-500 font-bold uppercase">Designated Bank</span>
-                    <span className="text-sm font-black text-zinc-900">Commercial Bank Settlement</span>
+                <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 space-y-3">
+                  <div className="flex justify-between items-center border-b border-zinc-200 dark:border-white/10 pb-3">
+                    <span className="text-xs text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Designated Bank</span>
+                    <span className="text-sm font-black text-zinc-900 dark:text-white">Commercial Bank Settlement</span>
                   </div>
-                  <div className="flex justify-between items-center border-b border-zinc-200 dark:border-white/10 dark:border-white/10 pb-3">
-                    <span className="text-xs text-zinc-500 font-bold uppercase">Settlement Account</span>
-                    <span className="text-sm font-mono font-bold text-zinc-900">Verified Organizer Profile</span>
+                  <div className="flex justify-between items-center border-b border-zinc-200 dark:border-white/10 pb-3">
+                    <span className="text-xs text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Settlement Account</span>
+                    <span className="text-sm font-mono font-bold text-zinc-900 dark:text-white">Verified Organizer Profile</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-zinc-500 font-bold uppercase">Payout Timeline</span>
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                    <span className="text-xs text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Payout Timeline</span>
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2.5 py-0.5 rounded-full">
                       Next-Day Post Event Settlement
                     </span>
                   </div>
@@ -5683,7 +5735,7 @@ export const EventManage: React.FC = () => {
         {/* TAB 6: MARKETING */}
         {/* ========================================================================= */}
         {perms.canAccessMarketing && activeTab === 'marketing' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
             {marketingSubtab === 'widget' && (
               <div className="space-y-6">
                 <div>
@@ -5713,13 +5765,14 @@ export const EventManage: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Promoter Codes & Discounts</h3>
-                  <p className="text-xs text-zinc-500">Create discount coupons and track referrals generated by event promoters and affiliate partners.</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Create discount coupons and track referrals generated by event promoters and affiliate partners.</p>
                 </div>
 
                 <div className="space-y-3">
                   {promoters.length === 0 ? (
-                    <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-center text-xs text-zinc-500">
-                      No promoter codes created yet. Create promo codes below to give discounts to your attendees.
+                    <div className="p-8 rounded-2xl bg-zinc-50 dark:bg-white/[0.02] border border-dashed border-zinc-300 dark:border-white/10 text-center space-y-1">
+                      <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">No promoter codes created yet</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">Create promo codes below to give discounts to your attendees.</p>
                     </div>
                   ) : (
                     promoters.map(p => {
@@ -5729,25 +5782,27 @@ export const EventManage: React.FC = () => {
                       const isActive = (p.status || 'active') === 'active';
 
                       return (
-                        <div key={p.id || p.uuid} className="p-4 rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div key={p.id || p.uuid} className="p-4 rounded-xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-zinc-300 dark:hover:border-white/20 transition-all">
                           <div className="flex items-center gap-3">
-                            <span className="font-mono font-black text-sm text-[#E31B23] bg-red-50 border border-red-100 px-3 py-1 rounded-lg">
+                            <span className="font-mono font-black text-sm text-[#E31B23] bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-lg">
                               {p.code}
                             </span>
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-zinc-900">{discountLabel}</span>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-200 text-zinc-600'
+                                <span className="text-xs font-bold text-zinc-900 dark:text-white">{discountLabel}</span>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive 
+                                  ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' 
+                                  : 'bg-zinc-200 dark:bg-white/10 text-zinc-600 dark:text-zinc-400 border border-transparent dark:border-white/10'
                                   }`}>
                                   {isActive ? 'Active' : 'Inactive'}
                                 </span>
                               </div>
-                              <span className="text-xs text-zinc-500">{maxUsesLabel}</span>
+                              <span className="text-xs text-zinc-500 dark:text-zinc-400">{maxUsesLabel}</span>
                             </div>
                           </div>
 
                           <div className="flex items-center justify-between sm:justify-end gap-4">
-                            <span className="font-extrabold text-zinc-900 text-sm">{formatCurrency(p.sales || 0)} Sales</span>
+                            <span className="font-extrabold text-zinc-900 dark:text-white text-sm">{formatCurrency(p.sales || 0)} Sales</span>
                             <div className="flex items-center gap-1">
                               <button
                                 onClick={async () => {
@@ -5756,7 +5811,7 @@ export const EventManage: React.FC = () => {
                                   setPromoters(updated);
                                   await saveEventToBackend({ promoters: updated }, { promoters: updated }, `Promo code ${p.code} set to ${newStatus}!`);
                                 }}
-                                className="px-2.5 py-1 text-xs font-medium rounded-lg border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 text-zinc-700 cursor-pointer transition-colors"
+                                className="px-2.5 py-1 text-xs font-medium rounded-lg border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300 cursor-pointer transition-colors"
                               >
                                 {isActive ? 'Deactivate' : 'Activate'}
                               </button>
@@ -5766,7 +5821,7 @@ export const EventManage: React.FC = () => {
                                   setPromoters(updated);
                                   await saveEventToBackend({ promoters: updated }, { promoters: updated }, `Promo code ${p.code} removed!`);
                                 }}
-                                className="p-1.5 text-zinc-400 hover:text-red-600 rounded-lg cursor-pointer transition-colors"
+                                className="p-1.5 text-zinc-400 hover:text-[#E31B23] hover:bg-red-500/10 rounded-lg cursor-pointer transition-colors"
                                 title="Delete Promo Code"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -5779,48 +5834,48 @@ export const EventManage: React.FC = () => {
                   )}
                 </div>
 
-                <div className="p-5 rounded-2xl bg-[#F8F9FB] border border-zinc-200 dark:border-white/10 space-y-4">
-                  <h4 className="text-xs font-bold text-zinc-800 uppercase tracking-wider">Create New Promo Code</h4>
+                <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 space-y-4">
+                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">Create New Promo Code</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <div className="sm:col-span-1">
-                      <label className="text-[11px] font-bold text-zinc-600 block mb-1">Promo Code</label>
+                      <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 block mb-1">Promo Code</label>
                       <input
                         type="text"
                         placeholder="e.g. VIP20"
                         value={newPromoCode}
                         onChange={(e) => setNewPromoCode(e.target.value.toUpperCase())}
-                        className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-mono font-bold focus:border-[#E31B23] outline-none"
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-mono font-bold focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] outline-none transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold text-zinc-600 block mb-1">Discount Type</label>
+                      <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 block mb-1">Discount Type</label>
                       <select
                         value={newPromoDiscountType}
                         onChange={(e) => setNewPromoDiscountType(e.target.value as 'percentage' | 'fixed')}
-                        className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] outline-none cursor-pointer"
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] outline-none cursor-pointer transition-colors"
                       >
                         <option value="percentage">Percentage (%)</option>
                         <option value="fixed">Fixed Amount (₦)</option>
                       </select>
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold text-zinc-600 block mb-1">Discount Value</label>
+                      <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 block mb-1">Discount Value</label>
                       <input
                         type="number"
                         placeholder={newPromoDiscountType === 'percentage' ? 'e.g. 20' : 'e.g. 5000'}
                         value={newPromoDiscount || ''}
                         onChange={(e) => setNewPromoDiscount(Number(e.target.value))}
-                        className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold focus:border-[#E31B23] outline-none"
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] outline-none transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold text-zinc-600 block mb-1">Usage Limit (Optional)</label>
+                      <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 block mb-1">Usage Limit (Optional)</label>
                       <input
                         type="number"
                         placeholder="Unlimited"
                         value={newPromoMaxUses}
                         onChange={(e) => setNewPromoMaxUses(e.target.value === '' ? '' : Number(e.target.value))}
-                        className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] outline-none"
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] outline-none transition-colors"
                       />
                     </div>
                   </div>
@@ -5859,7 +5914,7 @@ export const EventManage: React.FC = () => {
                         setNewPromoMaxUses('');
                         await saveEventToBackend({ promoters: updated }, { promoters: updated }, `Promo code ${trimmedCode} activated!`);
                       }}
-                      className="px-5 py-2.5 bg-zinc-900 text-white text-xs font-bold rounded-xl hover:bg-zinc-800 cursor-pointer transition-colors"
+                      className="px-5 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 text-xs font-bold rounded-xl cursor-pointer transition-colors shadow-sm"
                     >
                       + Create Code
                     </button>
@@ -5870,28 +5925,41 @@ export const EventManage: React.FC = () => {
 
             {marketingSubtab === 'email' && (
               <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 dark:border-white/10 pb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
                   <div>
                     <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Broadcast Email Marketing</h3>
                     <p className="text-xs text-zinc-500">Send direct promotional and informational emails to your registered audience.</p>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-bold shadow-2xs">
-                    <Coins className="w-4 h-4 text-amber-600" />
-                    <span>Eventa Credit: <strong>{localStorage.getItem("strayttix_organizer_credits") || "500"} Available</strong></span>
-                    <Link to="/organizer/analytics" className="text-[#E31B23] hover:underline text-[11px] font-black ml-1">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-300 text-xs font-bold shadow-2xs">
+                    <Coins className="w-4 h-4 text-amber-500" />
+                    <span>Credits: <strong>{creditsWalletBalance.toLocaleString()} Available</strong></span>
+                    <button
+                      type="button"
+                      onClick={() => setIsTopupModalOpen(true)}
+                      className="text-[#E31B23] hover:underline text-[11px] font-black ml-1 cursor-pointer"
+                    >
                       Top-Up
-                    </Link>
+                    </button>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10/80 flex items-center justify-between gap-4 text-xs">
+                {/* Pre-Flight Consumption Gate Check Pill */}
+                <CreditCheckPill
+                  requiredCredits={attendees.length || 1}
+                  availableCredits={creditsWalletBalance}
+                  featureName="Email Broadcast"
+                  onTopupClick={() => setIsTopupModalOpen(true)}
+                  className="w-full"
+                />
+
+                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-between gap-4 text-xs">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-red-100 text-[#E31B23] flex items-center justify-center font-bold">
+                    <div className="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-500/15 text-[#E31B23] flex items-center justify-center font-bold">
                       <Mail className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="font-bold text-zinc-900">Email Marketing Credit Rate</p>
-                      <p className="text-[11px] text-zinc-500">Each attendee recipient consumes 1 Eventa Credit.</p>
+                      <p className="font-bold text-zinc-900 dark:text-white">Email Marketing Credit Rate</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Each attendee recipient consumes 1 Credit.</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -5901,14 +5969,14 @@ export const EventManage: React.FC = () => {
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-xs font-bold text-zinc-700 block mb-1">Target Audience</label>
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Target Audience</label>
                     <select className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium">
                       <option>All Registered Attendees ({attendees.length})</option>
                       {event.tickets?.map((t, i) => <option key={i}>{t.name} Ticket Holders</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-zinc-700 block mb-1">Email Subject Line</label>
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Email Subject Line</label>
                     <input
                       type="text"
                       placeholder="Important: Update regarding event entry and gates"
@@ -5916,7 +5984,7 @@ export const EventManage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-zinc-700 block mb-1">Message Content</label>
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Message Content</label>
                     <textarea
                       rows={4}
                       placeholder="Write your announcement..."
@@ -5925,8 +5993,16 @@ export const EventManage: React.FC = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => showNotification('Announcement email scheduled for delivery.', 'success')}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer"
+                  disabled={creditsWalletBalance < (attendees.length || 1)}
+                  onClick={() => {
+                    if (creditsWalletBalance < (attendees.length || 1)) {
+                      showNotification('Insufficient credits to dispatch this email broadcast. Please top up first.', 'error');
+                      setIsTopupModalOpen(true);
+                      return;
+                    }
+                    showNotification('Announcement email scheduled for delivery.', 'success');
+                  }}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50"
                 >
                   <Send className="w-4 h-4" /> Send Email Broadcast
                 </button>
@@ -5941,7 +6017,7 @@ export const EventManage: React.FC = () => {
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-xs font-bold text-zinc-700 block mb-1">Meta Pixel ID (Facebook / Instagram)</label>
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Meta Pixel ID (Facebook / Instagram)</label>
                     <input
                       type="text"
                       placeholder="e.g. 19284719283749"
@@ -5949,7 +6025,7 @@ export const EventManage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-zinc-700 block mb-1">Google Analytics 4 Measurement ID</label>
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Google Analytics 4 Measurement ID</label>
                     <input
                       type="text"
                       placeholder="e.g. G-XXXXXXXXXX"
@@ -5972,7 +6048,7 @@ export const EventManage: React.FC = () => {
         {/* TAB 7: SETTINGS */}
         {/* ========================================================================= */}
         {perms.canAccessSettings && activeTab === 'settings' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
             {settingsSubtab === 'duplicate' && (
               <div className="space-y-4">
                 <div>
@@ -6009,7 +6085,7 @@ export const EventManage: React.FC = () => {
                   <h3 className="text-lg font-bold text-red-600 flex items-center gap-2">
                     <AlertTriangle className="w-5 h-5" /> Danger Zone: Delete Event Listing
                   </h3>
-                  <p className="text-xs text-zinc-500 mt-1">Permanently remove this event and its associated assets from Eventa.</p>
+                  <p className="text-xs text-zinc-500 mt-1">Permanently remove this event and its associated assets from StraytTix.</p>
                 </div>
 
                 <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2">
@@ -6025,7 +6101,7 @@ export const EventManage: React.FC = () => {
                 {/* Cancel Event Action */}
                 <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <h4 className="text-sm font-bold text-zinc-900">Cancel Event Listing</h4>
+                    <h4 className="text-sm font-bold text-zinc-900 dark:text-white">Cancel Event Listing</h4>
                     <p className="text-xs text-zinc-500">
                       Halt all ticket sales and mark the event status as Cancelled for attendees.
                     </p>
@@ -6041,7 +6117,7 @@ export const EventManage: React.FC = () => {
 
                 {isPublished ? (
                   <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-3">
-                    <p className="text-xs font-bold text-zinc-700">
+                    <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
                       Current Status: <span className="text-emerald-600 font-black">Published</span> (Deletion locked)
                     </p>
                     <button
@@ -6125,7 +6201,7 @@ export const EventManage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsStatusModalOpen(false)}
-              className="flex-1 py-3 border border-zinc-200 dark:border-white/10 text-zinc-700 text-sm font-bold rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer"
+              className="flex-1 py-3 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-sm font-bold rounded-xl hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5 cursor-pointer"
             >
               Cancel
             </button>
@@ -6237,7 +6313,7 @@ export const EventManage: React.FC = () => {
                 <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
-                    <span className="text-xs font-bold text-zinc-800">
+                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
                       Category: {ticketCategory === 'single' ? 'Single Ticket (Admits 1)' : `Group Ticket (${groupSize} Guests)`}
                     </span>
                   </div>
@@ -6253,14 +6329,14 @@ export const EventManage: React.FC = () => {
 
               {/* Pricing Type */}
               <div>
-                <label className="text-xs font-bold text-zinc-700 block mb-1.5">Pricing Type</label>
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1.5">Pricing Type</label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setTicketTypePricing('free')}
                     className={`py-2.5 px-4 rounded-xl border text-sm font-bold transition-all cursor-pointer ${ticketTypePricing === 'free'
                       ? 'border-[#E31B23] bg-red-50/50 text-[#E31B23]'
-                      : 'border-zinc-200 dark:border-white/10 text-zinc-700 hover:bg-zinc-50 dark:hover:bg-white/5'
+                      : 'border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5'
                       }`}
                   >
                     Free / RSVP (₦0)
@@ -6270,7 +6346,7 @@ export const EventManage: React.FC = () => {
                     onClick={() => setTicketTypePricing('paid')}
                     className={`py-2.5 px-4 rounded-xl border text-sm font-bold transition-all cursor-pointer ${ticketTypePricing === 'paid'
                       ? 'border-[#E31B23] bg-red-50/50 text-[#E31B23]'
-                      : 'border-zinc-200 dark:border-white/10 text-zinc-700 hover:bg-zinc-50 dark:hover:bg-white/5'
+                      : 'border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5'
                       }`}
                   >
                     Paid Ticket
@@ -6280,7 +6356,7 @@ export const EventManage: React.FC = () => {
 
               {/* Ticket Name */}
               <div>
-                <label className="text-xs font-bold text-zinc-700 block mb-1">Ticket Name</label>
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Ticket Name</label>
                 <input
                   type="text"
                   required
@@ -6293,7 +6369,7 @@ export const EventManage: React.FC = () => {
 
               {/* Ticket Description */}
               <div>
-                <label className="text-xs font-bold text-zinc-700 block mb-1">Description (Optional)</label>
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Description (Optional)</label>
                 <input
                   type="text"
                   placeholder="e.g. Grants access to keynote hall and afterparty."
@@ -6306,7 +6382,7 @@ export const EventManage: React.FC = () => {
               {/* Price Input */}
               {ticketTypePricing === 'paid' && (
                 <div>
-                  <label className="text-xs font-bold text-zinc-700 block mb-1">Price (₦ NGN)</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Price (₦ NGN)</label>
                   <input
                     type="number"
                     min="0"
@@ -6322,7 +6398,7 @@ export const EventManage: React.FC = () => {
               {/* Group Size */}
               {ticketCategory === 'group' && (
                 <div>
-                  <label className="text-xs font-bold text-zinc-700 block mb-1">Group Size (Admitted Guests)</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Group Size (Admitted Guests)</label>
                   <input
                     type="number"
                     min="2"
@@ -6337,7 +6413,7 @@ export const EventManage: React.FC = () => {
 
               {/* Capacity options */}
               <div>
-                <label className="text-xs font-bold text-zinc-700 block mb-1.5">Ticket Capacity / Availability</label>
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1.5">Ticket Capacity / Availability</label>
                 <div className="grid grid-cols-2 gap-3 mb-2">
                   <button
                     type="button"
@@ -6371,7 +6447,7 @@ export const EventManage: React.FC = () => {
 
               {/* Perks & Benefits Studio */}
               <div>
-                <label className="text-xs font-bold text-zinc-700 block mb-1">Perks & Inclusions</label>
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Perks & Inclusions</label>
                 <div className="flex items-center gap-2 mb-2">
                   <input
                     type="text"
@@ -6392,7 +6468,7 @@ export const EventManage: React.FC = () => {
                 {ticketPerks.length > 0 && (
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {ticketPerks.map((p, idx) => (
-                      <span key={idx} className="inline-flex items-center gap-1.5 bg-zinc-100 text-zinc-800 text-xs px-2.5 py-1 rounded-lg">
+                      <span key={idx} className="inline-flex items-center gap-1.5 bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200 text-xs px-2.5 py-1 rounded-lg">
                         <span>{p}</span>
                         <button type="button" onClick={() => handleRemovePerk(idx)} className="text-zinc-400 hover:text-red-500 cursor-pointer">
                           ×
@@ -6413,21 +6489,21 @@ export const EventManage: React.FC = () => {
                     className="w-4 h-4 accent-[#E31B23]"
                   />
                   <div>
-                    <span className="text-sm font-bold text-zinc-900 block">Invite-only pass</span>
+                    <span className="text-sm font-bold text-zinc-900 dark:text-white block">Invite-only pass</span>
                     <span className="text-xs text-zinc-500">Require private passcode or organizer approval.</span>
                   </div>
                 </label>
 
                 {isInviteOnly && (
-                  <div className="pl-7 pt-2 space-y-3 border-t border-zinc-200 dark:border-white/10 dark:border-white/10/80">
+                  <div className="pl-7 pt-2 space-y-3 border-t border-zinc-200 dark:border-white/10">
                     <div>
-                      <label className="text-xs font-bold text-zinc-700 block mb-1">Access Passcode</label>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Access Passcode</label>
                       <input
                         type="text"
                         placeholder="e.g. VIP2026"
                         value={passcode}
                         onChange={(e) => setPasscode(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-mono font-bold"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-mono font-bold"
                       />
                     </div>
 
@@ -6439,7 +6515,7 @@ export const EventManage: React.FC = () => {
                         className="w-4 h-4 accent-[#E31B23] mt-0.5"
                       />
                       <div>
-                        <span className="text-xs font-bold text-zinc-900 block">Require manual approval</span>
+                        <span className="text-xs font-bold text-zinc-900 dark:text-white block">Require manual approval</span>
                         <span className="text-[11px] text-zinc-500 leading-relaxed block">
                           You will review applications before passes are confirmed.
                         </span>
@@ -6455,7 +6531,7 @@ export const EventManage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setTicketStep(1)}
-                    className="px-5 py-3 rounded-xl border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-700 hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer"
+                    className="px-5 py-3 rounded-xl border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5 cursor-pointer"
                   >
                     Back
                   </button>
@@ -6512,14 +6588,14 @@ export const EventManage: React.FC = () => {
           <div className="space-y-1.5">
             <h4 className="text-base font-black text-zinc-950 dark:text-white">Add at least one ticket tier before publishing</h4>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto leading-relaxed">
-              Every live public event requires at least one active ticket tier so attendees can reserve free passes or purchase tickets on Eventa.
+              Every live public event requires at least one active ticket tier so attendees can reserve free passes or purchase tickets on StraytTix.
             </p>
           </div>
           <div className="flex items-center gap-3 pt-2">
             <button
               type="button"
               onClick={() => setIsPublishGuardModalOpen(false)}
-              className="flex-1 py-2.5 border border-zinc-200 dark:border-white/10 text-zinc-700 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer"
+              className="flex-1 py-2.5 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5 cursor-pointer"
             >
               Cancel
             </button>
@@ -6558,7 +6634,7 @@ export const EventManage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsUnpublishModalOpen(false)}
-              className="flex-1 py-2.5 border border-zinc-200 dark:border-white/10 text-zinc-700 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer"
+              className="flex-1 py-2.5 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5 cursor-pointer"
             >
               Keep Live
             </button>
@@ -6594,13 +6670,13 @@ export const EventManage: React.FC = () => {
           </div>
 
           <div className="space-y-1.5 text-left pt-2">
-            <label className="text-xs font-bold text-zinc-700 block">Cancellation Reason (Optional)</label>
+            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">Cancellation Reason (Optional)</label>
             <textarea
               rows={3}
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
               placeholder="e.g. Due to unforeseen scheduling or logistical changes..."
-              className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-red-500 leading-relaxed"
+              className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-red-500 leading-relaxed"
             />
           </div>
 
@@ -6608,7 +6684,7 @@ export const EventManage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsCancelModalOpen(false)}
-              className="flex-1 py-2.5 border border-zinc-200 dark:border-white/10 text-zinc-700 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer"
+              className="flex-1 py-2.5 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5 cursor-pointer"
             >
               Back
             </button>
@@ -6661,26 +6737,26 @@ export const EventManage: React.FC = () => {
           className="space-y-4 py-2"
         >
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-700 block">Question</label>
+            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">Question</label>
             <input
               type="text"
               required
               value={newFaqQuestion}
               onChange={(e) => setNewFaqQuestion(e.target.value)}
               placeholder="e.g. Is there parking available on-site?"
-              className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-[#E31B23]"
+              className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-700 block">Answer</label>
+            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">Answer</label>
             <textarea
               rows={4}
               required
               value={newFaqAnswer}
               onChange={(e) => setNewFaqAnswer(e.target.value)}
               placeholder="e.g. Yes, free parking is available inside the main gate."
-              className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-[#E31B23] leading-relaxed"
+              className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23] leading-relaxed"
             />
           </div>
 
@@ -6693,7 +6769,7 @@ export const EventManage: React.FC = () => {
                 setNewFaqQuestion('');
                 setNewFaqAnswer('');
               }}
-              className="px-4 py-2 border border-zinc-200 dark:border-white/10 text-zinc-700 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer"
+              className="px-4 py-2 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5 cursor-pointer"
             >
               Cancel
             </button>
@@ -6721,12 +6797,12 @@ export const EventManage: React.FC = () => {
           </p>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-700 block">Select Team Member</label>
+            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">Select Team Member</label>
             <select
               required
               value={selectedMemberId}
               onChange={(e) => setSelectedMemberId(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-semibold text-zinc-800 outline-none focus:border-[#E31B23]"
+              className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-semibold text-zinc-800 dark:text-zinc-200 outline-none focus:border-[#E31B23]"
             >
               <option value="">-- Choose a team member --</option>
               {orgTeamMembers.map((member) => {
@@ -6746,11 +6822,11 @@ export const EventManage: React.FC = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-700 block">Assigned Event Duty</label>
+            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">Assigned Event Duty</label>
             <select
               value={assignDuty}
               onChange={(e) => setAssignDuty(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-semibold text-zinc-800 outline-none focus:border-[#E31B23]"
+              className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-semibold text-zinc-800 dark:text-zinc-200 outline-none focus:border-[#E31B23]"
             >
               <option value="Gate Check-in">Gate Check-in (Ticket Scanning & Entry)</option>
               <option value="VIP Concierge">VIP Concierge (Lounge & Guest Escort)</option>
@@ -6762,26 +6838,26 @@ export const EventManage: React.FC = () => {
 
           {assignDuty === 'Custom' && (
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-zinc-700 block">Custom Duty Title</label>
+              <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">Custom Duty Title</label>
               <input
                 type="text"
                 required
                 value={customDuty}
                 onChange={(e) => setCustomDuty(e.target.value)}
                 placeholder="e.g. Stage Manager, Parking Lead"
-                className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-[#E31B23]"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
               />
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-700 block">Gate Station / Location Notes</label>
+            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">Gate Station / Location Notes</label>
             <input
               type="text"
               value={assignStation}
               onChange={(e) => setAssignStation(e.target.value)}
               placeholder="e.g. Main Entrance Gate 1, VIP Booth"
-              className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-[#E31B23]"
+              className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
             />
           </div>
 
@@ -6793,7 +6869,7 @@ export const EventManage: React.FC = () => {
                 onChange={(e) => setAssignCanScan(e.target.checked)}
                 className="w-4 h-4 text-[#E31B23] rounded border-zinc-300 focus:ring-[#E31B23]"
               />
-              <span className="text-xs font-bold text-zinc-800">Enable Ticket QR Scanner Access</span>
+              <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Enable Ticket QR Scanner Access</span>
             </label>
             <p className="text-[11px] text-zinc-500 pl-6">
               Allows this staff member to scan and validate attendee ticket QR codes at entrance check-in gates.
@@ -6804,7 +6880,7 @@ export const EventManage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsAssignStaffModalOpen(false)}
-              className="px-4 py-2 border border-zinc-200 dark:border-white/10 text-zinc-700 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer"
+              className="px-4 py-2 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5 cursor-pointer"
             >
               Cancel
             </button>
@@ -6828,11 +6904,11 @@ export const EventManage: React.FC = () => {
       >
         <form onSubmit={handleSaveDutyEdit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-700 block">Assigned Event Duty</label>
+            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">Assigned Event Duty</label>
             <select
               value={assignDuty}
               onChange={(e) => setAssignDuty(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-semibold text-zinc-800 outline-none focus:border-[#E31B23]"
+              className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-semibold text-zinc-800 dark:text-zinc-200 outline-none focus:border-[#E31B23]"
             >
               <option value="Gate Check-in">Gate Check-in</option>
               <option value="VIP Concierge">VIP Concierge</option>
@@ -6844,24 +6920,24 @@ export const EventManage: React.FC = () => {
 
           {assignDuty === 'Custom' && (
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-zinc-700 block">Custom Duty Title</label>
+              <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">Custom Duty Title</label>
               <input
                 type="text"
                 required
                 value={customDuty}
                 onChange={(e) => setCustomDuty(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-[#E31B23]"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
               />
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-zinc-700 block">Gate Station / Location Notes</label>
+            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">Gate Station / Location Notes</label>
             <input
               type="text"
               value={assignStation}
               onChange={(e) => setAssignStation(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-white border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 outline-none focus:border-[#E31B23]"
+              className="w-full px-3.5 py-2.5 bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-white outline-none focus:border-[#E31B23]"
             />
           </div>
 
@@ -6873,7 +6949,7 @@ export const EventManage: React.FC = () => {
                 onChange={(e) => setAssignCanScan(e.target.checked)}
                 className="w-4 h-4 text-[#E31B23] rounded border-zinc-300 focus:ring-[#E31B23]"
               />
-              <span className="text-xs font-bold text-zinc-800">Enable Ticket QR Scanner Access</span>
+              <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Enable Ticket QR Scanner Access</span>
             </label>
           </div>
 
@@ -6881,7 +6957,7 @@ export const EventManage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsEditDutyModalOpen(false)}
-              className="px-4 py-2 border border-zinc-200 dark:border-white/10 text-zinc-700 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer"
+              className="px-4 py-2 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:bg-white/5 dark:hover:bg-white/5 cursor-pointer"
             >
               Cancel
             </button>
@@ -6913,6 +6989,21 @@ export const EventManage: React.FC = () => {
         onScan={handleScanTicket}
         onUndo={handleUndoCheckIn}
         title={`Gate Ticket Scanner — ${event?.title || 'Event Check-In'}`}
+      />
+
+      {/* TOP-UP CREDITS MODAL */}
+      <CreditTopupModal
+        isOpen={isTopupModalOpen}
+        onClose={() => setIsTopupModalOpen(false)}
+        onSuccess={() => {
+          creditsApi.getWallet(organizer?.id).then(res => {
+            const data = res.data || (res as any);
+            if (typeof data?.available_balance === 'number') {
+              setCreditsWalletBalance(data.available_balance);
+            }
+          }).catch(() => {});
+        }}
+        organizerUuid={organizer?.id}
       />
 
     </OrganizerDashboardLayout>

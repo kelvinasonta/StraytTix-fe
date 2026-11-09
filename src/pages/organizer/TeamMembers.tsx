@@ -11,7 +11,7 @@ import { useNotification } from '../../context/NotificationContext';
 import { organizerApi } from '../../api/organizers';
 import { eventApi } from '../../api/events';
 import { getApiErrorMessage } from '../../api/client';
-import type { TeamMember, StaffInvitation, StaffRole, Event, EventStaffAssignment } from '../../types/api';
+import type { TeamMember, StaffInvitation, StaffRole, Event, EventStaffAssignment, RoleCatalogItem } from '../../types/api';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
 import {
   Users,
@@ -33,16 +33,20 @@ import {
   ChevronDown,
   UserCog,
   Settings,
+  KeyRound,
 } from 'lucide-react';
+import { useCan } from '../../hooks/useCan';
+import { MemberPermissionsModal } from '../../components/team/MemberPermissionsModal';
 
 export const TeamMembers: React.FC = () => {
   const { organizer, user } = useAuth();
   const { showNotification } = useNotification();
+  const { can, isOwner } = useCan();
 
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
 
-  if (organizer?.type === 'individual' || !perms.canManageTeam) {
+  if (organizer?.type === 'individual' || (!perms.canManageTeam && !can('org.members.view'))) {
     return <Navigate to="/organizer" replace />;
   }
 
@@ -62,13 +66,24 @@ export const TeamMembers: React.FC = () => {
       || (typeof u.role === 'object' ? u.role?.value : u.role) 
       || raw.pivot?.role 
       || (raw.is_owner || raw.isOwner || u.is_owner || u.isOwner ? 'owner' : 'staff');
-    const memberRole: StaffRole = ['owner', 'admin', 'manager', 'staff'].includes(String(rawRole).toLowerCase())
+    const memberRole: StaffRole = ['owner', 'admin', 'finance', 'manager', 'staff'].includes(String(rawRole).toLowerCase())
       ? String(rawRole).toLowerCase() as StaffRole : 'staff';
-    const resolvedId = String(u.uuid || u.id || raw.uuid || raw.id || raw.user_id || Math.random().toString());
+    const resolvedId = String(raw.member_id || raw.id || u.uuid || u.id || raw.uuid || raw.user_id || Math.random().toString());
+    const permissions: string[] = Array.isArray(raw.permissions)
+      ? raw.permissions
+      : Array.isArray(u.permissions)
+      ? u.permissions
+      : [];
+    const isOwner = Boolean(raw.is_owner || raw.isOwner || u.is_owner || u.isOwner || memberRole === 'owner');
     return {
       id: resolvedId,
-      uuid: resolvedId,
+      uuid: String(u.uuid || raw.uuid || raw.user_id || resolvedId),
+      member_id: raw.member_id || raw.id,
+      user_id: String(raw.user_id || u.id || u.uuid || ''),
       firstName: firstName || 'Team', lastName: lastName || 'Member', email: email || '', role: memberRole,
+      role_label: raw.role_label || u.role_label,
+      is_owner: isOwner,
+      permissions: permissions.length > 0 ? permissions : undefined,
       joinedAt: raw.joinedAt || raw.joined_at || raw.createdAt || raw.created_at || new Date().toISOString()
     };
   };
@@ -88,6 +103,7 @@ export const TeamMembers: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'members' | 'invitations' | 'staff'>('members');
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [invitations, setInvitations] = useState<StaffInvitation[]>([]);
+  const [roleCatalog, setRoleCatalog] = useState<RoleCatalogItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -114,6 +130,41 @@ export const TeamMembers: React.FC = () => {
     isLoading?: boolean;
     onConfirm: () => void | Promise<void>;
   }>({ isOpen: false, title: '', message: '', confirmLabel: 'Delete', variant: 'danger', isLoading: false, onConfirm: () => { } });
+
+  // =========================================================================
+  // GRANULAR PERMISSIONS MODAL STATE
+  // =========================================================================
+  const [isPermsModalOpen, setIsPermsModalOpen] = useState(false);
+  const [selectedPermsMember, setSelectedPermsMember] = useState<TeamMember | null>(null);
+  const [isSavingPerms, setIsSavingPerms] = useState(false);
+
+  const handleOpenPermsModal = (member: TeamMember) => {
+    setSelectedPermsMember(member);
+    setIsPermsModalOpen(true);
+  };
+
+  const handleSaveMemberPermissions = async (memberUuid: string, newRole: StaffRole, newPermissions: string[]) => {
+    setIsSavingPerms(true);
+    try {
+      if (organizer?.id) {
+        await organizerApi.updateMemberRole(organizer.id, memberUuid, newRole, newPermissions);
+      }
+      setMembers(prev =>
+        prev.map(m =>
+          (m.uuid === memberUuid || m.id === memberUuid)
+            ? { ...m, role: newRole, permissions: newPermissions }
+            : m
+        )
+      );
+      showNotification('Member role and capabilities updated successfully!', 'success');
+      setIsPermsModalOpen(false);
+    } catch (err: any) {
+      const msg = getApiErrorMessage(err);
+      showNotification(msg || 'Failed to update member permissions.', 'error');
+    } finally {
+      setIsSavingPerms(false);
+    }
+  };
 
   // =========================================================================
   // STAFF MEMBER SETTINGS MODAL STATE
@@ -325,9 +376,10 @@ export const TeamMembers: React.FC = () => {
     if (!organizer?.id) return;
     setIsLoading(true);
     try {
-      const [membersRes, invitesRes] = await Promise.all([
+      const [membersRes, invitesRes, rolesRes] = await Promise.all([
         organizerApi.getTeamMembers(organizer.id),
-        organizerApi.getInvitations(organizer.id)
+        organizerApi.getInvitations(organizer.id),
+        organizerApi.getRoles(organizer.id).catch(() => ({ success: false, data: [] as RoleCatalogItem[] }))
       ]);
       if (membersRes.success && membersRes.data) {
         const items = Array.isArray(membersRes.data) ? membersRes.data : (membersRes.data as any).data || [];
@@ -338,6 +390,14 @@ export const TeamMembers: React.FC = () => {
       if (invitesRes.success && invitesRes.data) {
         const inviteList = Array.isArray(invitesRes.data) ? invitesRes.data : ((invitesRes.data as any).data || []);
         setInvitations(inviteList.map(normalizeInvitation));
+      }
+      if (rolesRes.success && rolesRes.data) {
+        const rolesList = Array.isArray(rolesRes.data)
+          ? rolesRes.data
+          : Array.isArray((rolesRes.data as any)?.roles)
+          ? (rolesRes.data as any).roles
+          : [];
+        setRoleCatalog(rolesList);
       }
     } catch {
       // Preserve current user as owner
@@ -455,7 +515,7 @@ export const TeamMembers: React.FC = () => {
     setUpdatingMemberUuid(null);
   };
 
-  const handleRemoveMember = (memberUuid: string, name: string) => {
+  const handleRemoveMember = (memberUuid: string | number, name: string) => {
     setConfirmDialog({
       isOpen: true, title: 'Remove Team Member',
       message: `Are you sure you want to remove ${name} from this organization?`,
@@ -598,8 +658,8 @@ export const TeamMembers: React.FC = () => {
                   <tbody className="divide-y divide-zinc-100 dark:divide-white/10 font-medium text-zinc-800 dark:text-zinc-200">
                     {filteredMembers.map((member) => {
                       const isCurrentUser = member.email === user?.email;
-                      const isOwner = member.role === 'owner';
-                      const memberId = member.uuid || member.id;
+                      const isOwner = member.is_owner === true || member.role === 'owner';
+                      const memberId = member.member_id || member.user_id || member.uuid || member.id;
                       return (
                         <tr key={memberId} className="hover:bg-zinc-50/70 dark:hover:bg-white/[0.02] transition-colors">
                           <td className="px-6 py-4">
@@ -618,26 +678,15 @@ export const TeamMembers: React.FC = () => {
                           </td>
                           <td className="px-6 py-4">
                             {isOwner ? (
-                              <Badge variant="neutral">Owner (All Permissions)</Badge>
-                            ) : isCurrentUser ? (
-                              member.role === 'admin' ? (
-                                <Badge variant="info">Admin (Full Console)</Badge>
-                              ) : member.role === 'manager' ? (
-                                <Badge variant="warning">Manager (Events & Orders)</Badge>
-                              ) : (
-                                <Badge variant="default">Staff (Gate Check-in)</Badge>
-                              )
+                              <Badge variant="neutral">Owner</Badge>
+                            ) : member.role === 'admin' ? (
+                              <Badge variant="info">{member.role_label || 'Admin'}</Badge>
+                            ) : member.role === 'finance' ? (
+                              <Badge variant="success">{member.role_label || 'Finance'}</Badge>
+                            ) : member.role === 'manager' ? (
+                              <Badge variant="warning">{member.role_label || 'Manager'}</Badge>
                             ) : (
-                              <select
-                                value={member.role}
-                                disabled={updatingMemberUuid === memberId || !canManageEvents || (member.role === 'admin' && userRole !== 'owner')}
-                                onChange={(e) => handleRoleChange(memberId, e.target.value)}
-                                className="bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-xs font-bold rounded-xl px-3 py-1.5 text-zinc-800 dark:text-zinc-200 focus:border-[#E31B23] focus:outline-none cursor-pointer disabled:opacity-50"
-                              >
-                                {userRole === 'owner' && <option value="admin">Admin — Full Console</option>}
-                                <option value="manager">Manager — Events & Orders</option>
-                                <option value="staff">Staff — Gate Check-in</option>
-                              </select>
+                              <Badge variant="default">{member.role_label || 'Staff'}</Badge>
                             )}
                           </td>
                           <td className="px-6 py-4 text-zinc-500 font-medium text-xs">
@@ -645,7 +694,18 @@ export const TeamMembers: React.FC = () => {
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              {canManageEvents && (
+                              {!isOwner && canManageEvents && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenPermsModal(member)}
+                                  className="px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white border border-zinc-200 dark:border-white/10 rounded-xl transition-colors inline-flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                                  title="Configure Member Permissions & Capabilities"
+                                >
+                                  <KeyRound className="w-3.5 h-3.5 text-[#E31B23]" />
+                                  <span>Permissions</span>
+                                </button>
+                              )}
+                              {!isOwner && canManageEvents && (
                                 <button
                                   type="button"
                                   onClick={() => handleOpenStaffSettings(member)}
@@ -996,16 +1056,31 @@ export const TeamMembers: React.FC = () => {
                 <div className="space-y-2.5">
                   <label className="block text-sm font-bold text-zinc-900 dark:text-white">Assign Operational Role</label>
                   <div className="space-y-2">
-                    {[
-                      { role: 'admin', title: 'Admin', desc: 'Full event creation, financial reports, and order management' },
-                      { role: 'manager', title: 'Manager', desc: 'Create/edit events and access attendee rosters' },
-                      { role: 'staff', title: 'Staff', desc: 'Ticket QR scanning and gate check-in only' },
-                    ].map((item) => (
-                      <label key={item.role} className={`p-3.5 border rounded-2xl flex items-start gap-3 cursor-pointer transition-all ${inviteRole === item.role ? 'border-[#E31B23] bg-red-50/50 dark:bg-red-500/10 text-zinc-950 dark:text-white' : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300'}`}>
-                        <input type="radio" name="inviteRole" checked={inviteRole === item.role} onChange={() => setInviteRole(item.role as StaffRole)} className="mt-1 accent-[#E31B23]" />
-                        <div><p className="text-sm font-bold">{item.title}</p><p className="text-xs text-zinc-500 font-medium">{item.desc}</p></div>
-                      </label>
-                    ))}
+                    {(() => {
+                      const assignable = roleCatalog.length > 0
+                        ? roleCatalog.filter(r => r.can_assign)
+                        : [];
+                      
+                      const optionsToRender = assignable.length > 0
+                        ? assignable.map(r => ({
+                            role: r.role as StaffRole,
+                            title: r.label,
+                            desc: r.description
+                          }))
+                        : [
+                            ...(userRole === 'owner' ? [{ role: 'admin' as StaffRole, title: 'Admin', desc: 'Full event creation, financial reports, and order management' }] : []),
+                            { role: 'finance' as StaffRole, title: 'Finance Officer', desc: 'Payouts, bank accounts, wallet and financial reports' },
+                            { role: 'manager' as StaffRole, title: 'Event Manager', desc: 'Create/edit events and access attendee rosters' },
+                            { role: 'staff' as StaffRole, title: 'Staff Member', desc: 'Ticket QR scanning and gate check-in only' },
+                          ];
+
+                      return optionsToRender.map((item) => (
+                        <label key={item.role} className={`p-3.5 border rounded-2xl flex items-start gap-3 cursor-pointer transition-all ${inviteRole === item.role ? 'border-[#E31B23] bg-red-50/50 dark:bg-red-500/10 text-zinc-950 dark:text-white' : 'border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300'}`}>
+                          <input type="radio" name="inviteRole" checked={inviteRole === item.role} onChange={() => setInviteRole(item.role)} className="mt-1 accent-[#E31B23]" />
+                          <div><p className="text-sm font-bold">{item.title}</p><p className="text-xs text-zinc-500 font-medium">{item.desc}</p></div>
+                        </label>
+                      ));
+                    })()}
                   </div>
                 </div>
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-white/10">
@@ -1289,6 +1364,17 @@ export const TeamMembers: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Member Permissions & Capabilities Modal */}
+        <MemberPermissionsModal
+          isOpen={isPermsModalOpen}
+          onClose={() => setIsPermsModalOpen(false)}
+          member={selectedPermsMember}
+          onSave={handleSaveMemberPermissions}
+          currentOrganizerRole={role}
+          assignableRoles={roleCatalog}
+          isSaving={isSavingPerms}
+        />
 
         {/* Confirm Dialog */}
         <ConfirmDialog

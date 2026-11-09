@@ -26,6 +26,8 @@ import { useAuth } from '../../context/AuthContext';
 import { eventApi, normalizeBackendEvent } from '../../api/events';
 import { getApiErrorMessage } from '../../api/client';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
+import { useCan } from '../../hooks/useCan';
+import { Can } from '../../components/auth/Can';
 import type { Event } from '../../types/api';
 
 type EventFilterStatus = 'All' | 'Published' | 'Draft' | 'Ended';
@@ -33,6 +35,7 @@ type EventFilterStatus = 'All' | 'Published' | 'Draft' | 'Ended';
 export const Events: React.FC = () => {
   const { organizer } = useAuth();
   const { showNotification } = useNotification();
+  const { can } = useCan();
 
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
@@ -302,13 +305,15 @@ export const Events: React.FC = () => {
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
             </button>
-            {perms.canCreateEvents && (
-              <Link to="/organizer/events/create" className="hidden sm:inline-flex">
-                <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-xl shadow-xs transition-all cursor-pointer">
-                  <PlusCircle className="w-5 h-5" /> Create New Event
-                </button>
-              </Link>
-            )}
+            <Can permission="org.events.create">
+              {perms.canCreateEvents && (
+                <Link to="/organizer/events/create" className="hidden sm:inline-flex">
+                  <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-xl shadow-xs transition-all cursor-pointer">
+                    <PlusCircle className="w-5 h-5" /> Create New Event
+                  </button>
+                </Link>
+              )}
+            </Can>
           </div>
         </div>
 
@@ -442,7 +447,7 @@ export const Events: React.FC = () => {
               >
                 Clear Filters
               </button>
-            ) : perms.canCreateEvents ? (
+            ) : perms.canCreateEvents && can('org.events.create') ? (
               <Link to="/organizer/events/create">
                 <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-bold rounded-xl shadow-sm transition-all cursor-pointer">
                   <PlusCircle className="w-5 h-5" /> Create Your First Event
@@ -568,7 +573,7 @@ export const Events: React.FC = () => {
                             </a>
                           )}
 
-                          {perms.canDeleteEvents && (
+                          {perms.canDeleteEvents && can('org.events.delete') && (
                             <button
                               onClick={() => handleDeletePrompt(eventId, evt.title)}
                               className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl cursor-pointer transition-colors"
@@ -729,7 +734,7 @@ export const Events: React.FC = () => {
                             </a>
                           )}
 
-                          {perms.canDeleteEvents && (
+                          {perms.canDeleteEvents && can('org.events.delete') && (
                             <button
                               onClick={() => handleDeletePrompt(eventId, evt.title)}
                               className="p-2 sm:p-2.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 border border-zinc-200 dark:border-white/10 hover:border-red-200 bg-white dark:bg-[#070709] rounded-xl cursor-pointer transition-colors shadow-2xs"

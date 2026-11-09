@@ -61,21 +61,32 @@ export const tokenStorage = {
   },
 
   getActiveOrganizerUuid(): string | null {
-    return localStorage.getItem('strayttix_active_organizer_uuid') || sessionStorage.getItem('strayttix_active_organizer_uuid');
+    return (
+      localStorage.getItem('eventos_active_organizer_uuid') ||
+      localStorage.getItem('strayttix_active_organizer_uuid') ||
+      sessionStorage.getItem('eventos_active_organizer_uuid') ||
+      sessionStorage.getItem('strayttix_active_organizer_uuid')
+    );
   },
 
   setActiveOrganizerUuid(uuid: string, remember: boolean): void {
     if (remember) {
+      localStorage.setItem('eventos_active_organizer_uuid', uuid);
       localStorage.setItem('strayttix_active_organizer_uuid', uuid);
+      sessionStorage.removeItem('eventos_active_organizer_uuid');
       sessionStorage.removeItem('strayttix_active_organizer_uuid');
     } else {
+      sessionStorage.setItem('eventos_active_organizer_uuid', uuid);
       sessionStorage.setItem('strayttix_active_organizer_uuid', uuid);
+      localStorage.removeItem('eventos_active_organizer_uuid');
       localStorage.removeItem('strayttix_active_organizer_uuid');
     }
   },
 
   clearActiveOrganizerUuid(): void {
+    localStorage.removeItem('eventos_active_organizer_uuid');
     localStorage.removeItem('strayttix_active_organizer_uuid');
+    sessionStorage.removeItem('eventos_active_organizer_uuid');
     sessionStorage.removeItem('strayttix_active_organizer_uuid');
   }
 };

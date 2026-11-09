@@ -150,8 +150,9 @@ export const authApi = {
     return data;
   },
 
-  async getMe(): Promise<ApiResponse<{ user: User; organizer: Organizer | null; email_verified: boolean }>> {
-    const { data } = await apiClient.get<ApiResponse<{ user: User; organizer: Organizer | null; email_verified: boolean }>>('/auth/me');
+  async getMe(organizerUuid?: string): Promise<ApiResponse<{ user: User; organizer: Organizer | null; email_verified: boolean }>> {
+    const params = organizerUuid ? { organizer_uuid: organizerUuid } : undefined;
+    const { data } = await apiClient.get<ApiResponse<{ user: User; organizer: Organizer | null; email_verified: boolean }>>('/auth/me', { params });
     return data;
   },
 
@@ -277,7 +278,14 @@ export const authApi = {
     return data;
   },
 
-  async acceptInvitation(payload: any): Promise<ApiResponse<AuthPayload>> {
+  async acceptInvitation(payload: {
+    token: string;
+    first_name?: string;
+    last_name?: string;
+    password?: string;
+    password_confirmation?: string;
+    [key: string]: any;
+  }): Promise<ApiResponse<AuthPayload>> {
     const { data } = await apiClient.post<ApiResponse<AuthPayload>>('/auth/invitations/accept', payload);
     return data;
   },
@@ -285,13 +293,17 @@ export const authApi = {
   async verifyInvitation(token: string): Promise<ApiResponse<{
     email: string;
     role: string;
+    role_label?: string;
     organizer_name?: string;
+    user_exists: boolean;
     expires_at?: string;
   }>> {
     const { data } = await apiClient.post<ApiResponse<{
       email: string;
       role: string;
+      role_label?: string;
       organizer_name?: string;
+      user_exists: boolean;
       expires_at?: string;
     }>>('/auth/invitations/verify', { token });
     return data;

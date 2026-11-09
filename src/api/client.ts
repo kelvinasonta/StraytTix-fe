@@ -118,6 +118,20 @@ apiClient.interceptors.response.use(
         ) {
           window.location.href = '/verify-email/pending';
         }
+      } else if (status === 403) {
+        // Multi-tenant permission guard failure: do NOT clear session, show non-intrusive toast
+        const errorMsg =
+          response?.data?.message ||
+          'You do not have permission to perform this action for this organization.';
+        window.dispatchEvent(
+          new CustomEvent('app:show-notification', {
+            detail: {
+              message: errorMsg,
+              type: 'error',
+              duration: 5000,
+            },
+          })
+        );
       }
     }
 
