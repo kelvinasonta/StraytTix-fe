@@ -13,7 +13,7 @@ import { formatCurrency, formatDate } from '../../utils/format';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
 import { useCan } from '../../hooks/useCan';
 import { Can } from '../../components/auth/Can';
-import type { Event, TicketType, ScheduleSession, LineupMember, EventStats, FaqItem, EventStaffAssignment, TeamMember, CheckInStats, TicketAttendee } from '../../types/api';
+import type { Event, TicketType, ScheduleSession, LineupMember, EventStats, FaqItem, EventStaffAssignment, TeamMember, StaffRole, CheckInStats, TicketAttendee } from '../../types/api';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import RichTextEditor from '../../components/ui/RichTextEditor';
@@ -23,6 +23,8 @@ import HeroHeaderPicker, { type HeroBannerStyle } from '../../components/events/
 import CameraQrScannerModal from '../../components/events/CameraQrScannerModal';
 import { CreditCheckPill, CreditTopupModal } from '../../components/credits';
 import { creditsApi } from '../../api/credits';
+import { useSettings } from '../../context/SettingsContext';
+import { getFeeConfig } from '../../utils/fees';
 import { EVENT_FORMATS, POPULAR_CATEGORY_TAGS, SYSTEM_AVATARS, PRESET_CATEGORIES, PRESET_COVERS } from './CreateEvent';
 import {
   Calendar,
@@ -106,6 +108,8 @@ export const EventManage: React.FC = () => {
   const { organizer, user } = useAuth();
   const { showNotification } = useNotification();
   const { can, hasRole } = useCan();
+  const { settings } = useSettings();
+  const { percentage: feePct } = getFeeConfig(settings);
 
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
@@ -911,7 +915,31 @@ export const EventManage: React.FC = () => {
           : Array.isArray((res.data as any)?.data)
             ? (res.data as any).data
             : [];
-        setOrgTeamMembers(list);
+        const normalizedList: TeamMember[] = list.map((raw: any) => {
+          const u = raw.user || raw.member || {};
+          const userUuid = String(raw.userId || raw.user_id || u.id || u.uuid || '');
+          const memberTableId = String(raw.member_id || raw.memberId || raw.id || '');
+          const resolvedId = userUuid || memberTableId;
+          const email = String(raw.email || u.email || '').trim();
+          let firstName = String(raw.firstName || raw.first_name || u.firstName || u.first_name || '').trim();
+          let lastName = String(raw.lastName || raw.last_name || u.lastName || u.last_name || '').trim();
+          if (!firstName && !lastName) {
+            const fullName = String(raw.name || u.name || '').trim();
+            if (fullName) { const p = fullName.split(' '); firstName = p[0] || ''; lastName = p.slice(1).join(' ') || ''; }
+          }
+          if (!firstName && email) firstName = email.split('@')[0] || 'Member';
+          return {
+            id: resolvedId,
+            uuid: userUuid || resolvedId,
+            member_id: memberTableId,
+            user_id: userUuid || resolvedId,
+            firstName: firstName || 'Team',
+            lastName: lastName || 'Member',
+            email,
+            role: (raw.role || 'staff') as StaffRole,
+          };
+        });
+        setOrgTeamMembers(normalizedList);
       }
     } catch (err) {
       console.warn('Could not load team members:', err);
@@ -986,11 +1014,12 @@ export const EventManage: React.FC = () => {
       return;
     }
 
-    const member = orgTeamMembers.find(m => String(m.id || m.uuid) === String(selectedMemberId));
+    const member = orgTeamMembers.find(m => String(m.user_id || m.uuid || m.id) === String(selectedMemberId));
     const memberName = member ? `${member.firstName} ${member.lastName}`.trim() : 'Team Member';
     const memberEmail = member?.email || '';
     const memberRole = member?.role || 'staff';
     const resolvedDuty = assignDuty === 'Custom' ? (customDuty.trim() || 'Staff Support') : assignDuty;
+    const targetUserId = member?.user_id || member?.uuid || selectedMemberId;
 
     const currentUserName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : 'Admin';
     const assignedByLabel = `${currentUserName} (${String(userRole).toUpperCase()})`;
@@ -998,7 +1027,8 @@ export const EventManage: React.FC = () => {
     setIsSubmittingStaff(true);
     try {
       const payload = {
-        memberId: selectedMemberId,
+        user_id: targetUserId,
+        memberId: targetUserId,
         memberName,
         memberEmail,
         role: memberRole,
@@ -1011,7 +1041,7 @@ export const EventManage: React.FC = () => {
       const res = await eventApi.assignEventStaff(targetUuid, payload, organizer?.id);
       if (res && res.data) {
         setEventStaff(prev => {
-          const filtered = prev.filter(s => String(s.memberId) !== String(selectedMemberId));
+          const filtered = prev.filter(s => String(s.memberId) !== String(targetUserId) && String(s.memberId) !== String(selectedMemberId));
           return [...filtered, res.data];
         });
       }
@@ -5692,12 +5722,12 @@ export const EventManage: React.FC = () => {
                     <p className="text-2xl font-black text-zinc-950 dark:text-white mt-1">{formatCurrency(event.revenue || 2450000)}</p>
                   </div>
                   <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10">
-                    <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Platform Fee (2.5%)</span>
-                    <p className="text-2xl font-black text-zinc-600 dark:text-zinc-400 mt-1">{formatCurrency((event.revenue || 2450000) * 0.025)}</p>
+                    <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Platform Fee ({feePct}%)</span>
+                    <p className="text-2xl font-black text-zinc-600 dark:text-zinc-400 mt-1">{formatCurrency((event.revenue || 2450000) * (feePct / 100))}</p>
                   </div>
                   <div className="p-5 rounded-2xl bg-[#FEF2F2] dark:bg-red-500/10 border border-red-100 dark:border-red-500/20">
                     <span className="text-xs font-bold text-[#E31B23] uppercase tracking-wider">Net Payout</span>
-                    <p className="text-2xl font-black text-[#E31B23] mt-1">{formatCurrency((event.revenue || 2450000) * 0.975)}</p>
+                    <p className="text-2xl font-black text-[#E31B23] mt-1">{formatCurrency((event.revenue || 2450000) * (1 - (feePct / 100)))}</p>
                   </div>
                 </div>
               </div>
@@ -6806,9 +6836,10 @@ export const EventManage: React.FC = () => {
             >
               <option value="">-- Choose a team member --</option>
               {orgTeamMembers.map((member) => {
-                const isAssigned = eventStaff.some(s => String(s.memberId) === String(member.id || member.uuid));
+                const memberIdentifier = member.user_id || member.uuid || member.id;
+                const isAssigned = eventStaff.some(s => String(s.memberId) === String(memberIdentifier));
                 return (
-                  <option key={member.id || member.uuid} value={member.id || member.uuid}>
+                  <option key={memberIdentifier} value={memberIdentifier}>
                     {member.firstName} {member.lastName} ({member.role.toUpperCase()}) {isAssigned ? '— [Already Assigned]' : ''}
                   </option>
                 );

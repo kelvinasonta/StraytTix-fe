@@ -5,12 +5,17 @@ import { AuthLayout } from '../../components/layout/AuthLayout';
 import { getApiErrorMessage } from '../../api/client';
 import { AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useNotification } from '../../context/NotificationContext';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { showNotification } = useNotification();
+
+  const canRegister = useFeatureFlag('auth-registration');
+  const canResetPassword = useFeatureFlag('auth-password-reset');
+  const canSocialLogin = useFeatureFlag('auth-social-login');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -83,6 +88,16 @@ export const Login: React.FC = () => {
       subtitle="Enter your credentials to access your StraytTix account"
     >
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        {!canRegister && (
+          <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 text-amber-900 dark:text-amber-200 rounded-xl text-xs flex items-start gap-2.5 shadow-2xs">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+            <div className="space-y-0.5">
+              <span className="font-bold block">User registration is currently paused by administrators.</span>
+              <span className="text-[11px] text-zinc-600 dark:text-zinc-400">New signups are disabled. Existing accounts can still sign in below.</span>
+            </div>
+          </div>
+        )}
+
         {isExpired && (
           <div className="p-3.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 rounded-xl text-xs flex items-center gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
@@ -120,12 +135,14 @@ export const Login: React.FC = () => {
             <label className="block text-xs font-mono font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
               Password
             </label>
-            <Link
-              to="/forgot-password"
-              className="text-xs text-[#E31B23] hover:text-red-400 font-semibold transition-colors"
-            >
-              Forgot password?
-            </Link>
+            {canResetPassword && (
+              <Link
+                to="/forgot-password"
+                className="text-xs text-[#E31B23] hover:text-red-400 font-semibold transition-colors"
+              >
+                Forgot password?
+              </Link>
+            )}
           </div>
           <div className="relative">
             <input
@@ -173,67 +190,79 @@ export const Login: React.FC = () => {
           <span>{isLoading ? 'Signing in...' : 'Sign in to StraytTix'}</span>
         </button>
 
-        {/* Divider */}
-        <div className="relative py-2 flex items-center justify-center">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-zinc-200 dark:border-white/10" />
-          </div>
-          <span className="relative px-3 bg-white dark:bg-[#070709] text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-wider">
-            or continue with
-          </span>
-        </div>
+        {/* Social Buttons - Protected by auth-social-login flag */}
+        {canSocialLogin && (
+          <>
+            {/* Divider */}
+            <div className="relative py-2 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-zinc-200 dark:border-white/10" />
+              </div>
+              <span className="relative px-3 bg-white dark:bg-[#070709] text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-wider">
+                or continue with
+              </span>
+            </div>
 
-        {/* Social Buttons */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* Google Button */}
-          <button
-            type="button"
-            onClick={() => handleSocialAuth('Google')}
-            className="w-full py-2.5 px-3 bg-zinc-50 dark:bg-[#0F0F14] hover:bg-zinc-100 dark:hover:bg-[#14151B] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
-          >
-            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.4 7.33 24 12 24z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.6 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-              />
-            </svg>
-            <span>Google</span>
-          </button>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Google Button */}
+              <button
+                type="button"
+                onClick={() => handleSocialAuth('Google')}
+                className="w-full py-2.5 px-3 bg-zinc-50 dark:bg-[#0F0F14] hover:bg-zinc-100 dark:hover:bg-[#14151B] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
+              >
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.4 7.33 24 12 24z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.6 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                  />
+                </svg>
+                <span>Google</span>
+              </button>
 
-          {/* Apple Button */}
-          <button
-            type="button"
-            onClick={() => handleSocialAuth('Apple')}
-            className="w-full py-2.5 px-3 bg-zinc-50 dark:bg-[#0F0F14] hover:bg-zinc-100 dark:hover:bg-[#14151B] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
-          >
-            <svg className="w-4 h-4 shrink-0 fill-current text-zinc-900 dark:text-white" viewBox="0 0 24 24">
-              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.87c.65-.79 1.09-1.89.97-3-.93.04-2.07.62-2.73 1.39-.58.67-1.09 1.76-.95 2.82 1.04.08 2.06-.42 2.71-1.21z" />
-            </svg>
-            <span>Apple</span>
-          </button>
-        </div>
+              {/* Apple Button */}
+              <button
+                type="button"
+                onClick={() => handleSocialAuth('Apple')}
+                className="w-full py-2.5 px-3 bg-zinc-50 dark:bg-[#0F0F14] hover:bg-zinc-100 dark:hover:bg-[#14151B] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
+              >
+                <svg className="w-4 h-4 shrink-0 fill-current text-zinc-900 dark:text-white" viewBox="0 0 24 24">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.87c.65-.79 1.09-1.89.97-3-.93.04-2.07.62-2.73 1.39-.58.67-1.09 1.76-.95 2.82 1.04.08 2.06-.42 2.71-1.21z" />
+                </svg>
+                <span>Apple</span>
+              </button>
+            </div>
+          </>
+        )}
 
         {/* Switch to Register */}
         <div className="text-center pt-3 text-xs text-zinc-600 dark:text-zinc-400 font-medium">
-          New to StraytTix?{' '}
-          <Link
-            to="/register"
-            className="text-[#E31B23] hover:text-red-400 font-bold transition-colors"
-          >
-            Create an account
-          </Link>
+          {canRegister ? (
+            <>
+              New to StraytTix?{' '}
+              <Link
+                to="/register"
+                className="text-[#E31B23] hover:text-red-400 font-bold transition-colors"
+              >
+                Create an account
+              </Link>
+            </>
+          ) : (
+            <span className="text-zinc-500 italic">
+              User registration is currently paused by administrators.
+            </span>
+          )}
         </div>
       </form>
     </AuthLayout>

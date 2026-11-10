@@ -73,6 +73,14 @@ export interface FeatureFlagToggleResponse {
   is_active: boolean;
 }
 
+export interface FeatureFlagRecord {
+  key: string;
+  label?: string;
+  description?: string;
+  isActive: boolean;
+  group?: string;
+}
+
 export const adminApi = {
   getVerifications: async (params?: { status?: string; per_page?: number; page?: number }): Promise<VerificationListResponse> => {
     const response = await apiClient.get<ApiResponse<VerificationListResponse>>('/admin/verifications', { params });
@@ -88,6 +96,26 @@ export const adminApi = {
   reviewVerification: async (uuid: string, payload: ReviewVerificationPayload): Promise<AdminVerification> => {
     const response = await apiClient.post<ApiResponse<AdminVerification>>(`/admin/verifications/${uuid}/review`, payload);
     return response.data.data;
+  },
+
+  getFeatureFlags: async (): Promise<Record<string, boolean>> => {
+    try {
+      const response = await apiClient.get<any>('/admin/feature-flags');
+      const data = response.data?.data || response.data?.flags || response.data;
+      if (Array.isArray(data)) {
+        const mapped: Record<string, boolean> = {};
+        data.forEach((item: any) => {
+          if (item.key) mapped[item.key] = Boolean(item.isActive ?? item.is_active ?? item.enabled);
+        });
+        return mapped;
+      }
+      if (typeof data === 'object' && data !== null) {
+        return data;
+      }
+      return {};
+    } catch {
+      return {};
+    }
   },
 
   toggleFeatureFlag: async (feature: string, isActive: boolean): Promise<FeatureFlagToggleResponse> => {

@@ -21,6 +21,8 @@ import type { Event } from '../types/api';
 import { formatCurrency, formatEventDateTime } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { useSettings } from '../context/SettingsContext';
+import { getFeeConfig, calculatePlatformFee } from '../utils/fees';
 
 export const EventTickets: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -28,6 +30,8 @@ export const EventTickets: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { isAuthenticated } = useAuth();
   const { showNotification } = useNotification();
+  const { settings } = useSettings();
+  const { percentage: feePct, fixed: feeFixed } = getFeeConfig(settings);
 
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -112,7 +116,8 @@ export const EventTickets: React.FC = () => {
     return acc + (t ? (t.price || 0) * qty : 0);
   }, 0);
 
-  const serviceFee = subtotal > 0 ? Math.round(subtotal * 0.025) : 0;
+  const totalTicketsCount = getSelectedCount();
+  const serviceFee = subtotal > 0 ? calculatePlatformFee(subtotal, totalTicketsCount, settings) : 0;
   const total = subtotal + serviceFee;
 
   const handleProceedCheckout = () => {
@@ -369,7 +374,7 @@ export const EventTickets: React.FC = () => {
                       <span className="font-bold text-zinc-950 dark:text-white font-mono">{formatCurrency(subtotal)}</span>
                     </div>
                     <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
-                      <span>Service Fee (2.5%)</span>
+                      <span>Service Fee ({feePct}%{feeFixed > 0 ? ` + ₦${feeFixed}` : ''})</span>
                       <span className="font-bold text-zinc-950 dark:text-white font-mono">{formatCurrency(serviceFee)}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm pt-3 border-t border-zinc-200 dark:border-white/10">

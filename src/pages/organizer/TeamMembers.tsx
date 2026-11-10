@@ -68,7 +68,9 @@ export const TeamMembers: React.FC = () => {
       || (raw.is_owner || raw.isOwner || u.is_owner || u.isOwner ? 'owner' : 'staff');
     const memberRole: StaffRole = ['owner', 'admin', 'finance', 'manager', 'staff'].includes(String(rawRole).toLowerCase())
       ? String(rawRole).toLowerCase() as StaffRole : 'staff';
-    const resolvedId = String(raw.member_id || raw.id || u.uuid || u.id || raw.uuid || raw.user_id || Math.random().toString());
+    const userUuid = String(raw.userId || raw.user_id || u.id || u.uuid || '');
+    const memberTableId = String(raw.member_id || raw.memberId || raw.id || '');
+    const resolvedId = userUuid || memberTableId || Math.random().toString();
     const permissions: string[] = Array.isArray(raw.permissions)
       ? raw.permissions
       : Array.isArray(u.permissions)
@@ -77,9 +79,9 @@ export const TeamMembers: React.FC = () => {
     const isOwner = Boolean(raw.is_owner || raw.isOwner || u.is_owner || u.isOwner || memberRole === 'owner');
     return {
       id: resolvedId,
-      uuid: String(u.uuid || raw.uuid || raw.user_id || resolvedId),
-      member_id: raw.member_id || raw.id,
-      user_id: String(raw.user_id || u.id || u.uuid || ''),
+      uuid: userUuid || resolvedId,
+      member_id: memberTableId,
+      user_id: userUuid || resolvedId,
       firstName: firstName || 'Team', lastName: lastName || 'Member', email: email || '', role: memberRole,
       role_label: raw.role_label || u.role_label,
       is_owner: isOwner,
@@ -317,15 +319,16 @@ export const TeamMembers: React.FC = () => {
     if (!selectedStaffEventId) { showNotification('Select an event first.', 'warning'); return; }
     if (!assignMemberId) { showNotification('Select a team member.', 'warning'); return; }
 
-    const member = members.find(m => String(m.uuid || m.id) === String(assignMemberId));
+    const member = members.find(m => String(m.user_id || m.uuid || m.id) === String(assignMemberId));
     if (!member) { showNotification('Team member not found.', 'error'); return; }
 
     setIsSubmittingAssign(true);
     try {
       const memberName = `${member.firstName} ${member.lastName}`.trim() || member.email;
       const currentUserName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : 'Admin';
+      const targetUserId = member.user_id || member.uuid || member.id;
       const payload = {
-        memberId: member.uuid || member.id,
+        memberId: targetUserId,
         memberName,
         memberEmail: member.email,
         role: member.role,
@@ -334,7 +337,7 @@ export const TeamMembers: React.FC = () => {
         canScanTickets: assignCanScan,
         notes: assignNotes.trim(),
         assignedBy: `${currentUserName} (${String(userRole).toUpperCase()})`,
-        user_id: member.uuid || member.id,
+        user_id: targetUserId,
       };
 
       await eventApi.assignEventStaff(selectedStaffEventId, payload, organizer?.id);
@@ -838,7 +841,7 @@ export const TeamMembers: React.FC = () => {
                       <select
                         value={selectedStaffEventId}
                         onChange={(e) => setSelectedStaffEventId(e.target.value)}
-                        className="w-full appearance-none bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-zinc-900 dark:text-white dark:text-white focus:outline-none focus:border-[#E31B23] pr-10"
+                        className="w-full appearance-none bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-zinc-900 dark:text-white focus:outline-none focus:border-[#E31B23] pr-10"
                       >
                         {organizerEvents.map((evt) => {
                           const eId = String(evt.id || (evt as any).uuid);
@@ -914,7 +917,7 @@ export const TeamMembers: React.FC = () => {
                 </div>
               ) : staffRoster.length === 0 ? (
                 <div className="p-14 text-center space-y-4">
-                  <div className="w-14 h-14 bg-zinc-50 border border-zinc-200 rounded-2xl flex items-center justify-center mx-auto text-zinc-300">
+                  <div className="w-14 h-14 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl flex items-center justify-center mx-auto text-zinc-400 dark:text-zinc-500">
                     <Users className="w-7 h-7" />
                   </div>
                   <div>
@@ -1123,15 +1126,18 @@ export const TeamMembers: React.FC = () => {
                     <select
                       value={assignMemberId}
                       onChange={(e) => setAssignMemberId(e.target.value)}
-                      className="w-full appearance-none bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23] pr-10"
+                      className="w-full appearance-none bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 dark:text-white focus:outline-none focus:border-[#E31B23] pr-10"
                       required
                     >
                       <option value="">— Select a member —</option>
-                      {members.map((m) => (
-                        <option key={m.uuid || m.id} value={m.uuid || m.id}>
-                          {m.firstName} {m.lastName} ({m.email}) — {m.role}
-                        </option>
-                      ))}
+                      {members.map((m) => {
+                        const memberVal = m.user_id || m.uuid || m.id;
+                        return (
+                          <option key={memberVal} value={memberVal} className="bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white">
+                            {m.firstName} {m.lastName} ({m.email}) — {m.role}
+                          </option>
+                        );
+                      })}
                     </select>
                     <ChevronDown className="w-4 h-4 text-zinc-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
@@ -1144,9 +1150,9 @@ export const TeamMembers: React.FC = () => {
                     <select
                       value={assignDuty}
                       onChange={(e) => setAssignDuty(e.target.value)}
-                      className="w-full appearance-none bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23] pr-10"
+                      className="w-full appearance-none bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 dark:text-white focus:outline-none focus:border-[#E31B23] pr-10"
                     >
-                      {dutyOptions.map((d) => <option key={d} value={d}>{d}</option>)}
+                      {dutyOptions.map((d) => <option key={d} value={d} className="bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white">{d}</option>)}
                     </select>
                     <ChevronDown className="w-4 h-4 text-zinc-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
@@ -1160,7 +1166,7 @@ export const TeamMembers: React.FC = () => {
                     value={assignStation}
                     onChange={(e) => setAssignStation(e.target.value)}
                     placeholder="e.g. Main Entrance Gate A, VIP Turnstile"
-                    className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
+                    className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-[#E31B23]"
                   />
                 </div>
 
@@ -1171,7 +1177,7 @@ export const TeamMembers: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-zinc-900 dark:text-white">Grant Mobile QR Ticket Scanning Permissions</p>
-                    <p className="text-[11px] font-normal text-zinc-500 mt-0.5">
+                    <p className="text-[11px] font-normal text-zinc-500 dark:text-zinc-400 mt-0.5">
                       Allows this staff member to validate tickets via the StraytTix Check-in Camera App.
                     </p>
                   </div>
@@ -1185,7 +1191,7 @@ export const TeamMembers: React.FC = () => {
                     onChange={(e) => setAssignNotes(e.target.value)}
                     rows={2}
                     placeholder="e.g. Report to Gate A lead by 4:00 PM for radio briefing"
-                    className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl p-3 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23] resize-none"
+                    className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl p-3 text-xs font-medium text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-[#E31B23] resize-none"
                   />
                 </div>
 
@@ -1247,7 +1253,7 @@ export const TeamMembers: React.FC = () => {
                       value={memberDuty}
                       onChange={(e) => setMemberDuty(e.target.value)}
                       placeholder="e.g. Lead Usher, Gate Scanner"
-                      className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
+                      className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-[#E31B23]"
                     />
                   </div>
                   <div>
@@ -1257,7 +1263,7 @@ export const TeamMembers: React.FC = () => {
                       value={memberStation}
                       onChange={(e) => setMemberStation(e.target.value)}
                       placeholder="e.g. Main Entrance Gate A"
-                      className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
+                      className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-[#E31B23]"
                     />
                   </div>
                 </div>
@@ -1269,7 +1275,7 @@ export const TeamMembers: React.FC = () => {
                     value={memberPhone}
                     onChange={(e) => setMemberPhone(e.target.value)}
                     placeholder="+234 809 555 0192"
-                    className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#E31B23]"
+                    className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-[#E31B23]"
                   />
                 </div>
 

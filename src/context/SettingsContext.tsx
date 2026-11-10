@@ -11,6 +11,10 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   support_email: null,
   timezone: 'UTC',
   currency_id: null,
+  ticket_fee_percentage: 5,
+  ticket_fee_fixed: 100,
+  platform_fee_percentage: 5,
+  platform_fee_fixed: 100,
 };
 
 const SETTINGS_STORAGE_KEY = 'strayttix_app_settings';

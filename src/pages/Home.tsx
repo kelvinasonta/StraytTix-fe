@@ -17,8 +17,13 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
+import { useSettings } from '../context/SettingsContext';
+import { getFeeConfig } from '../utils/fees';
 
 export const Home: React.FC = () => {
+  const { settings } = useSettings();
+  const { percentage: feePct, fixed: feeFixed } = getFeeConfig(settings);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
@@ -29,11 +34,10 @@ export const Home: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // Fee calculation mechanics (per Design.md and StraytTix High-Assurance specs):
-  // StraytTix transparent platform fee: 2.5% + ₦100 flat processing per ticket (capped at ₦2,000 per ticket max)
+  // Fee calculation mechanics (dynamically fetched from AppSettings):
   const grossRevenue = calcTicketCount * calcTicketPrice;
-  const rawFeePerTicket = (calcTicketPrice * 0.025) + (calcTicketPrice > 0 ? 100 : 0);
-  const cappedFeePerTicket = Math.min(rawFeePerTicket, 2000);
+  const rawFeePerTicket = (calcTicketPrice * (feePct / 100)) + (calcTicketPrice > 0 ? feeFixed : 0);
+  const cappedFeePerTicket = Math.min(rawFeePerTicket, 5000);
   const totalPlatformFees = calcTicketCount * cappedFeePerTicket;
   const organizerTakeHome = calcAbsorbFee ? Math.max(0, grossRevenue - totalPlatformFees) : grossRevenue;
   const buyerPaysPerTicket = calcAbsorbFee ? calcTicketPrice : calcTicketPrice + cappedFeePerTicket;
@@ -510,7 +514,7 @@ export const Home: React.FC = () => {
                 Calculate your exact ticket earnings.
               </h2>
               <p className="text-zinc-600 dark:text-zinc-400 text-sm sm:text-base leading-relaxed">
-                Clear pricing with no surprises. Simple 2.5% platform fee with no setup or monthly software subscriptions.
+                Clear pricing with no surprises. Simple {feePct}% + ₦{feeFixed} platform fee with no setup or monthly software subscriptions.
               </p>
             </div>
 
@@ -571,7 +575,7 @@ export const Home: React.FC = () => {
                     <div>
                       <p className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-zinc-200">Pass platform fee to buyer?</p>
                       <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                        {calcAbsorbFee ? 'Organizer absorbs standard 2.5% fee' : 'Attendee covers fee at checkout (you keep 100% of price)'}
+                        {calcAbsorbFee ? `Organizer absorbs standard ${feePct}% + ₦${feeFixed} fee` : 'Attendee covers fee at checkout (you keep 100% of price)'}
                       </p>
                     </div>
                     <button
@@ -609,7 +613,7 @@ export const Home: React.FC = () => {
                       <span className="text-zinc-950 dark:text-white font-medium">{formatCurrency(grossRevenue)}</span>
                     </div>
                     <div className="flex justify-between items-center text-zinc-600 dark:text-zinc-400">
-                      <span>Platform processing (2.5% + ₦100):</span>
+                      <span>Platform processing ({feePct}% + ₦{feeFixed}):</span>
                       <span className="text-zinc-800 dark:text-zinc-300">{formatCurrency(totalPlatformFees)}</span>
                     </div>
                     <div className="flex justify-between items-center text-zinc-600 dark:text-zinc-400">

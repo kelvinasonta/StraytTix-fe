@@ -150,9 +150,14 @@ export const authApi = {
     return data;
   },
 
-  async getMe(organizerUuid?: string): Promise<ApiResponse<{ user: User; organizer: Organizer | null; email_verified: boolean }>> {
+  async getMe(organizerUuid?: string): Promise<ApiResponse<{ user: User; organizer: Organizer | null; email_verified: boolean; features?: Record<string, boolean> }>> {
     const params = organizerUuid ? { organizer_uuid: organizerUuid } : undefined;
-    const { data } = await apiClient.get<ApiResponse<{ user: User; organizer: Organizer | null; email_verified: boolean }>>('/auth/me', { params });
+    const { data } = await apiClient.get<ApiResponse<{ user: User; organizer: Organizer | null; email_verified: boolean; features?: Record<string, boolean> }>>('/auth/me', { params });
+    return data;
+  },
+
+  async getAuthFeatures(): Promise<ApiResponse<Record<string, boolean>>> {
+    const { data } = await apiClient.get<ApiResponse<Record<string, boolean>>>('/auth/features');
     return data;
   },
 

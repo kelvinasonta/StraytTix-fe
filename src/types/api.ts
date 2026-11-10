@@ -795,6 +795,10 @@ export interface AppSettings {
   support_email?: string | null;
   timezone?: string | null;
   currency_id?: string | number | null;
+  ticket_fee_percentage?: number | null;
+  ticket_fee_fixed?: number | null;
+  platform_fee_percentage?: number | null;
+  platform_fee_fixed?: number | null;
 }
 
 // ============================================================================

@@ -57,8 +57,11 @@ import {
   XCircle,
   UserCheck,
   User,
-  Vibrate
+  Vibrate,
+  Flag
 } from 'lucide-react';
+import { useFeatureFlags } from '../../hooks/useFeatureFlag';
+import { FEATURE_FLAG_METADATA } from '../../types/featureFlags';
 
 /* ---------------- Types ---------------- */
 type SettingsTab = 'profile' | 'scanner' | 'station' | 'security' | 'sessions' | 'audit' | 'preferences' | 'notifications' | 'developer' | 'danger';
@@ -108,6 +111,9 @@ export const Settings: React.FC = () => {
   const { user, organizer, logout, setActiveOrganizer, refreshUser } = useAuth();
   const { showNotification } = useNotification();
   const { can, hasRole, isOwner } = useCan();
+  const { flags, isEnabled, setFlagOverride, resetFlagOverrides } = useFeatureFlags();
+  const isSessionsEnabled = isEnabled('auth-session-management');
+  const is2faEnabled = isEnabled('auth-two-factor');
   const isOrganization = organizer?.type === 'organization';
 
   const role = resolveOrganizerRole(organizer);
@@ -121,6 +127,13 @@ export const Settings: React.FC = () => {
 
   // Active Tab: User Profile is the first tab across all roles
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+
+  // If currently active tab is disabled by feature flag, bounce to profile
+  useEffect(() => {
+    if (activeTab === 'sessions' && !isSessionsEnabled) {
+      setActiveTab('profile');
+    }
+  }, [activeTab, isSessionsEnabled]);
 
   /* ---------------- USER PROFILE PREFERENCES ---------------- */
   const [profileFirstName, setProfileFirstName] = useState(() => {
@@ -306,14 +319,14 @@ export const Settings: React.FC = () => {
       }
     };
 
-    if (activeTab === 'sessions') {
+    if (activeTab === 'sessions' && isSessionsEnabled) {
       fetchLiveSessions();
     }
 
     return () => {
       isMounted = false;
     };
-  }, [activeTab]);
+  }, [activeTab, isSessionsEnabled]);
 
   /* ---------------- 4. AUDIT LOGS STATES ---------------- */
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => {
@@ -771,14 +784,14 @@ export const Settings: React.FC = () => {
                   { id: 'scanner', label: 'Scanner & Terminal', icon: QrCode },
                   { id: 'station', label: 'Staff Profile & Station', icon: ShieldCheck },
                   { id: 'security', label: 'Security & Password', icon: KeyRound },
-                  { id: 'sessions', label: 'Active Devices', icon: Smartphone, count: sessions.length },
+                  ...(isSessionsEnabled ? [{ id: 'sessions', label: 'Active Devices', icon: Smartphone, count: sessions.length }] : []),
                   { id: 'notifications', label: 'Shift & Gate Alerts', icon: Bell },
                   { id: 'audit', label: 'My Gate Scan History', icon: History, count: staffScans.length },
                 ]
               : [
                   { id: 'profile', label: 'User Profile', icon: User },
                   { id: 'security', label: 'Security & Password', icon: KeyRound },
-                  { id: 'sessions', label: 'Login Sessions', icon: Smartphone, count: sessions.length },
+                  ...(isSessionsEnabled ? [{ id: 'sessions', label: 'Login Sessions', icon: Smartphone, count: sessions.length }] : []),
                   ...(can('org.audit_logs.view') ? [{ id: 'audit', label: 'Audit Logs', icon: History }] : []),
                   { id: 'preferences', label: 'Preferences & Regional', icon: Globe },
                   { id: 'notifications', label: 'Notifications', icon: Bell },
@@ -973,9 +986,11 @@ export const Settings: React.FC = () => {
                   <KeyRound className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-black text-zinc-950 dark:text-white dark:text-white">Security & Authentication</h4>
+                  <h4 className="text-sm font-black text-zinc-950 dark:text-white">Security & Authentication</h4>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5">
-                    Need to change your password or configure Two-Factor Authentication (2FA)?
+                    {is2faEnabled
+                      ? 'Need to change your password or configure Two-Factor Authentication (2FA)?'
+                      : 'Need to update your account password or security credentials?'}
                   </p>
                 </div>
               </div>
@@ -1157,7 +1172,7 @@ export const Settings: React.FC = () => {
               </div>
 
               <div className="pt-2">
-                <label className="block text-xs font-bold text-zinc-800 mb-1.5">
+                <label className="block text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-1.5">
                   Default Optical Camera Sensor
                 </label>
                 <div className="flex flex-wrap gap-4">
@@ -1386,9 +1401,9 @@ export const Settings: React.FC = () => {
                     <div className="space-y-1.5 pt-1">
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="text-zinc-500 dark:text-zinc-400 font-medium">Strength:</span>
-                        <span className="font-bold text-zinc-900">{passwordStrength.label}</span>
+                        <span className="font-bold text-zinc-900 dark:text-white">{passwordStrength.label}</span>
                       </div>
-                      <div className="w-full h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-zinc-100 dark:bg-white/10 rounded-full overflow-hidden">
                         <div
                           className={`h-full transition-all duration-300 ${passwordStrength.color}`}
                           style={{ width: `${passwordStrength.score}%` }}
@@ -1429,63 +1444,67 @@ export const Settings: React.FC = () => {
               </form>
             </div>
 
-            {/* Two-Factor Authentication Card */}
-            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 flex-shrink-0">
-                    <Shield className="w-5 h-5" />
+            {/* Two-Factor Authentication Card - Protected by auth-two-factor feature flag */}
+            {is2faEnabled && (
+              <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-500/20 flex-shrink-0">
+                      <Shield className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-black text-zinc-950 dark:text-white tracking-tight">Two-Factor Authentication (2FA)</h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Protect high-stakes organizer payouts and team settings with TOTP authenticator verification.</p>
+                    </div>
                   </div>
+
+                  <Badge variant={twoFactorEnabled ? 'success' : 'neutral'}>
+                    {twoFactorEnabled ? '2FA Enabled' : '2FA Not Configured'}
+                  </Badge>
+                </div>
+
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10">
+                  <div className="space-y-1">
+                    <h4 className="text-xs font-bold text-zinc-900 dark:text-white">
+                      {twoFactorEnabled
+                        ? 'Authenticator App (TOTP) Protected'
+                        : 'Setup Google Authenticator / 1Password'}
+                    </h4>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed max-w-xl">
+                      {twoFactorEnabled
+                        ? 'Every login from unrecognized devices will require a 6-digit one-time code from your authenticator application.'
+                        : 'Add an extra barrier to safeguard attendee data, financial settlement bank routes, and revenue payouts.'}
+                    </p>
+                  </div>
+
                   <div>
-                    <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Two-Factor Authentication (2FA)</h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Protect high-stakes organizer payouts and team settings with TOTP authenticator verification.</p>
+                    {twoFactorEnabled ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleDisable2FA}
+                        className="text-xs text-red-650 hover:bg-red-50 dark:hover:bg-red-950/20 border-red-200 dark:border-red-500/30"
+                      >
+                        Disable 2FA
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        onClick={() => setIs2FAModalOpen(true)}
+                        className="text-xs"
+                      >
+                        <ShieldCheck className="w-4 h-4 mr-1.5" />
+                        Configure 2FA
+                      </Button>
+                    )}
                   </div>
                 </div>
-
-                <Badge variant={twoFactorEnabled ? 'success' : 'neutral'}>
-                  {twoFactorEnabled ? '2FA Enabled' : '2FA Not Configured'}
-                </Badge>
               </div>
-
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10">
-                <div className="space-y-1">
-                  <h4 className="text-xs font-bold text-zinc-900 dark:text-white">
-                    {twoFactorEnabled ? 'Authenticator App (TOTP) Protected' : 'Setup Google Authenticator / 1Password'}
-                  </h4>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed max-w-xl">
-                    {twoFactorEnabled
-                      ? 'Every login from unrecognized devices will require a 6-digit one-time code from your authenticator application.'
-                      : 'Add an extra barrier to safeguard attendee data, financial settlement bank routes, and revenue payouts.'}
-                  </p>
-                </div>
-
-                <div>
-                  {twoFactorEnabled ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleDisable2FA}
-                      className="text-xs text-red-650 hover:bg-red-50 border-red-200"
-                    >
-                      Disable 2FA
-                    </Button>
-                  ) : (
-                    <Button
-                      type="button"
-                      onClick={() => setIs2FAModalOpen(true)}
-                      className="text-xs"
-                    >
-                      <ShieldCheck className="w-4 h-4 mr-1.5" />
-                      Configure 2FA
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
+            )}
 
             {/* Security Alerts and Safeguards */}
             <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
-              <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight flex items-center gap-2">
+              <h3 className="text-base font-black text-zinc-950 dark:text-white tracking-tight flex items-center gap-2">
                 <Lock className="w-4 h-4 text-[#E31B23]" /> Advanced Security Safeguards
               </h3>
 
@@ -1535,7 +1554,7 @@ export const Settings: React.FC = () => {
             <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div>
-                  <h3 className="text-base font-black text-zinc-950 dark:text-white dark:text-white tracking-tight">Active Devices & Login Sessions</h3>
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white tracking-tight">Active Devices & Login Sessions</h3>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                     Review and revoke access across all browsers, mobile apps, and box-office terminals currently logged into this organizer account.
                   </p>
@@ -1838,11 +1857,11 @@ export const Settings: React.FC = () => {
                       ) : (
                         staffScans.map(scan => (
                           <tr key={scan.id} className="hover:bg-zinc-50/60 dark:hover:bg-white/[0.02] transition-colors">
-                            <td className="py-3 px-4 font-bold text-zinc-900">{scan.attendeeName}</td>
-                            <td className="py-3 px-4 text-zinc-600">{scan.ticketType}</td>
-                            <td className="py-3 px-4 font-mono text-[11px] text-zinc-500">{scan.barcode}</td>
-                            <td className="py-3 px-4 text-zinc-500">{scan.station}</td>
-                            <td className="py-3 px-4 text-zinc-400">{scan.timestamp}</td>
+                            <td className="py-3 px-4 font-bold text-zinc-900 dark:text-white">{scan.attendeeName}</td>
+                            <td className="py-3 px-4 text-zinc-600 dark:text-zinc-300">{scan.ticketType}</td>
+                            <td className="py-3 px-4 font-mono text-[11px] text-zinc-500 dark:text-zinc-400">{scan.barcode}</td>
+                            <td className="py-3 px-4 text-zinc-500 dark:text-zinc-400">{scan.station}</td>
+                            <td className="py-3 px-4 text-zinc-400 dark:text-zinc-500">{scan.timestamp}</td>
                             <td className="py-3 px-4 text-right">
                               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
                                 scan.status === 'valid'
@@ -1948,13 +1967,13 @@ export const Settings: React.FC = () => {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-bold text-zinc-950 dark:text-white">{log.action}</span>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-zinc-100 text-zinc-700">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300">
                               {log.category}
                             </span>
                           </div>
                           <p className="text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">{log.details}</p>
                           <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-medium">
-                            <span className="text-zinc-700 font-semibold">{log.actorName}</span>
+                            <span className="text-zinc-700 dark:text-zinc-300 font-semibold">{log.actorName}</span>
                             <span>({log.actorRole})</span>
                             <span>•</span>
                             <span className="font-mono">{log.ip}</span>
@@ -2350,6 +2369,97 @@ export const Settings: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Feature Flags & Runtime Control Switches */}
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
+                <div>
+                  <h3 className="text-base font-black text-zinc-950 dark:text-white tracking-tight flex items-center gap-2">
+                    <Flag className="w-4 h-4 text-[#E31B23]" />
+                    <span>Platform Feature Flags & Runtime Switches</span>
+                  </h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+                    Toggle dynamic feature availability (guest checkout, instant settlements, scanner engines) across your organization and platform sessions.
+                  </p>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    resetFlagOverrides();
+                    showNotification('Feature flags reset to platform defaults.', 'info');
+                  }}
+                  className="text-xs"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 mr-1" />
+                  Reset to Defaults
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(flags).map(([flagKey, isActive]) => {
+                  const meta = FEATURE_FLAG_METADATA[flagKey] || {
+                    key: flagKey,
+                    label: flagKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                    description: 'Custom feature toggle switch.',
+                    group: 'experimental',
+                  };
+
+                  return (
+                    <div
+                      key={flagKey}
+                      className="p-5 rounded-2xl bg-zinc-50/70 dark:bg-white/[0.02] border border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 transition-all flex flex-col justify-between space-y-3"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-zinc-200 dark:bg-white/10 text-zinc-700 dark:text-zinc-300">
+                              {meta.group}
+                            </span>
+                            <span className="text-[10px] font-mono text-zinc-400 font-bold">
+                              {flagKey}
+                            </span>
+                          </div>
+                          <h4 className="text-sm font-bold text-zinc-950 dark:text-white">{meta.label}</h4>
+                        </div>
+
+                        {/* Switch */}
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const next = !isActive;
+                            await setFlagOverride(flagKey, next);
+                            showNotification(`${meta.label} is now ${next ? 'enabled' : 'disabled'}.`, 'success');
+                          }}
+                          className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer flex-shrink-0 ${
+                            isActive ? 'bg-[#E31B23]' : 'bg-zinc-300 dark:bg-zinc-700'
+                          }`}
+                        >
+                          <span
+                            className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${
+                              isActive ? 'left-5.5' : 'left-0.5'
+                            }`}
+                          />
+                        </button>
+                      </div>
+
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
+                        {meta.description}
+                      </p>
+
+                      <div className="flex items-center justify-between text-[11px] font-mono border-t border-zinc-200/60 dark:border-white/10 pt-2.5">
+                        <span className={isActive ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-zinc-400'}>
+                          STATUS: {isActive ? 'ACTIVE' : 'DISABLED'}
+                        </span>
+                        <span className="text-zinc-400 text-[10px]">Client + API Guarded</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
 
@@ -2429,7 +2539,7 @@ export const Settings: React.FC = () => {
         {/* MODAL: 2FA SETUP MODAL */}
         {/* ========================================================================= */}
         <Modal
-          isOpen={is2FAModalOpen}
+          isOpen={is2faEnabled && is2FAModalOpen}
           onClose={() => setIs2FAModalOpen(false)}
           title="Configure Two-Factor Authenticator"
           size="md"
@@ -2441,12 +2551,12 @@ export const Settings: React.FC = () => {
 
             {/* Simulated QR Code Canvas */}
             <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 space-y-3">
-              <div className="w-36 h-36 bg-white dark:bg-white p-3 rounded-2xl border-2 border-zinc-900 dark:border-white/20 shadow-sm flex items-center justify-center">
-                <QrCode className="w-28 h-28 text-zinc-950 dark:text-white" />
+              <div className="w-36 h-36 bg-white p-3 rounded-2xl border-2 border-zinc-900 shadow-sm flex items-center justify-center">
+                <QrCode className="w-28 h-28 text-zinc-950" />
               </div>
               <div className="text-center space-y-1">
                 <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Secret Setup Key</span>
-                <p className="font-mono text-xs font-black text-zinc-800 bg-zinc-200/60 px-3 py-1 rounded-md select-all">
+                <p className="font-mono text-xs font-black text-zinc-800 dark:text-zinc-200 bg-zinc-200/60 dark:bg-white/10 px-3 py-1 rounded-md select-all">
                   EVT-9021-X982-PLM4
                 </p>
               </div>

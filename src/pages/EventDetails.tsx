@@ -463,28 +463,28 @@ export const EventDetails: React.FC = () => {
   if (isLoading) {
     if (isEmbedMode) {
       return (
-        <div className="w-full h-screen min-h-[460px] bg-[#F9FAFB] p-3.5 sm:p-4 flex flex-col justify-between font-sans animate-pulse box-border">
+        <div className="w-full h-screen min-h-[460px] bg-[#F9FAFB] dark:bg-[#070709] p-3.5 sm:p-4 flex flex-col justify-between font-sans animate-pulse box-border">
           <div className="space-y-3">
-            <div className="bg-white rounded-2xl p-3.5 border border-zinc-200 shadow-xs flex items-center gap-3">
-              <div className="w-13 h-13 rounded-xl bg-zinc-200 flex-shrink-0" />
+            <div className="bg-white dark:bg-[#0F0F14] rounded-2xl p-3.5 border border-zinc-200 dark:border-white/10 shadow-xs flex items-center gap-3">
+              <div className="w-13 h-13 rounded-xl bg-zinc-200 dark:bg-white/10 flex-shrink-0" />
               <div className="flex-1 space-y-2">
-                <div className="h-3 w-20 bg-zinc-200 rounded-full" />
-                <div className="h-4 w-44 bg-zinc-200 rounded-lg" />
-                <div className="h-3 w-32 bg-zinc-200 rounded-md" />
+                <div className="h-3 w-20 bg-zinc-200 dark:bg-white/10 rounded-full" />
+                <div className="h-4 w-44 bg-zinc-200 dark:bg-white/10 rounded-lg" />
+                <div className="h-3 w-32 bg-zinc-200 dark:bg-white/10 rounded-md" />
               </div>
             </div>
-            <div className="h-9 bg-zinc-200/80 rounded-xl w-full" />
+            <div className="h-9 bg-zinc-200/80 dark:bg-white/10 rounded-xl w-full" />
             <div className="space-y-2 pt-1">
-              <div className="h-16 bg-white rounded-xl border border-zinc-200" />
-              <div className="h-16 bg-white rounded-xl border border-zinc-200" />
+              <div className="h-16 bg-white dark:bg-[#0F0F14] rounded-xl border border-zinc-200 dark:border-white/10" />
+              <div className="h-16 bg-white dark:bg-[#0F0F14] rounded-xl border border-zinc-200 dark:border-white/10" />
             </div>
           </div>
-          <div className="pt-3 border-t border-zinc-200 flex items-center justify-between">
+          <div className="pt-3 border-t border-zinc-200 dark:border-white/10 flex items-center justify-between">
             <div className="space-y-1">
-              <div className="h-2.5 w-12 bg-zinc-200 rounded" />
-              <div className="h-5 w-24 bg-zinc-300 rounded" />
+              <div className="h-2.5 w-12 bg-zinc-200 dark:bg-white/10 rounded" />
+              <div className="h-5 w-24 bg-zinc-300 dark:bg-white/20 rounded" />
             </div>
-            <div className="h-10 w-36 bg-zinc-300 rounded-xl" />
+            <div className="h-10 w-36 bg-zinc-300 dark:bg-white/20 rounded-xl" />
           </div>
         </div>
       );
@@ -600,13 +600,13 @@ export const EventDetails: React.FC = () => {
   if (!event || error) {
     if (isEmbedMode) {
       return (
-        <div className="w-full h-screen min-h-[460px] bg-[#F9FAFB] flex flex-col items-center justify-center p-6 text-center space-y-3 box-border font-sans">
-          <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-200 text-[#E31B23] flex items-center justify-center shadow-xs">
+        <div className="w-full h-screen min-h-[460px] bg-[#F9FAFB] dark:bg-[#070709] flex flex-col items-center justify-center p-6 text-center space-y-3 box-border font-sans">
+          <div className="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-[#E31B23] flex items-center justify-center shadow-xs">
             <AlertCircle className="w-6 h-6" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-sm font-black text-zinc-900">Event Experience Unavailable</h3>
-            <p className="text-xs text-zinc-500 max-w-xs">{error || 'Unable to load tickets for this event. Please check your connection or link.'}</p>
+            <h3 className="text-sm font-black text-zinc-900 dark:text-white">Event Experience Unavailable</h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-xs">{error || 'Unable to load tickets for this event. Please check your connection or link.'}</p>
           </div>
           <div className="flex items-center gap-2 pt-1">
             <button
@@ -620,7 +620,7 @@ export const EventDetails: React.FC = () => {
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3.5 py-2 border border-zinc-200 bg-white text-zinc-700 text-xs font-bold rounded-xl hover:bg-zinc-50 transition-all"
+              className="px-3.5 py-2 border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0F0F14] text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-all"
             >
               Browse Events
             </a>
@@ -1253,7 +1253,7 @@ export const EventDetails: React.FC = () => {
                   }`}>
                     {isPreSale ? 'Pre-Sale Announcement' : 'Ticket Sales Notice'}
                   </span>
-                  <p className="text-xs sm:text-sm font-semibold leading-snug text-zinc-900">
+                  <p className="text-xs sm:text-sm font-semibold leading-snug text-zinc-900 dark:text-white">
                     {displayMsg}
                   </p>
                 </div>

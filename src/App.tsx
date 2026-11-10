@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-
 import { NotificationProvider } from './context/NotificationContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { AuthProvider } from './context/AuthContext';
+import { FeatureFlagProvider } from './context/FeatureFlagContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { GuestRoute } from './routes/GuestRoute';
@@ -73,9 +74,10 @@ export const App: React.FC = () => {
       <NotificationProvider>
         <SettingsProvider>
           <AuthProvider>
-            <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
+            <FeatureFlagProvider>
+              <BrowserRouter>
+              <ScrollToTop />
+              <Routes>
             {/* Public Pages */}
             <Route path="/" element={<Home />} />
             <Route path="/discover" element={<Discover />} />
@@ -338,6 +340,7 @@ export const App: React.FC = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        </FeatureFlagProvider>
         </AuthProvider>
       </SettingsProvider>
     </NotificationProvider>

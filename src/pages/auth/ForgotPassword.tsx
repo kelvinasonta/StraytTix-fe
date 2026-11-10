@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authApi } from '../../api/auth';
 import { AuthLayout } from '../../components/layout/AuthLayout';
-import { Mail, ArrowLeft, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
+import { Mail, ArrowLeft, AlertCircle, Loader2, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { getApiErrorMessage } from '../../api/client';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
 export const ForgotPassword: React.FC = () => {
+  const isPasswordResetEnabled = useFeatureFlag('auth-password-reset');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -42,6 +44,36 @@ export const ForgotPassword: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  if (!isPasswordResetEnabled) {
+    return (
+      <AuthLayout
+        title="Password reset unavailable"
+        subtitle="Self-service password recovery is currently paused by administrators"
+      >
+        <div className="space-y-6">
+          <div className="p-6 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-900 dark:text-amber-200 rounded-2xl text-center space-y-3">
+            <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center mx-auto">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-zinc-950 dark:text-white">Feature Currently Inactive</h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
+              Password recovery requests are currently disabled. If you require urgent access to your account, please reach out directly to customer support or your workspace administrator.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <Link
+              to="/login"
+              className="w-full py-3 px-4 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            >
+              <ArrowLeft className="w-4 h-4" /> Return to Sign In
+            </Link>
+          </div>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   if (isSubmitted) {
     return (

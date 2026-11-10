@@ -2,8 +2,12 @@ import React from 'react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import { Shield, FileText } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
+import { getFeeConfig } from '../utils/fees';
 
 export const Terms: React.FC = () => {
+  const { settings } = useSettings();
+  const { percentage: feePct, fixed: feeFixed } = getFeeConfig(settings);
   const lastUpdated = 'September 16, 2026';
 
   const sections = [
@@ -25,7 +29,7 @@ export const Terms: React.FC = () => {
     {
       id: 'fees-payouts',
       title: '4. Ticketing Fees, Taxes & Payout Settlements',
-      content: `StraytTix charges a platform service fee on paid tickets (standard 2.5% + $0.50 per ticket unless custom enterprise contracts apply). Fees can be absorbed by the organizer or added to buyer checkout totals. Payouts for ticket revenue are disbursed on an automated rolling schedule directly to the organizer's verified bank account or settlement ledger, subject to standard anti-fraud reserves and chargeback deductions.`
+      content: `StraytTix charges a platform service fee on paid tickets (standard ${feePct}% + ₦${feeFixed} per ticket unless custom enterprise contracts apply). Fees can be absorbed by the organizer or added to buyer checkout totals. Payouts for ticket revenue are disbursed on an automated rolling schedule directly to the organizer's verified bank account or settlement ledger, subject to standard anti-fraud reserves and chargeback deductions.`
     },
     {
       id: 'ticket-purchases',
