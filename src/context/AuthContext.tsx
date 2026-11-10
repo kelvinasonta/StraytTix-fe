@@ -30,7 +30,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [organizer, setOrganizer] = useState<Organizer | null>(null);
   const [organizations, setOrganizations] = useState<Organizer[]>([]);
   const [token, setToken] = useState<string | null>(tokenStorage.getToken());
-  const [isEmailVerified, setIsEmailVerified] = useState<boolean>(false);
+  const [isEmailVerified, setIsEmailVerified] = useState<boolean>(
+    Boolean(tokenStorage.getUser<User>()?.isEmailVerified)
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { showNotification } = useNotification();
 
@@ -153,13 +155,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (credentials: any) => {
     setIsLoading(true);
     try {
-      const remember = !!credentials.remember;
+      const remember = credentials.remember !== undefined ? Boolean(credentials.remember) : true;
       const res = await authApi.login(credentials);
       if (res.success && res.data) {
+        const verified = Boolean(res.data.user?.isEmailVerified);
         tokenStorage.setToken(res.data.token, remember);
         tokenStorage.setUser(res.data.user, remember);
         setToken(res.data.token);
         setUser(res.data.user);
+        setIsEmailVerified(verified);
 
         if (res.data.organizer) {
           setActiveOrganizer(res.data.organizer);
@@ -167,16 +171,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setActiveOrganizer(null);
         }
 
-        // Fetch verification state
+        // Sync full user & verification state from /auth/me
         await refreshUser();
-        showNotification(res.message, 'success');
+        if (verified) {
+          showNotification(res.message || 'Signed in successfully.', 'success');
+        } else {
+          showNotification('Please verify your email address to continue.', 'info');
+        }
       }
     } catch (err: any) {
       setIsLoading(false);
       const responseData = err.response?.data;
       if (responseData && responseData.code === 'EMAIL_VERIFICATION_REQUIRED') {
         if (responseData.data) {
-          const remember = !!credentials.remember;
+          const remember = credentials.remember !== undefined ? Boolean(credentials.remember) : true;
           if (responseData.data.token) {
             tokenStorage.setToken(responseData.data.token, remember);
             setToken(responseData.data.token);
@@ -199,11 +207,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await authApi.register(formData);
       if (res.success && res.data) {
-        tokenStorage.setToken(res.data.token, false);
-        tokenStorage.setUser(res.data.user, false);
+        // Persist in localStorage so email verification links opened in a new browser tab remain authenticated
+        tokenStorage.setToken(res.data.token, true);
+        tokenStorage.setUser(res.data.user, true);
         setToken(res.data.token);
         setUser(res.data.user);
-        setIsEmailVerified(false);
+        setIsEmailVerified(Boolean(res.data.user?.isEmailVerified));
 
         if (res.data.organizer) {
           setActiveOrganizer(res.data.organizer);

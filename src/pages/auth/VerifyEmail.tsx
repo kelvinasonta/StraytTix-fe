@@ -36,6 +36,12 @@ export const VerifyEmail: React.FC = () => {
       clearTimeout(redirectTimeoutRef.current);
     }
 
+    const activeToken = localStorage.getItem('strayttix_auth_token') || sessionStorage.getItem('strayttix_auth_token');
+    if (!activeToken) {
+      navigate('/login?verified=true', { replace: true });
+      return;
+    }
+
     const cachedUserStr = localStorage.getItem('strayttix_auth_user') || sessionStorage.getItem('strayttix_auth_user');
     const cachedOrg = localStorage.getItem('strayttix_active_organizer');
 
@@ -182,7 +188,7 @@ export const VerifyEmail: React.FC = () => {
   return (
     <AuthLayout
       title="Email verification"
-      subtitle="Securing your Eventa account identity"
+      subtitle="Securing your StraytTix account identity"
     >
       <div className="space-y-6 text-center">
         {status === 'verifying' && (

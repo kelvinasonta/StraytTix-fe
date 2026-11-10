@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { ApiResponse, AuthPayload, User, Organizer, LoginSession, LoginHistoryPagination } from '../types/api';
+import type { ApiResponse, AuthPayload, User, Organizer, LoginSession, LoginHistoryPagination, UserActivityPagination } from '../types/api';
 
 /**
  * Normalizes timezone string to valid IANA timezone identifier.
@@ -279,6 +279,28 @@ export const authApi = {
   async getSessionHistory(page: number = 1, perPage: number = 15): Promise<ApiResponse<LoginHistoryPagination>> {
     const { data } = await apiClient.get<ApiResponse<LoginHistoryPagination>>('/auth/sessions/history', {
       params: { page, per_page: perPage }
+    });
+    return data;
+  },
+
+  async getActivityLogs(params?: {
+    page?: number;
+    perPage?: number;
+    per_page?: number;
+    action?: string;
+    search?: string;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<ApiResponse<UserActivityPagination>> {
+    const { data } = await apiClient.get<ApiResponse<UserActivityPagination>>('/auth/me/activity', {
+      params: {
+        page: params?.page || 1,
+        per_page: params?.per_page || params?.perPage || 15,
+        action: params?.action,
+        search: params?.search,
+        start_date: params?.startDate,
+        end_date: params?.endDate,
+      },
     });
     return data;
   },

@@ -37,7 +37,7 @@ import { getFeeConfig, calculatePlatformFee } from '../../utils/fees';
 
 export const CheckoutPage: React.FC = () => {
   const { settings } = useSettings();
-  const { percentage: feePct, fixed: feeFixed } = getFeeConfig(settings);
+  const { percentage: feePct, fixed: feeFixed, passthrough } = getFeeConfig(settings);
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -866,8 +866,16 @@ export const CheckoutPage: React.FC = () => {
                   )}
 
                   <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
-                    <span>Platform & Processing Fee ({feePct}%{feeFixed > 0 ? ` + ₦${feeFixed}` : ''})</span>
-                    <span>{serviceFee === 0 ? 'FREE' : formatCurrency(serviceFee)}</span>
+                    <span>
+                      Platform & Processing Fee {!passthrough ? '(Absorbed by Host)' : `(${feePct}%${feeFixed > 0 ? ` + ₦${feeFixed}` : ''})`}
+                    </span>
+                    <span>
+                      {!passthrough || serviceFee === 0 ? (
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">₦0.00</span>
+                      ) : (
+                        formatCurrency(serviceFee)
+                      )}
+                    </span>
                   </div>
 
                   <div className="pt-3 border-t border-zinc-100 dark:border-white/10 flex justify-between items-baseline text-sm">

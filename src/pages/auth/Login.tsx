@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { AuthLayout } from '../../components/layout/AuthLayout';
 import { getApiErrorMessage } from '../../api/client';
-import { AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useNotification } from '../../context/NotificationContext';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
@@ -25,49 +25,66 @@ export const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const isExpired = new URLSearchParams(location.search).get('expired') === 'true';
+  const searchParams = new URLSearchParams(location.search);
+  const isExpired = searchParams.get('expired') === 'true';
+  const isVerifiedSuccess = searchParams.get('verified') === 'true';
+  const isResetSuccess = searchParams.get('reset') === 'true';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
-    setIsLoading(true);
 
-    if (!email || !password) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
       setFormError('Please enter your email and password.');
-      setIsLoading(false);
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      await login({ email, password, remember });
-      
-      setTimeout(() => {
-        const from = (location.state as any)?.from;
-        if (from) {
-          navigate(from, { replace: true });
+      await login({ email: trimmedEmail, password, remember });
+
+      const cachedUserStr = localStorage.getItem('strayttix_auth_user') || sessionStorage.getItem('strayttix_auth_user');
+      let parsedUser: any = null;
+      if (cachedUserStr) {
+        try {
+          parsedUser = JSON.parse(cachedUserStr);
+        } catch {
+          // ignore
+        }
+      }
+
+      if (parsedUser && parsedUser.isEmailVerified === false) {
+        navigate('/verify-email/pending', { replace: true });
+        return;
+      }
+
+      const rawFrom = (location.state as any)?.from;
+      if (rawFrom) {
+        const targetPath =
+          typeof rawFrom === 'string'
+            ? rawFrom
+            : rawFrom.pathname
+            ? `${rawFrom.pathname}${rawFrom.search || ''}${rawFrom.hash || ''}`
+            : null;
+        if (targetPath && !targetPath.startsWith('/login') && !targetPath.startsWith('/register')) {
+          navigate(targetPath, { replace: true });
           return;
         }
+      }
 
-        const cachedUserStr = localStorage.getItem('strayttix_auth_user') || sessionStorage.getItem('strayttix_auth_user');
-        if (cachedUserStr) {
-          try {
-            const parsed = JSON.parse(cachedUserStr);
-            if (parsed.accountType === 'organizer') {
-              navigate('/organizer', { replace: true });
-              return;
-            }
-          } catch {
-            // fallback
-          }
-        }
-        navigate('/dashboard', { replace: true });
-      }, 100);
+      if (parsedUser?.accountType === 'organizer') {
+        navigate('/organizer', { replace: true });
+        return;
+      }
 
+      navigate('/dashboard', { replace: true });
     } catch (err: any) {
       setPassword('');
       const responseData = err.response?.data;
       if (responseData && responseData.code === 'EMAIL_VERIFICATION_REQUIRED') {
-        navigate('/verify-email/pending');
+        navigate('/verify-email/pending', { replace: true });
       } else {
         const errorMsg = getApiErrorMessage(err);
         setFormError(errorMsg);
@@ -102,6 +119,20 @@ export const Login: React.FC = () => {
           <div className="p-3.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 rounded-xl text-xs flex items-center gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
             <span>Your session has expired. Please sign in again.</span>
+          </div>
+        )}
+
+        {isVerifiedSuccess && (
+          <div className="p-3.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 rounded-xl text-xs flex items-center gap-2.5">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <span>Your email address has been verified! Please sign in to continue.</span>
+          </div>
+        )}
+
+        {isResetSuccess && (
+          <div className="p-3.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 rounded-xl text-xs flex items-center gap-2.5">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <span>Password updated successfully. Please sign in with your new credentials.</span>
           </div>
         )}
 

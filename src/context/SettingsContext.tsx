@@ -15,6 +15,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   ticket_fee_fixed: 100,
   platform_fee_percentage: 5,
   platform_fee_fixed: 100,
+  platform_fee_passthrough: true,
 };
 
 const SETTINGS_STORAGE_KEY = 'strayttix_app_settings';

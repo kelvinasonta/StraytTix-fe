@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { authApi, normalizeTimezone } from '../../api/auth';
+import { adminApi } from '../../api/admin';
+import type { AppSettings, UserActivityLog } from '../../types/api';
+import PlatformFeeSettingsModal from '../../components/admin/PlatformFeeSettingsModal';
 import { getApiErrorMessage } from '../../api/client';
 import { useNotification } from '../../context/NotificationContext';
 import { useFeatureFlags } from '../../hooks/useFeatureFlag';
@@ -37,7 +40,12 @@ import {
   ShieldAlert,
   Clock,
   SlidersHorizontal,
-  ChevronDown
+  ChevronDown,
+  Activity,
+  Search,
+  RefreshCw,
+  Percent,
+  Coins
 } from 'lucide-react';
 
 const EVENT_GENRES = [
@@ -53,7 +61,7 @@ const EVENT_GENRES = [
   'Film & Theatre'
 ];
 
-type TabType = 'profile' | 'interests' | 'security' | 'notifications' | 'privacy';
+type TabType = 'profile' | 'interests' | 'security' | 'notifications' | 'privacy' | 'platform';
 
 export const Settings: React.FC = () => {
   const { user, refreshUser, logout } = useAuth();
@@ -63,13 +71,25 @@ export const Settings: React.FC = () => {
   const is2faEnabled = isEnabled('auth-two-factor');
   const location = useLocation();
 
+  const isAdmin = user?.role === 'admin' || (user as any)?.is_admin;
+  const [platformSettings, setPlatformSettings] = useState<AppSettings | null>(null);
+  const [isLoadingPlatformSettings, setIsLoadingPlatformSettings] = useState<boolean>(false);
+  const [showPlatformFeeModal, setShowPlatformFeeModal] = useState<boolean>(false);
+
+  // Security Activity Logs State
+  const [activityLogs, setActivityLogs] = useState<UserActivityLog[]>([]);
+  const [isLoadingActivity, setIsLoadingActivity] = useState<boolean>(false);
+  const [activityPage, setActivityPage] = useState<number>(1);
+  const [activityTotalPages, setActivityTotalPages] = useState<number>(1);
+  const [activitySearchQuery, setActivitySearchQuery] = useState<string>('');
+
   const [activeTab, setActiveTab] = useState<TabType>('profile');
 
   // Handle ?tab= in URL query if passed
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab') as TabType | null;
-    if (tabParam && ['profile', 'interests', 'security', 'notifications', 'privacy'].includes(tabParam)) {
+    if (tabParam && ['profile', 'interests', 'security', 'notifications', 'privacy', 'platform'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [location.search]);
@@ -275,6 +295,60 @@ export const Settings: React.FC = () => {
     setSessions(prev => prev.filter(s => s.isCurrent));
   };
 
+  // Activity Logs Fetching
+  const fetchActivityLogs = useCallback(async (page: number = 1, search: string = '') => {
+    setIsLoadingActivity(true);
+    try {
+      const res = await authApi.getActivityLogs({
+        page,
+        per_page: 8,
+        search: search.trim() || undefined,
+      });
+      if (res && res.data) {
+        const payload = (res.data as any).data || res.data;
+        if (Array.isArray(payload)) {
+          setActivityLogs(payload);
+          const meta = (res.data as any).meta;
+          if (meta) {
+            setActivityTotalPages(meta.last_page || 1);
+          }
+        } else if (Array.isArray(res.data)) {
+          setActivityLogs(res.data);
+        }
+      }
+    } catch {
+      // Non-critical
+    } finally {
+      setIsLoadingActivity(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'security') {
+      fetchActivityLogs(activityPage, activitySearchQuery);
+    }
+  }, [activeTab, activityPage, fetchActivityLogs]);
+
+  // Platform Admin Settings Fetching
+  const fetchPlatformSettings = useCallback(async () => {
+    if (!isAdmin) return;
+    setIsLoadingPlatformSettings(true);
+    try {
+      const data = await adminApi.getSettings();
+      if (data) setPlatformSettings(data);
+    } catch {
+      // Non-critical
+    } finally {
+      setIsLoadingPlatformSettings(false);
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (activeTab === 'platform' && isAdmin) {
+      fetchPlatformSettings();
+    }
+  }, [activeTab, isAdmin, fetchPlatformSettings]);
+
   // Notifications Toggle
   const handleToggleNotification = (key: keyof typeof notifications) => {
     setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
@@ -342,12 +416,13 @@ export const Settings: React.FC = () => {
 
   // Nav menu configuration for senior desktop sidebar + mobile segmented strip
   const navTabs = [
-    { id: 'profile', label: 'Personal Info', desc: 'Name, email, phone & regional locale', icon: User },
-    { id: 'interests', label: 'Preferences & Pass', desc: 'Favorite genres, dietary & accessibility', icon: Sparkles },
-    { id: 'security', label: 'Security & Access', desc: is2faEnabled ? 'Password, 2FA & live device sessions' : 'Password & live device sessions', icon: KeyRound },
-    { id: 'notifications', label: 'Notifications', desc: 'Ticket receipts, gate SMS & reminders', icon: Bell },
-    { id: 'privacy', label: 'Privacy & Data', desc: 'Manifest visibility & account deletion', icon: Lock },
-  ] as const;
+    { id: 'profile' as const, label: 'Personal Info', desc: 'Name, email, phone & regional locale', icon: User },
+    { id: 'interests' as const, label: 'Preferences & Pass', desc: 'Favorite genres, dietary & accessibility', icon: Sparkles },
+    { id: 'security' as const, label: 'Security & Access', desc: is2faEnabled ? 'Password, 2FA & live device sessions' : 'Password & live device sessions', icon: KeyRound },
+    { id: 'notifications' as const, label: 'Notifications', desc: 'Ticket receipts, gate SMS & reminders', icon: Bell },
+    { id: 'privacy' as const, label: 'Privacy & Data', desc: 'Manifest visibility & account deletion', icon: Lock },
+    ...(isAdmin ? [{ id: 'platform' as const, label: 'Platform & Fees', desc: 'Global platform fee policy & system rules', icon: SlidersHorizontal }] : []),
+  ];
 
   const currentTabMeta = navTabs.find(t => t.id === activeTab) || navTabs[0];
 
@@ -875,6 +950,152 @@ export const Settings: React.FC = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Account Security Activity & Audit Trail Card */}
+                <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-[#E31B23]" />
+                        <h3 className="text-base font-black text-zinc-950 dark:text-white">Security Activity & Audit Trail</h3>
+                      </div>
+                      <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        Historical log of logins, profile updates, and key security events.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="relative">
+                        <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                        <input
+                          type="text"
+                          placeholder="Search actions..."
+                          value={activitySearchQuery}
+                          onChange={(e) => setActivitySearchQuery(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              setActivityPage(1);
+                              fetchActivityLogs(1, activitySearchQuery);
+                            }
+                          }}
+                          className="pl-8 pr-3 py-1.5 text-xs rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-900 dark:text-white focus:outline-hidden focus:border-[#E31B23] w-40 sm:w-52"
+                        />
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        fullWidth={false}
+                        onClick={() => fetchActivityLogs(activityPage, activitySearchQuery)}
+                        disabled={isLoadingActivity}
+                        title="Refresh activity logs"
+                        className="px-2.5 py-1.5"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${isLoadingActivity ? 'animate-spin' : ''}`} />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {isLoadingActivity ? (
+                    <div className="py-8 text-center text-xs text-zinc-500 dark:text-zinc-400 flex items-center justify-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin text-[#E31B23]" />
+                      Loading activity records...
+                    </div>
+                  ) : activityLogs.length === 0 ? (
+                    <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-center space-y-1">
+                      <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">No activity logs recorded</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                        {activitySearchQuery ? 'No security actions match your search query.' : 'Recent account events will appear here once authenticated.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {activityLogs.map((log) => {
+                        const dateStr = log.created_at || log.createdAt;
+                        const formattedDate = dateStr
+                          ? new Date(dateStr).toLocaleString(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })
+                          : 'Recent';
+                        const ip = log.ip_address || log.ipAddress || 'Direct';
+                        const ua = log.user_agent || log.userAgent;
+
+                        return (
+                          <div
+                            key={log.id}
+                            className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                          >
+                            <div className="flex items-start sm:items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-zinc-200/60 dark:bg-white/10 flex items-center justify-center shrink-0 text-[#E31B23]">
+                                <Clock className="w-4 h-4" />
+                              </div>
+                              <div className="space-y-0.5">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-bold text-zinc-900 dark:text-white">
+                                    {log.description || log.action}
+                                  </span>
+                                  <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-white/10 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/10">
+                                    {log.action}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-3 text-[11px] text-zinc-500 dark:text-zinc-400 flex-wrap">
+                                  <span>IP: <code className="font-mono text-zinc-700 dark:text-zinc-300">{ip}</code></span>
+                                  {ua && (
+                                    <span className="truncate max-w-[200px] sm:max-w-[320px]" title={ua}>
+                                      Client: {ua}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right shrink-0 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+                              {formattedDate}
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {/* Pagination Controls */}
+                      {activityTotalPages > 1 && (
+                        <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-white/10 text-xs">
+                          <span className="text-zinc-500 dark:text-zinc-400">
+                            Page {activityPage} of {activityTotalPages}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              fullWidth={false}
+                              disabled={activityPage <= 1 || isLoadingActivity}
+                              onClick={() => {
+                                const prev = Math.max(1, activityPage - 1);
+                                setActivityPage(prev);
+                              }}
+                              className="px-3 py-1 text-xs"
+                            >
+                              Previous
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              fullWidth={false}
+                              disabled={activityPage >= activityTotalPages || isLoadingActivity}
+                              onClick={() => {
+                                const next = activityPage + 1;
+                                setActivityPage(next);
+                              }}
+                              className="px-3 py-1 text-xs"
+                            >
+                              Next
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -1149,6 +1370,127 @@ export const Settings: React.FC = () => {
               </div>
             )}
 
+            {/* TAB 6: PLATFORM & SYSTEM SETTINGS (ADMIN ONLY) */}
+            {isAdmin && activeTab === 'platform' && (
+              <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <SlidersHorizontal className="w-5 h-5 text-[#E31B23]" />
+                      <h2 className="text-lg sm:text-xl font-black text-zinc-950 dark:text-white">
+                        Global Platform & Fee Governance
+                      </h2>
+                    </div>
+                    <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                      Configure ticket service fee rates, passthrough policies, and platform branding.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      fullWidth={false}
+                      onClick={fetchPlatformSettings}
+                      disabled={isLoadingPlatformSettings}
+                      className="px-3 py-1.5"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isLoadingPlatformSettings ? 'animate-spin' : ''}`} />
+                      Refresh
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      fullWidth={false}
+                      onClick={() => setShowPlatformFeeModal(true)}
+                    >
+                      Configure Settings
+                    </Button>
+                  </div>
+                </div>
+
+                {isLoadingPlatformSettings ? (
+                  <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-500 text-xs">
+                    <RefreshCw className="w-5 h-5 animate-spin text-[#E31B23]" />
+                    Loading system settings...
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Live Metric Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 space-y-1">
+                        <div className="flex items-center justify-between text-zinc-400 text-xs font-bold">
+                          <span>Platform Fee Rate</span>
+                          <Percent className="w-4 h-4 text-emerald-500" />
+                        </div>
+                        <p className="text-xl font-black text-zinc-950 dark:text-white">
+                          {platformSettings?.platform_fee_percentage ?? 3.5}%
+                        </p>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                          Charged on ticket subtotal
+                        </p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 space-y-1">
+                        <div className="flex items-center justify-between text-zinc-400 text-xs font-bold">
+                          <span>Fixed Platform Fee</span>
+                          <Coins className="w-4 h-4 text-blue-500" />
+                        </div>
+                        <p className="text-xl font-black text-zinc-950 dark:text-white">
+                          ₦{platformSettings?.platform_fee_fixed ?? 100}
+                        </p>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                          Flat charge per ticket item
+                        </p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 space-y-1">
+                        <div className="flex items-center justify-between text-zinc-400 text-xs font-bold">
+                          <span>Billing Passthrough</span>
+                          <ShieldCheck className="w-4 h-4 text-purple-500" />
+                        </div>
+                        <p className="text-xl font-black text-zinc-950 dark:text-white">
+                          {(platformSettings?.platform_fee_passthrough ?? true) ? 'Buyer Pays' : 'Host Absorbs'}
+                        </p>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                          {(platformSettings?.platform_fee_passthrough ?? true)
+                            ? 'Added on checkout screen'
+                            : 'Deducted from organizer balance'}
+                        </p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 space-y-1">
+                        <div className="flex items-center justify-between text-zinc-400 text-xs font-bold">
+                          <span>Platform Name</span>
+                          <Globe className="w-4 h-4 text-amber-500" />
+                        </div>
+                        <p className="text-xl font-black text-zinc-950 dark:text-white truncate">
+                          {platformSettings?.sitename || 'EventsOS'}
+                        </p>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+                          {platformSettings?.support_email || 'support@strayttix.com'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Operational Overview & Reassurance Note */}
+                    <div className="p-5 rounded-2xl bg-gradient-to-r from-red-500/5 via-transparent to-red-500/5 border border-[#E31B23]/20 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <ShieldAlert className="w-4 h-4 text-[#E31B23]" />
+                        <h3 className="text-xs font-black uppercase tracking-wider text-zinc-950 dark:text-white">
+                          Reconciliation & Payout Guardrails
+                        </h3>
+                      </div>
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                        Changes to global platform fee percentages and passthrough flags take effect immediately on all new ticket checkouts.
+                        Existing reserved carts retain their initial checkout breakdown for 15 minutes before expiring.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
 
         {/* ----------------- 2FA SETUP MODAL ----------------- */}
@@ -1255,6 +1597,18 @@ export const Settings: React.FC = () => {
             </div>
           </div>
         </Modal>
+
+        {/* ----------------- PLATFORM ADMIN FEE SETTINGS MODAL ----------------- */}
+        {isAdmin && (
+          <PlatformFeeSettingsModal
+            isOpen={showPlatformFeeModal}
+            onClose={() => setShowPlatformFeeModal(false)}
+            onSaved={(updated) => {
+              setPlatformSettings(updated);
+              fetchPlatformSettings();
+            }}
+          />
+        )}
 
       </div>
     </DashboardLayout>

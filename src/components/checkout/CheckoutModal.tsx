@@ -117,7 +117,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     : 0;
 
   const { settings } = useSettings();
-  const { percentage: feePct, fixed: feeFixed } = getFeeConfig(settings);
+  const { percentage: feePct, fixed: feeFixed, passthrough } = getFeeConfig(settings);
 
   const discountedSubtotal = Math.max(0, subtotal - discountAmount);
   const isFree = subtotal === 0 || discountedSubtotal === 0;
@@ -385,8 +385,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
                 )}
                 <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
-                  <span>Service Fee ({feePct}%{feeFixed > 0 ? ` + ₦${feeFixed}` : ''})</span>
-                  <span className="font-semibold text-zinc-900 dark:text-white">{formatCurrency(serviceFee)}</span>
+                  <span>
+                    Service Fee {!passthrough ? '(Absorbed by Host)' : `(${feePct}%${feeFixed > 0 ? ` + ₦${feeFixed}` : ''})`}
+                  </span>
+                  <span className="font-semibold text-zinc-900 dark:text-white">
+                    {!passthrough || serviceFee === 0 ? (
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">₦0.00</span>
+                    ) : (
+                      formatCurrency(serviceFee)
+                    )}
+                  </span>
                 </div>
                 <div className="flex justify-between pt-3 border-t border-zinc-200 dark:border-white/10 text-base font-black text-zinc-950 dark:text-white">
                   <span>Total Amount</span>

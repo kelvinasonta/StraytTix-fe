@@ -11,7 +11,7 @@ const COUNTDOWN_EXPIRY_KEY = 'strayttix_resend_countdown_expiry';
 const RESEND_INTERVAL = 15 * 60; // 15 minutes in seconds
 
 export const VerificationPending: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, organizer, isEmailVerified, refreshUser, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { showNotification } = useNotification();
@@ -22,6 +22,33 @@ export const VerificationPending: React.FC = () => {
 
   const timerRef = useRef<any>(null);
   const isResentQuery = new URLSearchParams(location.search).get('resent') === 'true';
+
+  // Automatically redirect to console if user is already verified
+  useEffect(() => {
+    if (isEmailVerified) {
+      localStorage.removeItem(COUNTDOWN_EXPIRY_KEY);
+      if (user?.accountType === 'organizer' || organizer) {
+        navigate('/organizer', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [isEmailVerified, user, organizer, navigate]);
+
+  // Re-check verification status when user returns to this tab from their email app
+  useEffect(() => {
+    const onFocusOrVisible = () => {
+      if (document.visibilityState === 'visible') {
+        refreshUser().catch(() => {});
+      }
+    };
+    window.addEventListener('focus', onFocusOrVisible);
+    document.addEventListener('visibilitychange', onFocusOrVisible);
+    return () => {
+      window.removeEventListener('focus', onFocusOrVisible);
+      document.removeEventListener('visibilitychange', onFocusOrVisible);
+    };
+  }, [refreshUser]);
 
   useEffect(() => {
     const expiryStr = localStorage.getItem(COUNTDOWN_EXPIRY_KEY);
@@ -61,18 +88,30 @@ export const VerificationPending: React.FC = () => {
 
     try {
       const res = await authApi.resendVerificationEmail();
-      // Inspect backend response for dynamic cooldown / retry_after
+      // Inspect backend response for dynamic cooldown / retry_after (defaults to 15 mins per backend policy)
       const backendCooldown = extractThrottleSeconds(res);
-      const cooldown = backendCooldown && backendCooldown > 0 ? backendCooldown : 60;
+      const cooldown = backendCooldown && backendCooldown > 0 ? backendCooldown : RESEND_INTERVAL;
       const expiryTime = Date.now() + cooldown * 1000;
       localStorage.setItem(COUNTDOWN_EXPIRY_KEY, expiryTime.toString());
       setSecondsLeft(cooldown);
       showNotification('Verification email sent.', 'success');
       setResending(false);
     } catch (err: any) {
+      const code = err.response?.data?.code || err.response?.data?.errorCode;
+      if (code === 'EMAIL_ALREADY_VERIFIED') {
+        showNotification('Your email is already verified!', 'success');
+        await refreshUser();
+        setResending(false);
+        return;
+      }
+
       const throttledSec = extractThrottleSeconds(err);
-      if (throttledSec || err.response?.status === 429) {
-        const cooldown = throttledSec || 60;
+      if (
+        throttledSec ||
+        err.response?.status === 429 ||
+        code === 'RESEND_EMAIL_VERIFICATION_FAILED_TOO_SOON'
+      ) {
+        const cooldown = throttledSec || RESEND_INTERVAL;
         const expiryTime = Date.now() + cooldown * 1000;
         localStorage.setItem(COUNTDOWN_EXPIRY_KEY, expiryTime.toString());
         setSecondsLeft(cooldown);
@@ -155,10 +194,10 @@ export const VerificationPending: React.FC = () => {
         <div className="flex items-center justify-between pt-2 border-t border-zinc-200 dark:border-white/10">
           <button
             type="button"
-            onClick={() => navigate('/login')}
+            onClick={logout}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white cursor-pointer transition-colors"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Sign In
+            <ArrowLeft className="w-3.5 h-3.5" /> Use a different account
           </button>
           <button
             type="button"

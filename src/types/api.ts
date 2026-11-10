@@ -17,6 +17,8 @@ export interface User {
   email: string;
   isEmailVerified: boolean;
   accountType: AccountType;
+  role?: string;
+  is_admin?: boolean;
   phone?: string;
   timezone?: string;
   avatar?: string;
@@ -799,6 +801,41 @@ export interface AppSettings {
   ticket_fee_fixed?: number | null;
   platform_fee_percentage?: number | null;
   platform_fee_fixed?: number | null;
+  platform_fee_passthrough?: boolean | null;
+}
+
+export interface UserActivityLog {
+  id: number | string;
+  action: string;
+  description: string;
+  ipAddress?: string | null;
+  ip_address?: string | null;
+  userAgent?: string | null;
+  user_agent?: string | null;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  created_at?: string;
+  user?: {
+    id: string | number;
+    name: string;
+    email: string;
+  };
+}
+
+export interface UserActivityPagination {
+  data: UserActivityLog[];
+  meta?: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+  links?: {
+    first?: string;
+    last?: string;
+    prev?: string | null;
+    next?: string | null;
+  };
 }
 
 // ============================================================================

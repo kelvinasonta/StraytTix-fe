@@ -68,8 +68,28 @@ export const Register: React.FC = () => {
       return;
     }
 
-    if (password !== confirmPassword) {
-      setFormError('Passwords do not match. Please verify your password confirmation.');
+    // Split full name into first & last name and validate minimum length
+    const nameParts = trimmedName.split(/\s+/).filter(Boolean);
+    if (nameParts.length < 2) {
+      setFormError('Please enter both your first and last name (e.g. Alex Vance).');
+      return;
+    }
+
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ');
+
+    if (firstName.length < 2 || lastName.length < 2) {
+      setFormError('First name and last name must each be at least 2 characters.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setFormError('Please enter a valid email address.');
+      return;
+    }
+
+    if (accountType === 'organizer' && isOrganization && organizationName.trim().length < 3) {
+      setFormError('Please enter your company or collective name (at least 3 characters).');
       return;
     }
 
@@ -78,10 +98,15 @@ export const Register: React.FC = () => {
       return;
     }
 
-    // Split full name into first & last name seamlessly
-    const nameParts = trimmedName.split(/\s+/);
-    const firstName = nameParts[0] || 'Member';
-    const lastName = nameParts.slice(1).join(' ') || firstName;
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[\W_]/.test(password)) {
+      setFormError('Password must include uppercase, lowercase, a number, and a special character.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setFormError('Passwords do not match. Please verify your password confirmation.');
+      return;
+    }
 
     setIsLoading(true);
 
@@ -107,7 +132,8 @@ export const Register: React.FC = () => {
       }
 
       await register(payload);
-      navigate('/verify-email/pending');
+      localStorage.setItem('strayttix_resend_countdown_expiry', (Date.now() + 60 * 1000).toString());
+      navigate('/verify-email/pending', { replace: true });
     } catch (err: any) {
       const validationErrs = getValidationErrors(err);
       setFieldErrors(validationErrs);
@@ -122,7 +148,7 @@ export const Register: React.FC = () => {
   if (!canRegister) {
     return (
       <AuthLayout
-        title="Join Eventa"
+        title="Join StraytTix"
         subtitle="User registration is currently paused"
       >
         <div className="p-6 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-center space-y-4 shadow-sm my-2">
@@ -162,7 +188,7 @@ export const Register: React.FC = () => {
 
   return (
     <AuthLayout
-      title="Join Eventa"
+      title="Join StraytTix"
       subtitle="Sign up in under 60 seconds — no lengthy forms"
     >
       {/* Fast Setup Badge with Interactive Sparkle Motion - only when registration is open */}
@@ -467,7 +493,15 @@ export const Register: React.FC = () => {
         </motion.button>
 
         <p className="text-center text-[11px] text-zinc-500 dark:text-zinc-400 pt-1">
-          By signing up, you agree to our Terms of Service and Privacy Policy.
+          By signing up, you agree to our{' '}
+          <Link to="/terms" className="underline hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">
+            Terms of Service
+          </Link>{' '}
+          and{' '}
+          <Link to="/privacy" className="underline hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">
+            Privacy Policy
+          </Link>
+          .
         </p>
 
         <div className="text-center text-xs text-zinc-500 font-medium pt-2 border-t border-zinc-200 dark:border-white/10">

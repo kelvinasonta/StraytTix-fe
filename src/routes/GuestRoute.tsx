@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 interface GuestRouteProps {
@@ -7,7 +7,8 @@ interface GuestRouteProps {
 }
 
 export const GuestRoute: React.FC<GuestRouteProps> = ({ children }) => {
-  const { isAuthenticated, isEmailVerified, isLoading, token } = useAuth();
+  const { isAuthenticated, isEmailVerified, isLoading, token, user, organizer } = useAuth();
+  const location = useLocation();
 
   // If we have an active token and are validating it, show minimal non-jarring fallback
   if (isLoading && token) {
@@ -24,6 +25,24 @@ export const GuestRoute: React.FC<GuestRouteProps> = ({ children }) => {
     if (!isEmailVerified) {
       return <Navigate to="/verify-email/pending" replace />;
     }
+
+    const rawFrom = (location.state as any)?.from;
+    if (rawFrom) {
+      const targetPath =
+        typeof rawFrom === 'string'
+          ? rawFrom
+          : rawFrom.pathname
+          ? `${rawFrom.pathname}${rawFrom.search || ''}${rawFrom.hash || ''}`
+          : null;
+      if (targetPath && !targetPath.startsWith('/login') && !targetPath.startsWith('/register')) {
+        return <Navigate to={targetPath} replace />;
+      }
+    }
+
+    if (user?.accountType === 'organizer' || organizer) {
+      return <Navigate to="/organizer" replace />;
+    }
+
     return <Navigate to="/dashboard" replace />;
   }
 

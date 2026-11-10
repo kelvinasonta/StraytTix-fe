@@ -129,14 +129,7 @@ export const App: React.FC = () => {
                 </GuestRoute>
               }
             />
-            <Route
-              path="/reset-password"
-              element={
-                <GuestRoute>
-                  <ResetPassword />
-                </GuestRoute>
-              }
-            />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Email Verification */}
             <Route path="/verify-email" element={<VerifyEmail />} />

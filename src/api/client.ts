@@ -113,9 +113,13 @@ apiClient.interceptors.response.use(
 
       // Handle 403 EMAIL_VERIFICATION_REQUIRED
       if (status === 403 && response.data && response.data.code === 'EMAIL_VERIFICATION_REQUIRED') {
+        const pathname = window.location.pathname;
         if (
-          !window.location.pathname.startsWith('/verify-email') &&
-          !window.location.pathname.startsWith('/invitations')
+          !pathname.startsWith('/verify-email') &&
+          !pathname.startsWith('/invitations') &&
+          !pathname.startsWith('/login') &&
+          !pathname.startsWith('/register') &&
+          !pathname.startsWith('/reset-password')
         ) {
           window.location.href = '/verify-email/pending';
         }
@@ -290,6 +294,8 @@ export const extractThrottleSeconds = (responseOrError: unknown): number | null 
     data?.cooldown_seconds ?? 
     data?.seconds ?? 
     data?.throttle_seconds ??
+    data?.meta?.retry_after ??
+    data?.meta?.cooldown ??
     data?.data?.retry_after ??
     data?.data?.cooldown;
   if (typeof candidateNumber === 'number' && candidateNumber > 0) {
@@ -300,10 +306,10 @@ export const extractThrottleSeconds = (responseOrError: unknown): number | null 
     if (!isNaN(parsed) && parsed > 0) return parsed;
   }
 
-  // 3. Check message string for numbers e.g. "try again in 718 seconds" or "please wait 60 seconds"
+  // 3. Check message string for numbers e.g. "try again in 718 seconds" or "every 15 minutes"
   const message = data?.message || anyObj?.message || '';
   if (typeof message === 'string') {
-    const match = message.match(/(?:try again in|wait|throttle|available in|cooldown[^\d]*)(\d+)\s*(?:seconds?|s|mins?|minutes?)?/i);
+    const match = message.match(/(?:try again in|wait|throttle|available in|every|cooldown[^\d]*)(\d+)\s*(?:seconds?|s|mins?|minutes?)?/i);
     if (match && match[1]) {
       const num = parseInt(match[1], 10);
       if (!isNaN(num) && num > 0) {

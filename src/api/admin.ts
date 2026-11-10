@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { ApiResponse } from '../types/api';
+import type { ApiResponse, AppSettings } from '../types/api';
 
 export interface AdminVerificationRequester {
   id: number;
@@ -123,5 +123,15 @@ export const adminApi = {
       is_active: isActive,
     });
     return response.data;
+  },
+
+  getSettings: async (): Promise<AppSettings> => {
+    const response = await apiClient.get<ApiResponse<AppSettings>>('/admin/settings');
+    return response.data.data;
+  },
+
+  updateSettings: async (payload: Partial<AppSettings>): Promise<AppSettings> => {
+    const response = await apiClient.post<ApiResponse<AppSettings>>('/admin/settings', payload);
+    return response.data.data;
   },
 };
