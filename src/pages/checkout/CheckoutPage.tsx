@@ -30,14 +30,20 @@ import { ordersApi } from '../../api/orders';
 import { formatCurrency, formatDate, formatEventDateTime } from '../../utils/format';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { apiClient, getApiErrorMessage } from '../../api/client';
+import { useSettings } from '../../context/SettingsContext';
+import { getFeeConfig, calculatePlatformFee } from '../../utils/fees';
 
 export const CheckoutPage: React.FC = () => {
+  const { settings } = useSettings();
+  const { percentage: feePct, fixed: feeFixed } = getFeeConfig(settings);
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated } = useAuth();
   const { showNotification } = useNotification();
+  const isGuestCheckoutAllowed = useFeatureFlag('guest_checkout');
 
   // Selected tickets state passed via location state or URL params
   const stateSelectedTickets: Record<string, number> = (location.state as any)?.selectedTickets || {};
@@ -179,9 +185,9 @@ export const CheckoutPage: React.FC = () => {
 
   const discountedSubtotal = Math.max(0, subtotal - discountAmount);
   const isFree = subtotal === 0 || discountedSubtotal === 0;
-  const serviceFee = isFree ? 0 : Math.round(discountedSubtotal * 0.025);
-  const totalAmount = discountedSubtotal + serviceFee;
   const totalQuantity = selectedItems.reduce((acc, item) => acc + item.quantity, 0);
+  const serviceFee = isFree ? 0 : calculatePlatformFee(discountedSubtotal, totalQuantity, settings);
+  const totalAmount = discountedSubtotal + serviceFee;
 
   const handleApplyPromo = () => {
     if (!event) return;
@@ -208,6 +214,12 @@ export const CheckoutPage: React.FC = () => {
 
   const handleProceedToReview = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated && !isGuestCheckoutAllowed) {
+      showNotification('Guest checkout is disabled. Please log in to complete your ticket order.', 'warning');
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
+      return;
+    }
+
     if (!fullName.trim() || !email.trim()) {
       showNotification('Please enter your full name and email address.', 'warning');
       return;
@@ -550,21 +562,48 @@ export const CheckoutPage: React.FC = () => {
                         <span>Attendee Contact Details</span>
                       </h2>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5">
-                        No account required. Your tickets and receipt will be sent directly to your email.
+                        {isGuestCheckoutAllowed
+                          ? 'No account required. Your tickets and receipt will be sent directly to your email.'
+                          : 'Please ensure your details match your account credentials.'}
                       </p>
                     </div>
 
                     {!isAuthenticated ? (
-                      <span className="self-start sm:self-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 inline-flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        <span>Guest Checkout Active</span>
-                      </span>
+                      isGuestCheckoutAllowed ? (
+                        <span className="self-start sm:self-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 inline-flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span>Guest Checkout Active</span>
+                        </span>
+                      ) : (
+                        <Link
+                          to={`/login?redirect=${encodeURIComponent(location.pathname)}`}
+                          className="self-start sm:self-center px-3 py-1 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50 inline-flex items-center gap-1 hover:underline"
+                        >
+                          <Lock className="w-3 h-3 text-amber-600" />
+                          <span>Sign In Required</span>
+                        </Link>
+                      )
                     ) : (
                       <span className="self-start sm:self-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10">
                         Signed In as {user?.firstName}
                       </span>
                     )}
                   </div>
+
+                  {!isAuthenticated && !isGuestCheckoutAllowed && (
+                    <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 flex items-center justify-between text-xs text-amber-900 dark:text-amber-200">
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                        <span>Account required: Guest checkout is disabled. Please log in before proceeding.</span>
+                      </div>
+                      <Link
+                        to={`/login?redirect=${encodeURIComponent(location.pathname)}`}
+                        className="font-bold underline text-[#E31B23] hover:text-[#B91C1C]"
+                      >
+                        Sign In
+                      </Link>
+                    </div>
+                  )}
 
                   <div className="space-y-4">
                     <div className="space-y-1.5">
@@ -827,7 +866,7 @@ export const CheckoutPage: React.FC = () => {
                   )}
 
                   <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
-                    <span>Platform & Processing Fee</span>
+                    <span>Platform & Processing Fee ({feePct}%{feeFixed > 0 ? ` + ₦${feeFixed}` : ''})</span>
                     <span>{serviceFee === 0 ? 'FREE' : formatCurrency(serviceFee)}</span>
                   </div>
 

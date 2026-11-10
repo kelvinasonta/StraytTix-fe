@@ -703,7 +703,7 @@ export const Orders: React.FC = () => {
                                 setSelectedOrder(ord);
                                 setIsDetailModalOpen(true);
                               }}
-                              className="p-1.5 text-zinc-500 hover:text-zinc-900 dark:text-white dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                              className="p-1.5 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                               title="View order breakdown"
                             >
                               <Eye className="w-4 h-4" />

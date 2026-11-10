@@ -4,16 +4,22 @@ import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import Button from '../components/ui/Button';
 import { Check, Sparkles, HelpCircle, ArrowRight, ShieldCheck, Zap, Server } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
+import { getFeeConfig } from '../utils/fees';
+import { formatCurrency } from '../utils/format';
 
 export const Pricing: React.FC = () => {
+  const { settings } = useSettings();
+  const { percentage: feePct, fixed: feeFixed } = getFeeConfig(settings);
+
   const [billingCycle, setBillingCycle] = useState<'per_ticket' | 'annual'>('per_ticket');
   const [estimatedTickets, setEstimatedTickets] = useState(500);
-  const [averagePrice, setAveragePrice] = useState(50);
+  const [averagePrice, setAveragePrice] = useState(5000);
 
   const calculateFees = () => {
     const grossVolume = estimatedTickets * averagePrice;
-    const platformFee = grossVolume * 0.025 + estimatedTickets * 0.5;
-    const organizerPayout = grossVolume - platformFee;
+    const platformFee = grossVolume * (feePct / 100) + estimatedTickets * feeFixed;
+    const organizerPayout = Math.max(0, grossVolume - platformFee);
     return { grossVolume, platformFee, organizerPayout };
   };
 
@@ -24,7 +30,7 @@ export const Pricing: React.FC = () => {
       name: 'Community & Free',
       badge: 'Always Free',
       description: 'Perfect for free meetups, workshops, RSVP gatherings, and non-profit community sessions.',
-      price: '$0',
+      price: 'Free',
       period: 'per free ticket',
       subtext: 'No credit card required to start',
       ctaText: 'Host Free Event',
@@ -44,8 +50,8 @@ export const Pricing: React.FC = () => {
       name: 'Pro Organizer',
       badge: 'Most Popular',
       description: 'For growing creators, music festivals, summits, and clubs demanding high conversion and custom branding.',
-      price: '2.5%',
-      period: '+ $0.50 per paid ticket',
+      price: `${feePct}%`,
+      period: `+ ₦${feeFixed} per paid ticket`,
       subtext: 'Passed to buyer or absorbed by organizer',
       ctaText: 'Start Selling Tickets',
       ctaLink: '/register',
@@ -88,7 +94,7 @@ export const Pricing: React.FC = () => {
   const faqs = [
     {
       q: 'Who pays the ticketing fees?',
-      a: 'You choose! By default, the 2.5% + $0.50 platform fee is added to the ticket price paid by the buyer. Alternatively, you can absorb the fee in your event settings so the buyer sees a flat, all-inclusive price.'
+      a: `You choose! By default, the ${feePct}% + ₦${feeFixed} platform fee is added to the ticket price paid by the buyer. Alternatively, you can absorb the fee in your event settings so the buyer sees a flat, all-inclusive price.`
     },
     {
       q: 'When do I receive my ticket sale proceeds?',
@@ -244,21 +250,21 @@ export const Pricing: React.FC = () => {
               <div className="space-y-2.5">
                 <div className="flex justify-between text-xs font-mono font-bold text-zinc-700 dark:text-zinc-200">
                   <span>Average Ticket Price</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg font-mono font-black">${averagePrice}</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg font-mono font-black">{formatCurrency(averagePrice)}</span>
                 </div>
                 <input
                   type="range"
-                  min="5"
-                  max="500"
-                  step="5"
+                  min="500"
+                  max="50000"
+                  step="500"
                   value={averagePrice}
                   onChange={(e) => setAveragePrice(Number(e.target.value))}
                   className="w-full h-2.5 bg-zinc-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#E31B23]"
                 />
                 <div className="flex justify-between text-[11px] font-mono text-zinc-500">
-                  <span>$5</span>
-                  <span>$250</span>
-                  <span>$500</span>
+                  <span>₦500</span>
+                  <span>₦25,000</span>
+                  <span>₦50,000</span>
                 </div>
               </div>
             </div>
@@ -268,7 +274,7 @@ export const Pricing: React.FC = () => {
               <div className="space-y-1">
                 <span className="text-zinc-400 text-xs font-mono uppercase tracking-wider">Estimated Net Organizer Payout</span>
                 <div className="text-3xl md:text-5xl font-black font-mono text-emerald-400">
-                  ${organizerPayout.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {formatCurrency(organizerPayout)}
                 </div>
               </div>
 
@@ -276,13 +282,13 @@ export const Pricing: React.FC = () => {
                 <div>
                   <span className="text-zinc-400 block mb-1">Gross Sales Volume</span>
                   <span className="font-bold text-white text-base">
-                    ${grossVolume.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {formatCurrency(grossVolume)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-zinc-400 block mb-1">Platform Fee (2.5% + $0.50)</span>
+                  <span className="text-zinc-400 block mb-1">Platform Fee ({feePct}% + ₦{feeFixed})</span>
                   <span className="font-bold text-[#E31B23] text-base">
-                    ${platformFee.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {formatCurrency(platformFee)}
                   </span>
                 </div>
               </div>

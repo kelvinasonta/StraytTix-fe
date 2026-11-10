@@ -35,6 +35,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { useSettings } from '../../context/SettingsContext';
+import { getFeeConfig } from '../../utils/fees';
 import { eventApi } from '../../api/events';
 import { ordersApi } from '../../api/orders';
 import { paymentApi } from '../../api/payments';
@@ -350,8 +351,9 @@ export const Analytics: React.FC = () => {
     return paidOrders.reduce((sum, o) => sum + Number(o.total ?? o.amount ?? 0), 0);
   }, [paidOrders]);
 
-  // Platform & Processing Fees (estimated at 3.5%)
-  const platformFees = useMemo(() => Math.round(grossRevenue * 0.035), [grossRevenue]);
+  // Platform & Processing Fees (dynamically fetched from AppSettings)
+  const { percentage: feePct } = getFeeConfig(settings);
+  const platformFees = useMemo(() => Math.round(grossRevenue * (feePct / 100)), [grossRevenue, feePct]);
 
   // Net Lifetime Earnings
   const netEarnings = useMemo(() => Math.max(0, grossRevenue - platformFees), [grossRevenue, platformFees]);

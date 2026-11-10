@@ -597,7 +597,7 @@ export const eventApi = {
     const backendNotes = noteParts.length > 0 ? noteParts.join(' | ') : null;
 
     const backendPayload = {
-      user_id: payload.user_id || payload.memberId || payload.userId,
+      user_id: payload.user_id || payload.userId || payload.memberId,
       role: backendRole,
       permissions,
       notes: backendNotes,

@@ -20,10 +20,13 @@ import type { Event, TicketType } from '../../types/api';
 import { formatCurrency, formatDate } from '../../utils/format';
 import { useNotification } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { Link } from 'react-router-dom';
 import { ticketApi } from '../../api/tickets';
 import { ordersApi } from '../../api/orders';
 import { getApiErrorMessage } from '../../api/client';
+import { useSettings } from '../../context/SettingsContext';
+import { getFeeConfig, calculatePlatformFee } from '../../utils/fees';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -40,6 +43,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 }) => {
   const { user } = useAuth();
   const { showNotification } = useNotification();
+  const isGuestCheckoutAllowed = useFeatureFlag('guest_checkout');
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [fullName, setFullName] = useState(user ? `${user.firstName} ${user.lastName}` : '');
@@ -112,11 +116,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         : Math.round((subtotal * Number(appliedPromo.discount || 0)) / 100))
     : 0;
 
+  const { settings } = useSettings();
+  const { percentage: feePct, fixed: feeFixed } = getFeeConfig(settings);
+
   const discountedSubtotal = Math.max(0, subtotal - discountAmount);
   const isFree = subtotal === 0 || discountedSubtotal === 0;
-  const serviceFee = isFree ? 0 : Math.round(discountedSubtotal * 0.025);
-  const totalAmount = discountedSubtotal + serviceFee;
   const totalQuantity = selectedItems.reduce((acc, item) => acc + item.quantity, 0);
+  const serviceFee = isFree ? 0 : calculatePlatformFee(discountedSubtotal, totalQuantity, settings);
+  const totalAmount = discountedSubtotal + serviceFee;
 
   const handleApplyPromo = () => {
     setPromoError('');
@@ -141,6 +148,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   };
 
   const handleProceedToPayment = () => {
+    if (!user && !isGuestCheckoutAllowed) {
+      showNotification('Guest checkout is disabled. Please sign in to purchase tickets.', 'warning');
+      return;
+    }
+
     if (!fullName || !email) {
       showNotification('Please provide your name and email address.', 'warning');
       return;
@@ -373,7 +385,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
                 )}
                 <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
-                  <span>Service Fee</span>
+                  <span>Service Fee ({feePct}%{feeFixed > 0 ? ` + ₦${feeFixed}` : ''})</span>
                   <span className="font-semibold text-zinc-900 dark:text-white">{formatCurrency(serviceFee)}</span>
                 </div>
                 <div className="flex justify-between pt-3 border-t border-zinc-200 dark:border-white/10 text-base font-black text-zinc-950 dark:text-white">
@@ -398,6 +410,22 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <h4 className="text-base font-bold text-zinc-900 dark:text-white">Attendee Information</h4>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Where should we send your digital tickets?</p>
               </div>
+
+              {!user && !isGuestCheckoutAllowed && (
+                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 flex items-center justify-between text-xs text-amber-900 dark:text-amber-200">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <span>Account required: Please log in to complete checkout.</span>
+                  </div>
+                  <Link
+                    to="/login"
+                    onClick={onClose}
+                    className="font-bold underline text-[#E31B23] hover:text-[#B91C1C]"
+                  >
+                    Sign In
+                  </Link>
+                </div>
+              )}
 
               <div className="space-y-4">
                 <div className="space-y-1.5">

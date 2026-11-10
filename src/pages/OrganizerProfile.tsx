@@ -590,12 +590,12 @@ export const OrganizerProfile: React.FC = () => {
             {isLoadingEvents && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="bg-white rounded-3xl p-5 border border-zinc-200 shadow-xs space-y-4">
-                    <div className="h-48 bg-zinc-200 rounded-2xl w-full" />
-                    <div className="h-4 bg-zinc-200 rounded w-1/3" />
-                    <div className="h-6 bg-zinc-200 rounded w-4/5" />
-                    <div className="h-4 bg-zinc-200 rounded w-1/2" />
-                    <div className="h-10 bg-zinc-200 rounded-xl w-full mt-4" />
+                  <div key={i} className="bg-white dark:bg-[#0F0F14] rounded-3xl p-5 border border-zinc-200 dark:border-white/10 shadow-xs space-y-4">
+                    <div className="h-48 bg-zinc-200 dark:bg-white/10 rounded-2xl w-full" />
+                    <div className="h-4 bg-zinc-200 dark:bg-white/10 rounded w-1/3" />
+                    <div className="h-6 bg-zinc-200 dark:bg-white/10 rounded w-4/5" />
+                    <div className="h-4 bg-zinc-200 dark:bg-white/10 rounded w-1/2" />
+                    <div className="h-10 bg-zinc-200 dark:bg-white/10 rounded-xl w-full mt-4" />
                   </div>
                 ))}
               </div>

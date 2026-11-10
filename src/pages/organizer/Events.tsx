@@ -475,7 +475,7 @@ export const Events: React.FC = () => {
                   className="group bg-white dark:bg-[#0F0F14] border border-zinc-200/90 dark:border-white/10 rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-zinc-300 dark:hover:border-white/20 transition-all flex flex-col justify-between"
                 >
                   {/* Card Top Banner with Cover Image and Badges */}
-                  <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-zinc-100">
+                  <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-zinc-100 dark:bg-white/5">
                     <img
                       src={evt.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=600&q=80'}
                       alt={evt.title}
@@ -614,7 +614,7 @@ export const Events: React.FC = () => {
                     {/* Thumbnail with overlay badges */}
                     <Link
                       to={targetManageUrl}
-                      className="relative w-24 h-24 sm:w-48 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 bg-zinc-100 block group/thumb"
+                      className="relative w-24 h-24 sm:w-48 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 bg-zinc-100 dark:bg-white/5 block group/thumb"
                     >
                       <img
                         src={evt.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=500&q=80'}
@@ -654,7 +654,7 @@ export const Events: React.FC = () => {
                           {evt.category || 'Event'}
                         </span>
                         {evt.eventFormat && (
-                          <span className="text-[9px] font-mono uppercase text-zinc-400 bg-zinc-50 border border-zinc-200/80 px-1.5 py-0.5 rounded">
+                          <span className="text-[9px] font-mono uppercase text-zinc-400 bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 px-1.5 py-0.5 rounded">
                             {evt.eventFormat}
                           </span>
                         )}
@@ -755,11 +755,11 @@ export const Events: React.FC = () => {
 
         {/* Pagination Controls */}
         {!isLoading && (paginationMeta.total > 0 || events.length > 0) && paginationMeta.last_page > 1 && (
-          <div className="bg-white rounded-2xl border border-zinc-200/90 px-5 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
-            <div className="text-xs text-zinc-500 font-semibold">
-              Showing <span className="font-bold text-zinc-900">{paginationMeta.from || (filteredEvents.length > 0 ? 1 : 0)}</span> to{' '}
-              <span className="font-bold text-zinc-900">{paginationMeta.to || filteredEvents.length}</span> of{' '}
-              <span className="font-bold text-zinc-900">{paginationMeta.total}</span> events
+          <div className="bg-white dark:bg-[#0F0F14] rounded-2xl border border-zinc-200/90 dark:border-white/10 px-5 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 font-semibold">
+              Showing <span className="font-bold text-zinc-900 dark:text-white">{paginationMeta.from || (filteredEvents.length > 0 ? 1 : 0)}</span> to{' '}
+              <span className="font-bold text-zinc-900 dark:text-white">{paginationMeta.to || filteredEvents.length}</span> of{' '}
+              <span className="font-bold text-zinc-900 dark:text-white">{paginationMeta.total}</span> events
             </div>
 
             <div className="flex items-center gap-2">
@@ -767,7 +767,7 @@ export const Events: React.FC = () => {
               <button
                 onClick={() => handlePageChange(paginationMeta.current_page - 1)}
                 disabled={paginationMeta.current_page <= 1 || isLoading}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5"
               >
                 <ChevronLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Previous</span>
@@ -791,7 +791,7 @@ export const Events: React.FC = () => {
                       className={`w-9 h-9 rounded-xl text-xs font-black transition-all cursor-pointer ${
                         p === paginationMeta.current_page
                           ? 'bg-[#E31B23] text-white shadow-xs scale-105'
-                          : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200'
+                          : 'bg-white dark:bg-[#070709] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 border border-zinc-200 dark:border-white/10'
                       }`}
                     >
                       {p}
@@ -804,7 +804,7 @@ export const Events: React.FC = () => {
               <button
                 onClick={() => handlePageChange(paginationMeta.current_page + 1)}
                 disabled={paginationMeta.current_page >= paginationMeta.last_page || isLoading}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5"
               >
                 <span className="hidden sm:inline">Next</span>
                 <ChevronRight className="w-4 h-4" />

@@ -18,6 +18,7 @@ export const apiClient = axios.create({
 const isPublicAuthRoute = (url?: string): boolean => {
   if (!url) return false;
   const publicRoutes = [
+    '/auth/features',
     '/auth/login',
     '/auth/register',
     '/auth/password/forgot',

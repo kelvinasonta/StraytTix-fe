@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { authApi, normalizeTimezone } from '../../api/auth';
 import { getApiErrorMessage } from '../../api/client';
 import { useNotification } from '../../context/NotificationContext';
+import { useFeatureFlags } from '../../hooks/useFeatureFlag';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
@@ -57,6 +58,9 @@ type TabType = 'profile' | 'interests' | 'security' | 'notifications' | 'privacy
 export const Settings: React.FC = () => {
   const { user, refreshUser, logout } = useAuth();
   const { showNotification } = useNotification();
+  const { isEnabled } = useFeatureFlags();
+  const isSessionsEnabled = isEnabled('auth-session-management');
+  const is2faEnabled = isEnabled('auth-two-factor');
   const location = useLocation();
 
   const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -251,14 +255,14 @@ export const Settings: React.FC = () => {
       }
     };
 
-    if (activeTab === 'security') {
+    if (activeTab === 'security' && isSessionsEnabled) {
       fetchLiveSessions();
     }
 
     return () => {
       isMounted = false;
     };
-  }, [activeTab]);
+  }, [activeTab, isSessionsEnabled]);
 
   // Revoke other sessions
   const handleRevokeOtherSessions = async () => {
@@ -340,7 +344,7 @@ export const Settings: React.FC = () => {
   const navTabs = [
     { id: 'profile', label: 'Personal Info', desc: 'Name, email, phone & regional locale', icon: User },
     { id: 'interests', label: 'Preferences & Pass', desc: 'Favorite genres, dietary & accessibility', icon: Sparkles },
-    { id: 'security', label: 'Security & Access', desc: 'Password, 2FA & live device sessions', icon: KeyRound },
+    { id: 'security', label: 'Security & Access', desc: is2faEnabled ? 'Password, 2FA & live device sessions' : 'Password & live device sessions', icon: KeyRound },
     { id: 'notifications', label: 'Notifications', desc: 'Ticket receipts, gate SMS & reminders', icon: Bell },
     { id: 'privacy', label: 'Privacy & Data', desc: 'Manifest visibility & account deletion', icon: Lock },
   ] as const;
@@ -762,49 +766,51 @@ export const Settings: React.FC = () => {
                   </form>
                 </div>
 
-                {/* 2FA Two-Factor Authentication Card */}
-                <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5 transition-colors">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
-                    <div>
-                      <h3 className="text-base font-black text-zinc-950 dark:text-white flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-[#E31B23]" />
-                        Two-Factor Authentication (2FA)
-                      </h3>
-                      <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-                        Protect your ticket stubs from unauthorized transfers with an authenticator passcode.
-                      </p>
+                {/* 2FA Two-Factor Authentication Card - Protected by auth-two-factor feature flag */}
+                {is2faEnabled && (
+                  <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
+                      <div>
+                        <h3 className="text-base font-black text-zinc-950 dark:text-white flex items-center gap-2">
+                          <Lock className="w-4 h-4 text-[#E31B23]" />
+                          Two-Factor Authentication (2FA)
+                        </h3>
+                        <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+                          Protect your ticket stubs from unauthorized transfers with an authenticator passcode.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                          twoFactorEnabled
+                            ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
+                            : 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/10'
+                        }`}>
+                          {twoFactorEnabled ? '2FA Enabled' : 'Disabled'}
+                        </span>
+                        <Button
+                          variant={twoFactorEnabled ? 'outline' : 'primary'}
+                          size="sm"
+                          fullWidth={false}
+                          onClick={() => {
+                            if (twoFactorEnabled) {
+                              setTwoFactorEnabled(false);
+                              showNotification('Two-Factor Authentication disabled.', 'info');
+                            } else {
+                              setShowTwoFactorModal(true);
+                            }
+                          }}
+                        >
+                          {twoFactorEnabled ? 'Disable' : 'Enable 2FA'}
+                        </Button>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                        twoFactorEnabled
-                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
-                          : 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/10'
-                      }`}>
-                        {twoFactorEnabled ? '2FA Enabled' : 'Disabled'}
-                      </span>
-                      <Button
-                        variant={twoFactorEnabled ? 'outline' : 'primary'}
-                        size="sm"
-                        fullWidth={false}
-                        onClick={() => {
-                          if (twoFactorEnabled) {
-                            setTwoFactorEnabled(false);
-                            showNotification('Two-Factor Authentication disabled.', 'info');
-                          } else {
-                            setShowTwoFactorModal(true);
-                          }
-                        }}
-                      >
-                        {twoFactorEnabled ? 'Disable' : 'Enable 2FA'}
-                      </Button>
-                    </div>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
+                      Works seamlessly with Google Authenticator, 1Password, Authy, or Apple Passwords.
+                    </p>
                   </div>
-
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
-                    Works seamlessly with Google Authenticator, 1Password, Authy, or Apple Passwords.
-                  </p>
-                </div>
+                )}
 
                 {/* Active Sessions Card */}
                 <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5 transition-colors">
@@ -816,47 +822,58 @@ export const Settings: React.FC = () => {
                       </p>
                     </div>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      fullWidth={false}
-                      onClick={handleRevokeOtherSessions}
-                      className="text-xs"
-                    >
-                      Sign Out Other Devices
-                    </Button>
+                    {isSessionsEnabled && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        fullWidth={false}
+                        onClick={handleRevokeOtherSessions}
+                        className="text-xs"
+                      >
+                        Sign Out Other Devices
+                      </Button>
+                    )}
                   </div>
 
-                  <div className="space-y-3">
-                    {sessions.map((sess) => {
-                      const Icon = sess.icon;
-                      return (
-                        <div
-                          key={sess.id}
-                          className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 flex items-center justify-between"
-                        >
-                          <div className="flex items-center gap-3.5">
-                            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
-                              <Icon className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <p className="text-xs sm:text-sm font-bold text-zinc-950 dark:text-white flex items-center gap-2">
-                                <span>{sess.name}</span>
-                                {sess.isCurrent && (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
-                                    Current Device
-                                  </span>
-                                )}
-                              </p>
-                              <p className="text-[11px] text-zinc-400 dark:text-white mt-0.5">
-                                {sess.lastUsedAt}
-                              </p>
+                  {!isSessionsEnabled ? (
+                    <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-center space-y-1">
+                      <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Device & session management currently paused</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                        Live remote session revocation is temporarily disabled by system administrators.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {sessions.map((sess) => {
+                        const Icon = sess.icon;
+                        return (
+                          <div
+                            key={sess.id}
+                            className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 flex items-center justify-between"
+                          >
+                            <div className="flex items-center gap-3.5">
+                              <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#070709] border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <p className="text-xs sm:text-sm font-bold text-zinc-950 dark:text-white flex items-center gap-2">
+                                  <span>{sess.name}</span>
+                                  {sess.isCurrent && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
+                                      Current Device
+                                    </span>
+                                  )}
+                                </p>
+                                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                                  {sess.lastUsedAt}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1136,7 +1153,7 @@ export const Settings: React.FC = () => {
 
         {/* ----------------- 2FA SETUP MODAL ----------------- */}
         <Modal
-          isOpen={showTwoFactorModal}
+          isOpen={is2faEnabled && showTwoFactorModal}
           onClose={() => setShowTwoFactorModal(false)}
           title="Enable Two-Factor Authentication"
         >
