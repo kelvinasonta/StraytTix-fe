@@ -26,6 +26,11 @@ export const normalizeOrder = (raw: any, fallbackEvents: Event[] = []): Order =>
 
   const amountVal = Number(raw.total ?? raw.amount ?? raw.subtotal ?? 0);
 
+  const rawVenue = raw.eventVenue || raw.event?.venue || raw.event?.location || eventMatch?.location || eventMatch?.venue;
+  const eventVenueStr = typeof rawVenue === 'string'
+    ? rawVenue
+    : (rawVenue?.venueName || rawVenue?.venue_name || rawVenue?.streetAddress || rawVenue?.street_address || rawVenue?.city || '');
+
   return {
     id: raw.orderNumber || raw.order_number || raw.id || `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
     orderNumber: raw.orderNumber || raw.order_number || raw.id,
@@ -37,7 +42,7 @@ export const normalizeOrder = (raw: any, fallbackEvents: Event[] = []): Order =>
     eventSlug: raw.eventSlug || raw.event?.slug || eventMatch?.slug || '',
     eventImageUrl: raw.eventImageUrl || raw.event?.coverImage || raw.event?.cover_image || raw.event?.imageUrl || eventMatch?.imageUrl || '',
     eventDate: raw.eventDate || raw.event?.startDate || eventMatch?.startDate || '',
-    eventVenue: raw.eventVenue || raw.event?.location || eventMatch?.location || '',
+    eventVenue: eventVenueStr,
     amount: amountVal,
     total: amountVal,
     subtotal: Number(raw.subtotal ?? amountVal),

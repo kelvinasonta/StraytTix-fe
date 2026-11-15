@@ -61,7 +61,6 @@ import {
   Flag
 } from 'lucide-react';
 import { useFeatureFlags } from '../../hooks/useFeatureFlag';
-import { FEATURE_FLAG_METADATA } from '../../types/featureFlags';
 
 /* ---------------- Types ---------------- */
 type SettingsTab = 'profile' | 'scanner' | 'station' | 'security' | 'sessions' | 'audit' | 'preferences' | 'notifications' | 'developer' | 'danger';
@@ -111,10 +110,9 @@ export const Settings: React.FC = () => {
   const { user, organizer, logout, setActiveOrganizer, refreshUser } = useAuth();
   const { showNotification } = useNotification();
   const { can, hasRole, isOwner } = useCan();
-  const { flags, isEnabled, setFlagOverride, resetFlagOverrides } = useFeatureFlags();
+  const { isEnabled } = useFeatureFlags();
   const isSessionsEnabled = isEnabled('auth-session-management');
   const is2faEnabled = isEnabled('auth-two-factor');
-  const isOrganization = organizer?.type === 'organization';
 
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
@@ -890,11 +888,9 @@ export const Settings: React.FC = () => {
                 <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
                   role === 'staff'
                     ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                    : isOrganization
-                      ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                      : 'bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10'
+                    : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
                 }`}>
-                  {role === 'staff' ? 'Gate Staff Workstation' : isOrganization ? 'Organization Workspace' : 'Individual Planner'}
+                  {role === 'staff' ? 'Gate Staff Workstation' : 'Organizer Workspace'}
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <ShieldCheck className="w-3 h-3 text-emerald-600" /> {role === 'staff' ? 'Terminal Ready' : 'Security Status: Healthy'}
@@ -2591,97 +2587,6 @@ export const Settings: React.FC = () => {
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Feature Flags & Runtime Control Switches */}
-            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
-                <div>
-                  <h3 className="text-base font-black text-zinc-950 dark:text-white tracking-tight flex items-center gap-2">
-                    <Flag className="w-4 h-4 text-[#E31B23]" />
-                    <span>Platform Feature Flags & Runtime Switches</span>
-                  </h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-                    Toggle dynamic feature availability (guest checkout, instant settlements, scanner engines) across your organization and platform sessions.
-                  </p>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    resetFlagOverrides();
-                    showNotification('Feature flags reset to platform defaults.', 'info');
-                  }}
-                  className="text-xs"
-                >
-                  <RefreshCw className="w-3.5 h-3.5 mr-1" />
-                  Reset to Defaults
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(flags).map(([flagKey, isActive]) => {
-                  const meta = FEATURE_FLAG_METADATA[flagKey] || {
-                    key: flagKey,
-                    label: flagKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    description: 'Custom feature toggle switch.',
-                    group: 'experimental',
-                  };
-
-                  return (
-                    <div
-                      key={flagKey}
-                      className="p-5 rounded-2xl bg-zinc-50/70 dark:bg-white/[0.02] border border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 transition-all flex flex-col justify-between space-y-3"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-zinc-200 dark:bg-white/10 text-zinc-700 dark:text-zinc-300">
-                              {meta.group}
-                            </span>
-                            <span className="text-[10px] font-mono text-zinc-400 font-bold">
-                              {flagKey}
-                            </span>
-                          </div>
-                          <h4 className="text-sm font-bold text-zinc-950 dark:text-white">{meta.label}</h4>
-                        </div>
-
-                        {/* Switch */}
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            const next = !isActive;
-                            await setFlagOverride(flagKey, next);
-                            showNotification(`${meta.label} is now ${next ? 'enabled' : 'disabled'}.`, 'success');
-                          }}
-                          className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer flex-shrink-0 ${
-                            isActive ? 'bg-[#E31B23]' : 'bg-zinc-300 dark:bg-zinc-700'
-                          }`}
-                        >
-                          <span
-                            className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${
-                              isActive ? 'left-5.5' : 'left-0.5'
-                            }`}
-                          />
-                        </button>
-                      </div>
-
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
-                        {meta.description}
-                      </p>
-
-                      <div className="flex items-center justify-between text-[11px] font-mono border-t border-zinc-200/60 dark:border-white/10 pt-2.5">
-                        <span className={isActive ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-zinc-400'}>
-                          STATUS: {isActive ? 'ACTIVE' : 'DISABLED'}
-                        </span>
-                        <span className="text-zinc-400 text-[10px]">Client + API Guarded</span>
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
             </div>
           </div>

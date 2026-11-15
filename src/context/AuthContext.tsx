@@ -17,6 +17,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (credentials: any) => Promise<void>;
   register: (data: any) => Promise<void>;
+  setSession: (payload: { token: string; user?: User; organizer?: Organizer | null }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: (organizerUuid?: string) => Promise<void>;
   setActiveOrganizer: (org: Organizer | null) => void;
@@ -248,6 +249,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const setSession = useCallback(
+    async (payload: { token: string; user?: User; organizer?: Organizer | null }) => {
+      const remember = true;
+      tokenStorage.setToken(payload.token, remember);
+      setToken(payload.token);
+
+      if (payload.user) {
+        tokenStorage.setUser(payload.user, remember);
+        setUser(payload.user);
+        setIsEmailVerified(Boolean(payload.user.isEmailVerified));
+      }
+
+      if (payload.organizer) {
+        setActiveOrganizer(payload.organizer);
+      } else {
+        setActiveOrganizer(null);
+      }
+
+      setIsLoading(false);
+
+      // Refresh in background to sync any fresh permissions/favorites
+      try {
+        await refreshUser();
+      } catch {
+        // Ignore background refresh errors if session is already established
+      }
+    },
+    [setActiveOrganizer, refreshUser]
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -260,6 +291,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         login,
         register,
+        setSession,
         logout,
         refreshUser,
         setActiveOrganizer,

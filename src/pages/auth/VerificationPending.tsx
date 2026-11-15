@@ -23,10 +23,15 @@ export const VerificationPending: React.FC = () => {
   const timerRef = useRef<any>(null);
   const isResentQuery = new URLSearchParams(location.search).get('resent') === 'true';
 
-  // Automatically redirect to console if user is already verified
+  // Automatically redirect to console or onboarding if user is already verified
   useEffect(() => {
     if (isEmailVerified) {
       localStorage.removeItem(COUNTDOWN_EXPIRY_KEY);
+      const isOnboarded = localStorage.getItem(`strayttix_onboarding_completed_${user?.id || 'guest'}`);
+      if (!isOnboarded) {
+        navigate('/onboarding', { replace: true });
+        return;
+      }
       if (user?.accountType === 'organizer' || organizer) {
         navigate('/organizer', { replace: true });
       } else {

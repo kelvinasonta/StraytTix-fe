@@ -6,6 +6,7 @@ import { authApi, normalizeTimezone } from '../../api/auth';
 import { adminApi } from '../../api/admin';
 import type { AppSettings, UserActivityLog } from '../../types/api';
 import PlatformFeeSettingsModal from '../../components/admin/PlatformFeeSettingsModal';
+import { BecomeOrganizerModal } from '../../components/organizer/BecomeOrganizerModal';
 import { getApiErrorMessage } from '../../api/client';
 import { useNotification } from '../../context/NotificationContext';
 import { useFeatureFlags } from '../../hooks/useFeatureFlag';
@@ -45,7 +46,8 @@ import {
   Search,
   RefreshCw,
   Percent,
-  Coins
+  Coins,
+  Building2
 } from 'lucide-react';
 
 const EVENT_GENRES = [
@@ -64,7 +66,8 @@ const EVENT_GENRES = [
 type TabType = 'profile' | 'interests' | 'security' | 'notifications' | 'privacy' | 'platform';
 
 export const Settings: React.FC = () => {
-  const { user, refreshUser, logout } = useAuth();
+  const { user, organizer, refreshUser, logout } = useAuth();
+  const [isBecomeOrganizerOpen, setIsBecomeOrganizerOpen] = useState(false);
   const { showNotification } = useNotification();
   const { isEnabled } = useFeatureFlags();
   const isSessionsEnabled = isEnabled('auth-session-management');
@@ -481,7 +484,24 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Quick telemetry actions */}
-            <div className="flex items-center gap-3 self-start md:self-auto shrink-0">
+            <div className="flex items-center gap-3 self-start md:self-auto shrink-0 flex-wrap">
+              {organizer ? (
+                <Link to="/organizer">
+                  <button className="px-4 py-2.5 rounded-xl border border-[#E31B23]/30 bg-[#E31B23]/10 hover:bg-[#E31B23]/15 text-[#E31B23] text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs">
+                    <Building2 className="w-4 h-4" />
+                    <span>Organizer Console</span>
+                  </button>
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsBecomeOrganizerOpen(true)}
+                  className="px-4 py-2.5 rounded-xl border border-[#E31B23]/30 bg-[#E31B23]/10 hover:bg-[#E31B23]/15 text-[#E31B23] text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+                >
+                  <Building2 className="w-4 h-4" />
+                  <span>Convert to Organizer Account</span>
+                </button>
+              )}
               <Link to="/dashboard/tickets">
                 <button className="px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-zinc-50 dark:bg-white/5 text-zinc-800 dark:text-zinc-200 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs">
                   <Ticket className="w-4 h-4 text-[#E31B23]" />
@@ -1021,6 +1041,12 @@ export const Settings: React.FC = () => {
                           : 'Recent';
                         const ip = log.ip_address || log.ipAddress || 'Direct';
                         const ua = log.user_agent || log.userAgent;
+                        let cleanDescription = log.description || log.action;
+                        if (/^User \[\d+\] logged in successfully\.?$/i.test(cleanDescription)) {
+                          cleanDescription = 'Signed in to account successfully.';
+                        } else if (/^User \[\d+\] logged out successfully\.?$/i.test(cleanDescription)) {
+                          cleanDescription = 'Signed out of account.';
+                        }
 
                         return (
                           <div
@@ -1034,7 +1060,7 @@ export const Settings: React.FC = () => {
                               <div className="space-y-0.5">
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <span className="font-bold text-zinc-900 dark:text-white">
-                                    {log.description || log.action}
+                                    {cleanDescription}
                                   </span>
                                   <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-white/10 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/10">
                                     {log.action}
@@ -1609,6 +1635,11 @@ export const Settings: React.FC = () => {
             }}
           />
         )}
+
+        <BecomeOrganizerModal
+          isOpen={isBecomeOrganizerOpen}
+          onClose={() => setIsBecomeOrganizerOpen(false)}
+        />
 
       </div>
     </DashboardLayout>

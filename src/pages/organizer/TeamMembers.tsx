@@ -46,7 +46,7 @@ export const TeamMembers: React.FC = () => {
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
 
-  if (organizer?.type === 'individual' || (!perms.canManageTeam && !can('org.members.view'))) {
+  if (!perms.canManageTeam && !can('org.members.view')) {
     return <Navigate to="/organizer" replace />;
   }
 

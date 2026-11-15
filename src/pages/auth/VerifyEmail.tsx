@@ -45,9 +45,16 @@ export const VerifyEmail: React.FC = () => {
     const cachedUserStr = localStorage.getItem('strayttix_auth_user') || sessionStorage.getItem('strayttix_auth_user');
     const cachedOrg = localStorage.getItem('strayttix_active_organizer');
 
+    // Route new accounts through onboarding if not completed yet
     if (cachedUserStr) {
       try {
         const parsed = JSON.parse(cachedUserStr);
+        const isOnboarded = localStorage.getItem(`strayttix_onboarding_completed_${parsed.id || 'guest'}`);
+        if (!isOnboarded) {
+          navigate('/onboarding', { replace: true });
+          return;
+        }
+
         if (parsed.accountType === 'organizer' || parsed.role === 'organizer' || cachedOrg) {
           navigate('/organizer', { replace: true });
           return;

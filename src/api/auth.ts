@@ -291,15 +291,17 @@ export const authApi = {
     search?: string;
     startDate?: string;
     endDate?: string;
+    start_date?: string;
+    end_date?: string;
   }): Promise<ApiResponse<UserActivityPagination>> {
-    const { data } = await apiClient.get<ApiResponse<UserActivityPagination>>('/auth/me/activity', {
+    const { data } = await apiClient.get<ApiResponse<UserActivityPagination>>('/auth/activities', {
       params: {
         page: params?.page || 1,
         per_page: params?.per_page || params?.perPage || 15,
         action: params?.action,
         search: params?.search,
-        start_date: params?.startDate,
-        end_date: params?.endDate,
+        start_date: params?.start_date || params?.startDate,
+        end_date: params?.end_date || params?.endDate,
       },
     });
     return data;
@@ -343,6 +345,22 @@ export const authApi = {
 
   async resendVerificationEmail(): Promise<ApiResponse<any>> {
     const { data } = await apiClient.post<ApiResponse<any>>('/auth/email/resend');
+    return data;
+  },
+
+  async getGoogleRedirectUrl(captchaToken?: string): Promise<ApiResponse<{ url: string }>> {
+    if (captchaToken) {
+      const { data } = await apiClient.post<ApiResponse<{ url: string }>>('/auth/google/redirect', {
+        captcha_token: captchaToken,
+      });
+      return data;
+    }
+    const { data } = await apiClient.get<ApiResponse<{ url: string }>>('/auth/google/redirect');
+    return data;
+  },
+
+  async handleGoogleCallback(payload: { code?: string; access_token?: string; redirect_uri?: string }): Promise<ApiResponse<AuthPayload & { is_new_user?: boolean }>> {
+    const { data } = await apiClient.post<ApiResponse<AuthPayload & { is_new_user?: boolean }>>('/auth/google/callback', payload);
     return data;
   }
 };

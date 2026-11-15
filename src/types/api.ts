@@ -802,6 +802,11 @@ export interface AppSettings {
   platform_fee_percentage?: number | null;
   platform_fee_fixed?: number | null;
   platform_fee_passthrough?: boolean | null;
+  auth_captcha_provider?: 'none' | 'recaptcha' | 'turnstile' | string;
+  recaptcha_site_key?: string | null;
+  recaptcha_secret_key?: string | null;
+  cloudflare_turnstile_site_key?: string | null;
+  cloudflare_turnstile_secret_key?: string | null;
 }
 
 export interface UserActivityLog {

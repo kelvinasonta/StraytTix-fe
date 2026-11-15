@@ -35,6 +35,21 @@ import { apiClient, getApiErrorMessage } from '../../api/client';
 import { useSettings } from '../../context/SettingsContext';
 import { getFeeConfig, calculatePlatformFee } from '../../utils/fees';
 
+interface SavedReservationState {
+  order?: any;
+  reservedUntil?: string;
+  reservedUntilTime: number;
+  selectedTickets?: Record<string, number>;
+  step?: 1 | 2 | 3;
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  answers?: Record<string, string>;
+  appliedPromo?: any;
+}
+
+const getReservationStorageKey = (identifier: string) => `eventsos_checkout_hold_${identifier}`;
+
 export const CheckoutPage: React.FC = () => {
   const { settings } = useSettings();
   const { percentage: feePct, fixed: feeFixed, passthrough } = getFeeConfig(settings);
@@ -45,8 +60,27 @@ export const CheckoutPage: React.FC = () => {
   const { showNotification } = useNotification();
   const isGuestCheckoutAllowed = useFeatureFlag('guest_checkout');
 
-  // Selected tickets state passed via location state or URL params
-  const stateSelectedTickets: Record<string, number> = (location.state as any)?.selectedTickets || {};
+  // Check for existing saved reservation in sessionStorage
+  const storageKey = slug ? getReservationStorageKey(slug) : '';
+  const savedReservation: SavedReservationState | null = (() => {
+    if (!storageKey) return null;
+    try {
+      const data = sessionStorage.getItem(storageKey);
+      if (!data) return null;
+      const parsed = JSON.parse(data) as SavedReservationState;
+      if (parsed?.reservedUntilTime && parsed.reservedUntilTime > Date.now()) {
+        return parsed;
+      }
+      sessionStorage.removeItem(storageKey);
+    } catch {
+      // ignore json parse error
+    }
+    return null;
+  })();
+
+  // Selected tickets state passed via location state or URL params or restored from session
+  const stateSelectedTickets: Record<string, number> =
+    (location.state as any)?.selectedTickets || savedReservation?.selectedTickets || {};
   const [selectedTickets, setSelectedTickets] = useState<Record<string, number>>(stateSelectedTickets);
 
   const [event, setEvent] = useState<Event | null>((location.state as any)?.event || null);
@@ -54,22 +88,57 @@ export const CheckoutPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Form & Wizard State
-  const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Attendee Info & Questions, 2: Payment Review, 3: Success
-  const [fullName, setFullName] = useState(user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '');
-  const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState(user?.phone || '');
+  const [step, setStep] = useState<1 | 2 | 3>(savedReservation?.step || 1);
+  const [fullName, setFullName] = useState(
+    savedReservation?.fullName || (user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '')
+  );
+  const [email, setEmail] = useState(savedReservation?.email || user?.email || '');
+  const [phone, setPhone] = useState(savedReservation?.phone || user?.phone || '');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'bank' | 'apple'>('card');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
 
   // Promoters & Custom Questions state
   const [promoCodeInput, setPromoCodeInput] = useState('');
-  const [appliedPromo, setAppliedPromo] = useState<any | null>(null);
+  const [appliedPromo, setAppliedPromo] = useState<any | null>(savedReservation?.appliedPromo || null);
   const [promoError, setPromoError] = useState('');
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>(savedReservation?.answers || {});
 
-  // 15-minute order reservation countdown timer
-  const [timeLeft, setTimeLeft] = useState<number>(15 * 60);
+  // Backend Order & Reservation State
+  const [activeOrder, setActiveOrder] = useState<any | null>(savedReservation?.order || null);
+  const [isReserving, setIsReserving] = useState<boolean>(false);
+  const [reservedUntilTime, setReservedUntilTime] = useState<number | null>(() => {
+    if (savedReservation?.reservedUntilTime) {
+      return savedReservation.reservedUntilTime;
+    }
+    // Persist initial 15-minute checkout session deadline so refreshing on Step 1 never resets the counter
+    const initialDeadline = Date.now() + 15 * 60 * 1000;
+    if (storageKey) {
+      try {
+        sessionStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            reservedUntilTime: initialDeadline,
+            selectedTickets: stateSelectedTickets,
+            step: 1,
+          })
+        );
+      } catch {
+        // ignore storage error
+      }
+    }
+    return initialDeadline;
+  });
+
+  // Order reservation countdown timer in seconds, initializing from actual remaining time
+  const [timeLeft, setTimeLeft] = useState<number>(() => {
+    const targetTime = savedReservation?.reservedUntilTime || reservedUntilTime;
+    if (targetTime) {
+      return Math.max(0, Math.floor((targetTime - Date.now()) / 1000));
+    }
+    return 15 * 60;
+  });
 
   // Load Event if not provided in router state
   useEffect(() => {
@@ -133,14 +202,137 @@ export const CheckoutPage: React.FC = () => {
     }
   }, [event, location.search]);
 
-  // 15-minute countdown interval
+  // Immediately create backend order reservation on checkout mount if not already reserved
+  useEffect(() => {
+    if (!event || activeOrder || isReserving || step === 3) return;
+    const validSelected = Object.entries(selectedTickets)
+      .filter(([_, qty]) => qty > 0)
+      .map(([ticketId, quantity]) => {
+        const tier = event.tickets?.find((t) => t.id === ticketId) || {
+          id: ticketId,
+          name: 'Standard Ticket',
+          price: 0,
+          quantity: 100,
+        };
+        return { tier, quantity };
+      });
+
+    if (validSelected.length === 0) return;
+
+    // Only auto-reserve if we have real UUID ticket types on the backend
+    const firstTierId = validSelected[0]?.tier?.id || (validSelected[0]?.tier as any)?.uuid || '';
+    if (!firstTierId || firstTierId.startsWith('tkt-')) return;
+
+    let cancelled = false;
+    const reserveOnMount = async () => {
+      try {
+        const reservationPayload = {
+          event_id: event.id,
+          ticket_type_uuid: firstTierId,
+          items: validSelected.map(({ tier, quantity }) => ({
+            ticket_type_uuid: tier.id || (tier as any).uuid || '',
+            quantity,
+            attendee_name: fullName.trim() || undefined,
+            attendee_email: email.trim() || undefined,
+          })),
+          customer_name: fullName.trim() || undefined,
+          customer_email: email.trim() || undefined,
+          customer_phone: phone.trim() || undefined,
+        };
+
+        const res = await apiClient.post(`/events/${event.id}/orders`, reservationPayload);
+        const createdOrder = res.data?.data || res.data;
+        if (!cancelled && createdOrder) {
+          setActiveOrder(createdOrder);
+          let expiresMs = reservedUntilTime || Date.now() + 15 * 60 * 1000;
+          if (!reservedUntilTime && createdOrder.reservedUntil) {
+            expiresMs = new Date(createdOrder.reservedUntil).getTime();
+            setReservedUntilTime(expiresMs);
+            setTimeLeft(Math.max(0, Math.floor((expiresMs - Date.now()) / 1000)));
+          }
+          if (storageKey) {
+            sessionStorage.setItem(
+              storageKey,
+              JSON.stringify({
+                order: createdOrder,
+                reservedUntil: createdOrder.reservedUntil,
+                reservedUntilTime: expiresMs,
+                selectedTickets,
+                step,
+                fullName,
+                email,
+                phone,
+                answers,
+                appliedPromo,
+              })
+            );
+          }
+        }
+      } catch (err) {
+        console.warn('Initial background reservation hold skipped:', err);
+      }
+    };
+
+    reserveOnMount();
+    return () => {
+      cancelled = true;
+    };
+  }, [event, selectedTickets, activeOrder]);
+
+  // Keep sessionStorage synced when step or form fields change
+  useEffect(() => {
+    if (!storageKey || step === 3 || !reservedUntilTime) return;
+    try {
+      const saveState: SavedReservationState = {
+        order: activeOrder,
+        reservedUntil: activeOrder?.reservedUntil,
+        reservedUntilTime,
+        selectedTickets,
+        step,
+        fullName,
+        email,
+        phone,
+        answers,
+        appliedPromo,
+      };
+      sessionStorage.setItem(storageKey, JSON.stringify(saveState));
+    } catch {
+      // ignore storage errors
+    }
+  }, [storageKey, activeOrder, reservedUntilTime, selectedTickets, step, fullName, email, phone, answers, appliedPromo]);
+
+  // Sync countdown timer with backend order reservation expiration
   useEffect(() => {
     if (step === 3) return;
+
+    const computeSecondsLeft = () => {
+      if (reservedUntilTime) {
+        const remaining = Math.max(0, Math.floor((reservedUntilTime - Date.now()) / 1000));
+        return remaining;
+      }
+      return null;
+    };
+
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) {
+        const serverRemaining = computeSecondsLeft();
+        const currentVal = serverRemaining !== null ? serverRemaining : prev - 1;
+
+        if (currentVal <= 0) {
           clearInterval(interval);
-          showNotification('Ticket reservation hold expired. Please reselect your passes.', 'warning');
+          showNotification('Ticket reservation hold expired. Your held tickets have been returned to inventory.', 'warning');
+
+          if (storageKey) {
+            sessionStorage.removeItem(storageKey);
+          }
+
+          // Release backend reservation if order is active
+          if (activeOrder?.id || activeOrder?.uuid) {
+            const orderId = activeOrder.id || activeOrder.uuid;
+            const gToken = activeOrder.guestToken || activeOrder.guest_token;
+            ordersApi.cancelOrder(orderId, gToken).catch(() => {});
+          }
+
           if (event) {
             navigate(`/events/${event.slug || event.id}/tickets`);
           } else {
@@ -148,11 +340,13 @@ export const CheckoutPage: React.FC = () => {
           }
           return 0;
         }
-        return prev - 1;
+
+        return currentVal;
       });
     }, 1000);
+
     return () => clearInterval(interval);
-  }, [step, event, navigate, showNotification]);
+  }, [step, reservedUntilTime, activeOrder, event, navigate, showNotification]);
 
   const formatTimer = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -212,7 +406,7 @@ export const CheckoutPage: React.FC = () => {
     showNotification(`Promo code ${code} applied successfully!`, 'success');
   };
 
-  const handleProceedToReview = (e: React.FormEvent) => {
+  const handleProceedToReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated && !isGuestCheckoutAllowed) {
       showNotification('Guest checkout is disabled. Please log in to complete your ticket order.', 'warning');
@@ -242,11 +436,117 @@ export const CheckoutPage: React.FC = () => {
       }
     }
 
+    if (!event) return;
+
     if (isFree) {
       handleConfirmPurchase();
-    } else {
+      return;
+    }
+
+    // If an active order reservation hold was already created on mount, move directly to Step 2
+    if (activeOrder && (activeOrder.id || activeOrder.uuid)) {
       setStep(2);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Otherwise initialize backend order reservation hold now
+    setIsReserving(true);
+    try {
+      const primaryItem = selectedItems[0];
+      const ticketTypeUuid = primaryItem?.tier?.id || (primaryItem?.tier as any)?.uuid || '';
+
+      const reservationPayload = {
+        event_id: event.id,
+        ticket_type_uuid: ticketTypeUuid,
+        items: selectedItems.map(({ tier, quantity }) => ({
+          ticket_type_uuid: tier.id || (tier as any).uuid || '',
+          quantity,
+          attendee_name: fullName.trim(),
+          attendee_email: email.trim(),
+        })),
+        customer_name: fullName.trim(),
+        customer_email: email.trim(),
+        customer_phone: phone.trim() || undefined,
+        notes: appliedPromo?.code ? `Promo code: ${appliedPromo.code}` : undefined,
+      };
+
+      const res = await apiClient.post(`/events/${event.id}/orders`, reservationPayload);
+      const createdOrder = res.data?.data || res.data;
+
+      if (createdOrder) {
+        setActiveOrder(createdOrder);
+        let expiresMs: number = reservedUntilTime || Date.now() + 15 * 60 * 1000;
+        if (!reservedUntilTime && createdOrder.reservedUntil) {
+          expiresMs = new Date(createdOrder.reservedUntil).getTime();
+          setReservedUntilTime(expiresMs);
+          const initialSecs = Math.max(0, Math.floor((expiresMs - Date.now()) / 1000));
+          setTimeLeft(initialSecs);
+        }
+
+        // Persist reservation hold so browser refresh preserves countdown and state
+        if (storageKey) {
+          try {
+            const saveState: SavedReservationState = {
+              order: createdOrder,
+              reservedUntil: createdOrder.reservedUntil,
+              reservedUntilTime: expiresMs,
+              selectedTickets,
+              step: 2,
+              fullName,
+              email,
+              phone,
+              answers,
+              appliedPromo,
+            };
+            sessionStorage.setItem(storageKey, JSON.stringify(saveState));
+          } catch (storageErr) {
+            console.warn('Failed to save reservation to sessionStorage:', storageErr);
+          }
+        }
+      }
+
+      setStep(2);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (reserveErr: any) {
+      console.warn('Backend order reservation hold failed, continuing with direct confirmation flow:', reserveErr);
+      const errMsg = getApiErrorMessage(reserveErr);
+      if (errMsg && errMsg.toLowerCase().includes('capacity')) {
+        showNotification(errMsg, 'error');
+        return;
+      }
+      setStep(2);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setIsReserving(false);
+    }
+  };
+
+  const handleCancelReservation = async () => {
+    if (isCancelling) return;
+    setIsCancelling(true);
+
+    try {
+      if (storageKey) {
+        sessionStorage.removeItem(storageKey);
+      }
+
+      if (activeOrder?.id || activeOrder?.uuid) {
+        const orderId = activeOrder.id || activeOrder.uuid;
+        const gToken = activeOrder.guestToken || activeOrder.guest_token;
+        await ordersApi.cancelOrder(orderId, gToken);
+      }
+
+      showNotification('Ticket reservation cancelled and tickets returned to inventory.', 'info');
+    } catch (err) {
+      console.warn('Error releasing reservation order:', err);
+    } finally {
+      setIsCancelling(false);
+      if (event) {
+        navigate(`/events/${event.slug || event.id}/tickets`);
+      } else {
+        navigate('/discover');
+      }
     }
   };
 
@@ -290,59 +590,66 @@ export const CheckoutPage: React.FC = () => {
     };
 
     let bookingCompleted = false;
-    let orderResult: any = null;
+    let orderResult: any = activeOrder || null;
 
-    // Strategy 1: Dedicated Event Orders endpoint (POST /events/:id/orders)
-    try {
-      const res = await apiClient.post(`/events/${event.id}/orders`, unifiedPayload);
-      if (res.data) {
-        orderResult = res.data.data || res.data;
-        bookingCompleted = true;
-      }
-    } catch (err: any) {
-      console.warn('POST /events/:id/orders route not supported or failed, trying /orders:', err?.message);
-    }
-
-    // Strategy 2: Global Orders endpoint (POST /orders)
-    if (!bookingCompleted) {
+    // If an active order reservation already exists on backend, reuse it directly
+    if (activeOrder && (activeOrder.id || activeOrder.uuid)) {
+      bookingCompleted = true;
+    } else {
+      // Strategy 1: Dedicated Event Orders endpoint (POST /events/:id/orders)
       try {
-        const res = await apiClient.post('/orders', unifiedPayload);
+        const res = await apiClient.post(`/events/${event.id}/orders`, unifiedPayload);
         if (res.data) {
           orderResult = res.data.data || res.data;
           bookingCompleted = true;
+          setActiveOrder(orderResult);
         }
       } catch (err: any) {
-        console.warn('POST /orders route not supported or failed, trying /tickets/purchase:', err?.message);
+        console.warn('POST /events/:id/orders route not supported or failed, trying /orders:', err?.message);
       }
-    }
 
-    // Strategy 3: Direct Ticket Purchase endpoint (POST /tickets/purchase)
-    if (!bookingCompleted) {
-      try {
-        const res = await apiClient.post('/tickets/purchase', unifiedPayload);
-        if (res.data) {
-          orderResult = res.data.data || res.data;
-          bookingCompleted = true;
+      // Strategy 2: Global Orders endpoint (POST /orders)
+      if (!bookingCompleted) {
+        try {
+          const res = await apiClient.post('/orders', unifiedPayload);
+          if (res.data) {
+            orderResult = res.data.data || res.data;
+            bookingCompleted = true;
+            setActiveOrder(orderResult);
+          }
+        } catch (err: any) {
+          console.warn('POST /orders route not supported or failed, trying /tickets/purchase:', err?.message);
         }
-      } catch (err: any) {
-        console.warn('POST /tickets/purchase route not supported or failed, trying /tickets:', err?.message);
       }
-    }
 
-    // Strategy 4: Standard Ticket issue endpoint (POST /tickets)
-    if (!bookingCompleted) {
-      try {
-        const res = await apiClient.post('/tickets', unifiedPayload);
-        if (res.data) {
-          orderResult = res.data.data || res.data;
-          bookingCompleted = true;
+      // Strategy 3: Direct Ticket Purchase endpoint (POST /tickets/purchase)
+      if (!bookingCompleted) {
+        try {
+          const res = await apiClient.post('/tickets/purchase', unifiedPayload);
+          if (res.data) {
+            orderResult = res.data.data || res.data;
+            bookingCompleted = true;
+          }
+        } catch (err: any) {
+          console.warn('POST /tickets/purchase route not supported or failed, trying /tickets:', err?.message);
         }
-      } catch (err: any) {
-        console.error('All checkout POST endpoints returned error:', err);
-        const errMsg = getApiErrorMessage(err, 'Failed to complete booking. Please try again.');
-        showNotification(errMsg, 'error');
-        setIsProcessing(false);
-        return;
+      }
+
+      // Strategy 4: Standard Ticket issue endpoint (POST /tickets)
+      if (!bookingCompleted) {
+        try {
+          const res = await apiClient.post('/tickets', unifiedPayload);
+          if (res.data) {
+            orderResult = res.data.data || res.data;
+            bookingCompleted = true;
+          }
+        } catch (err: any) {
+          console.error('All checkout POST endpoints returned error:', err);
+          const errMsg = getApiErrorMessage(err, 'Failed to complete booking. Please try again.');
+          showNotification(errMsg, 'error');
+          setIsProcessing(false);
+          return;
+        }
       }
     }
 
@@ -354,6 +661,9 @@ export const CheckoutPage: React.FC = () => {
         const paymentRes = await apiClient.post(`/orders/${targetOrderId}/payments`, {
           gateway: 'paystack',
           callback_url: `${window.location.origin}/checkout/callback`,
+          customer_name: fullName.trim(),
+          customer_email: email.trim(),
+          customer_phone: phone.trim() || undefined,
         }, {
           headers: guestToken ? { 'X-Guest-Token': guestToken } : {}
         });
@@ -372,6 +682,10 @@ export const CheckoutPage: React.FC = () => {
     }
 
     // Confirm booking success on screen
+    if (storageKey) {
+      sessionStorage.removeItem(storageKey);
+    }
+
     const generatedOrder =
       orderResult?.orderNumber ||
       orderResult?.order_number ||
@@ -434,13 +748,15 @@ export const CheckoutPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-200 dark:border-white/10">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <Link
-                to={`/events/${event.slug || event.id}/tickets`}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white transition-colors"
+              <button
+                type="button"
+                onClick={handleCancelReservation}
+                disabled={isCancelling}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back to Tickets</span>
-              </Link>
+              </button>
               <span className="text-zinc-300">•</span>
               <span className="text-xs font-bold text-zinc-400">Step {step} of 3</span>
             </div>
@@ -459,6 +775,22 @@ export const CheckoutPage: React.FC = () => {
                   <strong className="font-mono font-bold text-amber-950 dark:text-amber-200">{formatTimer(timeLeft)}</strong>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={handleCancelReservation}
+                disabled={isCancelling}
+                className="px-3.5 py-2 rounded-2xl border border-zinc-200 dark:border-white/10 hover:border-red-300 dark:hover:border-red-500/30 text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {isCancelling ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Releasing...</span>
+                  </>
+                ) : (
+                  <span>Cancel Hold</span>
+                )}
+              </button>
             </div>
           )}
         </div>
@@ -695,11 +1027,20 @@ export const CheckoutPage: React.FC = () => {
                   <div className="pt-4">
                     <button
                       type="submit"
-                      disabled={isProcessing}
-                      className="w-full py-4 px-6 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+                      disabled={isProcessing || isReserving}
+                      className="w-full py-4 px-6 bg-[#E31B23] hover:bg-[#B91C1C] disabled:opacity-60 text-white text-sm font-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
                     >
-                      <span>{isFree ? 'Confirm Free Registration' : 'Continue to Payment Review'}</span>
-                      <ArrowRight className="w-4 h-4" />
+                      {isReserving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Securing Ticket Reservation...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>{isFree ? 'Confirm Free Registration' : 'Continue to Payment Review'}</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
                     </button>
                   </div>
                 </form>

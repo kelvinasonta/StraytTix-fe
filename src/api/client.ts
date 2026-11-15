@@ -28,6 +28,10 @@ const isPublicAuthRoute = (url?: string): boolean => {
     '/invitations/accept',
     '/auth/invitations/verify',
     '/invitations/verify',
+    '/auth/google/redirect',
+    '/auth/google/callback',
+    '/auth/callback/google',
+    '/admin/feature-flags',
     '/explore/events',
     '/events',
     '/payments/verify',
@@ -89,22 +93,14 @@ apiClient.interceptors.response.use(
           }
         } catch (refreshErr) {
           tokenStorage.clearAll();
-          // Never force redirect to login if the user is in public guest flows (checkout, event discovery, etc.)
+          // Only redirect to login with expired=true if the user is currently on an authenticated protected route
           const pathname = window.location.pathname;
-          const isGuestFlow =
-            pathname.startsWith('/login') ||
-            pathname.startsWith('/register') ||
-            pathname.startsWith('/forgot-password') ||
-            pathname.startsWith('/reset-password') ||
-            pathname.startsWith('/verify-email') ||
-            pathname.startsWith('/invitations') ||
-            pathname.startsWith('/checkout') ||
-            pathname.includes('/checkout') ||
-            pathname.startsWith('/events') ||
-            pathname.startsWith('/discover') ||
-            pathname === '/';
+          const isProtectedRoute =
+            pathname.startsWith('/dashboard') ||
+            pathname.startsWith('/organizer') ||
+            (pathname.startsWith('/admin') && pathname !== '/admin/login');
 
-          if (!isGuestFlow) {
+          if (isProtectedRoute) {
             window.location.href = `/login?expired=true`;
           }
           return Promise.reject(refreshErr);
