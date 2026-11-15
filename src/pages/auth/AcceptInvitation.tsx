@@ -253,6 +253,12 @@ export const AcceptInvitation: React.FC = () => {
         tokenStorage.setActiveOrganizerUuid(res.data.organizer.id, true);
       }
 
+      // Mark onboarding as completed so invited team members bypass tenant onboarding flow
+      const resolvedUserId = res.data?.user?.id || user?.id;
+      if (resolvedUserId) {
+        localStorage.setItem(`strayttix_onboarding_completed_${resolvedUserId}`, 'true');
+      }
+
       await refreshUser();
       setIsSuccess(true);
       showNotification('Invitation accepted successfully! Welcome to the team.', 'success');
@@ -297,6 +303,12 @@ export const AcceptInvitation: React.FC = () => {
         tokenStorage.setActiveOrganizerUuid(res.data.organizer.id, true);
       }
 
+      // Mark onboarding as completed so invited team members bypass tenant onboarding flow
+      const resolvedUserId = res.data?.user?.id || user?.id;
+      if (resolvedUserId) {
+        localStorage.setItem(`strayttix_onboarding_completed_${resolvedUserId}`, 'true');
+      }
+
       await refreshUser();
       setIsSuccess(true);
       showNotification('Account created and invitation accepted! Welcome to StraytTix.', 'success');
@@ -332,6 +344,12 @@ export const AcceptInvitation: React.FC = () => {
       if (res.data?.organizer) {
         const orgUuid = res.data.organizer.uuid || res.data.organizer.id;
         tokenStorage.setActiveOrganizerUuid(orgUuid, true);
+      }
+
+      // Mark onboarding as completed so invited team members bypass tenant onboarding flow
+      const resolvedUserId = res.data?.user?.id || user?.id;
+      if (resolvedUserId) {
+        localStorage.setItem(`strayttix_onboarding_completed_${resolvedUserId}`, 'true');
       }
 
       await refreshUser();

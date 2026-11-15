@@ -22,6 +22,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { useSettings } from '../../context/SettingsContext';
 import { creditsApi } from '../../api/credits';
+import { organizerApi } from '../../api/organizers';
 import { CreditTopupModal, CreditLedgerTable } from '../../components/credits';
 import type { CreditWallet, CreditLedgerItem, ReconcileWalletResponse } from '../../types/api';
 
@@ -50,6 +51,60 @@ export const Credits: React.FC = () => {
   // Live Reconciliation State
   const [isReconciling, setIsReconciling] = useState(false);
   const [reconcileResult, setReconcileResult] = useState<ReconcileWalletResponse | null>(null);
+
+  // Subscription Plan State
+  const [subscription, setSubscription] = useState<any | null>(null);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+  const [upgradingTier, setUpgradingTier] = useState<string | null>(null);
+  const [isCancellingSub, setIsCancellingSub] = useState(false);
+
+  const fetchSubscription = useCallback(async () => {
+    if (!organizer?.id) return;
+    try {
+      const res = await organizerApi.getSubscription(organizer.id);
+      setSubscription(res.data || null);
+    } catch (err) {
+      console.warn('Failed to fetch organizer subscription:', err);
+    }
+  }, [organizer?.id]);
+
+  const handleUpgradePlan = async (tier: 'pro') => {
+    if (!organizer?.id) return;
+    try {
+      setUpgradingTier(tier);
+      const res = await organizerApi.upgradeSubscription(organizer.id, {
+        plan_tier: tier,
+        months: billingCycle === 'annual' ? 12 : 1,
+        billing_cycle: billingCycle,
+      });
+      setSubscription(res.data || null);
+      showNotification(
+        res.message || `Upgraded to ${tier.toUpperCase()} (${billingCycle}) plan!`,
+        'success'
+      );
+      await fetchWallet();
+      await fetchLedger();
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || 'Insufficient credits to upgrade plan. Please top up your wallet first.';
+      showNotification(msg, 'error');
+    } finally {
+      setUpgradingTier(null);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!organizer?.id) return;
+    try {
+      setIsCancellingSub(true);
+      const res = await organizerApi.cancelSubscription(organizer.id);
+      setSubscription(res.data || null);
+      showNotification(res.message || 'Auto-renewal cancelled.', 'info');
+    } catch (err: any) {
+      showNotification('Failed to cancel subscription auto-renewal.', 'error');
+    } finally {
+      setIsCancellingSub(false);
+    }
+  };
 
   // Fetch Wallet Data
   const fetchWallet = useCallback(async () => {
@@ -113,7 +168,8 @@ export const Credits: React.FC = () => {
   // Initial load
   useEffect(() => {
     fetchWallet();
-  }, [fetchWallet]);
+    fetchSubscription();
+  }, [fetchWallet, fetchSubscription]);
 
   useEffect(() => {
     fetchLedger();
@@ -312,6 +368,173 @@ export const Credits: React.FC = () => {
             <p className="text-[11px] text-zinc-500 font-medium pt-1">
               Held for active email/SMS dispatch worker jobs
             </p>
+          </div>
+        </div>
+
+        {/* 1.5 Subscription Plan & Ticket Commission Tier */}
+        <div className="p-6 rounded-3xl bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 shadow-xs space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 dark:border-white/10 pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#E31B23]" />
+                <h2 className="text-base font-black text-zinc-950 dark:text-white tracking-tight">
+                  Organizer Subscription & Commission Tier
+                </h2>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                  Active: {subscription?.current_plan?.name || 'Free Starter'}
+                </span>
+              </div>
+              <p className="text-xs text-zinc-500 mt-0.5">
+                Upgrade with your wallet credits to unlock lower ticket fees and expanded team member limits for 30 days.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Billing Cycle Toggle */}
+              <div className="inline-flex rounded-xl bg-zinc-100 dark:bg-white/5 p-1 border border-zinc-200 dark:border-white/10 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setBillingCycle('monthly')}
+                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                    billingCycle === 'monthly'
+                      ? 'bg-white dark:bg-[#0F0F14] text-zinc-950 dark:text-white shadow-2xs'
+                      : 'text-zinc-500'
+                  }`}
+                >
+                  Monthly (30d)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBillingCycle('annual')}
+                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                    billingCycle === 'annual'
+                      ? 'bg-[#E31B23] text-white shadow-2xs'
+                      : 'text-zinc-500'
+                  }`}
+                >
+                  Annual (Save 2 Months)
+                </button>
+              </div>
+
+              {subscription?.current_plan?.is_paid_active && subscription?.current_plan?.auto_renew && (
+                <button
+                  type="button"
+                  disabled={isCancellingSub}
+                  onClick={handleCancelSubscription}
+                  className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-white/10 text-[11px] font-bold text-zinc-500 hover:text-rose-500 transition-colors cursor-pointer"
+                >
+                  {isCancellingSub ? 'Cancelling...' : 'Cancel Auto-Renew'}
+                </button>
+              )}
+
+              {subscription?.effective_fee && (
+                <div className="px-3.5 py-2 rounded-2xl bg-zinc-50 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/10 text-right">
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Your Effective Ticket Fee</span>
+                  <span className="text-sm font-black text-zinc-950 dark:text-white">
+                    {subscription.effective_fee.percentage}% + ₦{Number(subscription.effective_fee.fixed).toLocaleString()}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Free Starter */}
+            <div className={`p-5 rounded-2xl border flex flex-col justify-between space-y-4 ${
+              (subscription?.current_plan?.tier || 'free') === 'free'
+                ? 'border-zinc-900 dark:border-white bg-zinc-50/60 dark:bg-white/[0.04]'
+                : 'border-zinc-200 dark:border-white/10 bg-zinc-50/30 dark:bg-white/[0.02]'
+            }`}>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-zinc-500">Free Starter</span>
+                  {(subscription?.current_plan?.tier || 'free') === 'free' && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-200 dark:bg-white/10 text-zinc-800 dark:text-white">
+                      Current Plan
+                    </span>
+                  )}
+                </div>
+                <p className="text-2xl font-black text-zinc-950 dark:text-white">0 Credits <span className="text-xs font-normal text-zinc-500">/ mo</span></p>
+                <ul className="text-xs text-zinc-600 dark:text-zinc-400 space-y-1.5 pt-2">
+                  <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Standard platform ticket fee</li>
+                  <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Up to {subscription?.current_plan?.max_staff_members || 3} staff members</li>
+                  <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Unlimited free & paid events</li>
+                </ul>
+              </div>
+              <div className="text-[11px] font-semibold text-zinc-400 pt-2">Included by default</div>
+            </div>
+
+            {/* Pro Growth */}
+            <div className={`p-5 rounded-2xl border flex flex-col justify-between space-y-4 ${
+              subscription?.current_plan?.tier === 'pro'
+                ? 'border-[#E31B23] bg-[#E31B23]/5'
+                : 'border-zinc-200 dark:border-white/10 bg-zinc-50/30 dark:bg-white/[0.02]'
+            }`}>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-[#E31B23]">Pro Growth</span>
+                  {subscription?.current_plan?.tier === 'pro' && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#E31B23] text-white">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <p className="text-2xl font-black text-zinc-950 dark:text-white">
+                  1,500 Credits <span className="text-xs font-normal text-zinc-500">/ 30 days (₦15,000)</span>
+                </p>
+                <ul className="text-xs text-zinc-600 dark:text-zinc-400 space-y-1.5 pt-2">
+                  <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Discounted <strong>2.5% + ₦50</strong> ticket fee</li>
+                  <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Up to 15 team & staff members</li>
+                  <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Priority payout settlements</li>
+                </ul>
+              </div>
+              <button
+                type="button"
+                disabled={upgradingTier !== null}
+                onClick={() => handleUpgradePlan('pro')}
+                className="w-full py-2 px-4 rounded-xl bg-[#E31B23] hover:bg-[#B91C1C] disabled:opacity-50 text-white text-xs font-black transition-colors cursor-pointer"
+              >
+                {upgradingTier === 'pro'
+                  ? 'Upgrading...'
+                  : subscription?.current_plan?.tier === 'pro'
+                  ? 'Extend +30 Days (1,500 Credits)'
+                  : 'Upgrade to Pro (1,500 Credits)'}
+              </button>
+            </div>
+
+            {/* Enterprise (Custom) */}
+            <div className={`p-5 rounded-2xl border flex flex-col justify-between space-y-4 ${
+              subscription?.current_plan?.tier === 'enterprise'
+                ? 'border-amber-500 bg-amber-500/5'
+                : 'border-zinc-200 dark:border-white/10 bg-zinc-50/30 dark:bg-white/[0.02]'
+            }`}>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-amber-500">Enterprise</span>
+                  {subscription?.current_plan?.tier === 'enterprise' && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500 text-black">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <p className="text-2xl font-black text-zinc-950 dark:text-white">
+                  Custom <span className="text-xs font-normal text-zinc-500">/ tailored pricing</span>
+                </p>
+                <ul className="text-xs text-zinc-600 dark:text-zinc-400 space-y-1.5 pt-2">
+                  <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Bespoke discounted ticket commission</li>
+                  <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Unlimited team members & scanner passes</li>
+                  <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Dedicated Account Manager & Gate SLA</li>
+                  <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Custom payout & instant settlement terms</li>
+                </ul>
+              </div>
+              <a
+                href={settings?.support_email ? `mailto:${settings.support_email}?subject=Enterprise%20Plan%20Inquiry%20-%20${encodeURIComponent(organizer?.name || '')}` : 'mailto:support@strayttix.com?subject=Enterprise%20Plan%20Inquiry'}
+                className="w-full py-2 px-4 rounded-xl bg-zinc-900 dark:bg-white hover:opacity-90 text-white dark:text-zinc-950 text-xs font-black text-center transition-opacity cursor-pointer inline-flex items-center justify-center gap-1.5"
+              >
+                <span>Contact Sales for Custom</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
         </div>
 

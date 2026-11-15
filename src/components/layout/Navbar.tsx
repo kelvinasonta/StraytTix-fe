@@ -125,9 +125,10 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
     navigate('/');
   };
 
-  // Role permissions
-  const isOrganizer = user?.accountType === 'organizer';
-  const isOrganization = isOrganizer && organizer?.type === 'organization';
+  // Role permissions & active dashboard mode separation
+  const hasOrganization = user?.accountType === 'organizer' && Boolean(organizer);
+  const isAttendeePath = location.pathname.startsWith('/dashboard');
+  const isOrganizer = hasOrganization && !isAttendeePath;
   const role = resolveOrganizerRole(organizer);
 
   // 1. Guest Primary Nav Links
@@ -160,7 +161,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
     { to: '/discover', label: 'Discover Events', icon: Compass },
     { to: '/organizer/events', label: 'My Events', icon: Calendar },
     { to: '/organizer/orders', label: 'Sales & Orders', icon: Ticket },
-    ...(isOrganization ? [{ to: '/organizer/team', label: 'Team', icon: Users }] : []),
+    ...(isOrganizer ? [{ to: '/organizer/team', label: 'Team', icon: Users }] : []),
   ];
 
   const customerLinks = [
@@ -460,7 +461,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                           >
                             <Ticket className="w-3.5 h-3.5 text-zinc-400" /> Sales & Orders
                           </Link>
-                          {isOrganization && (
+                          {isOrganizer && (
                             <Link
                               to="/organizer/team"
                               onClick={() => setUserDropdown(false)}
@@ -486,6 +487,16 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                             <Settings className="w-3.5 h-3.5 text-zinc-400" /> {role === 'staff' ? 'Staff Settings' : 'Organization Settings'}
                           </Link>
                         </div>
+
+                        <div className="border-t border-zinc-150 dark:border-white/10 py-1">
+                          <Link
+                            to="/dashboard"
+                            onClick={() => setUserDropdown(false)}
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-[#E31B23] hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
+                          >
+                            <Ticket className="w-3.5 h-3.5" /> Switch to Attendee Mode
+                          </Link>
+                        </div>
                       </>
                     ) : (
                       <>
@@ -495,7 +506,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                           </p>
                           <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate">{user?.email}</p>
                           <span className="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300">
-                            Attendee Account
+                            Attendee Mode
                           </span>
                         </div>
 
@@ -529,6 +540,18 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
                             <UserIcon className="w-3.5 h-3.5 text-zinc-400" /> Profile & Settings
                           </Link>
                         </div>
+
+                        {hasOrganization && (
+                          <div className="border-t border-zinc-150 dark:border-white/10 py-1">
+                            <Link
+                              to="/organizer"
+                              onClick={() => setUserDropdown(false)}
+                              className="flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-[#E31B23] hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
+                            >
+                              <LayoutDashboard className="w-3.5 h-3.5" /> Switch to Organizer Console
+                            </Link>
+                          </div>
+                        )}
                       </>
                     )}
 

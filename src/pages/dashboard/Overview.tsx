@@ -16,18 +16,16 @@ import {
   Clock,
   Loader2,
   Compass,
-  Heart
+  Heart,
+  Building2
 } from 'lucide-react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { favoritesApi } from '../../api/favorites';
+import { BecomeOrganizerModal } from '../../components/organizer/BecomeOrganizerModal';
 
 export const Overview: React.FC = () => {
-  const { user } = useAuth();
-
-  // If an organizer accesses /dashboard, route them strictly to their organizer console
-  if (user?.accountType === 'organizer') {
-    return <Navigate to="/organizer" replace />;
-  }
+  const { user, organizer } = useAuth();
+  const [isBecomeOrganizerOpen, setIsBecomeOrganizerOpen] = useState(false);
 
   const firstName = user?.firstName || '';
 
@@ -97,6 +95,25 @@ export const Overview: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 z-10 flex-wrap">
+            {organizer ? (
+              <Link
+                to="/organizer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-900 dark:bg-white/10 hover:bg-zinc-800 dark:hover:bg-white/15 text-white text-xs font-bold rounded-xl transition-all shadow-xs border border-zinc-800 dark:border-white/15"
+              >
+                <Building2 className="w-4 h-4 text-[#E31B23]" />
+                <span>Switch to Organizer Console</span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsBecomeOrganizerOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 text-zinc-900 dark:text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer"
+              >
+                <Building2 className="w-4 h-4 text-[#E31B23]" />
+                <span>Become an Organizer</span>
+              </button>
+            )}
+
             <Link
               to="/dashboard/tickets"
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 text-zinc-900 dark:text-white text-xs font-bold rounded-xl transition-all shadow-xs"
@@ -110,7 +127,7 @@ export const Overview: React.FC = () => {
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl shadow-md hover:shadow-lg transition-all"
             >
               <Compass className="w-4 h-4" />
-              <span>Explore Events</span>
+              <span>Buy Tickets</span>
             </Link>
           </div>
 
@@ -299,7 +316,39 @@ export const Overview: React.FC = () => {
           </div>
         </div>
 
+        {/* Account Conversion / Organizer Mode Callout */}
+        {!organizer && (
+          <div className="bg-gradient-to-r from-[#E31B23]/10 via-white dark:via-[#0F0F14] to-white dark:to-[#0F0F14] rounded-3xl border border-[#E31B23]/25 p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-xs">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#E31B23] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#E31B23]/20">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-zinc-950 dark:text-white">
+                  Want to host your own events?
+                </h3>
+                <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-1 max-w-xl">
+                  Convert your Attendee account into an Organizer account to create events, sell tickets, manage staff permissions, and receive instant payouts.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsBecomeOrganizerOpen(true)}
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold shadow-md transition-all shrink-0 cursor-pointer"
+            >
+              <span>Convert to Organizer Account</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
       </div>
+
+      <BecomeOrganizerModal
+        isOpen={isBecomeOrganizerOpen}
+        onClose={() => setIsBecomeOrganizerOpen(false)}
+      />
     </DashboardLayout>
   );
 };

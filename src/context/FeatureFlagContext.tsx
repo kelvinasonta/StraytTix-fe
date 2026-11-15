@@ -86,15 +86,17 @@ export const FeatureFlagProvider: React.FC<{ children: React.ReactNode }> = ({ c
         // Auth features endpoint not critical
       }
 
-      // 2. Admin endpoint (if logged in as admin)
-      try {
-        const adminFlags = await adminApi.getFeatureFlags();
-        const parsedAdmin = parseFeatureMap(adminFlags);
-        if (Object.keys(parsedAdmin).length > 0) {
-          Object.assign(merged, parsedAdmin);
+      // 2. Admin endpoint (only if currently logged in as an admin)
+      if (user && ((user as any).isAdmin || (user as any).is_admin)) {
+        try {
+          const adminFlags = await adminApi.getFeatureFlags();
+          const parsedAdmin = parseFeatureMap(adminFlags);
+          if (Object.keys(parsedAdmin).length > 0) {
+            Object.assign(merged, parsedAdmin);
+          }
+        } catch {
+          // Admin flags not critical
         }
-      } catch {
-        // Admin flags not critical
       }
 
       if (Object.keys(merged).length > 0) {

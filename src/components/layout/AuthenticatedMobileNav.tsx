@@ -48,7 +48,6 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
 
   // Roles & permissions
   const isOrganizer = user?.accountType === 'organizer';
-  const isOrganization = isOrganizer && organizer?.type === 'organization';
   const isCustomer = !isOrganizer;
 
   // Strict mode: A customer account is ALWAYS strictly attendee mode
@@ -184,9 +183,7 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                   </h4>
                   <p className="text-xs text-zinc-400 truncate">{user?.email}</p>
                   <span className="inline-block mt-1 text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
-                    {isCustomer
-                      ? 'Attendee Account'
-                      : (isOrganization ? 'Organization Account' : 'Solo Organizer Account')}
+                    {isCustomer ? 'Attendee Account' : 'Organizer Workspace'}
                   </span>
                 </div>
               </div>
@@ -288,8 +285,8 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                       </NavLink>
                     )}
 
-                    {/* Team Members: ONLY for Organizations & allowed roles */}
-                    {isOrganization && can('org.members.view') && perms.canManageTeam && (
+                    {/* Team Members */}
+                    {can('org.members.view') && perms.canManageTeam && (
                       <NavLink
                         to="/organizer/team"
                         onClick={() => setDrawerOpen(false)}
@@ -406,8 +403,8 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                   </>
                 )}
 
-                {/* Switch to Attendee Account (if in Organizer Mode) */}
-                {isOrganizerMode && (
+                {/* Switch Mode: Attendee Mode <-> Organizer Console */}
+                {isOrganizerMode ? (
                   <div className="pt-2">
                     <Link
                       to="/dashboard"
@@ -416,7 +413,35 @@ export const AuthenticatedMobileNav: React.FC<AuthenticatedMobileNavProps> = ({ 
                     >
                       <span className="flex items-center gap-2">
                         <Ticket className="w-4 h-4 text-[#E31B23]" />
-                        <span>Attendee Account</span>
+                        <span>Attendee Dashboard (Buy Tickets)</span>
+                      </span>
+                      <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+                    </Link>
+                  </div>
+                ) : organizer ? (
+                  <div className="pt-2">
+                    <Link
+                      to="/organizer"
+                      onClick={() => setDrawerOpen(false)}
+                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-zinc-900 dark:text-zinc-100 bg-red-50/70 dark:bg-red-500/10 border border-red-200/50 dark:border-red-500/20 hover:bg-red-100/70 dark:hover:bg-red-500/20 transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <LayoutDashboard className="w-4 h-4 text-[#E31B23]" />
+                        <span>Switch to Organizer Console</span>
+                      </span>
+                      <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="pt-2">
+                    <Link
+                      to="/dashboard/settings"
+                      onClick={() => setDrawerOpen(false)}
+                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-zinc-900 dark:text-zinc-100 bg-red-50/70 dark:bg-red-500/10 border border-red-200/50 dark:border-red-500/20 hover:bg-red-100/70 dark:hover:bg-red-500/20 transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <LayoutDashboard className="w-4 h-4 text-[#E31B23]" />
+                        <span>Become an Organizer</span>
                       </span>
                       <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
                     </Link>

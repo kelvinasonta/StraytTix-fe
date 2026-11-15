@@ -1,19 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Ticket, Heart, User, LogOut, Compass, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Ticket, Heart, User, LogOut, Compass, Sun, Moon, Building2, ArrowRight, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import Navbar from './Navbar';
 import { AuthenticatedMobileNav } from './AuthenticatedMobileNav';
+import { BecomeOrganizerModal } from '../organizer/BecomeOrganizerModal';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { user, logout } = useAuth();
+  const { user, organizer, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [isBecomeOrganizerOpen, setIsBecomeOrganizerOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -57,7 +59,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   {user?.firstName || 'Attendee'} {user?.lastName || ''}
                 </h4>
                 <p className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wide">
-                  Attendee Account
+                  Attendee Mode
                 </p>
               </div>
             </Link>
@@ -83,15 +85,48 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               ))}
             </nav>
 
-            {/* Quick Explore Link, Theme Toggle & Sign Out */}
+            {/* Mode Switcher: Organizer Console vs Become an Organizer */}
             <div className="pt-4 border-t border-zinc-100 dark:border-white/10 space-y-3">
+              {organizer ? (
+                <Link
+                  to="/organizer"
+                  className="flex items-center justify-between p-3.5 rounded-2xl bg-[#E31B23]/10 hover:bg-[#E31B23]/15 border border-[#E31B23]/25 text-xs font-bold text-[#E31B23] transition-all group"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Building2 className="w-4 h-4 shrink-0" />
+                    <div className="min-w-0">
+                      <span className="block text-[10px] uppercase tracking-wider opacity-80">Switch Workspace</span>
+                      <span className="block truncate text-zinc-900 dark:text-white">Organizer Console</span>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsBecomeOrganizerOpen(true)}
+                  className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-br from-[#E31B23]/10 via-[#E31B23]/5 to-transparent hover:from-[#E31B23]/15 border border-[#E31B23]/25 text-left transition-all group cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-[#E31B23] text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="block text-xs font-bold text-zinc-900 dark:text-white">Become an Organizer</span>
+                      <span className="block text-[10px] text-zinc-500 dark:text-zinc-400 truncate">Host events & sell tickets</span>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-[#E31B23] shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              )}
+
               <Link
                 to="/discover"
                 className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-white/5 hover:bg-zinc-100/80 dark:hover:bg-white/10 border border-zinc-200/60 dark:border-white/10 text-xs font-bold text-zinc-800 dark:text-zinc-200 transition-all group"
               >
                 <span className="flex items-center gap-2">
                   <Compass className="w-4 h-4 text-[#E31B23]" />
-                  <span>Explore Events</span>
+                  <span>Explore & Buy Tickets</span>
                 </span>
                 <span className="text-zinc-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform">&rarr;</span>
               </Link>
@@ -128,6 +163,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           {children}
         </main>
       </div>
+
+      <BecomeOrganizerModal
+        isOpen={isBecomeOrganizerOpen}
+        onClose={() => setIsBecomeOrganizerOpen(false)}
+      />
     </div>
   );
 };

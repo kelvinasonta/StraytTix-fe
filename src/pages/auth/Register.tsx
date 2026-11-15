@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import { authApi } from '../../api/auth';
 import { AuthLayout } from '../../components/layout/AuthLayout';
 import { PasswordStrengthMeter } from '../../components/auth/PasswordStrengthMeter';
 import { getApiErrorMessage, getValidationErrors } from '../../api/client';
@@ -22,11 +23,15 @@ import {
 } from 'lucide-react';
 import { useNotification } from '../../context/NotificationContext';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useSettings } from '../../context/SettingsContext';
+import { CaptchaChallenge, type CaptchaChallengeHandle } from '../../components/auth/CaptchaChallenge';
 
 export const Register: React.FC = () => {
   const { register } = useAuth();
   const { showNotification } = useNotification();
   const navigate = useNavigate();
+  const { settings } = useSettings();
+  const captchaRef = useRef<CaptchaChallengeHandle>(null);
 
   const canRegister = useFeatureFlag('auth-registration');
   const canSocialLogin = useFeatureFlag('auth-social-login');
@@ -48,7 +53,41 @@ export const Register: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
-  const handleSocialAuth = (provider: 'Google' | 'Apple') => {
+  const [isSocialLoading, setIsSocialLoading] = useState(false);
+
+  const handleSocialAuth = async (provider: 'Google' | 'Apple') => {
+    if (provider === 'Google') {
+      try {
+        setIsSocialLoading(true);
+        let captchaToken: string | undefined = undefined;
+
+        if (
+          settings?.auth_captcha_provider &&
+          settings.auth_captcha_provider !== 'none' &&
+          captchaRef.current
+        ) {
+          try {
+            captchaToken = await captchaRef.current.execute();
+          } catch (captchaErr) {
+            console.warn('Captcha execution:', captchaErr);
+          }
+        }
+
+        const res = await authApi.getGoogleRedirectUrl(captchaToken);
+        if (res.data?.url) {
+          window.location.href = res.data.url;
+        } else {
+          showNotification('Failed to generate Google redirect link.', 'error');
+        }
+      } catch (err: any) {
+        captchaRef.current?.reset();
+        showNotification(getApiErrorMessage(err) || 'Failed to initialize Google registration.', 'error');
+      } finally {
+        setIsSocialLoading(false);
+      }
+      return;
+    }
+
     showNotification(`${provider} instant registration is coming soon. Please use email below!`, 'info');
   };
 
@@ -68,8 +107,28 @@ export const Register: React.FC = () => {
       return;
     }
 
-    if (password !== confirmPassword) {
-      setFormError('Passwords do not match. Please verify your password confirmation.');
+    // Split full name into first & last name and validate minimum length
+    const nameParts = trimmedName.split(/\s+/).filter(Boolean);
+    if (nameParts.length < 2) {
+      setFormError('Please enter both your first and last name (e.g. Alex Vance).');
+      return;
+    }
+
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ');
+
+    if (firstName.length < 2 || lastName.length < 2) {
+      setFormError('First name and last name must each be at least 2 characters.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setFormError('Please enter a valid email address.');
+      return;
+    }
+
+    if (accountType === 'organizer' && isOrganization && organizationName.trim().length < 3) {
+      setFormError('Please enter your company or collective name (at least 3 characters).');
       return;
     }
 
@@ -78,10 +137,15 @@ export const Register: React.FC = () => {
       return;
     }
 
-    // Split full name into first & last name seamlessly
-    const nameParts = trimmedName.split(/\s+/);
-    const firstName = nameParts[0] || 'Member';
-    const lastName = nameParts.slice(1).join(' ') || firstName;
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[\W_]/.test(password)) {
+      setFormError('Password must include uppercase, lowercase, a number, and a special character.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setFormError('Passwords do not match. Please verify your password confirmation.');
+      return;
+    }
 
     setIsLoading(true);
 
@@ -97,17 +161,14 @@ export const Register: React.FC = () => {
       };
 
       if (accountType === 'organizer') {
-        if (isOrganization && organizationName.trim()) {
-          payload.organizer_type = 'organization';
-          payload.organization_name = organizationName.trim();
-        } else {
-          payload.organizer_type = 'individual';
-          payload.organization_name = `${firstName} ${lastName}`;
-        }
+        payload.organization_name = (isOrganization && organizationName.trim()) 
+          ? organizationName.trim() 
+          : `${firstName} ${lastName}`;
       }
 
       await register(payload);
-      navigate('/verify-email/pending');
+      localStorage.setItem('strayttix_resend_countdown_expiry', (Date.now() + 60 * 1000).toString());
+      navigate('/verify-email/pending', { replace: true });
     } catch (err: any) {
       const validationErrs = getValidationErrors(err);
       setFieldErrors(validationErrs);
@@ -122,7 +183,7 @@ export const Register: React.FC = () => {
   if (!canRegister) {
     return (
       <AuthLayout
-        title="Join Eventa"
+        title="Join StraytTix"
         subtitle="User registration is currently paused"
       >
         <div className="p-6 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-center space-y-4 shadow-sm my-2">
@@ -162,25 +223,9 @@ export const Register: React.FC = () => {
 
   return (
     <AuthLayout
-      title="Join Eventa"
+      title="Join StraytTix"
       subtitle="Sign up in under 60 seconds — no lengthy forms"
     >
-      {/* Fast Setup Badge with Interactive Sparkle Motion - only when registration is open */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="flex items-center justify-between px-3.5 py-2 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/5 border border-emerald-500/20 rounded-2xl mb-4 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 shadow-2xs"
-      >
-        <span className="flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 animate-pulse" />
-          <span>Quick 1-Minute Registration</span>
-        </span>
-        <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 dark:bg-emerald-500/20 px-2 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider font-mono">
-          Fast-Track
-        </span>
-      </motion.div>
-
       {/* Social 1-Tap Signups with Whimsical Micro-bounce - Protected by auth-social-login flag */}
       {canSocialLogin && (
         <>
@@ -189,28 +234,33 @@ export const Register: React.FC = () => {
               whileHover={{ y: -2, scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
               type="button"
+              disabled={isSocialLoading}
               onClick={() => handleSocialAuth('Google')}
-              className="w-full py-2.5 px-3 bg-zinc-50 dark:bg-[#0F0F14] hover:bg-zinc-100 dark:hover:bg-white/5 border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-zinc-800 dark:text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:shadow-sm"
+              className="w-full py-2.5 px-3 bg-zinc-50 dark:bg-[#0F0F14] hover:bg-zinc-100 dark:hover:bg-white/5 border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-zinc-800 dark:text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:shadow-sm disabled:opacity-50"
             >
-              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.4 7.33 24 12 24z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.6 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-                />
-              </svg>
-              <span>Google</span>
+              {isSocialLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-zinc-500" />
+              ) : (
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.4 7.33 24 12 24z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.6 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                  />
+                </svg>
+              )}
+              <span>{isSocialLoading ? 'Connecting...' : 'Google'}</span>
             </motion.button>
 
             <motion.button
@@ -237,51 +287,6 @@ export const Register: React.FC = () => {
           </div>
         </>
       )}
-
-      {/* 1-Tap Animated Account Type Switcher with Fluid Indicator Pill */}
-      <div className="relative p-1 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl flex items-center mb-4 select-none">
-        <button
-          type="button"
-          onClick={() => setAccountType('customer')}
-          className={`relative z-10 flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer ${accountType === 'customer'
-            ? 'text-zinc-950 dark:text-white font-black'
-            : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-            }`}
-        >
-          {accountType === 'customer' && (
-            <motion.div
-              layoutId="accountTypePill"
-              className="absolute inset-0 bg-white dark:bg-white/10 rounded-xl shadow-xs border border-zinc-200/80 dark:border-white/15"
-              transition={{ type: "spring", stiffness: 450, damping: 30 }}
-            />
-          )}
-          <span className="relative z-10 flex items-center gap-2">
-            <User className="w-4 h-4 text-zinc-500 dark:text-zinc-300" />
-            <span>I'm an Attendee</span>
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setAccountType('organizer')}
-          className={`relative z-10 flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer ${accountType === 'organizer'
-            ? 'text-zinc-950 dark:text-white font-black'
-            : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-            }`}
-        >
-          {accountType === 'organizer' && (
-            <motion.div
-              layoutId="accountTypePill"
-              className="absolute inset-0 bg-white dark:bg-white/10 rounded-xl shadow-xs border border-zinc-200/80 dark:border-white/15"
-              transition={{ type: "spring", stiffness: 450, damping: 30 }}
-            />
-          )}
-          <span className="relative z-10 flex items-center gap-2">
-            <Building className="w-4 h-4 text-[#E31B23]" />
-            <span>I'm an Organizer</span>
-          </span>
-        </button>
-      </div>
 
       <AnimatePresence>
         {formError && (
@@ -467,7 +472,15 @@ export const Register: React.FC = () => {
         </motion.button>
 
         <p className="text-center text-[11px] text-zinc-500 dark:text-zinc-400 pt-1">
-          By signing up, you agree to our Terms of Service and Privacy Policy.
+          By signing up, you agree to our{' '}
+          <Link to="/terms" className="underline hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">
+            Terms of Service
+          </Link>{' '}
+          and{' '}
+          <Link to="/privacy" className="underline hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">
+            Privacy Policy
+          </Link>
+          .
         </p>
 
         <div className="text-center text-xs text-zinc-500 font-medium pt-2 border-t border-zinc-200 dark:border-white/10">
@@ -476,6 +489,17 @@ export const Register: React.FC = () => {
             Sign in
           </Link>
         </div>
+
+        {/* Invisible Captcha Challenge when active */}
+        <CaptchaChallenge
+          ref={captchaRef}
+          provider={settings?.auth_captcha_provider || 'none'}
+          siteKey={
+            settings?.auth_captcha_provider === 'recaptcha'
+              ? settings.recaptcha_site_key
+              : settings?.cloudflare_turnstile_site_key
+          }
+        />
       </form>
     </AuthLayout>
   );
