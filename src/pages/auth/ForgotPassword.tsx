@@ -30,15 +30,15 @@ export const ForgotPassword: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await authApi.forgotPassword(email);
+      await authApi.forgotPassword(email.trim().toLowerCase());
       setIsSubmitted(true);
     } catch (err: any) {
-      if (err.response?.status === 429) {
-        const errorMsg = getApiErrorMessage(err);
-        setFormError(errorMsg);
-      } else {
-        // Security fallback: Prevent account enumeration
+      const status = err.response?.status;
+      // Only mask 401/404 user status/enumeration errors; surface 422, 429, 403, 500, and network errors
+      if (status === 404 || status === 401) {
         setIsSubmitted(true);
+      } else {
+        setFormError(getApiErrorMessage(err));
       }
     } finally {
       setIsLoading(false);

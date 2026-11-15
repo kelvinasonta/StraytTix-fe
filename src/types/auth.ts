@@ -5,6 +5,10 @@ export interface User {
   lastName: string;
   email: string;
   role: string;
+  is_admin?: boolean;
+  admin_role?: string;
+  admin_permissions?: string[];
+  accountType?: 'customer' | 'organizer';
   createdAt: string;
 }
 
