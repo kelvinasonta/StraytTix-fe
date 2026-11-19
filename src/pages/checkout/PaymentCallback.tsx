@@ -17,6 +17,7 @@ import {
   Home
 } from 'lucide-react';
 import { useNotification } from '../../context/NotificationContext';
+import { getOrderEcho } from '../../lib/echo';
 
 export const PaymentCallback: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -24,9 +25,38 @@ export const PaymentCallback: React.FC = () => {
   const { showNotification } = useNotification();
 
   const reference = searchParams.get('reference') || searchParams.get('trxref') || searchParams.get('order_id');
+  const orderUuid = searchParams.get('order_uuid');
+  const guestToken = searchParams.get('guest_token');
   const [status, setStatus] = useState<'verifying' | 'success' | 'failed'>('verifying');
   const [order, setOrder] = useState<Order | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
+
+  // Listen on private-orders.{orderUuid} for instant WebSocket confirmation if webhook settles first
+  useEffect(() => {
+    if (!orderUuid || status === 'success') return;
+
+    const echo = getOrderEcho(guestToken);
+    if (!echo) return;
+
+    const isGuestEcho = !localStorage.getItem('strayttix_token') && !sessionStorage.getItem('strayttix_token');
+    const channelName = `orders.${orderUuid}`;
+    const channel = echo.private(channelName);
+
+    channel.listen('.order.payment.confirmed', (payload: any) => {
+      if (payload?.order) {
+        setOrder(payload.order);
+      }
+      setStatus('success');
+      showNotification('Payment confirmed! Your tickets are ready.', 'success');
+    });
+
+    return () => {
+      echo.leave(channelName);
+      if (isGuestEcho) {
+        echo.disconnect();
+      }
+    };
+  }, [orderUuid, guestToken, status, showNotification]);
 
   useEffect(() => {
     if (!reference) {

@@ -131,21 +131,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <span className="text-zinc-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform">&rarr;</span>
               </Link>
 
-              {/* Theme Toggle Button */}
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 border border-transparent hover:border-zinc-200 dark:hover:border-white/10 transition-all cursor-pointer"
-              >
-                <span className="flex items-center gap-2">
-                  {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-zinc-500" />}
-                  <span>{isDark ? 'Light Appearance' : 'Dark Appearance'}</span>
-                </span>
-                <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400">
-                  {isDark ? 'Dark' : 'Light'}
-                </span>
-              </button>
-
               {/* Sign Out */}
               <button
                 onClick={handleLogout}

@@ -59,7 +59,7 @@ export const ordersApi = {
   getOrganizerOrders: async (
     organizerUuid: string,
     eventUuid?: string,
-    params?: { page?: number; search?: string; status?: string }
+    params?: { page?: number; per_page?: number; search?: string; status?: string }
   ): Promise<PaginatedResponse<Order>> => {
     const url = eventUuid
       ? cleanUrl(`/api/v1/organizers/${organizerUuid}/events/${eventUuid}/orders`)

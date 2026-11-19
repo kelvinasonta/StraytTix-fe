@@ -184,5 +184,10 @@ export const organizerApi = {
     const { data } = await apiClient.post<ApiResponse<any>>(`/organizers/${organizerUuid}/subscription/cancel`);
     return data;
   },
+
+  async resumeSubscription(organizerUuid: string): Promise<ApiResponse<any>> {
+    const { data } = await apiClient.post<ApiResponse<any>>(`/organizers/${organizerUuid}/subscription/resume`);
+    return data;
+  },
 };
 
