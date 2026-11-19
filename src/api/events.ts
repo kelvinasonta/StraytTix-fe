@@ -646,7 +646,37 @@ export const eventApi = {
       const updated = updateStaffDuty(eventUuid, memberUuid, updates, orgUuid);
       return { success: true, message: 'Staff duty updated', data: updated ? normalizeEventStaff(updated) : null };
     }
-  }
+  },
+
+  async broadcastEmail(
+    eventUuid: string,
+    payload: { subject: string; message: string; ticket_type_uuid?: string | null },
+    organizerUuid?: string
+  ): Promise<
+    ApiResponse<{
+      reference: string;
+      recipients_count: number;
+      sent_count: number;
+      failed_count: number;
+      credits_charged: number;
+      available_balance: number;
+      balance: number;
+    }>
+  > {
+    const orgUuid = resolveOrganizerUuid(organizerUuid);
+    const { data } = await apiClient.post<
+      ApiResponse<{
+        reference: string;
+        recipients_count: number;
+        sent_count: number;
+        failed_count: number;
+        credits_charged: number;
+        available_balance: number;
+        balance: number;
+      }>
+    >(`/organizers/${orgUuid}/events/${eventUuid}/broadcast-email`, payload);
+    return data;
+  },
 };
 
 

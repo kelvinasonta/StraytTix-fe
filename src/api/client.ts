@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { tokenStorage } from '../utils/storage';
+import { getUserTimezone } from '../utils/format';
 import type { ApiErrorResponse } from '../types/auth';
 import type { ApiResponse, AuthPayload } from '../types/api';
 
@@ -52,6 +53,7 @@ apiClient.interceptors.request.use(
     if (organizerUuid) {
       config.headers['X-Organizer-UUID'] = organizerUuid;
     }
+    config.headers['X-Timezone'] = getUserTimezone();
     return config;
   },
   (error) => Promise.reject(error)

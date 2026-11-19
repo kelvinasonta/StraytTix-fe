@@ -27,6 +27,7 @@ import type { Event, TicketType } from '../../types/api';
 import { eventApi, normalizeBackendEvent } from '../../api/events';
 import { ticketApi } from '../../api/tickets';
 import { ordersApi } from '../../api/orders';
+import { getOrderEcho } from '../../lib/echo';
 import { formatCurrency, formatDate, formatEventDateTime } from '../../utils/format';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
@@ -348,6 +349,48 @@ export const CheckoutPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [step, reservedUntilTime, activeOrder, event, navigate, showNotification]);
 
+  // Real-time WebSocket listener on private-orders.{orderUuid} for instant webhook confirmation
+  useEffect(() => {
+    const orderUuid = activeOrder?.id || activeOrder?.uuid;
+    if (!orderUuid || step === 3) return;
+
+    const guestToken = activeOrder?.guestToken || activeOrder?.guest_token || null;
+    const echo = getOrderEcho(guestToken);
+    if (!echo) return;
+
+    const isGuestEcho = !localStorage.getItem('strayttix_token') && !sessionStorage.getItem('strayttix_token');
+    const channelName = `orders.${orderUuid}`;
+    const channel = echo.private(channelName);
+
+    channel.listen('.order.payment.confirmed', (payload: any) => {
+      if (payload?.order) {
+        setActiveOrder(payload.order);
+      } else {
+        setActiveOrder((prev: any) => (prev ? { ...prev, status: 'paid' } : prev));
+      }
+
+      if (storageKey) {
+        try {
+          sessionStorage.removeItem(storageKey);
+        } catch {
+          // ignore
+        }
+      }
+
+      setIsProcessing(false);
+      setStep(3);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showNotification('Payment Confirmed — Your tickets are ready to download!', 'success');
+    });
+
+    return () => {
+      echo.leave(channelName);
+      if (isGuestEcho) {
+        echo.disconnect();
+      }
+    };
+  }, [activeOrder?.id, activeOrder?.uuid, activeOrder?.guestToken, activeOrder?.guest_token, step, storageKey, showNotification]);
+
   const formatTimer = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -658,9 +701,13 @@ export const CheckoutPage: React.FC = () => {
       const targetOrderId = orderResult.id || orderResult.uuid;
       const guestToken = orderResult.guestToken || orderResult.guest_token;
       try {
+        const cbParams = new URLSearchParams({ order_uuid: String(targetOrderId) });
+        if (guestToken) {
+          cbParams.set('guest_token', String(guestToken));
+        }
         const paymentRes = await apiClient.post(`/orders/${targetOrderId}/payments`, {
           gateway: 'paystack',
-          callback_url: `${window.location.origin}/checkout/callback`,
+          callback_url: `${window.location.origin}/checkout/callback?${cbParams.toString()}`,
           customer_name: fullName.trim(),
           customer_email: email.trim(),
           customer_phone: phone.trim() || undefined,

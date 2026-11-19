@@ -2,22 +2,24 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import OrganizerDashboardLayout from '../../components/layout/OrganizerDashboardLayout';
 import { formatDate } from '../../utils/format';
-import { 
-  PlusCircle, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  RefreshCw, 
-  AlertCircle, 
-  Calendar, 
-  Search, 
-  Ticket, 
-  QrCode, 
-  LayoutGrid, 
-  List, 
-  MapPin, 
+import {
+  PlusCircle,
+  Eye,
+  Edit,
+  Trash2,
+  RefreshCw,
+  AlertCircle,
+  Calendar,
+  Search,
+  Ticket,
+  QrCode,
+  LayoutGrid,
+  List,
+  MapPin,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Loader2,
+  X
 } from 'lucide-react';
 import Badge from '../../components/ui/Badge';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
@@ -44,7 +46,15 @@ export const Events: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<EventFilterStatus>('All');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // View mode switcher: 'grid' or 'list' (persisted in localStorage)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
@@ -99,12 +109,9 @@ export const Events: React.FC = () => {
       const params: Record<string, any> = {
         page: targetPage,
       };
-      if (searchQuery.trim()) {
-        params.search = searchQuery.trim();
-        params.q = searchQuery.trim();
-      }
-      if (selectedStatus !== 'All') {
-        params.status = selectedStatus.toLowerCase();
+      if (debouncedSearchQuery.trim()) {
+        params.search = debouncedSearchQuery.trim();
+        params.q = debouncedSearchQuery.trim();
       }
 
       const res = await eventApi.getOrganizerEvents(organizer?.id, params);
@@ -163,7 +170,7 @@ export const Events: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [organizer?.id, searchQuery, selectedStatus]);
+  }, [organizer?.id, debouncedSearchQuery]);
 
   useEffect(() => {
     fetchEvents(1);
@@ -249,34 +256,34 @@ export const Events: React.FC = () => {
   };
 
 
+  const matchesFilterStatus = useCallback((evt: Event, status: EventFilterStatus): boolean => {
+    if (status === 'All') return true;
+    const rawStatus = (evt.status || '').toLowerCase();
+    const ended = (isEventEnded(evt) && rawStatus !== 'draft') || rawStatus === 'ended' || rawStatus === 'completed';
+
+    if (status === 'Ended') return ended;
+    if (status === 'Draft') return rawStatus === 'draft';
+    if (status === 'Published') return (rawStatus === 'published' || rawStatus === 'upcoming') && !ended;
+    return false;
+  }, [isEventEnded]);
+
   const getStatusCount = useCallback((status: EventFilterStatus) => {
     if (status === 'All') return paginationMeta.total || events.length;
-    if (status === 'Ended') return events.filter(e => (isEventEnded(e) && e.status !== 'Draft') || e.status === 'Ended' || e.status === 'Completed').length;
-    if (status === 'Draft') return events.filter(e => e.status === 'Draft').length;
-    if (status === 'Published') return events.filter(e => (e.status === 'Published' || e.status === 'Upcoming') && !isEventEnded(e)).length;
-    return 0;
-  }, [events, isEventEnded, paginationMeta.total]);
+    return events.filter((e) => matchesFilterStatus(e, status)).length;
+  }, [events, matchesFilterStatus, paginationMeta.total]);
 
   const filteredEvents = useMemo(() => {
+    const query = debouncedSearchQuery.trim().toLowerCase();
     return events.filter((e) => {
-      const ended = (isEventEnded(e) && e.status !== 'Draft') || e.status === 'Ended' || e.status === 'Completed';
-      let matchStatus = true;
-      if (selectedStatus === 'Ended') {
-        matchStatus = ended;
-      } else if (selectedStatus === 'Draft') {
-        matchStatus = e.status === 'Draft';
-      } else if (selectedStatus === 'Published') {
-        matchStatus = (e.status === 'Published' || e.status === 'Upcoming') && !ended;
-      }
-
-      const matchQuery = !searchQuery.trim() ||
-        e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (e.venue && e.venue.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (e.category && e.category.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchStatus = matchesFilterStatus(e, selectedStatus);
+      const matchQuery = !query ||
+        e.title.toLowerCase().includes(query) ||
+        (e.venue && e.venue.toLowerCase().includes(query)) ||
+        (e.category && e.category.toLowerCase().includes(query));
 
       return matchStatus && matchQuery;
     });
-  }, [events, selectedStatus, searchQuery, isEventEnded]);
+  }, [events, selectedStatus, debouncedSearchQuery, matchesFilterStatus]);
 
 
 
@@ -352,17 +359,28 @@ export const Events: React.FC = () => {
                 placeholder="Search title, venue, genre..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 text-zinc-900 dark:text-white rounded-xl text-sm font-medium focus:outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all shadow-2xs"
+                className="w-full pl-10 pr-9 py-2 bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 text-zinc-900 dark:text-white rounded-xl text-sm font-medium focus:outline-none focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] transition-all shadow-2xs"
               />
+              {(searchQuery !== debouncedSearchQuery || (isLoading && searchQuery.trim().length > 0)) ? (
+                <Loader2 className="w-4 h-4 text-[#E31B23] animate-spin absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              ) : searchQuery.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="p-0.5 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-white absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : null}
             </div>
 
             {/* View Mode Switcher (Grid vs List - Matching Discover page) */}
             <div className="flex items-center gap-1 bg-zinc-100 dark:bg-white/5 p-1 rounded-xl border border-zinc-200/70 dark:border-white/10 shrink-0">
               <button
                 onClick={() => handleViewModeChange('grid')}
-                className={`p-2 rounded-lg transition-all cursor-pointer ${
-                  viewMode === 'grid' ? 'bg-white dark:bg-[#0F0F14] text-zinc-950 dark:text-white shadow-xs' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200'
-                }`}
+                className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === 'grid' ? 'bg-white dark:bg-[#0F0F14] text-zinc-950 dark:text-white shadow-xs' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200'
+                  }`}
                 title="Grid view"
                 aria-label="Grid view"
               >
@@ -370,9 +388,8 @@ export const Events: React.FC = () => {
               </button>
               <button
                 onClick={() => handleViewModeChange('list')}
-                className={`p-2 rounded-lg transition-all cursor-pointer ${
-                  viewMode === 'list' ? 'bg-white dark:bg-[#0F0F14] text-zinc-950 dark:text-white shadow-xs' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200'
-                }`}
+                className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === 'list' ? 'bg-white dark:bg-[#0F0F14] text-zinc-950 dark:text-white shadow-xs' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200'
+                  }`}
                 title="List view"
                 aria-label="List view"
               >
@@ -611,43 +628,23 @@ export const Events: React.FC = () => {
                 >
                   {/* Left Block: Thumbnail + Title + Meta Details */}
                   <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 flex-1 min-w-0">
-                    {/* Thumbnail with overlay badges */}
+                    {/* Compact Thumbnail */}
                     <Link
                       to={targetManageUrl}
-                      className="relative w-24 h-24 sm:w-48 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 bg-zinc-100 dark:bg-white/5 block group/thumb"
+                      className="relative w-16 h-16 sm:w-28 sm:h-20 rounded-xl overflow-hidden shrink-0 bg-zinc-100 dark:bg-white/5 block group/thumb border border-zinc-200/80 dark:border-white/10"
                     >
                       <img
                         src={evt.imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=500&q=80'}
                         alt={evt.title}
                         className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent hidden sm:block" />
-
-                      {/* Category Badge on thumbnail (tablet/desktop) */}
-                      <span className="hidden sm:inline-block absolute top-2.5 left-2.5 bg-white/95 dark:bg-black/80 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] font-bold text-zinc-800 dark:text-zinc-200 shadow-xs border border-white/60 dark:border-white/20">
-                        {evt.category || 'Event'}
-                      </span>
-
-                      {/* Status Badge on thumbnail (tablet/desktop) */}
-                      <div className="hidden sm:block absolute top-2.5 right-2.5 shadow-xs">
-                        <Badge variant={displayStatus.variant} className="text-[10px] px-2 py-0.5">
-                          {displayStatus.label}
-                        </Badge>
-                      </div>
-
-                      {/* Format pill bottom */}
-                      {evt.eventFormat && (
-                        <span className="hidden sm:inline-block absolute bottom-2 left-2.5 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-md text-[9px] uppercase font-mono text-zinc-200 border border-white/20">
-                          {evt.eventFormat}
-                        </span>
-                      )}
                     </Link>
 
                     {/* Event Title & Metadata */}
-                    <div className="flex-1 min-w-0 space-y-1 sm:space-y-2">
-                      {/* Mobile Top Badges: Status + Category */}
-                      <div className="flex sm:hidden items-center gap-1.5 flex-wrap">
-                        <Badge variant={displayStatus.variant} className="text-[9px] px-2 py-0.5 font-bold">
+                    <div className="flex-1 min-w-0 space-y-1 sm:space-y-1.5">
+                      {/* Status + Category + Format Badges */}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <Badge variant={displayStatus.variant} className="text-[9px] sm:text-[10px] px-2 py-0.5 font-bold">
                           {displayStatus.label}
                         </Badge>
                         <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-white/10 px-2 py-0.5 rounded-full">
@@ -681,12 +678,7 @@ export const Events: React.FC = () => {
                         </span>
                       </div>
 
-                      {/* Description snippet for larger screens */}
-                      {evt.description && (
-                        <p className="hidden md:block text-xs text-zinc-400 line-clamp-1 font-normal max-w-xl">
-                          {evt.description.replace(/<[^>]*>/g, '')}
-                        </p>
-                      )}
+
                     </div>
                   </div>
 
@@ -788,11 +780,10 @@ export const Events: React.FC = () => {
                       key={p}
                       onClick={() => handlePageChange(p)}
                       disabled={isLoading}
-                      className={`w-9 h-9 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                        p === paginationMeta.current_page
+                      className={`w-9 h-9 rounded-xl text-xs font-black transition-all cursor-pointer ${p === paginationMeta.current_page
                           ? 'bg-[#E31B23] text-white shadow-xs scale-105'
                           : 'bg-white dark:bg-[#070709] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 border border-zinc-200 dark:border-white/10'
-                      }`}
+                        }`}
                     >
                       {p}
                     </button>

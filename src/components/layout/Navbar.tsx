@@ -29,6 +29,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Logo } from '../ui/Logo';
 import { resolveOrganizerRole } from '../../utils/permissions';
+import { NotificationBell } from '../common/NotificationBell';
 
 interface NavbarProps {
   isDashboard?: boolean;
@@ -371,18 +372,15 @@ export const Navbar: React.FC<NavbarProps> = ({ isDashboard, hideNavLinks }) => 
           {isAuthenticated ? (
             /* ================= AUTHENTICATED USER ACTIONS ================= */
             <div className="flex items-center gap-3">
-              {/* Notification Bell */}
-              <button
-                className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+              {/* Notification Bell with In-App Popover */}
+              <NotificationBell
+                className={`w-10 h-10 ${
                   useLightNavText
                     ? 'text-zinc-300 hover:text-white hover:bg-white/10'
-                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                 }`}
-                title="Notifications"
-              >
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#E31B23]" />
-              </button>
+                iconClassName="w-5 h-5"
+              />
 
               {/* Primary Action Button in Auth Nav */}
               {isOrganizer ? (

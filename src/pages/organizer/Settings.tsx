@@ -10,6 +10,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { authApi, normalizeTimezone } from '../../api/auth';
+import { SUPPORTED_TIMEZONES, getUserTimezone, getTimezonePreview } from '../../utils/format';
 import type { LoginSession, LoginHistoryItem } from '../../types/api';
 import { organizerApi } from '../../api/organizers';
 import { getApiErrorMessage } from '../../api/client';
@@ -142,7 +143,7 @@ export const Settings: React.FC = () => {
   });
   const [profilePhone, setProfilePhone] = useState(user?.phone || '');
   const [profileTimezone, setProfileTimezone] = useState(() => {
-    return normalizeTimezone(user?.timezone) || 'Africa/Lagos';
+    return normalizeTimezone(user?.timezone) || getUserTimezone();
   });
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
@@ -152,11 +153,11 @@ export const Settings: React.FC = () => {
       const lName = user.lastName || user.last_name || (user.name ? user.name.split(' ').slice(1).join(' ') : '') || '';
       if (fName) setProfileFirstName(fName);
       if (lName) setProfileLastName(lName);
-      if (user.phone) {
+      if (user.phone !== undefined && user.phone !== null) {
         setProfilePhone(user.phone);
       }
       if (user.timezone) {
-        setProfileTimezone(normalizeTimezone(user.timezone) || 'Africa/Lagos');
+        setProfileTimezone(normalizeTimezone(user.timezone) || getUserTimezone());
       }
     }
   }, [user]);
@@ -509,7 +510,6 @@ export const Settings: React.FC = () => {
 
   /* ---------------- 5. PREFERENCES STATES ---------------- */
   const [defaultCurrency, setDefaultCurrency] = useState('NGN');
-  const [timezone, setTimezone] = useState('Africa/Lagos');
   const [timeFormat, setTimeFormat] = useState('12h');
   const [vatPreference, setVatPreference] = useState('inclusive');
   const [doorSalesPinRequired, setDoorSalesPinRequired] = useState(true);
@@ -612,7 +612,6 @@ export const Settings: React.FC = () => {
         first_name: profileFirstName,
         last_name: profileLastName,
         phone: profilePhone,
-        timezone: normalizeTimezone(profileTimezone),
       });
       await refreshUser();
       showNotification(res?.message || 'User profile updated successfully.', 'success');
@@ -773,14 +772,22 @@ export const Settings: React.FC = () => {
   }, [auditLogs, auditCategoryFilter, auditSearchQuery]);
 
   /* ---------------- Preferences Save Handler ---------------- */
-  const handleSavePreferences = (e: React.FormEvent) => {
+  const handleSavePreferences = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingPrefs(true);
-    setTimeout(() => {
+    try {
+      const cleanTz = normalizeTimezone(profileTimezone) || profileTimezone;
+      await authApi.updateProfile({
+        timezone: cleanTz,
+      });
+      await refreshUser();
+      showNotification('Preferences & timezone updated successfully!', 'success');
+      appendAuditLog('Workspace Preferences Updated', 'system', `Currency: ${defaultCurrency}, Timezone: ${cleanTz}`);
+    } catch (err: any) {
+      showNotification(getApiErrorMessage(err, 'Failed to save preferences.'), 'error');
+    } finally {
       setIsSavingPrefs(false);
-      showNotification('Workspace preferences updated successfully!', 'success');
-      appendAuditLog('Workspace Preferences Updated', 'system', `Currency: ${defaultCurrency}, Timezone: ${timezone}`);
-    }, 500);
+    }
   };
 
   /* ---------------- Notifications Save Handler ---------------- */
@@ -1096,29 +1103,6 @@ export const Settings: React.FC = () => {
                     placeholder="+234 809 123 4567"
                     hint="Used for security verification and emergency operational alerts."
                   />
-                </div>
-
-                <div className="pt-2 border-t border-zinc-100 dark:border-white/10">
-                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                    Preferred Timezone
-                  </label>
-                  <select
-                    value={normalizeTimezone(profileTimezone) || profileTimezone}
-                    onChange={(e) => setProfileTimezone(normalizeTimezone(e.target.value) || e.target.value)}
-                    className="w-full max-w-md bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] text-sm rounded-xl px-4 py-2.5 outline-none transition-all font-medium"
-                  >
-                    <option value="Africa/Lagos">Africa/Lagos (WAT, GMT+1)</option>
-                    <option value="Africa/Accra">Africa/Accra (GMT)</option>
-                    <option value="Africa/Nairobi">Africa/Nairobi (EAT, GMT+3)</option>
-                    <option value="Africa/Johannesburg">Africa/Johannesburg (SAST, GMT+2)</option>
-                    <option value="Africa/Cairo">Africa/Cairo (EEST, GMT+2)</option>
-                    <option value="Europe/London">Europe/London (BST/GMT)</option>
-                    <option value="Europe/Paris">Europe/Paris (CET, GMT+1)</option>
-                    <option value="America/New_York">America/New_York (EST/EDT)</option>
-                    <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
-                    <option value="Asia/Dubai">Asia/Dubai (GST, GMT+4)</option>
-                    <option value="UTC">UTC (Universal Coordinated Time)</option>
-                  </select>
                 </div>
 
                 <div className="pt-4 flex items-center justify-between border-t border-zinc-100 dark:border-white/10">
@@ -2243,20 +2227,48 @@ export const Settings: React.FC = () => {
                   onChange={(e) => setDefaultCurrency(e.target.value)}
                 />
 
-                <Select
-                  label="Default Event Timezone"
-                  options={[
-                    { value: 'Africa/Lagos', label: 'Africa/Lagos (GMT+1) - West Africa' },
-                    { value: 'Africa/Accra', label: 'Africa/Accra (GMT+0) - Ghana' },
-                    { value: 'Africa/Nairobi', label: 'Africa/Nairobi (GMT+3) - East Africa' },
-                    { value: 'Africa/Johannesburg', label: 'Africa/Johannesburg (GMT+2) - South Africa' },
-                    { value: 'Europe/London', label: 'Europe/London (GMT+1) - UK' },
-                    { value: 'America/New_York', label: 'America/New_York (GMT-4) - US Eastern' },
-                    { value: 'UTC', label: 'UTC - Universal Coordinated Time' }
-                  ]}
-                  value={normalizeTimezone(timezone) || timezone}
-                  onChange={(e) => setTimezone(normalizeTimezone(e.target.value) || e.target.value)}
-                />
+                <div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                      Preferred Timezone
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-mono font-semibold text-zinc-500 dark:text-zinc-400">
+                        Local: {getTimezonePreview(profileTimezone)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                          if (detected) {
+                            setProfileTimezone(detected);
+                            showNotification(`Detected timezone: ${detected}`, 'info');
+                          }
+                        }}
+                        className="text-[11px] font-bold text-[#E31B23] hover:underline cursor-pointer"
+                      >
+                        Auto-Detect
+                      </button>
+                    </div>
+                  </div>
+                  <select
+                    value={normalizeTimezone(profileTimezone) || profileTimezone}
+                    onChange={(e) => setProfileTimezone(normalizeTimezone(e.target.value) || e.target.value)}
+                    className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] text-sm rounded-xl px-4 py-2.5 outline-none transition-all font-medium text-zinc-900 dark:text-white"
+                  >
+                    {!SUPPORTED_TIMEZONES.some((t) => t.value === (normalizeTimezone(profileTimezone) || profileTimezone)) &&
+                      profileTimezone && (
+                        <option value={normalizeTimezone(profileTimezone) || profileTimezone}>
+                          {normalizeTimezone(profileTimezone) || profileTimezone}
+                        </option>
+                      )}
+                    {SUPPORTED_TIMEZONES.map((tz) => (
+                      <option key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <Select
                   label="Time Presentation Format"

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Navigate, Link } from 'react-router-dom';
 import OrganizerDashboardLayout from '../../components/layout/OrganizerDashboardLayout';
 import StatCard from '../../components/ui/StatCard';
 import Modal from '../../components/ui/Modal';
@@ -7,30 +7,33 @@ import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import { Input } from '../../components/ui/Input';
 import { formatCurrency, formatDate } from '../../utils/format';
-import { 
-  Wallet, 
-  Landmark, 
-  ArrowUpRight, 
-  ArrowDownToLine, 
-  CheckCircle2, 
-  Clock, 
-  AlertCircle, 
-  CreditCard, 
-  Download, 
-  Search, 
-  Building2, 
-  ShieldCheck, 
-  BarChart3, 
-  LineChart, 
-  PieChart, 
-  Loader2, 
+import {
+  Wallet,
+  Landmark,
+  ArrowUpRight,
+  ArrowDownToLine,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  CreditCard,
+  Download,
+  Search,
+  Building2,
+  ShieldCheck,
+  BarChart3,
+  LineChart,
+  PieChart,
+  Loader2,
   X,
   FileText,
   Calendar,
   Lock,
   RefreshCw,
   TrendingUp,
-  Receipt, Coins, Sparkles, MessageSquare, Rocket, QrCode, Mail, Zap, Plus
+  Receipt,
+  Coins,
+  Sparkles,
+  Plus
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
@@ -39,6 +42,10 @@ import { getFeeConfig } from '../../utils/fees';
 import { eventApi } from '../../api/events';
 import { ordersApi } from '../../api/orders';
 import { paymentApi } from '../../api/payments';
+import { organizerApi } from '../../api/organizers';
+import { creditsApi } from '../../api/credits';
+import { CreditTopupModal } from '../../components/credits/CreditTopupModal';
+import { getApiErrorMessage } from '../../api/client';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
 import type { Order, Event, OrderStatus } from '../../types/api';
 
@@ -127,8 +134,9 @@ export const Analytics: React.FC = () => {
     return <Navigate to="/organizer" replace />;
   }
 
-  const [activeTab, setActiveTab] = useState<'wallet' | 'analytics' | 'events' | 'ledger' | 'credits'>('wallet');
+  const [activeTab, setActiveTab] = useState<'wallet' | 'analytics' | 'events' | 'credits'>('wallet');
   const [timeframe, setTimeframe] = useState<'7d' | '30d' | '3m' | '6m' | '12m'>('30d');
+  const [velocityMetric, setVelocityMetric] = useState<'revenue' | 'tickets'>('revenue');
   const [orders, setOrders] = useState<Order[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -147,8 +155,6 @@ export const Analytics: React.FC = () => {
       return null;
     }
   });
-
-  const [payoutSchedule, setPayoutSchedule] = useState<'daily' | 'weekly' | 'monthly' | 'manual'>('weekly');
 
   // Payout History state
   const [payouts, setPayouts] = useState<PayoutRecord[]>(() => {
@@ -171,14 +177,35 @@ export const Analytics: React.FC = () => {
   const [isSubmittingWithdraw, setIsSubmittingWithdraw] = useState(false);
   const [withdrawPin, setWithdrawPin] = useState('');
 
+  const FALLBACK_BANKS = [
+    { name: 'Guaranty Trust Bank (GTBank)', code: '058' },
+    { name: 'Access Bank PLC', code: '044' },
+    { name: 'Zenith Bank', code: '057' },
+    { name: 'First Bank of Nigeria', code: '011' },
+    { name: 'United Bank for Africa (UBA)', code: '033' },
+    { name: 'Standard Chartered Bank', code: '068' },
+    { name: 'Stanbic IBTC Bank', code: '221' },
+    { name: 'Kuda Microfinance Bank', code: '50211' },
+    { name: 'OPay Digital Services', code: '999992' },
+    { name: 'PalmPay', code: '999991' },
+  ];
+
+  const [banksList, setBanksList] = useState<Array<{ name: string; code: string; slug?: string }>>(FALLBACK_BANKS);
   const [showBankModal, setShowBankModal] = useState(false);
   const [editBankForm, setEditBankForm] = useState({
     bankName: bankAccount?.bankName || 'Guaranty Trust Bank (GTBank)',
-    accountName: bankAccount?.accountName || organizer?.name || '',
+    bankCode: '058',
+    accountName: bankAccount?.accountName || '',
     accountNumber: bankAccount?.accountNumber?.replace(/[^0-9]/g, '') || '',
     routingNumber: bankAccount?.routingNumber || ''
   });
   const [isSavingBank, setIsSavingBank] = useState(false);
+  const [isResolvingBank, setIsResolvingBank] = useState(false);
+  const [bankResolveStatus, setBankResolveStatus] = useState<'idle' | 'verified' | 'error'>('idle');
+  const [bankResolveFailureType, setBankResolveFailureType] = useState<'none' | 'invalid' | 'gateway_error'>('none');
+  const [bankResolveError, setBankResolveError] = useState<string | null>(null);
+  const [allowUnverifiedSave, setAllowUnverifiedSave] = useState(false);
+  const resolveSeqRef = useRef(0);
 
 
   // In-App Credits & Add-ons States
@@ -192,150 +219,183 @@ export const Analytics: React.FC = () => {
     reference: string;
   }
 
-  const [creditsBalance, setCreditsBalance] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem('strayttix_organizer_credits');
-      return saved ? Number(saved) : 0;
-    } catch {
-      return 0;
-    }
-  });
-
-  const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>(() => {
-    try {
-      const saved = localStorage.getItem('strayttix_organizer_credit_txs');
-      if (saved && (saved.includes('tx-1') || saved.includes('Growth Pack Top-Up'))) {
-        localStorage.removeItem('strayttix_organizer_credit_txs');
-        return [];
-      }
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
+  const [creditsBalance, setCreditsBalance] = useState<number>(0);
+  const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>([]);
   const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
-  const [selectedPack, setSelectedPack] = useState<'starter' | 'growth' | 'power' | 'custom'>('growth');
-  const [customCreditsAmount, setCustomCreditsAmount] = useState('250');
-  const [isProcessingTopUp, setIsProcessingTopUp] = useState(false);
 
-  useEffect(() => {
-    localStorage.setItem('strayttix_organizer_credits', creditsBalance.toString());
-  }, [creditsBalance]);
+  const loadCreditsData = async () => {
+    if (!organizer?.id) return;
+    try {
+      const [walletRes, ledgerRes] = await Promise.allSettled([
+        creditsApi.getWallet(organizer.id),
+        creditsApi.getLedger({ limit: 15 }, organizer.id),
+      ]);
 
-  useEffect(() => {
-    localStorage.setItem('strayttix_organizer_credit_txs', JSON.stringify(creditTransactions));
-  }, [creditTransactions]);
+      if (walletRes.status === 'fulfilled') {
+        const rawWallet = (walletRes.value as any)?.data ?? walletRes.value;
+        const balance = Number(rawWallet?.available_balance ?? rawWallet?.balance ?? 0);
+        setCreditsBalance(Number.isFinite(balance) ? balance : 0);
+      }
 
-  const handleCompleteTopUp = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsProcessingTopUp(true);
-
-    let creditsToAdd = 500;
-    let priceNgn = 22500;
-
-    if (selectedPack === 'starter') {
-      creditsToAdd = 100;
-      priceNgn = 5000;
-    } else if (selectedPack === 'power') {
-      creditsToAdd = 1500;
-      priceNgn = 60000;
-    } else if (selectedPack === 'custom') {
-      creditsToAdd = Math.max(50, Number(customCreditsAmount) || 50);
-      priceNgn = creditsToAdd * 50;
+      if (ledgerRes.status === 'fulfilled') {
+        const rawLedger = (ledgerRes.value as any)?.data ?? ledgerRes.value;
+        const items = Array.isArray(rawLedger) ? rawLedger : Array.isArray(rawLedger?.items) ? rawLedger.items : [];
+        setCreditTransactions(
+          items.map((item: any) => ({
+            id: String(item.id),
+            date: item.created_at
+              ? new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              : '—',
+            description: item.description || item.reason || (item.type === 'credit' ? 'Credit Top-Up' : 'Credit Usage'),
+            type: item.type === 'debit' ? 'debit' : 'credit',
+            amount: Number(item.amount ?? 0),
+            balanceAfter: Number(item.balance_after ?? 0),
+            reference: item.reference || String(item.id),
+          }))
+        );
+      }
+    } catch {
+      // Non-blocking: wallet/ledger remain empty until backend responds
     }
-
-    setTimeout(() => {
-      setIsProcessingTopUp(false);
-      const newTotal = creditsBalance + creditsToAdd;
-      setCreditsBalance(newTotal);
-
-      const newTx: CreditTransaction = {
-        id: `tx-${Date.now()}`,
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        description: `Credits Purchase (${creditsToAdd} Credits - ₦${priceNgn.toLocaleString()})`,
-        type: 'credit',
-        amount: creditsToAdd,
-        balanceAfter: newTotal,
-        reference: `PS_${Math.floor(100000 + Math.random() * 900000)}`
-      };
-
-      setCreditTransactions(prev => [newTx, ...prev]);
-      setIsTopUpModalOpen(false);
-      showNotification(`Successfully topped up ${creditsToAdd} Credits! New balance: ${newTotal} Credits.`, 'success');
-    }, 1200);
   };
 
-  const handleSimulateFeatureUse = (featureName: string, cost: number) => {
-    if (creditsBalance < cost) {
-      showNotification(`Insufficient credits! You need ${cost} credits, but have ${creditsBalance}. Please top up.`, 'error');
-      setIsTopUpModalOpen(true);
-      return;
-    }
-
-    const newTotal = creditsBalance - cost;
-    setCreditsBalance(newTotal);
-
-    const newTx: CreditTransaction = {
-      id: `tx-${Date.now()}`,
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      description: `In-App Feature: ${featureName}`,
-      type: 'debit',
-      amount: cost,
-      balanceAfter: newTotal,
-      reference: `ACT_${Math.floor(100000 + Math.random() * 900000)}`
-    };
-
-    setCreditTransactions(prev => [newTx, ...prev]);
-    showNotification(`Activated "${featureName}" (-${cost} Credits). Remaining: ${newTotal} Credits.`, 'success');
-  };
-
-  // Search & Filter in Ledger
-  const [ledgerSearch, setLedgerSearch] = useState('');
-  const [ledgerStatusFilter, setLedgerStatusFilter] = useState<'all' | 'Paid' | 'Pending' | 'Refunded'>('all');
+  useEffect(() => {
+    loadCreditsData();
+  }, [organizer?.id]);
 
   // Load Real Data
   useEffect(() => {
     setIsLoading(true);
     Promise.all([
       eventApi.getOrganizerEvents(organizer?.id).catch(() => ({ data: [] })),
-      (organizer?.id 
-        ? ordersApi.getOrganizerOrders(organizer.id).catch(() => ({ data: [] }))
+      (organizer?.id
+        ? ordersApi.getOrganizerOrders(organizer.id, undefined, { per_page: 100 }).catch(() => ({ data: [] }))
         : eventApi.getOrders(organizer?.id).catch(() => ({ data: [] }))
       ),
-      paymentApi.getPayouts().catch(() => ({ data: [] }))
+      paymentApi.getPayouts().catch(() => ({ data: [] })),
+      organizerApi.getBanks().catch(() => ({ data: [] })),
+      organizer?.id ? organizerApi.getBankAccount(organizer.id).catch(() => ({ data: null })) : Promise.resolve({ data: null })
     ])
-      .then(([eventsRes, ordersRes, payoutsRes]) => {
+      .then(([eventsRes, ordersRes, payoutsRes, banksRes, bankAcctRes]) => {
         const rawEvents = eventsRes.data;
-        const eventItems = Array.isArray(rawEvents) 
-          ? rawEvents 
-          : Array.isArray((rawEvents as any)?.data) 
-          ? (rawEvents as any).data 
-          : [];
+        const eventItems = Array.isArray(rawEvents)
+          ? rawEvents
+          : Array.isArray((rawEvents as any)?.data)
+            ? (rawEvents as any).data
+            : [];
         setEvents(eventItems);
 
         const rawOrders = (ordersRes as any)?.data || ordersRes || [];
         const orderItems = Array.isArray(rawOrders)
           ? rawOrders
           : Array.isArray((rawOrders as any)?.data)
-          ? (rawOrders as any).data 
-          : [];
+            ? (rawOrders as any).data
+            : [];
         setOrders(orderItems.map((o: any) => normalizeOrder(o)));
 
         const rawPayouts = (payoutsRes as any)?.data || payoutsRes || [];
         const payoutItems = Array.isArray(rawPayouts)
           ? rawPayouts
           : Array.isArray((rawPayouts as any)?.data)
-          ? (rawPayouts as any).data
-          : [];
+            ? (rawPayouts as any).data
+            : [];
         if (payoutItems.length > 0) {
           setPayouts(payoutItems);
+        }
+
+        const rawBanks = (banksRes as any)?.data?.data ?? (banksRes as any)?.data ?? [];
+        if (Array.isArray(rawBanks) && rawBanks.length > 0) {
+          setBanksList(rawBanks);
+        }
+
+        const rawBankAcct = (bankAcctRes as any)?.data?.data ?? (bankAcctRes as any)?.data ?? null;
+        if (rawBankAcct && rawBankAcct.account_number) {
+          const synced: BankAccountInfo = {
+            bankName: rawBankAcct.bank_name,
+            accountName: rawBankAcct.account_name,
+            accountNumber: `••••••••${String(rawBankAcct.account_number).slice(-4)}`,
+            routingNumber: rawBankAcct.bank_code || '',
+            currency: 'NGN',
+            isVerified: true
+          };
+          setBankAccount(synced);
+          localStorage.setItem(`strayttix_bank_${organizer?.id || 'default'}`, JSON.stringify(synced));
+          setEditBankForm(prev => ({
+            ...prev,
+            bankName: rawBankAcct.bank_name || prev.bankName,
+            bankCode: rawBankAcct.bank_code || prev.bankCode,
+            accountName: rawBankAcct.account_name || '',
+            accountNumber: String(rawBankAcct.account_number || '').replace(/[^0-9]/g, ''),
+          }));
         }
       })
       .finally(() => {
         setIsLoading(false);
       });
   }, [organizer?.id]);
+
+  // Auto-resolve 10-digit NUBAN account number via Paystack / Flutterwave (with stale-response guard)
+  const handleResolveBankAccount = async (acctNum = editBankForm.accountNumber, bCode = editBankForm.bankCode) => {
+    if (acctNum.length !== 10 || !bCode) return;
+    const reqSeq = ++resolveSeqRef.current;
+    setIsResolvingBank(true);
+    setBankResolveError(null);
+    setBankResolveFailureType('none');
+    setAllowUnverifiedSave(false);
+
+    try {
+      const res = await organizerApi.resolveBankAccount({
+        account_number: acctNum,
+        bank_code: bCode
+      });
+      if (reqSeq !== resolveSeqRef.current) return;
+
+      const resolved = (res as any)?.data?.data ?? (res as any)?.data;
+      if (resolved?.account_name) {
+        setEditBankForm(prev => ({ ...prev, accountName: resolved.account_name }));
+        setBankResolveStatus('verified');
+        setBankResolveFailureType('none');
+        setBankResolveError(null);
+      } else {
+        setBankResolveStatus('error');
+        setBankResolveFailureType('invalid');
+        setBankResolveError('Could not match this account number with the selected bank.');
+      }
+    } catch (err: any) {
+      if (reqSeq !== resolveSeqRef.current) return;
+      const status = err?.response?.status;
+      const isGatewayOutage = !err?.response || status >= 500 || status === 429 || status === 408;
+
+      setBankResolveStatus('error');
+      setBankResolveFailureType(isGatewayOutage ? 'gateway_error' : 'invalid');
+      setBankResolveError(
+        isGatewayOutage
+          ? 'Bank verification service is temporarily unavailable. Retry or save for manual review.'
+          : getApiErrorMessage(err, 'Account number does not match the selected bank.')
+      );
+    } finally {
+      if (reqSeq === resolveSeqRef.current) {
+        setIsResolvingBank(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!showBankModal) return;
+    if (editBankForm.accountNumber.length !== 10 || !editBankForm.bankCode) {
+      resolveSeqRef.current += 1;
+      setIsResolvingBank(false);
+      setBankResolveStatus('idle');
+      setBankResolveFailureType('none');
+      setBankResolveError(null);
+      setAllowUnverifiedSave(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      handleResolveBankAccount(editBankForm.accountNumber, editBankForm.bankCode);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [showBankModal, editBankForm.accountNumber, editBankForm.bankCode]);
 
   // Save changes to localStorage
   const savePayouts = (newPayouts: PayoutRecord[]) => {
@@ -350,7 +410,7 @@ export const Analytics: React.FC = () => {
 
   // Financial Calculations
   const paidOrders = useMemo(() => orders.filter(o => o.status === 'Paid' || String(o.status).toLowerCase() === 'paid'), [orders]);
-  
+
   // Total Gross Sales
   const grossRevenue = useMemo(() => {
     return paidOrders.reduce((sum, o) => sum + Number(o.total ?? o.amount ?? 0), 0);
@@ -393,30 +453,80 @@ export const Analytics: React.FC = () => {
   // Average Order Value
   const avgOrderValue = paidOrders.length > 0 ? grossRevenue / paidOrders.length : 0;
 
-  // Chart Data: Group paid orders by date
-  const salesByDate = useMemo(() => {
-    return paidOrders.reduce<Record<string, { count: number; volume: number }>>((acc, o) => {
-      const d = o.createdAt ? new Date(o.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Recent';
-      if (!acc[d]) acc[d] = { count: 0, volume: 0 };
-      acc[d].count += (Number(o.ticketQuantity) || 1);
-      acc[d].volume += Number(o.amount || 0);
-      return acc;
-    }, {});
-  }, [paidOrders]);
+  // Sales & Velocity Chart Data: Filter by selected timeframe and sort chronologically
+  const timeframeDaysMap: Record<'7d' | '30d' | '3m' | '6m' | '12m', number> = {
+    '7d': 7,
+    '30d': 30,
+    '3m': 90,
+    '6m': 180,
+    '12m': 365,
+  };
+
+  const timeframeOrders = useMemo(() => {
+    const cutoff = Date.now() - timeframeDaysMap[timeframe] * 86400000;
+    return paidOrders.filter((o) => {
+      if (!o.createdAt) return true;
+      const ts = new Date(o.createdAt).getTime();
+      return !isNaN(ts) && ts >= cutoff;
+    });
+  }, [paidOrders, timeframe]);
 
   const salesData = useMemo(() => {
-    return Object.entries(salesByDate).map(([date, data]) => ({ date, ...data }));
-  }, [salesByDate]);
+    const useMonthlyBuckets = timeframe === '3m' || timeframe === '6m' || timeframe === '12m';
+    const buckets: Record<string, { sortKey: string; date: string; count: number; volume: number; orders: number }> = {};
 
-  const maxSalesCount = salesData.length > 0 ? Math.max(...salesData.map(d => d.count)) : 1;
+    timeframeOrders.forEach((o) => {
+      const dt = o.createdAt ? new Date(o.createdAt) : new Date();
+      if (isNaN(dt.getTime())) return;
+
+      const sortKey = useMonthlyBuckets
+        ? `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`
+        : `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+
+      const label = useMonthlyBuckets
+        ? dt.toLocaleDateString(undefined, { month: 'short', year: '2-digit' })
+        : dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+      if (!buckets[sortKey]) {
+        buckets[sortKey] = { sortKey, date: label, count: 0, volume: 0, orders: 0 };
+      }
+      buckets[sortKey].count += Number(o.ticketQuantity) || 1;
+      buckets[sortKey].volume += Number(o.total ?? o.amount ?? 0);
+      buckets[sortKey].orders += 1;
+    });
+
+    return Object.values(buckets).sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+  }, [timeframeOrders, timeframe]);
+
+  const maxSalesCount = salesData.length > 0 ? Math.max(...salesData.map(d => d.count), 1) : 1;
+  const maxSalesVolume = salesData.length > 0 ? Math.max(...salesData.map(d => d.volume), 1) : 1;
+
+  const velocitySummary = useMemo(() => {
+    const totalRevenue = timeframeOrders.reduce((sum, o) => sum + Number(o.total ?? o.amount ?? 0), 0);
+    const totalTickets = timeframeOrders.reduce((sum, o) => sum + (Number(o.ticketQuantity) || 1), 0);
+    const activeBuckets = Math.max(salesData.length, 1);
+    const peakBucket = salesData.reduce<(typeof salesData)[0] | null>((best, cur) => {
+      if (!best) return cur;
+      return (velocityMetric === 'revenue' ? cur.volume > best.volume : cur.count > best.count) ? cur : best;
+    }, null);
+
+    return {
+      totalRevenue,
+      totalTickets,
+      orderCount: timeframeOrders.length,
+      avgPerBucketRevenue: totalRevenue / activeBuckets,
+      avgPerBucketTickets: totalTickets / activeBuckets,
+      peakBucket,
+    };
+  }, [timeframeOrders, salesData, velocityMetric]);
 
   // Revenue by Event breakdown
   const eventRevenueStats = useMemo(() => {
     return events.map(evt => {
-      const eventOrders = paidOrders.filter(o => 
-        (o.eventId && o.eventId === evt.id) || 
-        (o.event_id && o.event_id === evt.id) || 
-        (o.eventTitle && o.eventTitle === evt.title) || 
+      const eventOrders = paidOrders.filter(o =>
+        (o.eventId && o.eventId === evt.id) ||
+        (o.event_id && o.event_id === evt.id) ||
+        (o.eventTitle && o.eventTitle === evt.title) ||
         (evt.slug && o.eventSlug === evt.slug)
       );
       const ticketsSold = eventOrders.reduce((sum, o) => sum + (Number(o.ticketQuantity) || 1), 0);
@@ -435,22 +545,6 @@ export const Analytics: React.FC = () => {
       };
     });
   }, [events, paidOrders]);
-
-  // Filtered Ledger Orders
-  const filteredLedger = useMemo(() => {
-    return orders.filter(o => {
-      const matchesSearch = 
-        !ledgerSearch ||
-        o.id.toLowerCase().includes(ledgerSearch.toLowerCase()) ||
-        (o.customerName || '').toLowerCase().includes(ledgerSearch.toLowerCase()) ||
-        (o.customerEmail || '').toLowerCase().includes(ledgerSearch.toLowerCase()) ||
-        (o.eventTitle || '').toLowerCase().includes(ledgerSearch.toLowerCase());
-
-      const matchesStatus = ledgerStatusFilter === 'all' || o.status === ledgerStatusFilter;
-
-      return matchesSearch && matchesStatus;
-    });
-  }, [orders, ledgerSearch, ledgerStatusFilter]);
 
   // Withdrawal Handler
   const handleRequestWithdrawal = async (e: React.FormEvent) => {
@@ -473,6 +567,13 @@ export const Analytics: React.FC = () => {
 
     if (!bankAccount) {
       showNotification('Please connect a settlement bank account first.', 'warning');
+      setShowWithdrawModal(false);
+      setShowBankModal(true);
+      return;
+    }
+
+    if (!bankAccount.isVerified) {
+      showNotification('Your settlement bank account is pending verification. Please verify it before requesting a payout.', 'warning');
       setShowWithdrawModal(false);
       setShowBankModal(true);
       return;
@@ -504,34 +605,59 @@ export const Analytics: React.FC = () => {
     }
   };
 
-  // Update Bank Handler
-  const handleSaveBank = (e: React.FormEvent) => {
+  // Update Bank Handler (persists verified or pending-review bank account)
+  const handleSaveBank = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editBankForm.accountName.trim() || !editBankForm.accountNumber.trim()) {
-      showNotification('Please fill in all banking fields.', 'warning');
+    if (editBankForm.accountNumber.length !== 10 || !editBankForm.bankCode) {
+      showNotification('Please select a bank and enter a valid 10-digit NUBAN account number.', 'warning');
+      return;
+    }
+
+    const isVerified = bankResolveStatus === 'verified';
+    const hasManualDetails = editBankForm.accountName.trim().length >= 3;
+
+    if (!isVerified && !hasManualDetails) {
+      showNotification('Please verify the account number or enter the account holder name manually.', 'warning');
       return;
     }
 
     setIsSavingBank(true);
-    setTimeout(() => {
+    try {
+      if (organizer?.id) {
+        await organizerApi.saveBankAccount(organizer.id, {
+          bank_name: editBankForm.bankName,
+          bank_code: editBankForm.bankCode,
+          account_number: editBankForm.accountNumber,
+          account_name: editBankForm.accountName.trim(),
+        });
+      }
+
       saveBank({
         bankName: editBankForm.bankName,
-        accountName: editBankForm.accountName,
+        accountName: editBankForm.accountName.trim(),
         accountNumber: `••••••••${editBankForm.accountNumber.slice(-4)}`,
-        routingNumber: editBankForm.routingNumber,
+        routingNumber: editBankForm.bankCode,
         currency: 'NGN',
-        isVerified: true
+        isVerified
       });
-      setIsSavingBank(false);
       setShowBankModal(false);
-      showNotification('Settlement bank account updated and verified.', 'success');
-    }, 800);
+      showNotification(
+        isVerified
+          ? 'Settlement bank account verified and saved.'
+          : 'Bank account saved as Pending Verification. Payouts remain locked until verified.',
+        isVerified ? 'success' : 'info'
+      );
+    } catch (err: any) {
+      showNotification(getApiErrorMessage(err, 'Failed to save settlement bank account.'), 'error');
+    } finally {
+      setIsSavingBank(false);
+    }
   };
 
   return (
     <OrganizerDashboardLayout>
       <div className="space-y-8">
-        
+
         {/* Page Top Header */}
         <div className="border-b border-zinc-200/80 dark:border-white/10 pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -647,33 +773,41 @@ export const Analytics: React.FC = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 p-2 rounded-2xl shadow-xs flex items-center gap-1.5 overflow-x-auto">
-          {[
-            { id: 'wallet', label: 'Wallet & Payouts', icon: <Wallet className="w-4 h-4" /> },
-            { id: 'analytics', label: 'Sales & Velocity', icon: <BarChart3 className="w-4 h-4" /> },
-            { id: 'events', label: 'Revenue by Event', icon: <Receipt className="w-4 h-4" /> },
-            { id: 'ledger', label: 'Transaction Ledger', icon: <FileText className="w-4 h-4" /> },
-            { id: 'credits', label: `${sitename} Credits`, icon: <Coins className="w-4 h-4 text-amber-500" /> }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold inline-flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === tab.id
+        <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 p-2 rounded-2xl shadow-xs flex items-center justify-between gap-2 overflow-x-auto">
+          <div className="flex items-center gap-1.5">
+            {[
+              { id: 'wallet', label: 'Wallet & Payouts', icon: <Wallet className="w-4 h-4" /> },
+              { id: 'analytics', label: 'Sales & Velocity', icon: <BarChart3 className="w-4 h-4" /> },
+              { id: 'events', label: 'Revenue by Event', icon: <Receipt className="w-4 h-4" /> },
+              { id: 'credits', label: `${sitename} Credits`, icon: <Coins className="w-4 h-4 text-amber-500" /> }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold inline-flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${activeTab === tab.id
                   ? 'bg-[#E31B23] text-white shadow-xs'
                   : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-white/5'
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
+                  }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <Link
+            to="/organizer/orders"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors whitespace-nowrap shrink-0"
+          >
+            <span>Customer Orders</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-[#E31B23]" />
+          </Link>
         </div>
 
         {/* TAB 1: WALLET & PAYOUTS */}
         {activeTab === 'wallet' && (
           <div className="space-y-6">
-            
+
             {/* Settlement Bank Account Card */}
             <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-2xl p-6 shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 dark:border-white/10 pb-5">
@@ -681,9 +815,17 @@ export const Analytics: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Building2 className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />
                     <h3 className="text-base font-black text-zinc-950 dark:text-white">Settlement Bank Account</h3>
-                    <Badge variant="success" className="gap-1">
-                      <ShieldCheck className="w-3 h-3" /> Verified
-                    </Badge>
+                    {bankAccount && (
+                      bankAccount.isVerified ? (
+                        <Badge variant="success" className="gap-1">
+                          <ShieldCheck className="w-3 h-3" /> Verified
+                        </Badge>
+                      ) : (
+                        <Badge variant="warning" className="gap-1">
+                          <Clock className="w-3 h-3" /> Pending Verification
+                        </Badge>
+                      )
+                    )}
                   </div>
                   <p className="text-xs text-zinc-500 mt-1">
                     Funds requested for withdrawal are settled into this verified commercial account.
@@ -695,12 +837,16 @@ export const Analytics: React.FC = () => {
                     type="button"
                     variant="outline"
                     onClick={() => {
+                      const matchedBank = banksList.find(b => b.name === bankAccount.bankName || b.code === bankAccount.routingNumber);
                       setEditBankForm({
                         bankName: bankAccount.bankName,
+                        bankCode: matchedBank?.code || bankAccount.routingNumber || banksList[0]?.code || '058',
                         accountName: bankAccount.accountName,
                         accountNumber: bankAccount.accountNumber.replace(/[^0-9]/g, '') || '',
                         routingNumber: bankAccount.routingNumber
                       });
+                      setBankResolveStatus('idle');
+                      setBankResolveError(null);
                       setShowBankModal(true);
                     }}
                     fullWidth={false} className="w-auto text-xs font-bold px-4 py-2"
@@ -724,11 +870,14 @@ export const Analytics: React.FC = () => {
                       size="sm"
                       onClick={() => {
                         setEditBankForm({
-                          bankName: 'Guaranty Trust Bank (GTBank)',
-                          accountName: organizer?.name || '',
+                          bankName: banksList[0]?.name || 'Guaranty Trust Bank (GTBank)',
+                          bankCode: banksList[0]?.code || '058',
+                          accountName: '',
                           accountNumber: '',
                           routingNumber: ''
                         });
+                        setBankResolveStatus('idle');
+                        setBankResolveError(null);
                         setShowBankModal(true);
                       }}
                       fullWidth={false} className="w-auto gap-1.5 mt-2 px-5"
@@ -739,7 +888,7 @@ export const Analytics: React.FC = () => {
                 </div>
               ) : (
                 /* Bank Details Display */
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-5">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-5">
                   <div className="space-y-1">
                     <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Financial Institution</span>
                     <p className="text-sm font-bold text-zinc-900 dark:text-white">{bankAccount.bankName}</p>
@@ -753,23 +902,6 @@ export const Analytics: React.FC = () => {
                   <div className="space-y-1">
                     <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Account Number</span>
                     <p className="text-sm font-mono font-bold text-zinc-900 dark:text-white">{bankAccount.accountNumber}</p>
-                  </div>
-
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Automated Schedule</span>
-                    <select
-                      value={payoutSchedule}
-                      onChange={(e) => {
-                        setPayoutSchedule(e.target.value as any);
-                        showNotification(`Payout cadence updated to ${e.target.value}.`, 'info');
-                      }}
-                      className="bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-xs font-bold rounded-xl px-3 py-1.5 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-[#E31B23] cursor-pointer"
-                    >
-                      <option value="weekly">Weekly (Every Monday)</option>
-                      <option value="daily">Daily (Next Business Day)</option>
-                      <option value="monthly">Monthly (1st of Month)</option>
-                      <option value="manual">Manual on Demand Only</option>
-                    </select>
                   </div>
                 </div>
               )}
@@ -856,29 +988,88 @@ export const Analytics: React.FC = () => {
         {/* TAB 2: SALES & VELOCITY */}
         {activeTab === 'analytics' && (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 p-6 rounded-2xl shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
+            {/* Velocity Summary Strip */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard
+                title="Period Revenue"
+                value={formatCurrency(velocitySummary.totalRevenue)}
+                description={`${velocitySummary.orderCount} completed ${velocitySummary.orderCount === 1 ? 'order' : 'orders'}`}
+                icon={<TrendingUp className="w-5 h-5 text-emerald-600" />}
+              />
+              <StatCard
+                title="Tickets Sold"
+                value={velocitySummary.totalTickets.toLocaleString()}
+                description={`Last ${timeframe.toUpperCase()} window`}
+                icon={<Receipt className="w-5 h-5 text-blue-600" />}
+              />
+              <StatCard
+                title={timeframe === '7d' || timeframe === '30d' ? 'Daily Sales Pace' : 'Monthly Sales Pace'}
+                value={formatCurrency(Math.round(velocitySummary.avgPerBucketRevenue))}
+                description={`~${velocitySummary.avgPerBucketTickets.toFixed(1)} tickets / active ${timeframe === '7d' || timeframe === '30d' ? 'day' : 'month'}`}
+                icon={<BarChart3 className="w-5 h-5 text-[#E31B23]" />}
+              />
+              <StatCard
+                title="Peak Period"
+                value={velocitySummary.peakBucket ? velocitySummary.peakBucket.date : '—'}
+                description={
+                  velocitySummary.peakBucket
+                    ? `${velocitySummary.peakBucket.count} tickets • ${formatCurrency(velocitySummary.peakBucket.volume)}`
+                    : 'No sales recorded yet'
+                }
+                icon={<Sparkles className="w-5 h-5 text-amber-500" />}
+              />
+            </div>
+
+            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 p-6 rounded-2xl shadow-xs space-y-6">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
                 <div>
                   <h3 className="text-base font-black text-zinc-950 dark:text-white flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-[#E31B23]" /> Ticket Sales & Revenue Velocity
                   </h3>
                   <p className="text-xs text-zinc-500 mt-0.5">Real-time checkout volume and revenue cadence over time.</p>
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  {(['7d', '30d', '3m', '6m', '12m'] as const).map(t => (
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {/* Metric Switcher */}
+                  <div className="flex items-center gap-1 bg-zinc-100 dark:bg-white/5 p-1 rounded-xl border border-zinc-200/70 dark:border-white/10">
                     <button
-                      key={t}
-                      onClick={() => setTimeframe(t)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                        timeframe === t
-                          ? 'bg-[#E31B23] text-white'
-                          : 'bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300'
-                      }`}
+                      type="button"
+                      onClick={() => setVelocityMetric('revenue')}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${velocityMetric === 'revenue'
+                        ? 'bg-white dark:bg-[#0F0F14] text-zinc-950 dark:text-white shadow-2xs'
+                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white'
+                        }`}
                     >
-                      {t.toUpperCase()}
+                      Revenue
                     </button>
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => setVelocityMetric('tickets')}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${velocityMetric === 'tickets'
+                        ? 'bg-white dark:bg-[#0F0F14] text-zinc-950 dark:text-white shadow-2xs'
+                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white'
+                        }`}
+                    >
+                      Tickets
+                    </button>
+                  </div>
+
+                  {/* Timeframe Filter */}
+                  <div className="flex items-center gap-1.5">
+                    {(['7d', '30d', '3m', '6m', '12m'] as const).map(t => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setTimeframe(t)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${timeframe === t
+                          ? 'bg-[#E31B23] text-white shadow-xs'
+                          : 'bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300'
+                          }`}
+                      >
+                        {t.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -888,31 +1079,40 @@ export const Analytics: React.FC = () => {
                 </div>
               ) : salesData.length === 0 ? (
                 <div className="h-64 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-zinc-200 dark:border-white/15 rounded-xl space-y-2">
-                  <BarChart3 className="w-10 h-10 text-zinc-300" />
+                  <BarChart3 className="w-10 h-10 text-zinc-300 dark:text-zinc-600" />
                   <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">No sales activity in this timeframe</p>
                   <p className="text-xs text-zinc-400 max-w-sm">
-                    When attendees purchase event tickets, your sales velocity throughput will chart here automatically.
+                    When attendees purchase event tickets in the last {timeframe.toUpperCase()}, your sales velocity throughput will chart here automatically.
                   </p>
                 </div>
               ) : (
-                <div className="h-72 flex items-end justify-between gap-3 pt-10 pb-4 border-b border-zinc-100 dark:border-white/10">
-                  {salesData.map((data, idx) => {
-                    const heightPercent = Math.min(100, Math.max(12, (data.count / maxSalesCount) * 85 + 10));
+                <div className="h-72 flex items-end justify-around gap-3 pt-12 pb-3 border-b border-zinc-100 dark:border-white/10 overflow-x-auto">
+                  {salesData.map((data) => {
+                    const ratio = velocityMetric === 'revenue'
+                      ? (data.volume / maxSalesVolume)
+                      : (data.count / maxSalesCount);
+                    const heightPercent = Math.min(100, Math.max(12, Math.round(ratio * 88 + 10)));
+
                     return (
-                      <div key={idx} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer relative">
+                      <div key={data.sortKey} className="flex-1 min-w-[42px] max-w-[72px] h-full flex flex-col items-center justify-end gap-2 group cursor-pointer relative">
                         {/* Tooltip on hover */}
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-950 text-white font-mono text-[10px] px-2 py-1 rounded-lg shadow-xl absolute -translate-y-12 pointer-events-none z-20 whitespace-nowrap">
-                          {data.count} tickets • {formatCurrency(data.volume)}
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 font-mono text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-xl absolute top-0 pointer-events-none z-20 whitespace-nowrap">
+                          {data.count} {data.count === 1 ? 'ticket' : 'tickets'} • {formatCurrency(data.volume)}
                         </div>
-                        
+
+                        {/* Value label above bar */}
+                        <span className="text-[10px] font-mono font-bold text-zinc-500 dark:text-zinc-400 group-hover:text-[#E31B23] transition-colors">
+                          {velocityMetric === 'revenue' ? formatCurrency(data.volume) : data.count}
+                        </span>
+
                         {/* Bar */}
-                        <div 
-                          className="w-full bg-[#E31B23]/20 hover:bg-[#E31B23] rounded-t-lg transition-all duration-300"
+                        <div
+                          className="w-full max-w-[44px] bg-gradient-to-t from-[#E31B23]/80 to-[#E31B23] group-hover:brightness-110 rounded-t-xl transition-all duration-300 shadow-xs"
                           style={{ height: `${heightPercent}%` }}
                         />
-                        
+
                         {/* Date Label */}
-                        <span className="text-[10px] font-mono text-zinc-400 truncate max-w-full">{data.date}</span>
+                        <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 truncate max-w-full">{data.date}</span>
                       </div>
                     );
                   })}
@@ -972,105 +1172,12 @@ export const Analytics: React.FC = () => {
                           {formatCurrency(item.net)}
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                            item.settlementStatus.includes('Cleared')
-                              ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
-                              : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20'
-                          }`}>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${item.settlementStatus.includes('Cleared')
+                            ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
+                            : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20'
+                            }`}>
                             {item.settlementStatus}
                           </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* TAB 4: TRANSACTION LEDGER */}
-        {activeTab === 'ledger' && (
-          <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-2xl shadow-xs overflow-hidden space-y-4">
-            <div className="p-6 border-b border-zinc-100 dark:border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h3 className="text-base font-black text-zinc-950 dark:text-white">Ticket Transaction Ledger</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">Granular audit log of attendee checkouts and ticketing transactions.</p>
-              </div>
-
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div className="relative w-full sm:w-64">
-                  <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
-                  <input
-                    type="text"
-                    placeholder="Search order ID, attendee..."
-                    value={ledgerSearch}
-                    onChange={(e) => setLedgerSearch(e.target.value)}
-                    className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs text-zinc-900 dark:text-white rounded-xl pl-9 pr-3 py-2 font-medium focus:outline-none focus:border-[#E31B23]"
-                  />
-                </div>
-
-                <select
-                  value={ledgerStatusFilter}
-                  onChange={(e) => setLedgerStatusFilter(e.target.value as any)}
-                  className="bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-xs font-bold rounded-xl px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none"
-                >
-                  <option value="all">All Statuses</option>
-                  <option value="Paid">Paid</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Refunded">Refunded</option>
-                </select>
-              </div>
-            </div>
-
-            {filteredLedger.length === 0 ? (
-              <div className="p-12 text-center space-y-3">
-                <FileText className="w-10 h-10 text-zinc-300 mx-auto" />
-                <h4 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">No Transactions Match Filter</h4>
-                <p className="text-xs text-zinc-400">Clear your search query or status filter to see more results.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-zinc-50 dark:bg-white/[0.03] border-b border-zinc-100 dark:border-white/10 text-zinc-400 font-bold uppercase tracking-wider text-xs">
-                    <tr>
-                      <th className="px-6 py-4">Transaction / Order</th>
-                      <th className="px-6 py-4">Attendee</th>
-                      <th className="px-6 py-4">Event</th>
-                      <th className="px-6 py-4">Date</th>
-                      <th className="px-6 py-4">Status</th>
-                      <th className="px-6 py-4 text-right">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100 dark:divide-white/10 font-medium text-zinc-800 dark:text-zinc-200">
-                    {filteredLedger.map((o) => (
-                      <tr key={o.id} className="hover:bg-zinc-50/70 dark:hover:bg-white/[0.02] transition-colors">
-                        <td className="px-6 py-4 font-mono font-bold text-xs text-zinc-950 dark:text-white">
-                          {o.id}
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="font-bold text-xs text-zinc-900 dark:text-white">{o.customerName || 'Anonymous Attendee'}</p>
-                          <span className="text-[11px] text-zinc-400">{o.customerEmail}</span>
-                        </td>
-                        <td className="px-6 py-4 text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                          {o.eventTitle || 'General Event'}
-                        </td>
-                        <td className="px-6 py-4 text-xs text-zinc-400">
-                          {o.createdAt ? formatDate(o.createdAt) : 'Recent'}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                            o.status === 'Paid'
-                              ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
-                              : o.status === 'Refunded'
-                              ? 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'
-                              : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20'
-                          }`}>
-                            {o.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right font-bold font-mono text-zinc-950 dark:text-white">
-                          {formatCurrency(Number(o.amount || 0))}
                         </td>
                       </tr>
                     ))}
@@ -1201,49 +1308,125 @@ export const Analytics: React.FC = () => {
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Bank Name</label>
                   <select
-                    value={editBankForm.bankName}
-                    onChange={(e) => setEditBankForm(prev => ({ ...prev, bankName: e.target.value }))}
+                    value={editBankForm.bankCode}
+                    onChange={(e) => {
+                      const code = e.target.value;
+                      const match = banksList.find(b => b.code === code);
+                      setEditBankForm(prev => ({
+                        ...prev,
+                        bankCode: code,
+                        bankName: match?.name || prev.bankName,
+                        accountName: ''
+                      }));
+                      setBankResolveStatus('idle');
+                      setBankResolveError(null);
+                    }}
                     className="w-full bg-zinc-50 dark:bg-[#070709] border border-zinc-200 dark:border-white/10 text-xs font-bold rounded-xl px-3 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:border-[#E31B23] cursor-pointer"
                   >
-                    <option value="Guaranty Trust Bank (GTBank)">Guaranty Trust Bank (GTBank)</option>
-                    <option value="Access Bank PLC">Access Bank PLC</option>
-                    <option value="Zenith Bank">Zenith Bank</option>
-                    <option value="First Bank of Nigeria">First Bank of Nigeria</option>
-                    <option value="United Bank for Africa (UBA)">United Bank for Africa (UBA)</option>
-                    <option value="Standard Chartered Bank">Standard Chartered Bank</option>
-                    <option value="Stanbic IBTC Bank">Stanbic IBTC Bank</option>
-                    <option value="Kuda Microfinance Bank">Kuda Microfinance Bank</option>
+                    {banksList.map((b) => (
+                      <option key={`${b.code}-${b.name}`} value={b.code}>
+                        {b.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
-                <div>
-                  <Input
-                    label="Account Holder Name"
-                    type="text"
-                    value={editBankForm.accountName}
-                    onChange={(e) => setEditBankForm(prev => ({ ...prev, accountName: e.target.value }))}
-                    placeholder="Must match organization legal title"
-                    required
-                  />
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                      10-Digit NUBAN Account Number
+                    </label>
+                    {isResolvingBank && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-zinc-500">
+                        <Loader2 className="w-3 h-3 animate-spin text-[#E31B23]" />
+                        Verifying...
+                      </span>
+                    )}
+                    {!isResolvingBank && bankResolveStatus === 'verified' && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Verified
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <Input
+                        label=""
+                        type="text"
+                        maxLength={10}
+                        value={editBankForm.accountNumber}
+                        onChange={(e) => {
+                          const num = e.target.value.replace(/[^0-9]/g, '');
+                          setEditBankForm(prev => ({ ...prev, accountNumber: num, accountName: '' }));
+                          setBankResolveStatus('idle');
+                          setBankResolveError(null);
+                        }}
+                        placeholder="e.g. 0123456789"
+                        required
+                        className="font-mono"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleResolveBankAccount()}
+                      disabled={editBankForm.accountNumber.length !== 10 || isResolvingBank}
+                      className="px-3.5 py-2.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 text-xs font-bold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-opacity shrink-0"
+                    >
+                      Verify
+                    </button>
+                  </div>
+                  {bankResolveError && (
+                    <div className={`p-3 rounded-xl border text-[11px] space-y-2 ${bankResolveFailureType === 'gateway_error'
+                      ? 'bg-amber-50/80 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-200'
+                      : 'bg-rose-50/80 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-300'
+                      }`}>
+                      <p className="font-semibold flex items-center gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{bankResolveError}</span>
+                      </p>
+                      {bankResolveFailureType === 'gateway_error' && (
+                        <label className="flex items-center gap-2 cursor-pointer font-bold pt-0.5">
+                          <input
+                            type="checkbox"
+                            checked={allowUnverifiedSave}
+                            onChange={(e) => setAllowUnverifiedSave(e.target.checked)}
+                            className="rounded border-amber-400 text-[#E31B23] focus:ring-[#E31B23]"
+                          />
+                          <span>Save manually as Pending Verification (payouts locked until verified)</span>
+                        </label>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                <div>
+                <div className="space-y-1.5">
                   <Input
-                    label="10-Digit NUBAN Account Number"
+                    label={bankResolveStatus === 'verified' ? 'Verified Account Holder Name' : 'Account Holder Name'}
                     type="text"
-                    maxLength={10}
-                    value={editBankForm.accountNumber}
-                    onChange={(e) => setEditBankForm(prev => ({ ...prev, accountNumber: e.target.value.replace(/[^0-9]/g, '') }))}
-                    placeholder="e.g. 0123456789"
+                    value={editBankForm.accountName}
+                    onChange={(e) => {
+                      setEditBankForm(prev => ({ ...prev, accountName: e.target.value }));
+                      if (bankResolveStatus === 'verified') {
+                        setBankResolveStatus('idle');
+                      }
+                    }}
+                    placeholder={
+                      isResolvingBank
+                        ? 'Resolving account name...'
+                        : 'Auto-fills on verification, or type manually'
+                    }
                     required
-                    className="font-mono"
+                    className={bankResolveStatus === 'verified'
+                      ? 'bg-emerald-50/70 dark:bg-emerald-500/10 border-emerald-300 dark:border-emerald-500/30 font-bold text-emerald-900 dark:text-emerald-200'
+                      : ''}
                   />
                 </div>
 
                 <div className="p-3 bg-blue-50/70 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl text-xs text-blue-800 dark:text-blue-300 flex items-start gap-2">
                   <ShieldCheck className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                   <span>
-                    Account name must match your legal business registration to avoid settlement compliance holds.
+                    Account name is auto-verified via Paystack / Flutterwave. If you enter it manually, it will be saved as Pending Verification.
                   </span>
                 </div>
 
@@ -1258,9 +1441,14 @@ export const Analytics: React.FC = () => {
                   <Button
                     type="submit"
                     isLoading={isSavingBank}
-                    fullWidth={false} className="w-auto bg-[#E31B23] hover:bg-[#c9141b] text-white px-6 py-2.5 text-xs font-bold rounded-xl"
+                    disabled={
+                      isResolvingBank ||
+                      editBankForm.accountNumber.length !== 10 ||
+                      editBankForm.accountName.trim().length < 3
+                    }
+                    fullWidth={false} className="w-auto bg-[#E31B23] hover:bg-[#c9141b] text-white px-6 py-2.5 text-xs font-bold rounded-xl disabled:opacity-50"
                   >
-                    Save & Verify Account
+                    {bankResolveStatus === 'verified' ? 'Save Verified Account' : 'Save Account Details'}
                   </Button>
                 </div>
               </form>
@@ -1308,121 +1496,9 @@ export const Analytics: React.FC = () => {
               <div className="relative z-10 mt-6 pt-5 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs text-zinc-400">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span>Estimated Value: <strong>₦{(creditsBalance * 50).toLocaleString()}</strong></span>
+                  <span>Estimated Value: <strong>₦{(creditsBalance * 10).toLocaleString()}</strong></span>
                 </div>
-                <div>1 {sitename} Credit = ₦50.00 NGN flat rate</div>
-              </div>
-            </div>
-
-            {/* In-App Stuffs Catalog */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-black text-zinc-950 dark:text-white tracking-tight">Email Marketing & Outreach Packages</h3>
-                  <p className="text-xs text-zinc-500 font-medium">Dispatch targeted emails, announcements, and promotional newsletters to ticket holders.</p>
-                </div>
-                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-                  Instant Dispatch
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[
-                  {
-                    title: 'SMS & WhatsApp Attendee Broadcast',
-                    description: 'Instant SMS ticket confirmation or urgent schedule/gate changes dispatched directly to attendee mobile phones.',
-                    cost: 1,
-                    unit: 'credit / SMS',
-                    icon: MessageSquare,
-                    color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20',
-                    actionLabel: 'Dispatch Test SMS',
-                    actionCost: 1
-                  },
-                  {
-                    title: 'AI Event Copywriter & SEO Generator',
-                    description: 'Generate comprehensive, persuasive event descriptions, agenda schedules, and targeted marketing copy tailored to your category.',
-                    cost: 5,
-                    unit: 'credits / run',
-                    icon: Sparkles,
-                    color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 border-purple-100 dark:border-purple-500/20',
-                    actionLabel: 'Run AI Writer',
-                    actionCost: 5
-                  },
-                  {
-                    title: 'Featured Event Spotlight Boost',
-                    description: 'Pin your event to the top of public discovery feeds and category explore pages for 7 full days to amplify conversions.',
-                    cost: 50,
-                    unit: 'credits / 7 days',
-                    icon: Rocket,
-                    color: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20',
-                    actionLabel: 'Boost Event',
-                    actionCost: 50
-                  },
-                  {
-                    title: 'Dedicated QR Scanner Terminal Pass',
-                    description: 'Provision extra entrance gate scanning licenses for bouncers and usher mobile phones without granting dashboard access.',
-                    cost: 25,
-                    unit: 'credits / scanner',
-                    icon: QrCode,
-                    color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20',
-                    actionLabel: 'Provision Pass',
-                    actionCost: 25
-                  },
-                  {
-                    title: 'Custom White-Label Sender Domain',
-                    description: `Send order confirmations, tickets, and receipts from your custom domain (e.g. tickets@yourcompany.com) instead of ${sitename}.`,
-                    cost: 100,
-                    unit: 'credits / mo',
-                    icon: Mail,
-                    color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-100 dark:border-amber-500/20',
-                    actionLabel: 'Subscribe Domain',
-                    actionCost: 100
-                  },
-                  {
-                    title: 'Offline Box Office POS Sync',
-                    description: 'Enable offline door ticket cash sales mode on tablets with automatic cloud ledger reconciliation upon reconnecting.',
-                    cost: 15,
-                    unit: 'credits / device',
-                    icon: Zap,
-                    color: 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-500/10 border-teal-100 dark:border-teal-500/20',
-                    actionLabel: 'Enable POS License',
-                    actionCost: 15
-                  }
-                ].map((item, idx) => {
-                  const Icon = item.icon;
-                  return (
-                    <div
-                      key={idx}
-                      className="bg-white dark:bg-[#0F0F14] border border-zinc-200/80 dark:border-white/10 rounded-2xl p-5 shadow-2xs hover:shadow-sm transition-all flex flex-col justify-between gap-4"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${item.color}`}>
-                            <Icon className="w-4 h-4" />
-                          </div>
-                          <span className="px-2 py-0.5 rounded-md text-[11px] font-black bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
-                            {item.cost} {item.unit}
-                          </span>
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-zinc-950 dark:text-white">{item.title}</h4>
-                          <p className="text-[11px] text-zinc-500 font-medium mt-1 leading-relaxed">{item.description}</p>
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t border-zinc-100">
-                        <button
-                          type="button"
-                          onClick={() => handleSimulateFeatureUse(item.title, item.actionCost)}
-                          className="w-full py-2 px-3 rounded-xl bg-zinc-50 dark:bg-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 border border-zinc-200/80 dark:border-white/10 text-zinc-800 dark:text-zinc-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                        >
-                          <span>{item.actionLabel}</span>
-                          <span className="text-[10px] text-zinc-400 font-semibold">({item.actionCost} credits)</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+                <div>1 {sitename} Credit = ₦10.00 NGN</div>
               </div>
             </div>
 
@@ -1462,9 +1538,8 @@ export const Analytics: React.FC = () => {
                           <td className="py-3.5 text-zinc-500 font-medium whitespace-nowrap">{tx.date}</td>
                           <td className="py-3.5 text-zinc-900 dark:text-white font-bold">{tx.description}</td>
                           <td className="py-3.5 font-mono text-[11px] text-zinc-400">{tx.reference}</td>
-                          <td className={`py-3.5 font-black text-right whitespace-nowrap ${
-                            tx.type === 'credit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-900 dark:text-white'
-                          }`}>
+                          <td className={`py-3.5 font-black text-right whitespace-nowrap ${tx.type === 'credit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-900 dark:text-white'
+                            }`}>
                             {tx.type === 'credit' ? `+${tx.amount}` : `-${tx.amount}`} Credits
                           </td>
                           <td className="py-3.5 font-bold text-zinc-700 dark:text-zinc-300 text-right whitespace-nowrap">
@@ -1481,134 +1556,12 @@ export const Analytics: React.FC = () => {
         )}
 
         {/* MODAL: TOP-UP APP CREDITS */}
-        <Modal
+        <CreditTopupModal
           isOpen={isTopUpModalOpen}
           onClose={() => setIsTopUpModalOpen(false)}
-          title={`Top-Up ${sitename} Marketing Credits`}
-          size="lg"
-        >
-          <form onSubmit={handleCompleteTopUp} className="space-y-6">
-            <p className="text-xs text-zinc-600 font-medium leading-relaxed">
-              Credits are instantly issued to your organizer workspace. Select a curated growth pack or choose a custom amount.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-              {[
-                {
-                  id: 'starter',
-                  name: 'Starter Pack',
-                  credits: 100,
-                  price: '₦5,000',
-                  badge: null
-                },
-                {
-                  id: 'growth',
-                  name: 'Growth Pack',
-                  credits: 500,
-                  price: '₦22,500',
-                  badge: '10% Bonus'
-                },
-                {
-                  id: 'power',
-                  name: 'Pro Accelerator',
-                  credits: 1500,
-                  price: '₦60,000',
-                  badge: '20% Bonus'
-                }
-              ].map(pack => (
-                <div
-                  key={pack.id}
-                  onClick={() => setSelectedPack(pack.id as any)}
-                  className={`p-4 rounded-2xl border-2 transition-all cursor-pointer relative flex flex-col justify-between gap-3 ${
-                    selectedPack === pack.id
-                      ? 'border-[#E31B23] bg-red-50/20 dark:bg-red-500/10 shadow-xs'
-                      : 'border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-white dark:bg-white/5'
-                  }`}
-                >
-                  {pack.badge && (
-                    <span className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500 text-white shadow-2xs">
-                      {pack.badge}
-                    </span>
-                  )}
-                  <div>
-                    <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{pack.name}</h4>
-                    <div className="text-xl font-black text-zinc-950 dark:text-white mt-1">
-                      {pack.credits} <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Credits</span>
-                    </div>
-                  </div>
-                  <div className="text-xs font-black text-[#E31B23] pt-2 border-t border-zinc-100">
-                    {pack.price}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Custom Amount Option */}
-            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 space-y-3">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="pack"
-                  checked={selectedPack === 'custom'}
-                  onChange={() => setSelectedPack('custom')}
-                  className="w-4 h-4 text-[#E31B23] accent-[#E31B23]"
-                />
-                <span className="text-xs font-bold text-zinc-900 dark:text-white">Custom Credits Amount (₦50 / credit)</span>
-              </label>
-
-              {selectedPack === 'custom' && (
-                <div className="flex items-center gap-3 pt-1">
-                  <div className="w-36">
-                    <Input
-                      label=""
-                      type="number"
-                      min="50"
-                      step="50"
-                      value={customCreditsAmount}
-                      onChange={(e) => setCustomCreditsAmount(e.target.value)}
-                      placeholder="e.g. 300"
-                    />
-                  </div>
-                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    Total: ₦{((Number(customCreditsAmount) || 0) * 50).toLocaleString()}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 rounded-2xl bg-zinc-100/70 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 flex items-center justify-between text-xs font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
-              <div className="flex items-center gap-2.5">
-                <CreditCard className="w-4 h-4 text-zinc-500" />
-                <span>Pay securely via <strong>Paystack / Flutterwave Gateway</strong></span>
-              </div>
-              <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                Instant Credit
-              </span>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-zinc-100">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsTopUpModalOpen(false)}
-                disabled={isProcessingTopUp}
-                fullWidth={false}
-                className="w-auto px-5 text-xs"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                isLoading={isProcessingTopUp}
-                fullWidth={false}
-                className="w-auto px-6 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs"
-              >
-                <Plus className="w-3.5 h-3.5 mr-1" />
-                Pay & Top-Up Now
-              </Button>
-            </div>
-          </form>
-        </Modal>
+          onSuccess={loadCreditsData}
+          organizerUuid={organizer?.id}
+        />
 
       </div>
     </OrganizerDashboardLayout>
