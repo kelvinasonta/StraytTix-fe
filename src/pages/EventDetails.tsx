@@ -2,18 +2,19 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
+import { getPublicEcho } from '../lib/echo';
 import { resolveImageUrl } from '../utils/imageUrl';
-import { 
-  Calendar, 
-  MapPin, 
-  Share2, 
-  Heart, 
-  ArrowRight, 
-  Loader2, 
-  AlertCircle, 
-  Clock, 
-  ShieldCheck, 
-  Building, 
+import {
+  Calendar,
+  MapPin,
+  Share2,
+  Heart,
+  ArrowRight,
+  Loader2,
+  AlertCircle,
+  Clock,
+  ShieldCheck,
+  Building,
   CheckCircle2,
   Sparkles,
   Navigation,
@@ -74,13 +75,13 @@ export const EventDetails: React.FC = () => {
     }
   })();
   const isEmbedMode = searchParams.get('embed') === 'true' || location.pathname.includes('/embed') || isIframe;
-  
+
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<'about' | 'schedule' | 'location' | 'organizer' | 'faq' | 'gallery'>('about');
+  const [activeTab, setActiveTab] = useState<'about' | 'tickets' | 'lineup' | 'schedule' | 'location' | 'organizer' | 'faq' | 'gallery'>('about');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   // Ticket quantities state
@@ -118,7 +119,7 @@ export const EventDetails: React.FC = () => {
   // Hydrate favorites from backend if user is authenticated
   useEffect(() => {
     if (isAuthenticated && user?.id) {
-      favoritesApi.getFavoriteIds().catch(() => {});
+      favoritesApi.getFavoriteIds().catch(() => { });
     }
   }, [isAuthenticated, user?.id]);
 
@@ -198,7 +199,7 @@ export const EventDetails: React.FC = () => {
                 groupSize: Number(t.groupSize || t.group_size || 1)
               }));
             }
-          } catch (_) {}
+          } catch (_) { }
           setEvent(norm);
         } else {
           setError('Event details not found.');
@@ -216,35 +217,97 @@ export const EventDetails: React.FC = () => {
     loadEvent();
   }, [loadEvent]);
 
+  // Real-time ticket inventory & scarcity updates via public Reverb channel
+  useEffect(() => {
+    const eventUuid = event?.id;
+    if (!eventUuid) return;
+
+    const echo = getPublicEcho();
+    if (!echo) return;
+
+    const channelName = `events.${eventUuid}.inventory`;
+    const channel = echo.channel(channelName);
+
+    channel.listen('.ticket.inventory.updated', (payload: {
+      event_uuid?: string;
+      ticket_types?: Array<{
+        id: string;
+        available_quantity: number | null;
+        sold_quantity: number;
+        reserved_quantity: number;
+        is_available: boolean;
+        status?: string;
+      }>;
+    }) => {
+      if (!Array.isArray(payload?.ticket_types) || payload.ticket_types.length === 0) return;
+
+      const byId = new Map(payload.ticket_types.map((tt) => [tt.id, tt]));
+
+      setEvent((prev) => {
+        if (!prev || !prev.tickets) return prev;
+        return {
+          ...prev,
+          tickets: prev.tickets.map((t) => {
+            const updated = byId.get(t.id || '') || byId.get((t as any).uuid || '');
+            if (!updated) return t;
+            return {
+              ...t,
+              soldQuantity: updated.sold_quantity,
+              available: updated.available_quantity ?? t.quantity,
+              status: updated.status ?? t.status,
+            };
+          }),
+        };
+      });
+
+      setSelectedTickets((prev) => {
+        const next = { ...prev };
+        let changed = false;
+        for (const [tid, qty] of Object.entries(next)) {
+          const updated = byId.get(tid);
+          if (updated && updated.available_quantity !== null && qty > updated.available_quantity) {
+            next[tid] = Math.max(0, updated.available_quantity);
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+    });
+
+    return () => {
+      echo.leave(channelName);
+    };
+  }, [event?.id]);
+
   // Standardize or augment tickets for luxury experience
   const rawTickets = event?.tickets && event.tickets.length > 0 ? event.tickets : [];
   const s = (event as any)?.settings || {};
   const meta = (event as any)?.meta || {};
-  const statusMessageType: 'none' | 'pre_sale' | 'post_sales' = 
-    (event?.statusMessageType || s.statusMessageType || s.status_message_type || meta.statusMessageType) === 'pre_sale' || 
-    (event?.statusMessageType || s.statusMessageType || s.status_message_type || meta.statusMessageType) === 'post_sales'
+  const statusMessageType: 'none' | 'pre_sale' | 'post_sales' =
+    (event?.statusMessageType || s.statusMessageType || s.status_message_type || meta.statusMessageType) === 'pre_sale' ||
+      (event?.statusMessageType || s.statusMessageType || s.status_message_type || meta.statusMessageType) === 'post_sales'
       ? (event?.statusMessageType || s.statusMessageType || s.status_message_type || meta.statusMessageType)
       : ((event?.isStatusMsgEnabled ?? s.isStatusMsgEnabled ?? s.is_status_msg_enabled ?? meta.isStatusMsgEnabled)
-          ? ((event?.statusMessage || s.statusMessage || s.status_message || meta.statusMessage) && 
-             ((event?.statusMessage || s.statusMessage || s.status_message || meta.statusMessage).toLowerCase().includes('ended') || 
-              (event?.statusMessage || s.statusMessage || s.status_message || meta.statusMessage).toLowerCase().includes('sold out')) ? 'post_sales' : 'pre_sale')
-          : 'none');
+        ? ((event?.statusMessage || s.statusMessage || s.status_message || meta.statusMessage) &&
+          ((event?.statusMessage || s.statusMessage || s.status_message || meta.statusMessage).toLowerCase().includes('ended') ||
+            (event?.statusMessage || s.statusMessage || s.status_message || meta.statusMessage).toLowerCase().includes('sold out')) ? 'post_sales' : 'pre_sale')
+        : 'none');
   const isTicketSalesActive = statusMessageType === 'none';
-  const isOnline = 
-    event?.locationType === 'online' || 
-    (event as any)?.eventType === 'virtual' || 
+  const isOnline =
+    event?.locationType === 'online' ||
+    (event as any)?.eventType === 'virtual' ||
     Boolean((event as any)?.onlineMeetingUrl);
   const isPhysical = !isOnline;
   const categoryLabel = extractNameOrString(event?.category) || 'General';
 
   const layoutParam = searchParams.get('layout') as 'cinematic' | 'compact' | 'split' | 'bento' | null;
   const validLayouts: ('cinematic' | 'compact' | 'split' | 'bento')[] = ['cinematic', 'compact', 'split', 'bento'];
-  
+
   // Layout resolution
   const bannerStyle: 'cinematic' | 'compact' | 'split' | 'bento' =
     (layoutParam && validLayouts.includes(layoutParam))
       ? layoutParam
-      : (event?.bannerStyle as any) || (s.bannerStyle as any) || (s.banner_style as any) || (event?.meta?.bannerStyle as any) || 'split';
+      : (event?.bannerStyle as any) || (s.bannerStyle as any) || (s.banner_style as any) || (event?.meta?.bannerStyle as any) || 'cinematic';
 
   const handleGetTickets = () => {
     const ticketsEl = document.getElementById('tickets-section');
@@ -268,31 +331,31 @@ export const EventDetails: React.FC = () => {
   const tickets = rawTickets.length > 0
     ? rawTickets
     : [
-        {
-          id: 'tkt-ga',
-          name: 'General Admission',
-          description: 'Standard access to main arena, live performances & food village.',
-          price: 15000,
-          quantity: 250,
-          perks: ['Main arena access', 'Digital QR mobile pass', 'Food & beverage court access']
-        },
-        {
-          id: 'tkt-vip',
-          name: 'VIP Experience Pass',
-          description: 'Priority fast-track entry, elevated VIP lounge & complimentary drinks.',
-          price: 50000,
-          quantity: 80,
-          perks: ['Fast-track priority gate', 'Dedicated VIP viewing deck', 'Complimentary welcome cocktails', 'Private restrooms']
-        },
-        {
-          id: 'tkt-table',
-          name: 'Premium Table of 4',
-          description: 'Reserved elevated booth, premium bottle service & dedicated server.',
-          price: 250000,
-          quantity: 15,
-          perks: ['Reserved table for 4 guests', 'Dedicated waitstaff & bottle service', 'Exclusive backstage tour access', 'Complimentary valet parking']
-        }
-      ];
+      {
+        id: 'tkt-ga',
+        name: 'General Admission',
+        description: 'Standard access to main arena, live performances & food village.',
+        price: 15000,
+        quantity: 250,
+        perks: ['Main arena access', 'Digital QR mobile pass', 'Food & beverage court access']
+      },
+      {
+        id: 'tkt-vip',
+        name: 'VIP Experience Pass',
+        description: 'Priority fast-track entry, elevated VIP lounge & complimentary drinks.',
+        price: 50000,
+        quantity: 80,
+        perks: ['Fast-track priority gate', 'Dedicated VIP viewing deck', 'Complimentary welcome cocktails', 'Private restrooms']
+      },
+      {
+        id: 'tkt-table',
+        name: 'Premium Table of 4',
+        description: 'Reserved elevated booth, premium bottle service & dedicated server.',
+        price: 250000,
+        quantity: 15,
+        perks: ['Reserved table for 4 guests', 'Dedicated waitstaff & bottle service', 'Exclusive backstage tour access', 'Complimentary valet parking']
+      }
+    ];
 
   const handleQtyChange = (ticketId: string, delta: number) => {
     setSelectedTickets((prev) => {
@@ -336,7 +399,7 @@ export const EventDetails: React.FC = () => {
       ticketsToCheckout = { [firstTicketId]: 1 };
       setSelectedTickets(ticketsToCheckout);
     }
-    
+
     if (event) {
       navigate(`/events/${event.slug || event.id}/checkout`, {
         state: {
@@ -387,8 +450,8 @@ export const EventDetails: React.FC = () => {
 
   const downloadIcsFile = () => {
     if (!event) return;
-    const locationValue = isPhysical 
-      ? `${event.venue || 'Venue'}, ${event.city || ''}` 
+    const locationValue = isPhysical
+      ? `${event.venue || 'Venue'}, ${event.city || ''}`
       : 'Virtual or Online Event';
     const icsData = [
       'BEGIN:VCALENDAR',
@@ -435,11 +498,11 @@ export const EventDetails: React.FC = () => {
 
   const locationTarget = event
     ? (event.latitude && event.longitude
-        ? `${event.latitude},${event.longitude}`
-        : `${event.venue || ''} ${event.address || ''} ${event.city || ''}`.trim())
+      ? `${event.latitude},${event.longitude}`
+      : `${event.venue || ''} ${event.address || ''} ${event.city || ''}`.trim())
     : '';
 
-  const mapsUrl = event 
+  const mapsUrl = event
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationTarget)}`
     : '#';
 
@@ -680,17 +743,16 @@ export const EventDetails: React.FC = () => {
 
     const googleMapsUrl = event.venue || event.address
       ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          [event.venue, event.address, event.city].filter(Boolean).join(', ')
-        )}`
+        [event.venue, event.address, event.city].filter(Boolean).join(', ')
+      )}`
       : null;
 
     return (
       <div
-        className={`w-full h-screen min-h-[460px] max-h-screen flex flex-col justify-between font-sans antialiased box-border select-none transition-colors duration-200 relative overflow-hidden ${
-          isDark
-            ? 'bg-[#0B0F19] text-zinc-100'
-            : 'bg-[#F9FAFB] text-zinc-900'
-        }`}
+        className={`w-full h-screen min-h-[460px] max-h-screen flex flex-col justify-between font-sans antialiased box-border select-none transition-colors duration-200 relative overflow-hidden ${isDark
+          ? 'bg-[#0B0F19] text-zinc-100'
+          : 'bg-[#F9FAFB] text-zinc-900'
+          }`}
       >
         {/* Ambient Top Glow / Blurred Cover Backdrop */}
         {event.imageUrl && (
@@ -702,14 +764,13 @@ export const EventDetails: React.FC = () => {
 
         {/* Content Container (Header + Tabs + Body) */}
         <div className="flex-1 flex flex-col min-h-0 relative z-10 p-3 sm:p-4 space-y-2.5">
-          
+
           {/* Top Hero Card */}
           <div
-            className={`rounded-2xl p-3 sm:p-3.5 border transition-all shadow-xs ${
-              isDark
-                ? 'bg-zinc-900/90 border-white/10 backdrop-blur-md'
-                : 'bg-white/95 border-zinc-200/90 backdrop-blur-md shadow-xs'
-            }`}
+            className={`rounded-2xl p-3 sm:p-3.5 border transition-all shadow-xs ${isDark
+              ? 'bg-zinc-900/90 border-white/10 backdrop-blur-md'
+              : 'bg-white/95 border-zinc-200/90 backdrop-blur-md shadow-xs'
+              }`}
           >
             {/* Upper Action Row: Tags & Controls */}
             <div className="flex items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-zinc-150 dark:border-white/10">
@@ -718,11 +779,10 @@ export const EventDetails: React.FC = () => {
                   <span className="w-1.5 h-1.5 rounded-full bg-[#E31B23] animate-pulse" />
                   {categoryLabel}
                 </span>
-                <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 ${
-                  isPhysical
-                    ? 'bg-zinc-50 text-zinc-600 border-zinc-200 dark:bg-white/5 dark:text-zinc-300 dark:border-white/10'
-                    : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/20'
-                }`}>
+                <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 ${isPhysical
+                  ? 'bg-zinc-50 text-zinc-600 border-zinc-200 dark:bg-white/5 dark:text-zinc-300 dark:border-white/10'
+                  : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/20'
+                  }`}>
                   {isPhysical ? <MapPin className="w-2.5 h-2.5 text-[#E31B23]" /> : <Video className="w-2.5 h-2.5 text-blue-500" />}
                   {isPhysical ? (event.city || 'In-Person') : 'Virtual Event'}
                 </span>
@@ -733,11 +793,10 @@ export const EventDetails: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setEmbedTheme(isDark ? 'light' : 'dark')}
-                  className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                    isDark
-                      ? 'border-white/10 bg-white/5 text-amber-300 hover:bg-white/10'
-                      : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
-                  }`}
+                  className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${isDark
+                    ? 'border-white/10 bg-white/5 text-amber-300 hover:bg-white/10'
+                    : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
+                    }`}
                   title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
                 >
                   {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
@@ -746,11 +805,10 @@ export const EventDetails: React.FC = () => {
                   href={`/events/${event.slug || event.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`p-1.5 rounded-lg border transition-colors ${
-                    isDark
-                      ? 'border-white/10 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
-                      : 'border-zinc-200 bg-zinc-50 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
-                  }`}
+                  className={`p-1.5 rounded-lg border transition-colors ${isDark
+                    ? 'border-white/10 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
+                    : 'border-zinc-200 bg-zinc-50 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                    }`}
                   title="Open full event experience in new tab"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -802,31 +860,28 @@ export const EventDetails: React.FC = () => {
           </div>
 
           {/* Segmented Tab Switcher */}
-          <div className={`p-1 rounded-xl flex items-center gap-1 text-xs font-bold border ${
-            isDark
-              ? 'bg-zinc-900/60 border-white/5'
-              : 'bg-zinc-100 border-zinc-200/60'
-          }`}>
+          <div className={`p-1 rounded-xl flex items-center gap-1 text-xs font-bold border ${isDark
+            ? 'bg-zinc-900/60 border-white/5'
+            : 'bg-zinc-100 border-zinc-200/60'
+            }`}>
             <button
               type="button"
               onClick={() => setEmbedTab('tickets')}
-              className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                embedTab === 'tickets'
-                  ? isDark
-                    ? 'bg-white/15 text-white shadow-xs'
-                    : 'bg-white text-zinc-950 shadow-xs'
-                  : isDark
-                    ? 'text-zinc-400 hover:text-white'
-                    : 'text-zinc-500 hover:text-zinc-900'
-              }`}
+              className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${embedTab === 'tickets'
+                ? isDark
+                  ? 'bg-white/15 text-white shadow-xs'
+                  : 'bg-white text-zinc-950 shadow-xs'
+                : isDark
+                  ? 'text-zinc-400 hover:text-white'
+                  : 'text-zinc-500 hover:text-zinc-900'
+                }`}
             >
               <Ticket className="w-3.5 h-3.5 text-[#E31B23]" />
               <span>Tickets & Passes</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                embedTab === 'tickets'
-                  ? 'bg-red-50 text-[#E31B23] dark:bg-red-500/20 dark:text-red-400'
-                  : 'bg-zinc-200/60 text-zinc-600 dark:bg-white/10 dark:text-zinc-300'
-              }`}>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${embedTab === 'tickets'
+                ? 'bg-red-50 text-[#E31B23] dark:bg-red-500/20 dark:text-red-400'
+                : 'bg-zinc-200/60 text-zinc-600 dark:bg-white/10 dark:text-zinc-300'
+                }`}>
                 {tickets.length}
               </span>
             </button>
@@ -834,15 +889,14 @@ export const EventDetails: React.FC = () => {
             <button
               type="button"
               onClick={() => setEmbedTab('info')}
-              className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                embedTab === 'info'
-                  ? isDark
-                    ? 'bg-white/15 text-white shadow-xs'
-                    : 'bg-white text-zinc-950 shadow-xs'
-                  : isDark
-                    ? 'text-zinc-400 hover:text-white'
-                    : 'text-zinc-500 hover:text-zinc-900'
-              }`}
+              className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${embedTab === 'info'
+                ? isDark
+                  ? 'bg-white/15 text-white shadow-xs'
+                  : 'bg-white text-zinc-950 shadow-xs'
+                : isDark
+                  ? 'text-zinc-400 hover:text-white'
+                  : 'text-zinc-500 hover:text-zinc-900'
+                }`}
             >
               <Info className="w-3.5 h-3.5 text-[#E31B23]" />
               <span>Event Details</span>
@@ -855,21 +909,20 @@ export const EventDetails: React.FC = () => {
               <>
                 {/* Pre-sale / Status Alert */}
                 {!isTicketSalesActive && (
-                  <div className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2.5 ${
-                    statusMessageType === 'pre_sale'
-                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200'
-                      : 'bg-rose-500/10 border-rose-500/30 text-rose-900 dark:text-rose-200'
-                  }`}>
+                  <div className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2.5 ${statusMessageType === 'pre_sale'
+                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200'
+                    : 'bg-rose-500/10 border-rose-500/30 text-rose-900 dark:text-rose-200'
+                    }`}>
                     {statusMessageType === 'pre_sale' ? (
                       <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
                     ) : (
                       <AlertCircle className="w-4 h-4 text-rose-500 flex-shrink-0" />
                     )}
                     <p className="leading-snug text-xs">
-                      {event?.preSaleMessage || s.preSaleMessage || s.pre_sale_message || meta.preSaleMessage || 
-                       event?.postSaleMessage || s.postSaleMessage || s.post_sale_message || meta.postSaleMessage || 
-                       event?.statusMessage || s.statusMessage || s.status_message || meta.statusMessage || 
-                       (statusMessageType === 'pre_sale' ? 'Ticket sales will begin soon!' : 'Ticket sales have concluded for this event.')}
+                      {event?.preSaleMessage || s.preSaleMessage || s.pre_sale_message || meta.preSaleMessage ||
+                        event?.postSaleMessage || s.postSaleMessage || s.post_sale_message || meta.postSaleMessage ||
+                        event?.statusMessage || s.statusMessage || s.status_message || meta.statusMessage ||
+                        (statusMessageType === 'pre_sale' ? 'Ticket sales will begin soon!' : 'Ticket sales have concluded for this event.')}
                     </p>
                   </div>
                 )}
@@ -887,23 +940,36 @@ export const EventDetails: React.FC = () => {
                       const isVip = t.name.toLowerCase().includes('vip');
                       const isTable = t.name.toLowerCase().includes('table');
                       const isEarlyBird = t.name.toLowerCase().includes('early');
+                      const isUnlimited = Boolean((t as any).isUnlimited);
+                      const availableQty = typeof t.available === 'number' ? t.available : t.quantity;
+                      const isSoldOut = !isUnlimited && availableQty <= 0;
+                      const isLowStock = !isUnlimited && availableQty > 0 && availableQty <= 10;
 
                       return (
                         <div
                           key={t.id}
-                          className={`p-3 rounded-xl border transition-all flex items-center justify-between gap-3 ${
-                            qty > 0
-                              ? isDark
-                                ? 'border-[#E31B23] bg-red-500/10 ring-1 ring-[#E31B23]/40 shadow-sm'
-                                : 'border-[#E31B23] bg-red-500/[0.04] ring-1 ring-[#E31B23]/30 shadow-xs'
-                              : isDark
-                                ? 'border-white/10 bg-white/[0.03] hover:border-white/20'
-                                : 'border-zinc-200/90 bg-white hover:border-zinc-300'
-                          }`}
+                          className={`p-3 rounded-xl border transition-all flex items-center justify-between gap-3 ${isSoldOut ? 'opacity-65 ' : ''}${qty > 0
+                            ? isDark
+                              ? 'border-[#E31B23] bg-red-500/10 ring-1 ring-[#E31B23]/40 shadow-sm'
+                              : 'border-[#E31B23] bg-red-500/[0.04] ring-1 ring-[#E31B23]/30 shadow-xs'
+                            : isDark
+                              ? 'border-white/10 bg-white/[0.03] hover:border-white/20'
+                              : 'border-zinc-200/90 bg-white hover:border-zinc-300'
+                            }`}
                         >
                           <div className="min-w-0 flex-1 space-y-0.5">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <h4 className="text-xs sm:text-sm font-black truncate">{t.name}</h4>
+                              {isSoldOut && (
+                                <span className="px-1.5 py-0.2 rounded text-[8px] font-black uppercase bg-zinc-500/20 text-zinc-600 dark:text-zinc-300 border border-zinc-500/30">
+                                  Sold Out
+                                </span>
+                              )}
+                              {isLowStock && (
+                                <span className="px-1.5 py-0.2 rounded text-[8px] font-black uppercase bg-red-500/15 text-[#E31B23] dark:text-red-400 border border-red-500/30 animate-pulse">
+                                  Only {availableQty} left
+                                </span>
+                              )}
                               {isVip && (
                                 <span className="px-1.5 py-0.2 rounded text-[8px] font-black uppercase bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
                                   VIP Pass
@@ -945,13 +1011,12 @@ export const EventDetails: React.FC = () => {
                               type="button"
                               onClick={() => handleQtyChange(t.id!, -1)}
                               disabled={qty === 0}
-                              className={`w-7 h-7 rounded-lg border font-black text-xs flex items-center justify-center transition-all cursor-pointer ${
-                                qty === 0
-                                  ? 'opacity-25 cursor-not-allowed border-transparent'
-                                  : isDark
-                                    ? 'bg-white/10 hover:bg-white/20 border-white/10 text-white active:scale-95'
-                                    : 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-800 active:scale-95'
-                              }`}
+                              className={`w-7 h-7 rounded-lg border font-black text-xs flex items-center justify-center transition-all cursor-pointer ${qty === 0
+                                ? 'opacity-25 cursor-not-allowed border-transparent'
+                                : isDark
+                                  ? 'bg-white/10 hover:bg-white/20 border-white/10 text-white active:scale-95'
+                                  : 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-800 active:scale-95'
+                                }`}
                             >
                               -
                             </button>
@@ -959,11 +1024,13 @@ export const EventDetails: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleQtyChange(t.id!, 1)}
-                              className={`w-7 h-7 rounded-lg border font-black text-xs flex items-center justify-center transition-all cursor-pointer ${
-                                isDark
-                                  ? 'bg-white/10 hover:bg-white/20 border-white/10 text-white active:scale-95'
-                                  : 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-800 active:scale-95'
-                              }`}
+                              disabled={isSoldOut || (!isUnlimited && qty >= availableQty)}
+                              className={`w-7 h-7 rounded-lg border font-black text-xs flex items-center justify-center transition-all ${isSoldOut || (!isUnlimited && qty >= availableQty)
+                                ? 'opacity-25 cursor-not-allowed border-transparent'
+                                : isDark
+                                  ? 'bg-white/10 hover:bg-white/20 border-white/10 text-white active:scale-95 cursor-pointer'
+                                  : 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-800 active:scale-95 cursor-pointer'
+                                }`}
                             >
                               +
                             </button>
@@ -990,9 +1057,8 @@ export const EventDetails: React.FC = () => {
               /* Embed Tab: Event Details & Location */
               <div className="space-y-2.5">
                 {/* About Summary */}
-                <div className={`p-3 rounded-xl border text-xs ${
-                  isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white border-zinc-200/90'
-                }`}>
+                <div className={`p-3 rounded-xl border text-xs ${isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white border-zinc-200/90'
+                  }`}>
                   <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">
                     About This Event
                   </h4>
@@ -1002,9 +1068,8 @@ export const EventDetails: React.FC = () => {
                 </div>
 
                 {/* Venue & Location Details */}
-                <div className={`p-3 rounded-xl border text-xs space-y-2 ${
-                  isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white border-zinc-200/90'
-                }`}>
+                <div className={`p-3 rounded-xl border text-xs space-y-2 ${isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white border-zinc-200/90'
+                  }`}>
                   <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                     Location & Access
                   </h4>
@@ -1050,19 +1115,18 @@ export const EventDetails: React.FC = () => {
 
                 {/* Organizer Card */}
                 {event.organizer && (
-                  <div className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs ${
-                    isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white border-zinc-200/90'
-                  }`}>
+                  <div className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs ${isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white border-zinc-200/90'
+                    }`}>
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-8 h-8 rounded-full bg-red-50 dark:bg-red-500/20 text-[#E31B23] font-black text-xs flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {event.organizer.logo ? (
-                          <img 
-                            src={resolveImageUrl(event.organizer.logo)} 
-                            alt={event.organizer.name} 
+                          <img
+                            src={resolveImageUrl(event.organizer.logo)}
+                            alt={event.organizer.name}
                             onError={(e) => {
                               (e.currentTarget as HTMLElement).style.display = 'none';
                             }}
-                            className="w-full h-full object-cover" 
+                            className="w-full h-full object-cover"
                           />
                         ) : (
                           event.organizer.name.charAt(0).toUpperCase()
@@ -1078,11 +1142,10 @@ export const EventDetails: React.FC = () => {
                     </div>
                     <Link
                       to={`/@${event.organizer.slug || event.organizer.id}`}
-                      className={`px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-colors inline-flex items-center gap-1.5 flex-shrink-0 ${
-                        isDark
-                          ? 'border-white/10 bg-white/5 text-white hover:bg-white/10'
-                          : 'border-zinc-200 bg-zinc-50 text-zinc-800 hover:bg-zinc-100'
-                      }`}
+                      className={`px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-colors inline-flex items-center gap-1.5 flex-shrink-0 ${isDark
+                        ? 'border-white/10 bg-white/5 text-white hover:bg-white/10'
+                        : 'border-zinc-200 bg-zinc-50 text-zinc-800 hover:bg-zinc-100'
+                        }`}
                     >
                       <Building className="w-3 h-3 text-[#E31B23]" />
                       <span>View Organizer Profile</span>
@@ -1096,11 +1159,10 @@ export const EventDetails: React.FC = () => {
 
         {/* Sticky Luxury Checkout Bottom Bar */}
         <div
-          className={`p-3 sm:p-3.5 border-t relative z-20 backdrop-blur-lg transition-colors ${
-            isDark
-              ? 'bg-[#090D16]/95 border-white/10'
-              : 'bg-white/95 border-zinc-200/80 shadow-[0_-4px_16px_rgba(0,0,0,0.03)]'
-          }`}
+          className={`p-3 sm:p-3.5 border-t relative z-20 backdrop-blur-lg transition-colors ${isDark
+            ? 'bg-[#090D16]/95 border-white/10'
+            : 'bg-white/95 border-zinc-200/80 shadow-[0_-4px_16px_rgba(0,0,0,0.03)]'
+            }`}
         >
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -1199,9 +1261,9 @@ export const EventDetails: React.FC = () => {
   return (
     <div className={`min-h-screen ${pageBgClass} flex flex-col justify-between transition-colors duration-500`}>
       <Navbar />
-      
+
       <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 py-6 sm:py-8 lg:py-10 space-y-8 lg:space-y-12 pb-32 lg:pb-16">
-        
+
         {/* ========================================================================= */}
         {/* 1. BREADCRUMBS NAVIGATION */}
         {/* ========================================================================= */}
@@ -1221,36 +1283,33 @@ export const EventDetails: React.FC = () => {
         {(() => {
           const s = (event as any)?.settings || {};
           const m = (event as any)?.meta || {};
-          const msgType = event?.statusMessageType || s.statusMessageType || s.status_message_type || m.statusMessageType || 
-            ((event?.isStatusMsgEnabled ?? s.isStatusMsgEnabled ?? s.is_status_msg_enabled ?? m.isStatusMsgEnabled) 
-              ? ((event?.statusMessage || s.statusMessage || s.status_message || m.statusMessage)?.toLowerCase().includes('ended') || 
-                 (event?.statusMessage || s.statusMessage || s.status_message || m.statusMessage)?.toLowerCase().includes('sold out') ? 'post_sales' : 'pre_sale') 
+          const msgType = event?.statusMessageType || s.statusMessageType || s.status_message_type || m.statusMessageType ||
+            ((event?.isStatusMsgEnabled ?? s.isStatusMsgEnabled ?? s.is_status_msg_enabled ?? m.isStatusMsgEnabled)
+              ? ((event?.statusMessage || s.statusMessage || s.status_message || m.statusMessage)?.toLowerCase().includes('ended') ||
+                (event?.statusMessage || s.statusMessage || s.status_message || m.statusMessage)?.toLowerCase().includes('sold out') ? 'post_sales' : 'pre_sale')
               : 'none');
           if (msgType === 'none' && !event?.isStatusMsgEnabled && !s.isStatusMsgEnabled && !m.isStatusMsgEnabled) return null;
 
           const isPreSale = msgType === 'pre_sale';
-          const displayMsg = isPreSale 
+          const displayMsg = isPreSale
             ? (event?.preSaleMessage || s.preSaleMessage || s.pre_sale_message || m.preSaleMessage || event?.statusMessage || s.statusMessage || s.status_message || m.statusMessage || 'Tickets will go on sale soon. Join our waitlist to be notified first!')
             : (event?.postSaleMessage || s.postSaleMessage || s.post_sale_message || m.postSaleMessage || event?.statusMessage || s.statusMessage || s.status_message || m.statusMessage || 'Ticket sales have ended. Thank you for your interest and support!');
 
           if (!displayMsg) return null;
 
           return (
-            <div className={`p-4 sm:p-5 rounded-2xl border shadow-xs flex items-center justify-between gap-4 transition-all ${
-              isPreSale
-                ? 'bg-amber-50/90 border-amber-300/80 text-amber-950'
-                : 'bg-rose-50/90 border-rose-300/80 text-rose-950'
-            }`}>
+            <div className={`p-4 sm:p-5 rounded-2xl border shadow-xs flex items-center justify-between gap-4 transition-all ${isPreSale
+              ? 'bg-amber-50/90 border-amber-300/80 text-amber-950'
+              : 'bg-rose-50/90 border-rose-300/80 text-rose-950'
+              }`}>
               <div className="flex items-start sm:items-center gap-3.5">
-                <div className={`p-2.5 rounded-xl flex-shrink-0 ${
-                  isPreSale ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
-                }`}>
+                <div className={`p-2.5 rounded-xl flex-shrink-0 ${isPreSale ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
+                  }`}>
                   {isPreSale ? <Clock className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                 </div>
                 <div className="space-y-0.5">
-                  <span className={`text-[10px] font-black uppercase tracking-wider block ${
-                    isPreSale ? 'text-amber-800' : 'text-rose-800'
-                  }`}>
+                  <span className={`text-[10px] font-black uppercase tracking-wider block ${isPreSale ? 'text-amber-800' : 'text-rose-800'
+                    }`}>
                     {isPreSale ? 'Pre-Sale Announcement' : 'Ticket Sales Notice'}
                   </span>
                   <p className="text-xs sm:text-sm font-semibold leading-snug text-zinc-900 dark:text-white">
@@ -1263,23 +1322,25 @@ export const EventDetails: React.FC = () => {
         })()}
 
         {/* ========================================================================= */}
-        {/* 2. DYNAMIC HERO HEADER SECTION (Tix.africa Clean Red Banner & Poster)   */}
+        {/* 2. DYNAMIC HERO HEADER SECTION (Skipped for Bento since image lives in left pane) */}
         {/* ========================================================================= */}
-        <HeroHeader
-          layout={bannerStyle}
-          event={event}
-          categoryLabel={categoryLabel}
-          isTicketSalesActive={isTicketSalesActive}
-          statusMessageType={statusMessageType}
-          isPhysical={isPhysical}
-          favorited={favorited}
-          directionsUrl={directionsUrl}
-          mapsUrl={mapsUrl}
-          onShare={handleNativeShare}
-          onCalendar={() => setCalendarModalOpen(true)}
-          onToggleFavorite={handleToggleFavorite}
-          onSelectTickets={handleGetTickets}
-        />
+        {bannerStyle !== 'bento' && (
+          <HeroHeader
+            layout={bannerStyle}
+            event={event}
+            categoryLabel={categoryLabel}
+            isTicketSalesActive={isTicketSalesActive}
+            statusMessageType={statusMessageType}
+            isPhysical={isPhysical}
+            favorited={favorited}
+            directionsUrl={directionsUrl}
+            mapsUrl={mapsUrl}
+            onShare={handleNativeShare}
+            onCalendar={() => setCalendarModalOpen(true)}
+            onToggleFavorite={handleToggleFavorite}
+            onSelectTickets={handleGetTickets}
+          />
+        )}
 
         {/* ========================================================================= */}
         {/* 4. DYNAMIC WHOLE-PAGE STRUCTURE & EXPERIENCE LAYOUT SWITCHER */}
@@ -1386,10 +1447,10 @@ export const EventDetails: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2 p-2 rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10">
-              <input 
-                type="text" 
-                readOnly 
-                value={window.location.href} 
+              <input
+                type="text"
+                readOnly
+                value={window.location.href}
                 className="w-full bg-transparent text-xs text-zinc-800 dark:text-zinc-200 outline-none truncate font-medium pl-2"
               />
               <button

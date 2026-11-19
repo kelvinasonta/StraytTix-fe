@@ -226,18 +226,17 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
               <div className="relative z-10 flex items-center justify-between gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-white/90 text-zinc-950">
-                  {eventCategory}
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#E31B23] text-white">
-                  Selling Fast
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-white/90 text-zinc-950">
+                    {eventCategory}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#E31B23] text-white">
+                    Tickets Available
+                  </span>
+                </div>
               </div>
 
-              <div className="relative z-10 space-y-1">
-                <span className="text-[10px] font-black uppercase text-red-400 tracking-wider block">
-                  ● Confirmed Schedule
-                </span>
+              <div className="relative z-10 space-y-1.5">
                 <h4 className="text-base sm:text-lg font-black text-white leading-tight">
                   {eventTitle}
                 </h4>
@@ -262,17 +261,11 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-white/90 text-zinc-950">
                     {eventCategory}
                   </span>
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-[#E31B23] text-white">
-                    Selling Fast
-                  </span>
                 </div>
               </div>
               <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-b-2xl p-3.5 space-y-2 shadow-2xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="space-y-0.5">
-                    <span className="text-[10px] font-black uppercase text-red-600 dark:text-red-400 tracking-wider">
-                      ● Confirmed Schedule
-                    </span>
                     <h4 className="text-sm sm:text-base font-black text-zinc-950 dark:text-white">
                       {eventTitle}
                     </h4>
@@ -284,7 +277,7 @@ export const HeroHeaderPicker: React.FC<HeroHeaderPickerProps> = ({
                     type="button"
                     className="px-3.5 py-1.5 bg-[#E31B23] text-white text-xs font-bold rounded-xl self-start sm:self-center pointer-events-none"
                   >
-                    Get Tickets
+                    Get a Ticket
                   </button>
                 </div>
               </div>

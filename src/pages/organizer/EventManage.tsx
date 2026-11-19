@@ -23,6 +23,7 @@ import HeroHeaderPicker, { type HeroBannerStyle } from '../../components/events/
 import CameraQrScannerModal from '../../components/events/CameraQrScannerModal';
 import { CreditCheckPill, CreditTopupModal } from '../../components/credits';
 import { creditsApi } from '../../api/credits';
+import { getEcho } from '../../lib/echo';
 import { useSettings } from '../../context/SettingsContext';
 import { getFeeConfig } from '../../utils/fees';
 import { EVENT_FORMATS, POPULAR_CATEGORY_TAGS, SYSTEM_AVATARS, PRESET_CATEGORIES, PRESET_COVERS } from './CreateEvent';
@@ -195,6 +196,35 @@ export const EventManage: React.FC = () => {
   const [stats, setStats] = useState<EventStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState<boolean>(false);
 
+  // Real Payout Settlement Bank Account from GET /organizers/:orgUuid/bank-account
+  const [payoutBank, setPayoutBank] = useState<{
+    bank_name: string;
+    bank_code: string;
+    account_number: string;
+    account_name: string;
+    is_default: boolean;
+  } | null>(null);
+  const [isLoadingBank, setIsLoadingBank] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (activeTab !== 'finance' || financeSubtab !== 'payout' || !organizer?.id || !perms.canManageBanking) return;
+    let cancelled = false;
+    setIsLoadingBank(true);
+    organizerApi.getBankAccount(organizer.id)
+      .then((res) => {
+        if (cancelled) return;
+        const raw = (res as any)?.data?.data ?? res?.data ?? null;
+        setPayoutBank(raw && raw.account_number ? raw : null);
+      })
+      .catch(() => {
+        if (!cancelled) setPayoutBank(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingBank(false);
+      });
+    return () => { cancelled = true; };
+  }, [activeTab, financeSubtab, organizer?.id, perms.canManageBanking]);
+
   // Lifecycle Quick Action Modals
   const [isPublishGuardModalOpen, setIsPublishGuardModalOpen] = useState(false);
   const [isUnpublishModalOpen, setIsUnpublishModalOpen] = useState(false);
@@ -221,6 +251,10 @@ export const EventManage: React.FC = () => {
     return Number(localStorage.getItem('strayttix_organizer_credits') || 500);
   });
   const [isTopupModalOpen, setIsTopupModalOpen] = useState(false);
+  const [broadcastAudience, setBroadcastAudience] = useState<string>('all');
+  const [broadcastSubject, setBroadcastSubject] = useState<string>('');
+  const [broadcastMessage, setBroadcastMessage] = useState<string>('');
+  const [isSendingBroadcast, setIsSendingBroadcast] = useState<boolean>(false);
 
   useEffect(() => {
     creditsApi.getWallet(organizer?.id)
@@ -710,6 +744,102 @@ export const EventManage: React.FC = () => {
   const [gateStats, setGateStats] = useState<CheckInStats | null>(null);
   const [attendeeSearchQuery, setAttendeeSearchQuery] = useState('');
   const [isLoadingGateStats, setIsLoadingGateStats] = useState(false);
+
+  // Real-time Bulk Job Progress (Email Broadcast / CSV Export)
+  const [bulkJobProgress, setBulkJobProgress] = useState<{
+    job_id: string;
+    job_type: string;
+    status: string;
+    total: number;
+    processed: number;
+    sent: number;
+    failed: number;
+    percentage: number;
+    message?: string | null;
+  } | null>(null);
+
+  // Real-time Gate Check-In Sync (private-events.{eventUuid}.gate)
+  useEffect(() => {
+    const eventUuid = event?.id;
+    if (!eventUuid) return;
+
+    const echo = getEcho();
+    if (!echo) return;
+
+    const channelName = `events.${eventUuid}.gate`;
+    const channel = echo.private(channelName);
+
+    const handleGateSync = (isCheckedIn: boolean) => (payload: {
+      ticket?: {
+        id?: string;
+        ticket_number?: string;
+        status?: string;
+        checked_in_at?: string | null;
+      };
+      stats?: CheckInStats;
+    }) => {
+      if (payload?.stats) {
+        setGateStats(payload.stats);
+      }
+
+      if (payload?.ticket) {
+        const t = payload.ticket;
+        setAttendees((prev) =>
+          prev.map((att) =>
+            att.id === t.id || att.id === t.ticket_number
+              ? {
+                  ...att,
+                  checkedIn: isCheckedIn,
+                  checkedInAt: t.checked_in_at ?? null,
+                  status: t.status || (isCheckedIn ? 'used' : 'valid'),
+                }
+              : att
+          )
+        );
+      }
+    };
+
+    channel.listen('.attendee.checked_in', handleGateSync(true));
+    channel.listen('.attendee.check_in_undone', handleGateSync(false));
+
+    return () => {
+      echo.leave(channelName);
+    };
+  }, [event?.id]);
+
+  // Real-time Organizer Bulk Jobs Progress (private-organizers.{organizerUuid}.jobs)
+  useEffect(() => {
+    const organizerUuid = organizer?.id;
+    if (!organizerUuid) return;
+
+    const echo = getEcho();
+    if (!echo) return;
+
+    const channelName = `organizers.${organizerUuid}.jobs`;
+    const channel = echo.private(channelName);
+
+    channel.listen('.bulk.job.progress', (payload: {
+      job_id: string;
+      job_type: string;
+      event_uuid?: string | null;
+      status: string;
+      total: number;
+      processed: number;
+      sent: number;
+      failed: number;
+      percentage: number;
+      message?: string | null;
+    }) => {
+      if (payload.event_uuid && event?.id && payload.event_uuid !== event.id) {
+        return;
+      }
+      setBulkJobProgress(payload);
+    });
+
+    return () => {
+      echo.leave(channelName);
+    };
+  }, [organizer?.id, event?.id]);
 
   // Invite-only approval queue
   const [inviteApplicants, setInviteApplicants] = useState<Array<{
@@ -5709,53 +5839,167 @@ export const EventManage: React.FC = () => {
         {/* ========================================================================= */}
         {perms.canViewRevenue && activeTab === 'finance' && (
           <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-            {financeSubtab === 'sales' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Financial Sales Summary</h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Gross revenue, processing charges, and net earnings.</p>
-                </div>
+            {financeSubtab === 'sales' && (() => {
+              const grossRevenue = Number(stats?.totalRevenue ?? event.revenue ?? 0);
+              const soldCount = Number(stats?.soldTickets ?? event.ticketsSold ?? 0);
+              const platformFeeAmount = grossRevenue * (feePct / 100);
+              const netPayoutAmount = Math.max(0, grossRevenue - platformFeeAmount);
+              const tierRows = stats?.ticketBreakdown && stats.ticketBreakdown.length > 0
+                ? stats.ticketBreakdown
+                : (event.tickets || []).map((t) => ({
+                    id: t.id || t.name,
+                    name: t.name,
+                    type: (t.price === 0 ? 'free' : 'paid') as 'free' | 'paid',
+                    price: Number(t.price || 0),
+                    currency: t.currency || 'NGN',
+                    quantity: Number(t.quantity || 0),
+                    soldQuantity: Number(t.soldQuantity || 0),
+                    reservedQuantity: 0,
+                    revenue: Number(t.soldQuantity || 0) * Number(t.price || 0),
+                    status: t.status || 'active',
+                  }));
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10">
-                    <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Gross Revenue</span>
-                    <p className="text-2xl font-black text-zinc-950 dark:text-white mt-1">{formatCurrency(event.revenue || 2450000)}</p>
+              return (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Financial Sales Summary</h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Live ticket revenue, estimated platform fee, and net event earnings.
+                      </p>
+                    </div>
+                    <Link
+                      to="/organizer/orders"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-white/[0.06] dark:hover:bg-white/10 text-xs font-bold text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-white/10 transition-colors self-start sm:self-auto"
+                    >
+                      <span>View Orders</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Link>
                   </div>
-                  <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10">
-                    <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Platform Fee ({feePct}%)</span>
-                    <p className="text-2xl font-black text-zinc-600 dark:text-zinc-400 mt-1">{formatCurrency((event.revenue || 2450000) * (feePct / 100))}</p>
-                  </div>
-                  <div className="p-5 rounded-2xl bg-[#FEF2F2] dark:bg-red-500/10 border border-red-100 dark:border-red-500/20">
-                    <span className="text-xs font-bold text-[#E31B23] uppercase tracking-wider">Net Payout</span>
-                    <p className="text-2xl font-black text-[#E31B23] mt-1">{formatCurrency((event.revenue || 2450000) * (1 - (feePct / 100)))}</p>
+
+                  {isLoadingStats && !stats ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-pulse">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-24 rounded-2xl bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10" />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10">
+                        <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Gross Revenue</span>
+                        <p className="text-2xl font-black text-zinc-950 dark:text-white mt-1">{formatCurrency(grossRevenue)}</p>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                          {soldCount} {soldCount === 1 ? 'ticket' : 'tickets'} sold
+                        </p>
+                      </div>
+                      <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10">
+                        <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Est. Platform Fee ({feePct}%)</span>
+                        <p className="text-2xl font-black text-zinc-600 dark:text-zinc-400 mt-1">{formatCurrency(platformFeeAmount)}</p>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                          Based on configured fee rate
+                        </p>
+                      </div>
+                      <div className="p-5 rounded-2xl bg-[#FEF2F2] dark:bg-red-500/10 border border-red-100 dark:border-red-500/20">
+                        <span className="text-xs font-bold text-[#E31B23] uppercase tracking-wider">Est. Net Payout</span>
+                        <p className="text-2xl font-black text-[#E31B23] mt-1">{formatCurrency(netPayoutAmount)}</p>
+                        <p className="text-[11px] text-red-700/70 dark:text-red-300/70 mt-1 font-medium">
+                          Before refunds or adjustments
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Per-Tier Breakdown */}
+                  <div className="space-y-3 pt-2 border-t border-zinc-200/80 dark:border-white/10">
+                    <h4 className="text-xs font-black uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      Revenue by Ticket Tier
+                    </h4>
+                    {tierRows.length === 0 ? (
+                      <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-white/[0.02] border border-dashed border-zinc-200 dark:border-white/10 text-center text-xs text-zinc-500 dark:text-zinc-400">
+                        No ticket tiers configured for this event yet.
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-zinc-200/70 dark:divide-white/10 rounded-2xl border border-zinc-200 dark:border-white/10 overflow-hidden bg-zinc-50/50 dark:bg-white/[0.02]">
+                        {tierRows.map((tier) => (
+                          <div key={tier.id} className="p-4 flex items-center justify-between gap-4 text-xs sm:text-sm">
+                            <div className="min-w-0">
+                              <p className="font-bold text-zinc-950 dark:text-white truncate">{tier.name}</p>
+                              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
+                                {tier.price === 0 ? 'Free' : formatCurrency(tier.price)} • {tier.soldQuantity} sold
+                                {tier.quantity > 0 ? ` / ${tier.quantity}` : ''}
+                              </p>
+                            </div>
+                            <span className="font-black text-zinc-950 dark:text-white shrink-0">
+                              {formatCurrency(tier.revenue)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {financeSubtab === 'payout' && perms.canManageBanking && (
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Payout Settlement Account</h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Commercial settlement bank account for automatic transfers.</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Payout Settlement Account</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">Commercial settlement bank account linked to this organizer.</p>
+                  </div>
+                  <Link
+                    to="/organizer/settings?tab=billing"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-white/[0.06] dark:hover:bg-white/10 text-xs font-bold text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-white/10 transition-colors self-start sm:self-auto"
+                  >
+                    <span>Manage Bank Account</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 space-y-3">
-                  <div className="flex justify-between items-center border-b border-zinc-200 dark:border-white/10 pb-3">
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Designated Bank</span>
-                    <span className="text-sm font-black text-zinc-900 dark:text-white">Commercial Bank Settlement</span>
+                {isLoadingBank ? (
+                  <div className="h-40 rounded-2xl bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 animate-pulse" />
+                ) : payoutBank ? (
+                  <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 space-y-3">
+                    <div className="flex justify-between items-center border-b border-zinc-200 dark:border-white/10 pb-3">
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Designated Bank</span>
+                      <span className="text-sm font-black text-zinc-900 dark:text-white">{payoutBank.bank_name}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-zinc-200 dark:border-white/10 pb-3">
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Account Name</span>
+                      <span className="text-sm font-bold text-zinc-900 dark:text-white">{payoutBank.account_name}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-zinc-200 dark:border-white/10 pb-3">
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Account Number</span>
+                      <span className="text-sm font-mono font-bold text-zinc-900 dark:text-white">
+                        {`••••••${payoutBank.account_number.slice(-4)}`}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Payout Timeline</span>
+                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                        Next-Day Post Event Settlement
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center border-b border-zinc-200 dark:border-white/10 pb-3">
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Settlement Account</span>
-                    <span className="text-sm font-mono font-bold text-zinc-900 dark:text-white">Verified Organizer Profile</span>
+                ) : (
+                  <div className="p-6 rounded-2xl bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-amber-950 dark:text-amber-200">
+                        No settlement bank account configured
+                      </p>
+                      <p className="text-xs text-amber-800/80 dark:text-amber-300/80">
+                        Add a verified bank account in your organizer billing settings to receive event payouts.
+                      </p>
+                    </div>
+                    <Link
+                      to="/organizer/settings?tab=billing"
+                      className="px-4 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold shrink-0 text-center transition-colors"
+                    >
+                      Configure Payout Bank
+                    </Link>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Payout Timeline</span>
-                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                      Next-Day Post Event Settlement
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
             )}
           </div>
@@ -5953,91 +6197,183 @@ export const EventManage: React.FC = () => {
               </div>
             )}
 
-            {marketingSubtab === 'email' && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Broadcast Email Marketing</h3>
-                    <p className="text-xs text-zinc-500">Send direct promotional and informational emails to your registered audience.</p>
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-300 text-xs font-bold shadow-2xs">
-                    <Coins className="w-4 h-4 text-amber-500" />
-                    <span>Credits: <strong>{creditsWalletBalance.toLocaleString()} Available</strong></span>
-                    <button
-                      type="button"
-                      onClick={() => setIsTopupModalOpen(true)}
-                      className="text-[#E31B23] hover:underline text-[11px] font-black ml-1 cursor-pointer"
-                    >
-                      Top-Up
-                    </button>
-                  </div>
-                </div>
+            {marketingSubtab === 'email' && (() => {
+              const activeAttendees = attendees.filter((a: any) => !['cancelled', 'refunded', 'void'].includes(String(a.status || '').toLowerCase()));
+              const filteredAttendees = broadcastAudience === 'all'
+                ? activeAttendees
+                : activeAttendees.filter((a: any) => a.ticketType === broadcastAudience || a.ticketTypeId === broadcastAudience);
+              const uniqueEmails = new Set(
+                filteredAttendees
+                  .map((a: any) => String(a.email || a.attendeeEmail || '').trim().toLowerCase())
+                  .filter(Boolean)
+              );
+              const recipientCount = uniqueEmails.size;
 
-                {/* Pre-Flight Consumption Gate Check Pill */}
-                <CreditCheckPill
-                  requiredCredits={attendees.length || 1}
-                  availableCredits={creditsWalletBalance}
-                  featureName="Email Broadcast"
-                  onTopupClick={() => setIsTopupModalOpen(true)}
-                  className="w-full"
-                />
+              return (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Broadcast Email Marketing</h3>
+                      <p className="text-xs text-zinc-500">Send direct promotional and informational emails to your registered audience.</p>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-300 text-xs font-bold shadow-2xs">
+                      <Coins className="w-4 h-4 text-amber-500" />
+                      <span>Credits: <strong>{creditsWalletBalance.toLocaleString()} Available</strong></span>
+                      <button
+                        type="button"
+                        onClick={() => setIsTopupModalOpen(true)}
+                        className="text-[#E31B23] hover:underline text-[11px] font-black ml-1 cursor-pointer"
+                      >
+                        Top-Up
+                      </button>
+                    </div>
+                  </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-between gap-4 text-xs">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-500/15 text-[#E31B23] flex items-center justify-center font-bold">
-                      <Mail className="w-4 h-4" />
+                  {/* Pre-Flight Consumption Gate Check Pill */}
+                  <CreditCheckPill
+                    requiredCredits={Math.max(recipientCount, 1)}
+                    availableCredits={creditsWalletBalance}
+                    featureName="Email Broadcast"
+                    onTopupClick={() => setIsTopupModalOpen(true)}
+                    className="w-full"
+                  />
+
+                  <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-between gap-4 text-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-500/15 text-[#E31B23] flex items-center justify-center font-bold">
+                        <Mail className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-zinc-900 dark:text-white">Email Marketing Credit Rate</p>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Each unique attendee email recipient consumes 1 Credit.</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[11px] font-bold text-zinc-400 block uppercase">Recipients Cost</span>
+                      <strong className="text-sm font-black text-zinc-950 dark:text-white">{recipientCount} Credits</strong>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Target Audience</label>
+                      <select
+                        value={broadcastAudience}
+                        onChange={(e) => setBroadcastAudience(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium text-zinc-900 dark:text-white"
+                      >
+                        <option value="all">All Registered Attendees ({activeAttendees.length})</option>
+                        {event.tickets?.map((t: any, i: number) => (
+                          <option key={t.id || i} value={t.name}>
+                            {t.name} Ticket Holders
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
-                      <p className="font-bold text-zinc-900 dark:text-white">Email Marketing Credit Rate</p>
-                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Each attendee recipient consumes 1 Credit.</p>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Email Subject Line</label>
+                      <input
+                        type="text"
+                        value={broadcastSubject}
+                        onChange={(e) => setBroadcastSubject(e.target.value)}
+                        placeholder="Important: Update regarding event entry and gates"
+                        className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium text-zinc-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Message Content</label>
+                      <textarea
+                        rows={5}
+                        value={broadcastMessage}
+                        onChange={(e) => setBroadcastMessage(e.target.value)}
+                        placeholder="Write your announcement..."
+                        className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium text-zinc-900 dark:text-white"
+                      />
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-[11px] font-bold text-zinc-400 block uppercase">Recipients Cost</span>
-                    <strong className="text-sm font-black text-zinc-950 dark:text-white">{attendees.length} Credits</strong>
-                  </div>
+
+                  {bulkJobProgress && bulkJobProgress.job_type === 'email_broadcast' && (
+                    <div className="p-4 rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 space-y-2">
+                      <div className="flex items-center justify-between text-xs font-bold">
+                        <span className="text-zinc-700 dark:text-zinc-200">
+                          {bulkJobProgress.message || (bulkJobProgress.status === 'completed' ? 'Broadcast complete' : 'Sending broadcast...')}
+                        </span>
+                        <span className="tabular-nums text-[#E31B23] dark:text-red-400">
+                          {bulkJobProgress.sent} / {bulkJobProgress.total} ({bulkJobProgress.percentage}%)
+                        </span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-zinc-200 dark:bg-white/10 overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-300 ${bulkJobProgress.status === 'completed' ? 'bg-emerald-500' : 'bg-[#E31B23]'}`}
+                          style={{ width: `${Math.min(100, Math.max(0, bulkJobProgress.percentage))}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    disabled={isSendingBroadcast || recipientCount === 0}
+                    onClick={async () => {
+                      if (!broadcastSubject.trim() || broadcastSubject.trim().length < 3) {
+                        showNotification('Please enter an email subject line (at least 3 characters).', 'warning');
+                        return;
+                      }
+                      if (!broadcastMessage.trim() || broadcastMessage.trim().length < 5) {
+                        showNotification('Please enter your announcement message.', 'warning');
+                        return;
+                      }
+                      if (creditsWalletBalance < Math.max(recipientCount, 1)) {
+                        showNotification('Insufficient credits to dispatch this email broadcast. Please top up first.', 'error');
+                        setIsTopupModalOpen(true);
+                        return;
+                      }
+                      try {
+                        setIsSendingBroadcast(true);
+                        const res = await eventApi.broadcastEmail(
+                          event.id,
+                          {
+                            subject: broadcastSubject.trim(),
+                            message: broadcastMessage.trim(),
+                            ticket_type_uuid: broadcastAudience === 'all' ? null : broadcastAudience,
+                          },
+                          organizer?.id
+                        );
+                        if (typeof res.data?.available_balance === 'number') {
+                          setCreditsWalletBalance(res.data.available_balance);
+                          localStorage.setItem('strayttix_organizer_credits', String(res.data.balance ?? res.data.available_balance));
+                        }
+                        setBroadcastSubject('');
+                        setBroadcastMessage('');
+                        showNotification(
+                          res.message || `Email broadcast sent to ${res.data?.sent_count || recipientCount} attendee(s).`,
+                          'success'
+                        );
+                      } catch (err: any) {
+                        const code = err?.response?.data?.code;
+                        const msg = err?.response?.data?.message || 'Failed to send email broadcast.';
+                        showNotification(msg, 'error');
+                        if (code === 'INSUFFICIENT_CREDITS') {
+                          setIsTopupModalOpen(true);
+                        }
+                      } finally {
+                        setIsSendingBroadcast(false);
+                      }
+                    }}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>
+                      {isSendingBroadcast
+                        ? 'Dispatching Broadcast...'
+                        : recipientCount > 0
+                        ? `Send Email Broadcast (${recipientCount} Credit${recipientCount === 1 ? '' : 's'})`
+                        : 'No Registered Recipients Yet'}
+                    </span>
+                  </button>
                 </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Target Audience</label>
-                    <select className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium">
-                      <option>All Registered Attendees ({attendees.length})</option>
-                      {event.tickets?.map((t, i) => <option key={i}>{t.name} Ticket Holders</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Email Subject Line</label>
-                    <input
-                      type="text"
-                      placeholder="Important: Update regarding event entry and gates"
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Message Content</label>
-                    <textarea
-                      rows={4}
-                      placeholder="Write your announcement..."
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-medium"
-                    />
-                  </div>
-                </div>
-                <button
-                  disabled={creditsWalletBalance < (attendees.length || 1)}
-                  onClick={() => {
-                    if (creditsWalletBalance < (attendees.length || 1)) {
-                      showNotification('Insufficient credits to dispatch this email broadcast. Please top up first.', 'error');
-                      setIsTopupModalOpen(true);
-                      return;
-                    }
-                    showNotification('Announcement email scheduled for delivery.', 'success');
-                  }}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E31B23] text-white text-sm font-bold rounded-xl hover:bg-[#B91C1C] cursor-pointer disabled:opacity-50"
-                >
-                  <Send className="w-4 h-4" /> Send Email Broadcast
-                </button>
-              </div>
-            )}
+              );
+            })()}
 
             {marketingSubtab === 'pixels' && (
               <div className="space-y-6">

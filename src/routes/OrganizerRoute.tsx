@@ -33,8 +33,8 @@ export const OrganizerRoute: React.FC<OrganizerRouteProps> = ({ children, requir
     return <Navigate to="/verify-email/pending" replace />;
   }
 
-  if (user?.accountType !== 'organizer') {
-    // Redirect to customer dashboard if not an organizer
+  if (user?.accountType !== 'organizer' || !organizer) {
+    // Redirect to attendee dashboard if not an organizer or no longer belongs to an organization
     return <Navigate to="/dashboard" replace />;
   }
 

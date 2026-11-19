@@ -11,8 +11,22 @@ export const ordersApi = {
   },
 
   // 2. Fetch single order details & issued tickets
-  getOrder: async (orderUuid: string): Promise<Order> => {
-    const res = await apiClient.get<ApiResponse<Order>>(cleanUrl(`/api/v1/orders/${orderUuid}`));
+  getOrder: async (orderUuid: string, guestToken?: string): Promise<Order> => {
+    const config: any = {};
+    if (guestToken) {
+      config.headers = { 'X-Guest-Token': guestToken };
+    }
+    const res = await apiClient.get<ApiResponse<Order>>(cleanUrl(`/api/v1/orders/${orderUuid}`), config);
+    return res.data.data;
+  },
+
+  // Cancel order reservation and release held tickets back to pool
+  cancelOrder: async (orderUuid: string, guestToken?: string): Promise<Order> => {
+    const config: any = {};
+    if (guestToken) {
+      config.headers = { 'X-Guest-Token': guestToken };
+    }
+    const res = await apiClient.post<ApiResponse<Order>>(cleanUrl(`/api/v1/orders/${orderUuid}/cancel`), {}, config);
     return res.data.data;
   },
 
@@ -45,7 +59,7 @@ export const ordersApi = {
   getOrganizerOrders: async (
     organizerUuid: string,
     eventUuid?: string,
-    params?: { page?: number; search?: string; status?: string }
+    params?: { page?: number; per_page?: number; search?: string; status?: string }
   ): Promise<PaginatedResponse<Order>> => {
     const url = eventUuid
       ? cleanUrl(`/api/v1/organizers/${organizerUuid}/events/${eventUuid}/orders`)

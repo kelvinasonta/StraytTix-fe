@@ -34,6 +34,27 @@ export interface GetLedgerParams {
   search?: string;
 }
 
+export interface CreditPackageOption {
+  id: string;
+  name: string;
+  credits: number;
+  price_kobo?: number;
+  price_ngn?: number;
+  currency?: string;
+  discount_label?: string | null;
+  discount_badge?: string;
+  is_popular?: boolean;
+  popular?: boolean;
+  unit_price_desc?: string;
+}
+
+export interface CreditTopupConfigResponse {
+  default_gateway: string;
+  gateways: string[];
+  rate_per_credit_kobo: number;
+  packages?: CreditPackageOption[];
+}
+
 export interface PaginatedLedgerResponse {
   items: CreditLedgerItem[];
   total: number;
@@ -56,6 +77,22 @@ export const creditsApi = {
   },
 
   /**
+   * PUT /api/v1/organizers/{organizerUuid}/credits/wallet/settings
+   * Updates low-balance threshold and alert configuration.
+   */
+  async updateWalletSettings(
+    payload: { low_balance_threshold: number; low_balance_alert_enabled: boolean },
+    organizerUuid?: string
+  ): Promise<ApiResponse<CreditWallet>> {
+    const orgUuid = resolveOrganizerUuid(organizerUuid);
+    const { data } = await apiClient.put<ApiResponse<CreditWallet>>(
+      `/organizers/${orgUuid}/credits/wallet/settings`,
+      payload
+    );
+    return data;
+  },
+
+  /**
    * GET /api/v1/organizers/{organizerUuid}/credits/ledger
    * Returns paginated double-entry audit ledger entries.
    */
@@ -67,6 +104,30 @@ export const creditsApi = {
     const { data } = await apiClient.get<ApiResponse<PaginatedLedgerResponse | CreditLedgerItem[]>>(
       `/organizers/${orgUuid}/credits/ledger`,
       { params }
+    );
+    return data;
+  },
+
+  /**
+   * GET /api/v1/organizers/{organizerUuid}/credits/gateways
+   * Returns available gateways, default gateway, rate_per_credit_kobo, and optional packages.
+   */
+  async getTopupConfig(organizerUuid?: string): Promise<ApiResponse<CreditTopupConfigResponse>> {
+    const orgUuid = resolveOrganizerUuid(organizerUuid);
+    const { data } = await apiClient.get<ApiResponse<CreditTopupConfigResponse>>(
+      `/organizers/${orgUuid}/credits/gateways`
+    );
+    return data;
+  },
+
+  /**
+   * GET /api/v1/organizers/{organizerUuid}/credits/packages
+   * Returns backend-configured credit top-up packages.
+   */
+  async getPackages(organizerUuid?: string): Promise<ApiResponse<CreditPackageOption[]>> {
+    const orgUuid = resolveOrganizerUuid(organizerUuid);
+    const { data } = await apiClient.get<ApiResponse<CreditPackageOption[]>>(
+      `/organizers/${orgUuid}/credits/packages`
     );
     return data;
   },

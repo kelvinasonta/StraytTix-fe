@@ -10,17 +10,12 @@ import {
   Users,
   Settings,
   LogOut,
-  Search,
-  Bell,
   PlusCircle,
   ChevronDown,
-  Sparkles,
   Compass,
   Ticket,
   ArrowRight,
-  Shield,
   Building2,
-  Check,
   Sun,
   Moon
 } from 'lucide-react';
@@ -31,18 +26,18 @@ import { AuthenticatedMobileNav } from './AuthenticatedMobileNav';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
 import { useCan } from '../../hooks/useCan';
 import { getOrganizerLogo } from '../../utils/imageUrl';
+import { NotificationBell } from '../common/NotificationBell';
 
 interface OrganizerDashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> = ({ children }) => {
-  const { user, organizer, organizations, switchOrganization, logout } = useAuth();
+  const { user, organizer, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const { can } = useCan();
   const navigate = useNavigate();
   const location = useLocation();
-  const [orgDropdownOpen, setOrgDropdownOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
 
   const handleLogout = async () => {
@@ -50,7 +45,6 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
     navigate('/');
   };
 
-  const isOrganization = organizer?.type === 'organization';
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
 
@@ -67,7 +61,7 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
     ...(can(['org.attendees.view', 'org.events.view']) && perms.canViewOrders
       ? [{ to: '/organizer/orders', label: 'Orders & Sales', icon: ShoppingBag }]
       : []),
-    ...(isOrganization && can('org.members.view') && perms.canManageTeam
+    ...(can('org.members.view') && perms.canManageTeam
       ? [{ to: '/organizer/team', label: 'Team Members', icon: Users }]
       : []),
     ...(can('org.finance.view') && perms.canViewFinanceWallet
@@ -90,82 +84,48 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
       <AuthenticatedMobileNav currentMode="organizer" />
 
       {/* 2. DESKTOP PERMANENT SIDEBAR (Desktop md+ screens only) */}
-      <aside className="hidden md:flex flex-col justify-between w-72 bg-white dark:bg-[#0F0F14] border-r border-[#E5E7EB] dark:border-white/10 p-5 h-screen sticky top-0 flex-shrink-0 z-30 transition-colors">
-        <div className="space-y-5 overflow-y-auto pr-1">
-          {/* Brand Logo & Role Badge */}
+      <aside className="hidden md:flex flex-col justify-between w-64 bg-white dark:bg-[#0F0F14] border-r border-zinc-200/80 dark:border-white/10 p-4 h-screen sticky top-0 flex-shrink-0 z-30 transition-colors">
+        <div className="space-y-4 overflow-y-auto pr-0.5">
+          {/* Brand Logo */}
           <div className="px-2 pt-1 pb-1 flex items-center justify-between">
             <Logo to="/organizer" size="md" />
-            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${roleBadgeStyles[role] || 'bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-white/10'}`}>
-              {organizer?.role_label || role}
-            </span>
           </div>
 
-          {/* Organization Switcher Dropdown */}
-          {organizations.length > 0 && (
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
-                className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 transition-all text-left cursor-pointer"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-black text-xs flex items-center justify-center flex-shrink-0">
-                    {organizer?.name?.[0] || 'O'}
-                  </div>
-                  <div className="truncate">
-                    <p className="text-xs font-bold text-zinc-950 dark:text-white truncate">
-                      {organizer?.name || 'My Organization'}
-                    </p>
-                    <p className="text-[10px] text-zinc-500 font-medium capitalize truncate">
-                      {organizer?.role_label || role}
-                    </p>
-                  </div>
+          {/* Organization Workspace Card */}
+          {organizer && (
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50 dark:bg-white/[0.04] border border-zinc-200/70 dark:border-white/10">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-black text-xs flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {getOrganizerLogo(organizer) ? (
+                    <img
+                      src={getOrganizerLogo(organizer)}
+                      alt={organizer?.name || 'Organizer'}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLElement).style.display = 'none';
+                      }}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    organizer?.name?.[0] || 'O'
+                  )}
                 </div>
-                <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${orgDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {orgDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1.5 p-1.5 bg-white dark:bg-[#15151C] border border-zinc-200 dark:border-white/15 rounded-2xl shadow-xl z-50 space-y-1 animate-scaleUp">
-                  <p className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-zinc-400">
-                    Switch Workspace
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-zinc-950 dark:text-white truncate">
+                    {organizer?.name || 'My Organization'}
                   </p>
-                  <div className="max-h-56 overflow-y-auto space-y-0.5">
-                    {organizations.map((org) => {
-                      const orgId = org.uuid || org.id;
-                      const isCurrent = (organizer?.uuid || organizer?.id) === orgId;
-                      return (
-                        <button
-                          key={orgId}
-                          type="button"
-                          onClick={async () => {
-                            setOrgDropdownOpen(false);
-                            if (!isCurrent) {
-                              await switchOrganization(orgId);
-                            }
-                          }}
-                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-left text-xs transition-colors cursor-pointer ${
-                            isCurrent
-                              ? 'bg-red-50 dark:bg-red-500/10 text-[#E31B23] font-bold'
-                              : 'hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300'
-                          }`}
-                        >
-                          <div className="truncate pr-2">
-                            <span className="block font-bold truncate">{org.name}</span>
-                            <span className="text-[10px] text-zinc-400 capitalize">{org.role_label || org.role || 'Member'}</span>
-                          </div>
-                          {isCurrent && <Check className="w-3.5 h-3.5 text-[#E31B23] flex-shrink-0" />}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-semibold capitalize truncate">
+                    {organizer?.role_label || role}
+                  </p>
                 </div>
-              )}
+              </div>
+              <span className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider border shrink-0 ${roleBadgeStyles[role] || 'bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-white/10'}`}>
+                {role}
+              </span>
             </div>
           )}
 
-
           {/* Navigation Links */}
-          <nav className="space-y-1.5">
+          <nav className="space-y-1 pt-1">
             {navItems.map((item) => {
               const isActive = item.end
                 ? location.pathname === item.to
@@ -178,59 +138,46 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
                   end={item.end}
                   className={
                     isActive
-                      ? 'flex items-center gap-3 px-4 py-3 rounded-xl bg-[#E31B23] text-white font-bold text-sm shadow-xs transition-all'
-                      : 'flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-white/5 font-semibold text-sm transition-colors'
+                      ? 'flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#E31B23] text-white font-bold text-xs shadow-xs transition-all'
+                      : 'flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100/70 dark:hover:bg-white/5 font-semibold text-xs transition-colors'
                   }
                 >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.label}</span>
+                  <item.icon className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </NavLink>
               );
             })}
           </nav>
         </div>
 
-        {/* Bottom Callout: Public Marketplace + Sign Out */}
-        <div className="space-y-3 pt-4 border-t border-zinc-100 dark:border-white/10">
-          <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold text-zinc-950 dark:text-white">
-                <Compass className="w-4 h-4 text-[#E31B23]" />
-                <span>Public Marketplace</span>
-              </div>
-            </div>
-            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
-              Explore public event listings and trending experiences.
-            </p>
-            <Link
-              to="/discover"
-              className="block text-center py-2 bg-white dark:bg-[#070709] hover:bg-zinc-100 dark:hover:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-900 dark:text-white text-xs font-bold rounded-xl shadow-2xs transition-all"
-            >
-              Explore Events &rarr;
-            </Link>
-          </div>
-
-          {/* Theme Toggle Button */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 border border-zinc-200/80 dark:border-white/10 transition-all cursor-pointer"
+        {/* Minimal Sidebar Footer: Mode Switch & Sign Out */}
+        <div className="space-y-1.5 pt-3 border-t border-zinc-100 dark:border-white/10">
+          <Link
+            to="/dashboard"
+            className="flex items-center justify-between px-3 py-2 rounded-xl bg-zinc-50 dark:bg-white/[0.03] hover:bg-zinc-100 dark:hover:bg-white/[0.07] border border-zinc-200/70 dark:border-white/10 text-xs font-bold text-zinc-700 dark:text-zinc-300 transition-all group"
           >
-            <span className="flex items-center gap-2">
-              {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-zinc-500" />}
-              <span>{isDark ? 'Light Appearance' : 'Dark Appearance'}</span>
+            <span className="flex items-center gap-2 truncate">
+              <Ticket className="w-3.5 h-3.5 text-[#E31B23] shrink-0" />
+              <span className="truncate">Attendee Mode</span>
             </span>
-            <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-zinc-200/80 dark:bg-white/10 text-zinc-600 dark:text-zinc-400">
-              {isDark ? 'Dark' : 'Light'}
-            </span>
-          </button>
+            <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
+          </Link>
 
-          {/* Sign Out Button */}
+          <Link
+            to="/discover"
+            className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+          >
+            <span className="flex items-center gap-2 truncate">
+              <Compass className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+              <span className="truncate">Explore Events</span>
+            </span>
+          </Link>
+
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-zinc-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 transition-colors w-full cursor-pointer"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/20 transition-colors w-full cursor-pointer"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-3.5 h-3.5 shrink-0" />
             <span>Sign Out</span>
           </button>
         </div>
@@ -239,27 +186,23 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
       {/* 3. MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Desktop Top Header Bar */}
-        <header className="hidden md:flex h-16 bg-white/95 dark:bg-[#0F0F14]/95 backdrop-blur-md border-b border-[#E5E7EB] dark:border-white/10 items-center justify-between px-8 sticky top-0 z-20 shadow-2xs transition-colors">
-          {/* Quick Search */}
-          <div className="relative w-80">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search events, orders, or attendees..."
-              className="w-full bg-[#F8F9FB] dark:bg-[#070709] border border-zinc-200/80 dark:border-white/10 rounded-full pl-9 pr-4 py-2 text-xs text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 outline-none focus:border-[#E31B23] transition-all font-medium"
-            />
+        <header className="hidden md:flex h-16 bg-white/95 dark:bg-[#0F0F14]/95 backdrop-blur-md border-b border-zinc-200/80 dark:border-white/10 items-center justify-between px-8 sticky top-0 z-20 transition-colors">
+          {/* Workspace Context */}
+          <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+            <Building2 className="w-4 h-4 text-[#E31B23]" />
+            <span className="text-zinc-900 dark:text-white">{organizer?.name || 'Organizer Workspace'}</span>
           </div>
 
           {/* Right Profile, Notifications & Action Buttons */}
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-3">
             {/* Theme Mode Toggle Button */}
             <button
               type="button"
               onClick={toggleTheme}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
                 isDark
-                  ? 'bg-white/5 hover:bg-white/10 text-amber-300 border-white/15'
-                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
+                  ? 'bg-white/5 hover:bg-white/10 text-amber-300 border-white/10'
+                  : 'bg-zinc-50 hover:bg-zinc-100 text-zinc-700 border-zinc-200/80'
               }`}
               title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               aria-label="Toggle theme mode"
@@ -267,28 +210,16 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            {/* Explore Link */}
-            <Link
-              to="/discover"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
-            >
-              <Compass className="w-3.5 h-3.5 text-[#E31B23]" />
-              <span>Explore</span>
-            </Link>
-
             {/* Notification Bell */}
-            <button
-              className="relative w-9 h-9 rounded-full flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
-              title="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#E31B23]" />
-            </button>
+            <NotificationBell
+              className="w-9 h-9 rounded-xl border border-zinc-200/80 dark:border-white/10 bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10"
+              iconClassName="w-4 h-4"
+            />
 
             {/* Create Event CTA */}
             {perms.canCreateEvents && (
               <Link to="/organizer/events/create">
-                <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-black rounded-full transition-all shadow-xs cursor-pointer">
+                <button className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer">
                   <PlusCircle className="w-4 h-4" />
                   <span>Create Event</span>
                 </button>
@@ -296,20 +227,20 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
             )}
 
             {/* Profile Avatar & Dropdown */}
-            <div className="relative">
+            <div className="relative pl-1 border-l border-zinc-200/80 dark:border-white/10">
               <button
                 onClick={() => setUserDropdown(!userDropdown)}
-                className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-zinc-50 dark:hover:bg-white/5 border border-transparent hover:border-zinc-200 dark:hover:border-white/10 transition-all cursor-pointer"
+                className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 border border-transparent hover:border-zinc-200/80 dark:hover:border-white/10 transition-all cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-full bg-zinc-900 text-white font-black text-xs flex items-center justify-center shadow-2xs overflow-hidden">
+                <div className="w-7 h-7 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 font-black text-xs flex items-center justify-center shadow-2xs overflow-hidden">
                   {getOrganizerLogo(organizer) ? (
-                    <img 
-                      src={getOrganizerLogo(organizer)} 
-                      alt={organizer?.name || 'Organizer'} 
+                    <img
+                      src={getOrganizerLogo(organizer)}
+                      alt={organizer?.name || 'Organizer'}
                       onError={(e) => {
                         (e.currentTarget as HTMLElement).style.display = 'none';
                       }}
-                      className="w-full h-full object-cover" 
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     user?.firstName?.[0] || 'O'
@@ -322,89 +253,39 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
               </button>
 
               {userDropdown && (
-                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#0F0F14] rounded-2xl shadow-xl border border-zinc-150 dark:border-white/10 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-4 py-2 border-b border-zinc-100 dark:border-white/10">
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#0F0F14] rounded-2xl shadow-xl border border-zinc-200/80 dark:border-white/10 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-4 py-2.5 border-b border-zinc-100 dark:border-white/10">
                     <p className="text-xs font-bold text-zinc-950 dark:text-white truncate">
                       {user?.firstName || 'Organizer'} {user?.lastName || ''}
                     </p>
-                    <p className="text-[10px] text-zinc-400 dark:text-zinc-500 truncate">{user?.email}</p>
-                    <span className={`inline-block mt-1 px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wide border ${roleBadgeStyles[role] || 'bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300'}`}>
-                      {isOrganization ? `Org • ${role}` : role}
-                    </span>
+                    <p className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate mt-0.5">{user?.email}</p>
                   </div>
+
                   <div className="py-1">
-                    <Link
-                      to="/organizer"
-                      onClick={() => setUserDropdown(false)}
-                      className="block px-4 py-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#E31B23]"
-                    >
-                      Console Dashboard
-                    </Link>
-                    <Link
-                      to="/organizer/events"
-                      onClick={() => setUserDropdown(false)}
-                      className="block px-4 py-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#E31B23]"
-                    >
-                      {role === 'staff' ? 'Assigned Events' : 'My Events'}
-                    </Link>
-                    {perms.canViewOrders && (
-                      <Link
-                        to="/organizer/orders"
-                        onClick={() => setUserDropdown(false)}
-                        className="block px-4 py-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#E31B23]"
-                      >
-                        Orders & Sales
-                      </Link>
-                    )}
-                    {isOrganization && perms.canManageTeam && (
-                      <Link
-                        to="/organizer/team"
-                        onClick={() => setUserDropdown(false)}
-                        className="block px-4 py-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#E31B23]"
-                      >
-                        Team Members
-                      </Link>
-                    )}
-                    {perms.canViewFinanceWallet && (
-                      <Link
-                        to="/organizer/analytics"
-                        onClick={() => setUserDropdown(false)}
-                        className="block px-4 py-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#E31B23]"
-                      >
-                        Finance & Wallet
-                      </Link>
-                    )}
                     {perms.canEditOrganizerProfile && (
                       <Link
                         to="/organizer/profile"
                         onClick={() => setUserDropdown(false)}
-                        className="block px-4 py-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#E31B23]"
+                        className="block px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#E31B23]"
                       >
-                        Organizer Profile
+                        Organization Profile
                       </Link>
                     )}
                     {perms.canAccessSettings && (
                       <Link
                         to="/organizer/settings"
                         onClick={() => setUserDropdown(false)}
-                        className="block px-4 py-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#E31B23]"
+                        className="block px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#E31B23]"
                       >
                         {role === 'staff' ? 'Staff Settings' : 'Console Settings'}
                       </Link>
                     )}
-                  </div>
-
-                  {/* Switch to Attendee Account */}
-                  <div className="border-t border-zinc-100 dark:border-white/10 pt-1">
                     <Link
                       to="/dashboard"
                       onClick={() => setUserDropdown(false)}
-                      className="flex items-center justify-between px-4 py-2 text-xs font-bold text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#E31B23] transition-colors"
+                      className="flex items-center justify-between px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#E31B23] transition-colors"
                     >
-                      <span className="flex items-center gap-2">
-                        <Ticket className="w-3.5 h-3.5 text-[#E31B23]" />
-                        <span>Attendee Account</span>
-                      </span>
+                      <span>Switch to Attendee</span>
                       <ArrowRight className="w-3 h-3 text-zinc-400" />
                     </Link>
                   </div>
@@ -415,7 +296,7 @@ export const OrganizerDashboardLayout: React.FC<OrganizerDashboardLayoutProps> =
                         setUserDropdown(false);
                         handleLogout();
                       }}
-                      className="w-full text-left px-4 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 cursor-pointer"
                     >
                       Sign Out
                     </button>

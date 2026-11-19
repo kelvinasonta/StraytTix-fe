@@ -10,7 +10,7 @@ import VenueAutocompleteInput from '../../components/ui/VenueAutocompleteInput';
 import { useNotification } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
 import { countriesApi, type Country, DEFAULT_COUNTRIES } from '../../api/countries';
-import { formatDate, formatEventDateTime } from '../../utils/format';
+import { formatDate, formatEventDateTime, getUserTimezone } from '../../utils/format';
 import type { ScheduleSession, LineupMember } from '../../types/api';
 import HeroHeaderPicker, { type HeroBannerStyle } from '../../components/events/HeroHeaderPicker';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
@@ -591,7 +591,7 @@ export const CreateEvent: React.FC = () => {
 
   // Step 3: Schedule
   const [scheduleType, setScheduleType] = useState<'single' | 'recurring'>('single');
-  const [scheduleTimezone, setScheduleTimezone] = useState('Africa/Lagos');
+  const [scheduleTimezone, setScheduleTimezone] = useState(() => getUserTimezone());
   const [eventFrequency, setEventFrequency] = useState('weekly');
   const [startDate, setStartDate] = useState('');
   const [startTime, setStartTime] = useState('09:00');

@@ -8,8 +8,9 @@ import Modal from '../../components/ui/Modal';
 import { formatCurrency, formatDate } from '../../utils/format';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
-import { eventApi } from '../../api/events';
+import { eventApi, normalizeBackendEvent } from '../../api/events';
 import { ordersApi } from '../../api/orders';
+import { getApiErrorMessage } from '../../api/client';
 import { resolveOrganizerRole, getRolePermissions } from '../../utils/permissions';
 import { useCan } from '../../hooks/useCan';
 import { Can } from '../../components/auth/Can';
@@ -48,7 +49,7 @@ const normalizeOrder = (raw: any, fallbackEvents: Event[] = []): Order => {
   let normalizedStatus: OrderStatus = 'Pending';
   if (rawStatus === 'paid') normalizedStatus = 'Paid';
   else if (rawStatus === 'refunded') normalizedStatus = 'Refunded';
-  else if (rawStatus === 'failed' || rawStatus === 'cancelled') normalizedStatus = 'Failed';
+  else if (rawStatus === 'failed' || rawStatus === 'cancelled' || rawStatus === 'expired') normalizedStatus = 'Failed';
   else normalizedStatus = 'Pending';
 
   const ticketQty = Number(
@@ -60,10 +61,18 @@ const normalizeOrder = (raw: any, fallbackEvents: Event[] = []): Order => {
 
   const amountVal = Number(raw.total ?? raw.amount ?? raw.subtotal ?? 0);
 
+  const rawVenue = raw.eventVenue || raw.event?.venue || raw.event?.location || eventMatch?.location || eventMatch?.venue;
+  const eventVenueStr = typeof rawVenue === 'string'
+    ? rawVenue
+    : (rawVenue?.venueName || rawVenue?.venue_name || rawVenue?.streetAddress || rawVenue?.street_address || rawVenue?.city || '');
+
+  const resolvedUuid = raw.id || raw.uuid || raw.orderNumber || raw.order_number;
+  const resolvedOrderNumber = raw.orderNumber || raw.order_number || raw.id;
+
   return {
-    id: raw.orderNumber || raw.order_number || raw.id || `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
-    orderNumber: raw.orderNumber || raw.order_number || raw.id,
-    order_number: raw.order_number || raw.orderNumber || raw.id,
+    id: resolvedUuid,
+    orderNumber: resolvedOrderNumber,
+    order_number: resolvedOrderNumber,
     customerName: raw.customerName || raw.customer_name || raw.customer?.name || raw.user?.name || 'Guest Customer',
     customerEmail: raw.customerEmail || raw.customer_email || raw.customer?.email || raw.user?.email || 'guest@example.com',
     customerPhone: raw.customerPhone || raw.customer_phone || null,
@@ -71,7 +80,7 @@ const normalizeOrder = (raw: any, fallbackEvents: Event[] = []): Order => {
     eventSlug: raw.eventSlug || raw.event?.slug || eventMatch?.slug || '',
     eventImageUrl: raw.eventImageUrl || raw.event?.coverImage || raw.event?.cover_image || raw.event?.imageUrl || eventMatch?.imageUrl || '',
     eventDate: raw.eventDate || raw.event?.startDate || eventMatch?.startDate || '',
-    eventVenue: raw.eventVenue || raw.event?.location || eventMatch?.location || '',
+    eventVenue: eventVenueStr,
     amount: amountVal,
     total: amountVal,
     subtotal: Number(raw.subtotal ?? amountVal),
@@ -104,12 +113,26 @@ export const Orders: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [paginationMeta, setPaginationMeta] = useState<{ current_page: number; last_page: number; total: number }>({
+    current_page: 1,
+    last_page: 1,
+    total: 0
+  });
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'Paid' | 'Pending' | 'Refunded' | 'Failed'>('all');
   const [eventFilter, setEventFilter] = useState<string>('all');
   const [timeframeFilter, setTimeframeFilter] = useState<'all' | 'today' | '7d' | '30d'>('all');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Interactive Modals
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -122,56 +145,55 @@ export const Orders: React.FC = () => {
   const [isResendingReceipt, setIsResendingReceipt] = useState(false);
   const [copiedOrderId, setCopiedOrderId] = useState<string | null>(null);
 
-  // Load orders and events
-  const loadData = async (isManualRefresh = false) => {
+  // Load orders and organizer's events
+  const loadData = async (isManualRefresh = false, targetPage = 1) => {
     if (isManualRefresh) setIsRefreshing(true);
     else setIsLoading(true);
+    setLoadError(null);
 
     try {
       const [ordersRes, eventsRes] = await Promise.all([
-        (organizer?.id 
-          ? ordersApi.getOrganizerOrders(organizer.id).catch(() => ({ data: [] })) 
-          : eventApi.getOrders(organizer?.id).catch(() => ({ data: [] }))
-        ),
-        eventApi.getEvents({ organizerUuid: organizer?.id }).catch(() => ({ data: [] }))
+        organizer?.id
+          ? ordersApi.getOrganizerOrders(organizer.id, undefined, { page: targetPage, per_page: 100 })
+          : eventApi.getOrders(organizer?.id),
+        organizer?.id
+          ? eventApi.getOrganizerEvents(organizer.id, { per_page: 100 }).catch(() => ({ data: [] }))
+          : Promise.resolve({ data: [] })
       ]);
 
-      const rawOrdersData = (ordersRes as any)?.data || ordersRes || [];
-      const rawOrders = Array.isArray(rawOrdersData) 
-        ? rawOrdersData 
-        : Array.isArray((rawOrdersData as any)?.data) 
-        ? (rawOrdersData as any).data 
-        : [];
+      const rawOrdersPayload = (ordersRes as any)?.data ?? ordersRes ?? [];
+      const rawOrders = Array.isArray(rawOrdersPayload)
+        ? rawOrdersPayload
+        : Array.isArray((rawOrdersPayload as any)?.data)
+          ? (rawOrdersPayload as any).data
+          : [];
 
-      const rawEventsData = (eventsRes as any)?.data || eventsRes || [];
-      const rawEvents: Event[] = Array.isArray(rawEventsData)
-        ? rawEventsData
-        : Array.isArray((rawEventsData as any)?.data)
-        ? (rawEventsData as any).data
-        : [];
+      const meta = (ordersRes as any)?.meta || (rawOrdersPayload as any)?.meta || null;
+      setPaginationMeta({
+        current_page: Number(meta?.current_page ?? targetPage) || 1,
+        last_page: Number(meta?.last_page ?? 1) || 1,
+        total: Number(meta?.total ?? rawOrders.length) || rawOrders.length
+      });
 
-      setEvents(rawEvents);
+      const rawEventsPayload = (eventsRes as any)?.data ?? eventsRes ?? [];
+      const rawEventsList = Array.isArray(rawEventsPayload)
+        ? rawEventsPayload
+        : Array.isArray((rawEventsPayload as any)?.data)
+          ? (rawEventsPayload as any).data
+          : [];
+      const normalizedEvents: Event[] = rawEventsList.map(normalizeBackendEvent);
 
-      // Purge any legacy dummy sample orders cached in browser storage
-      try {
-        const cacheKey = `strayttix_orders_${organizer?.id || 'default'}`;
-        const cached = localStorage.getItem(cacheKey);
-        if (cached && (cached.includes('ORD-89421') || cached.includes('TechFest') || cached.includes('Chiamaka'))) {
-          localStorage.removeItem(cacheKey);
-        }
-        localStorage.removeItem('strayttix_orders_default');
-      } catch {
-        // Ignore localStorage access restrictions
-      }
+      setEvents(normalizedEvents);
 
       if (rawOrders.length > 0) {
-        const normalized = rawOrders.map((o: any) => normalizeOrder(o, rawEvents));
+        const normalized = rawOrders.map((o: any) => normalizeOrder(o, normalizedEvents));
         setOrders(normalized);
       } else {
         setOrders([]);
       }
     } catch (err: any) {
       console.warn('Failed to load orders data:', err);
+      setLoadError(getApiErrorMessage(err, 'Unable to load organizer orders.'));
       setOrders([]);
     } finally {
       setIsLoading(false);
@@ -180,7 +202,7 @@ export const Orders: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
+    loadData(false, 1);
   }, [organizer?.id]);
 
   // Copy helper
@@ -194,11 +216,11 @@ export const Orders: React.FC = () => {
 
   // Filtered orders calculation
   const filteredOrders = useMemo(() => {
+    const query = debouncedSearchQuery.toLowerCase().trim();
     return orders.filter(order => {
       // 1. Search Query
-      const query = searchQuery.toLowerCase().trim();
       if (query) {
-        const matchesId = order.id.toLowerCase().includes(query);
+        const matchesId = order.id.toLowerCase().includes(query) || (order.orderNumber || '').toLowerCase().includes(query);
         const matchesCustomer = order.customerName.toLowerCase().includes(query);
         const matchesEmail = order.customerEmail.toLowerCase().includes(query);
         const matchesEvent = order.eventTitle?.toLowerCase().includes(query);
@@ -230,7 +252,7 @@ export const Orders: React.FC = () => {
 
       return true;
     });
-  }, [orders, searchQuery, statusFilter, eventFilter, timeframeFilter]);
+  }, [orders, debouncedSearchQuery, statusFilter, eventFilter, timeframeFilter]);
 
   // Statistics summaries
   const metrics = useMemo(() => {
@@ -318,9 +340,11 @@ export const Orders: React.FC = () => {
     try {
       await eventApi.resendOrderReceipt(order.id, organizer?.id);
       showNotification(`Purchase receipt and ticket pass re-sent to ${order.customerEmail}.`, 'success');
-    } catch {
-      // Simulate successful re-dispatch for offline/demo backend mode
-      showNotification(`Purchase receipt and ticket pass re-sent to ${order.customerEmail}.`, 'success');
+    } catch (err: any) {
+      showNotification(
+        getApiErrorMessage(err, 'Unable to resend receipt. Please verify the resend-receipt API endpoint is enabled.'),
+        'error'
+      );
     } finally {
       setIsResendingReceipt(false);
     }
@@ -337,23 +361,26 @@ export const Orders: React.FC = () => {
         amount: orderToRefund.amount,
         organizerUuid: organizer?.id
       });
-    } catch {
-      // Offline fallback handling
+
+      const updated = orders.map(o => o.id === orderToRefund.id ? { ...o, status: 'Refunded' as const } : o);
+      setOrders(updated);
+
+      if (selectedOrder?.id === orderToRefund.id) {
+        setSelectedOrder(prev => prev ? { ...prev, status: 'Refunded' } : null);
+      }
+
+      showNotification(`Order ${orderToRefund.orderNumber || orderToRefund.id} has been refunded.`, 'success');
+      setIsRefundModalOpen(false);
+      setOrderToRefund(null);
+      setRefundCustomNotes('');
+    } catch (err: any) {
+      showNotification(
+        getApiErrorMessage(err, 'Refund failed. Please verify the order refund API endpoint is enabled on the backend.'),
+        'error'
+      );
+    } finally {
+      setIsSubmittingRefund(false);
     }
-
-    // Update local state
-    const updated = orders.map(o => o.id === orderToRefund.id ? { ...o, status: 'Refunded' as const } : o);
-    setOrders(updated);
-
-    if (selectedOrder?.id === orderToRefund.id) {
-      setSelectedOrder(prev => prev ? { ...prev, status: 'Refunded' } : null);
-    }
-
-    showNotification(`Order ${orderToRefund.id} has been marked as Refunded.`, 'success');
-    setIsSubmittingRefund(false);
-    setIsRefundModalOpen(false);
-    setOrderToRefund(null);
-    setRefundCustomNotes('');
   };
 
   const getStatusBadge = (status: string) => {
@@ -376,7 +403,7 @@ export const Orders: React.FC = () => {
       <div className="space-y-8 max-w-7xl mx-auto pb-16">
         
         {/* Top Header */}
-        <div className="border-b border-zinc-200/80 pb-5">
+        <div className="border-b border-zinc-200/80 dark:border-white/10 pb-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -390,7 +417,7 @@ export const Orders: React.FC = () => {
                 <ShoppingBag className="w-7 h-7 text-[#E31B23]" />
                 Orders & Ticket Sales
               </h1>
-              <p className="text-zinc-500 text-xs sm:text-sm font-medium mt-1">
+              <p className="text-zinc-500 dark:text-zinc-400 text-xs sm:text-sm font-medium mt-1">
                 Monitor checkout orders, customer payments, ticket vouchers, and manage refunds.
               </p>
             </div>
@@ -400,9 +427,9 @@ export const Orders: React.FC = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => loadData(true)}
+                onClick={() => loadData(true, paginationMeta.current_page)}
                 disabled={isRefreshing || isLoading}
-                className="gap-2 bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white dark:text-white border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5"
+                className="gap-2 bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-[#E31B23]' : ''}`} />
                 <span>Refresh</span>
@@ -413,7 +440,7 @@ export const Orders: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={handleExportCSV}
-                  className="gap-2 bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white dark:text-white border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5"
+                  className="gap-2 bg-white dark:bg-[#0F0F14] text-zinc-900 dark:text-white border-zinc-200 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Export CSV</span>
@@ -422,6 +449,23 @@ export const Orders: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Error Banner */}
+        {loadError && (
+          <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 flex items-center justify-between gap-4 text-xs sm:text-sm text-rose-700 dark:text-rose-300">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              <span className="font-semibold">{loadError}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => loadData(false, paginationMeta.current_page)}
+              className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shrink-0 cursor-pointer transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        )}
 
         {/* Financial & Volume Metrics Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -466,17 +510,20 @@ export const Orders: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by order ID, attendee name, email, or event title..."
-                className="w-full bg-zinc-50/70 dark:bg-white/5 hover:bg-zinc-50 dark:hover:bg-white/10 focus:bg-white dark:focus:bg-[#070709] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 focus:border-[#E31B23] focus:ring-2 focus:ring-[#E31B23]/20 text-xs sm:text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none transition-all text-zinc-900 dark:text-white dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500"
+                className="w-full bg-zinc-50/70 dark:bg-white/5 hover:bg-zinc-50 dark:hover:bg-white/10 focus:bg-white dark:focus:bg-[#070709] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 focus:border-[#E31B23] focus:ring-2 focus:ring-[#E31B23]/20 text-xs sm:text-sm rounded-xl pl-10 pr-10 py-2.5 outline-none transition-all text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500"
               />
-              {searchQuery && (
+              {searchQuery !== debouncedSearchQuery ? (
+                <Loader2 className="w-4 h-4 text-[#E31B23] animate-spin absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              ) : searchQuery ? (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 p-1 rounded-md"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-white p-1 rounded-md cursor-pointer"
+                  aria-label="Clear search"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
-              )}
+              ) : null}
             </div>
 
             {/* Quick Status Pills */}
@@ -632,15 +679,15 @@ export const Orders: React.FC = () => {
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-1.5">
                             <span className="font-mono font-bold text-zinc-950 dark:text-white group-hover:text-[#E31B23] transition-colors">
-                              {ord.id}
+                              {ord.orderNumber || ord.id}
                             </span>
                             <button
                               type="button"
-                              onClick={(e) => handleCopyOrderId(ord.id, e)}
-                              className="text-zinc-400 hover:text-zinc-700 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                              title="Copy order ID"
+                              onClick={(e) => handleCopyOrderId(ord.orderNumber || ord.id, e)}
+                              className="text-zinc-400 hover:text-zinc-700 dark:hover:text-white p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                              title="Copy order reference"
                             >
-                              {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                              {copiedOrderId === (ord.orderNumber || ord.id) ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                             </button>
                           </div>
                         </td>
@@ -731,6 +778,34 @@ export const Orders: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Footer */}
+          {paginationMeta.last_page > 1 && (
+            <div className="px-4 py-3 border-t border-zinc-200/80 dark:border-white/10 bg-zinc-50/50 dark:bg-white/[0.02] flex items-center justify-between text-xs">
+              <span className="text-zinc-500 dark:text-zinc-400 font-medium">
+                Page <strong className="text-zinc-900 dark:text-white">{paginationMeta.current_page}</strong> of{' '}
+                <strong className="text-zinc-900 dark:text-white">{paginationMeta.last_page}</strong> ({paginationMeta.total} total)
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={paginationMeta.current_page <= 1 || isLoading}
+                  onClick={() => loadData(false, paginationMeta.current_page - 1)}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={paginationMeta.current_page >= paginationMeta.last_page || isLoading}
+                  onClick={() => loadData(false, paginationMeta.current_page + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ----------------- ORDER DETAILS MODAL ----------------- */}
@@ -740,7 +815,7 @@ export const Orders: React.FC = () => {
             setIsDetailModalOpen(false);
             setSelectedOrder(null);
           }}
-          title={`Order Breakdown: #${selectedOrder?.id || ''}`}
+          title={`Order Breakdown: #${selectedOrder?.orderNumber || selectedOrder?.id || ''}`}
         >
           {selectedOrder && (
             <div className="space-y-6">

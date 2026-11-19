@@ -8,6 +8,17 @@ import { ThemeProvider } from './context/ThemeContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { GuestRoute } from './routes/GuestRoute';
 import { OrganizerRoute } from './routes/OrganizerRoute';
+import { AdminRoute } from './routes/AdminRoute';
+
+// Admin Governance pages
+import { AdminLayout } from './pages/admin/AdminLayout';
+import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { OrganizersList } from './pages/admin/OrganizersList';
+import { UsersGovernance } from './pages/admin/UsersGovernance';
+import { EventsModeration } from './pages/admin/EventsModeration';
+import { FinanceSettlement } from './pages/admin/FinanceSettlement';
+import { VerificationQueue } from './pages/admin/VerificationQueue';
+import { AdminSettings } from './pages/admin/AdminSettings';
 
 // Public pages
 import { Home } from './pages/Home';
@@ -35,6 +46,8 @@ import { VerificationPending } from './pages/auth/VerificationPending';
 import { ForgotPassword } from './pages/auth/ForgotPassword';
 import { ResetPassword } from './pages/auth/ResetPassword';
 import { AcceptInvitation } from './pages/auth/AcceptInvitation';
+import { Onboarding } from './pages/auth/Onboarding';
+import { GoogleCallback } from './pages/auth/GoogleCallback';
 
 // Customer Dashboard pages
 import { Overview as CustomerOverview } from './pages/dashboard/Overview';
@@ -129,14 +142,7 @@ export const App: React.FC = () => {
                 </GuestRoute>
               }
             />
-            <Route
-              path="/reset-password"
-              element={
-                <GuestRoute>
-                  <ResetPassword />
-                </GuestRoute>
-              }
-            />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Email Verification */}
             <Route path="/verify-email" element={<VerifyEmail />} />
@@ -150,9 +156,23 @@ export const App: React.FC = () => {
               }
             />
 
+            {/* Interactive Onboarding (for new signups & future OAuth accounts) */}
+            <Route
+              path="/onboarding"
+              element={
+                <ProtectedRoute>
+                  <Onboarding />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Team Staff Invitations */}
             <Route path="/invitations/accept" element={<AcceptInvitation />} />
             <Route path="/accept-invitation" element={<AcceptInvitation />} />
+
+            {/* Google OAuth Callback */}
+            <Route path="/api/v1/auth/callback/google" element={<GoogleCallback />} />
+            <Route path="/auth/callback/google" element={<GoogleCallback />} />
 
             {/* Payment Gateway Callbacks (Paystack / Stripe) */}
             <Route path="/checkout/callback" element={<PaymentCallback />} />
@@ -329,6 +349,24 @@ export const App: React.FC = () => {
                 </OrganizerRoute>
               }
             />
+
+            {/* Administrative Governance Portal */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminLayout />
+                </AdminRoute>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="organizers" element={<OrganizersList />} />
+              <Route path="users" element={<UsersGovernance />} />
+              <Route path="events" element={<EventsModeration />} />
+              <Route path="finance" element={<FinanceSettlement />} />
+              <Route path="verifications" element={<VerificationQueue />} />
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
 
             {/* Public Organizer Profile (Supports direct /artful-media or /@artful-media) */}
             <Route path="/:slug" element={<OrganizerProfile />} />

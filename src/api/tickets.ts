@@ -65,49 +65,78 @@ export const ticketApi = {
   async getCustomerTickets(): Promise<ApiResponse<TicketInstance[]>> {
     try {
       const { data } = await apiClient.get<ApiResponse<any>>('/tickets');
-      const raw = data.data;
+      const raw = data?.data;
       const list = Array.isArray(raw) ? raw : (raw as any)?.data || [];
-      const mapped: TicketInstance[] = list.map((t: any) => ({
-        id: t.id || t.uuid || '',
-        eventTitle: t.event?.title || t.eventTitle || 'Event',
-        eventSlug: t.event?.slug || t.eventSlug || '',
-        eventDate: t.event?.startDate || t.eventDate || '',
-        eventVenue: t.event?.venueName || t.eventVenue || '',
-        eventImageUrl: t.event?.bannerUrl || t.eventImageUrl || '',
-        ticketTypeName: t.ticketType?.name || t.ticketTypeName || 'General Admission',
-        ticketId: t.ticketNumber || t.ticketId || t.id || '',
-        price: Number(t.pricePaid ?? t.price ?? 0),
-        status: (t.status ? (t.status.charAt(0).toUpperCase() + t.status.slice(1)) : 'Upcoming') as any,
-        qrCodeValue: t.qrCode || t.qrCodeValue || t.id || ''
-      }));
+      const mapped: TicketInstance[] = list.map((t: any) => {
+        const rawStatus = (t.status || '').toLowerCase();
+        let displayStatus = 'Upcoming';
+        if (rawStatus === 'valid' || rawStatus === 'upcoming') {
+          displayStatus = 'Upcoming';
+        } else if (rawStatus === 'used') {
+          displayStatus = 'Used';
+        } else if (rawStatus === 'expired') {
+          displayStatus = 'Expired';
+        } else if (rawStatus === 'cancelled' || rawStatus === 'canceled') {
+          displayStatus = 'Cancelled';
+        } else if (t.status) {
+          displayStatus = t.status.charAt(0).toUpperCase() + t.status.slice(1);
+        }
+
+        return {
+          id: t.id || t.uuid || '',
+          eventTitle: t.event?.title || t.eventTitle || 'Event',
+          eventSlug: t.event?.slug || t.eventSlug || '',
+          eventDate: t.event?.startDate || t.event?.schedule?.startDate || t.eventDate || '',
+          eventVenue: t.event?.venueName || t.event?.location?.venueName || t.event?.city || t.eventVenue || 'Venue TBA',
+          eventImageUrl: t.event?.bannerUrl || t.eventImageUrl || '',
+          ticketTypeName: t.ticketType?.name || t.ticketTypeName || 'General Admission',
+          ticketId: t.ticketNumber || t.ticketId || t.id || '',
+          price: Number(t.pricePaid ?? t.price ?? 0),
+          status: displayStatus as any,
+          qrCodeValue: t.qrCode || t.qrCodeValue || t.id || '',
+        };
+      });
       return { ...data, data: mapped };
-    } catch {
-      const { data } = await apiClient.get<ApiResponse<TicketInstance[]>>('/dashboard/tickets');
-      return data;
+    } catch (err) {
+      console.error('Failed to fetch customer tickets from API:', err);
+      return {
+        success: false,
+        message: 'Failed to load tickets',
+        data: [],
+      };
     }
   },
 
   async getTicketDetails(ticketId: string): Promise<ApiResponse<TicketInstance>> {
-    try {
-      const { data } = await apiClient.get<ApiResponse<any>>(`/tickets/${ticketId}`);
-      const t = data.data;
-      const mapped: TicketInstance = {
-        id: t.id || t.uuid || '',
-        eventTitle: t.event?.title || t.eventTitle || 'Event',
-        eventSlug: t.event?.slug || t.eventSlug || '',
-        eventDate: t.event?.startDate || t.eventDate || '',
-        eventVenue: t.event?.venueName || t.eventVenue || '',
-        eventImageUrl: t.event?.bannerUrl || t.eventImageUrl || '',
-        ticketTypeName: t.ticketType?.name || t.ticketTypeName || 'General Admission',
-        ticketId: t.ticketNumber || t.ticketId || t.id || '',
-        price: Number(t.pricePaid ?? t.price ?? 0),
-        status: (t.status ? (t.status.charAt(0).toUpperCase() + t.status.slice(1)) : 'Upcoming') as any,
-        qrCodeValue: t.qrCode || t.qrCodeValue || t.id || ''
-      };
-      return { ...data, data: mapped };
-    } catch {
-      const { data } = await apiClient.get<ApiResponse<TicketInstance>>(`/dashboard/tickets/${ticketId}`);
-      return data;
+    const { data } = await apiClient.get<ApiResponse<any>>(`/tickets/${ticketId}`);
+    const t = data?.data;
+    const rawStatus = (t?.status || '').toLowerCase();
+    let displayStatus = 'Upcoming';
+    if (rawStatus === 'valid' || rawStatus === 'upcoming') {
+      displayStatus = 'Upcoming';
+    } else if (rawStatus === 'used') {
+      displayStatus = 'Used';
+    } else if (rawStatus === 'expired') {
+      displayStatus = 'Expired';
+    } else if (rawStatus === 'cancelled' || rawStatus === 'canceled') {
+      displayStatus = 'Cancelled';
+    } else if (t?.status) {
+      displayStatus = t.status.charAt(0).toUpperCase() + t.status.slice(1);
     }
+
+    const mapped: TicketInstance = {
+      id: t?.id || t?.uuid || '',
+      eventTitle: t?.event?.title || t?.eventTitle || 'Event',
+      eventSlug: t?.event?.slug || t?.eventSlug || '',
+      eventDate: t?.event?.startDate || t?.event?.schedule?.startDate || t?.eventDate || '',
+      eventVenue: t?.event?.venueName || t?.event?.location?.venueName || t?.event?.city || t?.eventVenue || 'Venue TBA',
+      eventImageUrl: t?.event?.bannerUrl || t?.eventImageUrl || '',
+      ticketTypeName: t?.ticketType?.name || t?.ticketTypeName || 'General Admission',
+      ticketId: t?.ticketNumber || t?.ticketId || t?.id || '',
+      price: Number(t?.pricePaid ?? t?.price ?? 0),
+      status: displayStatus as any,
+      qrCodeValue: t?.qrCode || t?.qrCodeValue || t?.id || '',
+    };
+    return { ...data, data: mapped };
   }
 };

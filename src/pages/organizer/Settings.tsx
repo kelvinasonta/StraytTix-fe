@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
 import OrganizerDashboardLayout from '../../components/layout/OrganizerDashboardLayout';
 import Input from '../../components/ui/Input';
@@ -10,6 +10,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { authApi, normalizeTimezone } from '../../api/auth';
+import { SUPPORTED_TIMEZONES, getUserTimezone, getTimezonePreview } from '../../utils/format';
 import type { LoginSession, LoginHistoryItem } from '../../types/api';
 import { organizerApi } from '../../api/organizers';
 import { getApiErrorMessage } from '../../api/client';
@@ -61,7 +62,6 @@ import {
   Flag
 } from 'lucide-react';
 import { useFeatureFlags } from '../../hooks/useFeatureFlag';
-import { FEATURE_FLAG_METADATA } from '../../types/featureFlags';
 
 /* ---------------- Types ---------------- */
 type SettingsTab = 'profile' | 'scanner' | 'station' | 'security' | 'sessions' | 'audit' | 'preferences' | 'notifications' | 'developer' | 'danger';
@@ -111,10 +111,9 @@ export const Settings: React.FC = () => {
   const { user, organizer, logout, setActiveOrganizer, refreshUser } = useAuth();
   const { showNotification } = useNotification();
   const { can, hasRole, isOwner } = useCan();
-  const { flags, isEnabled, setFlagOverride, resetFlagOverrides } = useFeatureFlags();
+  const { isEnabled } = useFeatureFlags();
   const isSessionsEnabled = isEnabled('auth-session-management');
   const is2faEnabled = isEnabled('auth-two-factor');
-  const isOrganization = organizer?.type === 'organization';
 
   const role = resolveOrganizerRole(organizer);
   const perms = getRolePermissions(role);
@@ -144,7 +143,7 @@ export const Settings: React.FC = () => {
   });
   const [profilePhone, setProfilePhone] = useState(user?.phone || '');
   const [profileTimezone, setProfileTimezone] = useState(() => {
-    return normalizeTimezone(user?.timezone) || 'Africa/Lagos';
+    return normalizeTimezone(user?.timezone) || getUserTimezone();
   });
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
@@ -154,11 +153,11 @@ export const Settings: React.FC = () => {
       const lName = user.lastName || user.last_name || (user.name ? user.name.split(' ').slice(1).join(' ') : '') || '';
       if (fName) setProfileFirstName(fName);
       if (lName) setProfileLastName(lName);
-      if (user.phone) {
+      if (user.phone !== undefined && user.phone !== null) {
         setProfilePhone(user.phone);
       }
       if (user.timezone) {
-        setProfileTimezone(normalizeTimezone(user.timezone) || 'Africa/Lagos');
+        setProfileTimezone(normalizeTimezone(user.timezone) || getUserTimezone());
       }
     }
   }, [user]);
@@ -329,24 +328,188 @@ export const Settings: React.FC = () => {
   }, [activeTab, isSessionsEnabled]);
 
   /* ---------------- 4. AUDIT LOGS STATES ---------------- */
-  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => {
-    try {
-      const saved = localStorage.getItem('strayttix_organizer_audit_logs');
-      if (saved && (saved.includes('log-1') || saved.includes('Kelvin Okonkwo') || saved.includes('Lagos Tech Expo 2026'))) {
-        localStorage.removeItem('strayttix_organizer_audit_logs');
-        return [];
-      }
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
+  const [isLoadingAuditLogs, setIsLoadingAuditLogs] = useState<boolean>(false);
   const [auditCategoryFilter, setAuditCategoryFilter] = useState('all');
   const [auditSearchQuery, setAuditSearchQuery] = useState('');
+  const [auditPage, setAuditPage] = useState<number>(1);
+  const [auditPerPage] = useState<number>(15);
+  const [auditTotalPages, setAuditTotalPages] = useState<number>(1);
+  const [auditTotalCount, setAuditTotalCount] = useState<number>(0);
+
+  const mapRawLogToEntry = (raw: any): AuditLogEntry => {
+    const rawAction = String(raw.action || 'system.event');
+    const lower = rawAction.toLowerCase();
+
+    let category: AuditLogEntry['category'] = 'system';
+    let status: AuditLogEntry['status'] = 'success';
+    let prettyAction = rawAction;
+
+    if (lower.startsWith('user.') || lower.includes('login') || lower.includes('password') || lower.includes('session') || lower.includes('email_verified') || lower.includes('feature_flag')) {
+      category = 'security';
+    } else if (lower.startsWith('event.')) {
+      category = 'events';
+    } else if (lower.startsWith('member.') || lower.includes('invitation') || lower.includes('staff')) {
+      category = 'team';
+    } else if (lower.startsWith('credit') || lower.includes('topup')) {
+      category = 'credits';
+    } else if (lower.startsWith('order.') || lower.startsWith('payout') || lower.startsWith('bank')) {
+      category = 'billing';
+    }
+
+    if (lower.includes('deleted') || lower.includes('revoked') || lower.includes('removed') || lower.includes('failed') || lower.includes('disabled')) {
+      status = 'warning';
+    } else if (lower.includes('updated') || lower.includes('assigned') || lower.includes('invited') || lower.includes('logout')) {
+      status = 'info';
+    }
+
+    const ACTION_LABELS: Record<string, string> = {
+      'user.login_success': 'Account Sign-In',
+      'user.logout': 'Account Sign-Out',
+      'user.registered': 'Account Registered',
+      'user.email_verified': 'Email Verified',
+      'user.profile.updated': 'Profile Updated',
+      'user.password.updated': 'Password Changed',
+      'user.password_reset_requested': 'Password Reset Requested',
+      'user.password_reset_completed': 'Password Reset Completed',
+      'user.session.revoked': 'Device Session Revoked',
+      'user.sessions.revoked_others': 'Other Sessions Terminated',
+      'event.created': 'Event Created',
+      'event.updated': 'Event Updated',
+      'event.published': 'Event Published',
+      'event.deleted': 'Event Deleted',
+      'event.staff_assigned': 'Event Staff Assigned',
+      'event.staff_removed': 'Event Staff Removed',
+      'member.invited': 'Team Member Invited',
+      'member.added': 'Team Member Added',
+      'member.role_updated': 'Team Role Updated',
+      'member.removed': 'Team Member Removed',
+      'order.paid': 'Ticket Order Paid',
+      'feature_flag.toggled': 'Security Flag Updated',
+    };
+
+    prettyAction =
+      ACTION_LABELS[rawAction] ||
+      rawAction
+        .replace(/[._-]/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+
+    const actorObj = raw.user;
+    const actorName =
+      actorObj?.name ||
+      (actorObj?.firstName ? `${actorObj.firstName} ${actorObj.lastName || ''}`.trim() : '') ||
+      `${user?.firstName || ''} ${user?.lastName || ''}`.trim() ||
+      user?.name ||
+      'System';
+    const actorEmail = actorObj?.email || user?.email || '';
+    const actorRole = actorObj
+      ? role.charAt(0).toUpperCase() + role.slice(1)
+      : lower.startsWith('order.')
+      ? 'Payment Gateway'
+      : 'System';
+
+    let details = String(raw.description || prettyAction);
+    // Clean up technical "User [4] logged in successfully." into friendly copy
+    if (/^User \[\d+\] logged in successfully\.?$/i.test(details)) {
+      details = `Authenticated session established for ${actorName} (${actorEmail || 'verified user'}).`;
+    } else if (/^User \[\d+\] logged out successfully\.?$/i.test(details)) {
+      details = `Session signed out cleanly by ${actorName}.`;
+    }
+
+    const rawDate = raw.createdAt || raw.created_at;
+    const timestamp = rawDate
+      ? new Date(rawDate).toLocaleString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : 'Recently';
+
+    return {
+      id: String(raw.id || `log-${Math.random()}`),
+      timestamp,
+      action: prettyAction,
+      category,
+      actorName,
+      actorEmail,
+      actorRole,
+      ip: raw.ipAddress || raw.ip_address || raw.metadata?.ip || '127.0.0.1',
+      status,
+      details,
+    };
+  };
+
+  const fetchLiveAuditLogs = useCallback(async (page: number = 1, search: string = '') => {
+    setIsLoadingAuditLogs(true);
+    try {
+      const orgId = organizer?.uuid || organizer?.id;
+      let rawItems: any[] = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+
+      if (orgId && can('org.audit_logs.view')) {
+        const res = await organizerApi.getAuditLogs(orgId, {
+          page,
+          perPage: auditPerPage,
+          search: search.trim() || undefined,
+        });
+        if (res && res.data) {
+          const payload = res.data;
+          const list = Array.isArray(payload?.data)
+            ? payload.data
+            : Array.isArray(payload)
+            ? payload
+            : [];
+          rawItems = list;
+          const meta = payload?.meta;
+          if (meta) {
+            totalPages = meta.last_page || 1;
+            totalRecords = meta.total ?? list.length;
+          } else {
+            totalRecords = list.length;
+          }
+        }
+      } else {
+        const res = await authApi.getActivityLogs({
+          page,
+          per_page: auditPerPage,
+          search: search.trim() || undefined,
+        });
+        if (res && res.data) {
+          const payload = (res.data as any).data || res.data;
+          const list = Array.isArray(payload) ? payload : [];
+          rawItems = list;
+          const meta = (res.data as any).meta;
+          if (meta) {
+            totalPages = meta.last_page || 1;
+            totalRecords = meta.total ?? list.length;
+          } else {
+            totalRecords = list.length;
+          }
+        }
+      }
+
+      setAuditTotalPages(totalPages);
+      setAuditTotalCount(totalRecords);
+      setAuditPage(page);
+      setAuditLogs(rawItems.map(mapRawLogToEntry));
+    } catch {
+      // Keep existing logs on transient network error
+    } finally {
+      setIsLoadingAuditLogs(false);
+    }
+  }, [organizer?.uuid, organizer?.id, can, auditPerPage, role, user]);
+
+  useEffect(() => {
+    if (activeTab === 'audit' && role !== 'staff') {
+      fetchLiveAuditLogs(auditPage, auditSearchQuery);
+    }
+  }, [activeTab, role, fetchLiveAuditLogs]);
 
   /* ---------------- 5. PREFERENCES STATES ---------------- */
   const [defaultCurrency, setDefaultCurrency] = useState('NGN');
-  const [timezone, setTimezone] = useState('Africa/Lagos');
   const [timeFormat, setTimeFormat] = useState('12h');
   const [vatPreference, setVatPreference] = useState('inclusive');
   const [doorSalesPinRequired, setDoorSalesPinRequired] = useState(true);
@@ -394,10 +557,6 @@ export const Settings: React.FC = () => {
     localStorage.setItem('strayttix_organizer_sessions', JSON.stringify(sessions));
   }, [sessions]);
 
-  useEffect(() => {
-    localStorage.setItem('strayttix_organizer_audit_logs', JSON.stringify(auditLogs));
-  }, [auditLogs]);
-
   // Helper to append audit logs
   const appendAuditLog = (
     action: string,
@@ -418,6 +577,7 @@ export const Settings: React.FC = () => {
       details
     };
     setAuditLogs(prev => [newEntry, ...prev]);
+    setAuditTotalCount(prev => prev + 1);
   };
 
   /* ---------------- Password Strength Computation ---------------- */
@@ -452,7 +612,6 @@ export const Settings: React.FC = () => {
         first_name: profileFirstName,
         last_name: profileLastName,
         phone: profilePhone,
-        timezone: normalizeTimezone(profileTimezone),
       });
       await refreshUser();
       showNotification(res?.message || 'User profile updated successfully.', 'success');
@@ -613,14 +772,22 @@ export const Settings: React.FC = () => {
   }, [auditLogs, auditCategoryFilter, auditSearchQuery]);
 
   /* ---------------- Preferences Save Handler ---------------- */
-  const handleSavePreferences = (e: React.FormEvent) => {
+  const handleSavePreferences = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingPrefs(true);
-    setTimeout(() => {
+    try {
+      const cleanTz = normalizeTimezone(profileTimezone) || profileTimezone;
+      await authApi.updateProfile({
+        timezone: cleanTz,
+      });
+      await refreshUser();
+      showNotification('Preferences & timezone updated successfully!', 'success');
+      appendAuditLog('Workspace Preferences Updated', 'system', `Currency: ${defaultCurrency}, Timezone: ${cleanTz}`);
+    } catch (err: any) {
+      showNotification(getApiErrorMessage(err, 'Failed to save preferences.'), 'error');
+    } finally {
       setIsSavingPrefs(false);
-      showNotification('Workspace preferences updated successfully!', 'success');
-      appendAuditLog('Workspace Preferences Updated', 'system', `Currency: ${defaultCurrency}, Timezone: ${timezone}`);
-    }, 500);
+    }
   };
 
   /* ---------------- Notifications Save Handler ---------------- */
@@ -728,11 +895,9 @@ export const Settings: React.FC = () => {
                 <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
                   role === 'staff'
                     ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                    : isOrganization
-                      ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                      : 'bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10'
+                    : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
                 }`}>
-                  {role === 'staff' ? 'Gate Staff Workstation' : isOrganization ? 'Organization Workspace' : 'Individual Planner'}
+                  {role === 'staff' ? 'Gate Staff Workstation' : 'Organizer Workspace'}
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <ShieldCheck className="w-3 h-3 text-emerald-600" /> {role === 'staff' ? 'Terminal Ready' : 'Security Status: Healthy'}
@@ -938,29 +1103,6 @@ export const Settings: React.FC = () => {
                     placeholder="+234 809 123 4567"
                     hint="Used for security verification and emergency operational alerts."
                   />
-                </div>
-
-                <div className="pt-2 border-t border-zinc-100 dark:border-white/10">
-                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                    Preferred Timezone
-                  </label>
-                  <select
-                    value={normalizeTimezone(profileTimezone) || profileTimezone}
-                    onChange={(e) => setProfileTimezone(normalizeTimezone(e.target.value) || e.target.value)}
-                    className="w-full max-w-md bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] text-sm rounded-xl px-4 py-2.5 outline-none transition-all font-medium"
-                  >
-                    <option value="Africa/Lagos">Africa/Lagos (WAT, GMT+1)</option>
-                    <option value="Africa/Accra">Africa/Accra (GMT)</option>
-                    <option value="Africa/Nairobi">Africa/Nairobi (EAT, GMT+3)</option>
-                    <option value="Africa/Johannesburg">Africa/Johannesburg (SAST, GMT+2)</option>
-                    <option value="Africa/Cairo">Africa/Cairo (EEST, GMT+2)</option>
-                    <option value="Europe/London">Europe/London (BST/GMT)</option>
-                    <option value="Europe/Paris">Europe/Paris (CET, GMT+1)</option>
-                    <option value="America/New_York">America/New_York (EST/EDT)</option>
-                    <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
-                    <option value="Asia/Dubai">Asia/Dubai (GST, GMT+4)</option>
-                    <option value="UTC">UTC (Universal Coordinated Time)</option>
-                  </select>
                 </div>
 
                 <div className="pt-4 flex items-center justify-between border-t border-zinc-100 dark:border-white/10">
@@ -1890,15 +2032,27 @@ export const Settings: React.FC = () => {
                     </p>
                   </div>
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleExportAuditLogs}
-                  className="text-xs whitespace-nowrap"
-                >
-                  <Download className="w-3.5 h-3.5 mr-1.5" />
-                  Export CSV
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fetchLiveAuditLogs(auditPage, auditSearchQuery)}
+                    disabled={isLoadingAuditLogs}
+                    className="text-xs whitespace-nowrap"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isLoadingAuditLogs ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleExportAuditLogs}
+                    className="text-xs whitespace-nowrap"
+                  >
+                    <Download className="w-3.5 h-3.5 mr-1.5" />
+                    Export CSV
+                  </Button>
+                </div>
               </div>
 
               {/* Filters and Search Bar */}
@@ -1909,7 +2063,13 @@ export const Settings: React.FC = () => {
                     type="text"
                     value={auditSearchQuery}
                     onChange={(e) => setAuditSearchQuery(e.target.value)}
-                    placeholder="Search by action, actor name, or IP address..."
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setAuditPage(1);
+                        fetchLiveAuditLogs(1, auditSearchQuery);
+                      }
+                    }}
+                    placeholder="Search by action, actor name, or IP address (press Enter)..."
                     className="w-full pl-9 pr-4 py-2 bg-zinc-50 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 rounded-xl text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-[#E31B23] transition-colors"
                   />
                 </div>
@@ -1918,9 +2078,10 @@ export const Settings: React.FC = () => {
                   {[
                     { id: 'all', label: 'All Events' },
                     { id: 'security', label: 'Security' },
-                    { id: 'credits', label: 'Credits' },
+                    { id: 'events', label: 'Events' },
+                    { id: 'team', label: 'Team & Roles' },
                     { id: 'billing', label: 'Billing & Payout' },
-                    { id: 'events', label: 'Events' }
+                    { id: 'credits', label: 'Credits' }
                   ].map(cat => (
                     <button
                       key={cat.id}
@@ -1928,8 +2089,8 @@ export const Settings: React.FC = () => {
                       onClick={() => setAuditCategoryFilter(cat.id)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                         auditCategoryFilter === cat.id
-                          ? 'bg-zinc-950 text-white'
-                          : 'bg-zinc-100 hover:bg-zinc-200/70 text-zinc-600'
+                          ? 'bg-zinc-950 dark:bg-[#E31B23] text-white'
+                          : 'bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200/70 dark:hover:bg-white/10 text-zinc-600 dark:text-zinc-300'
                       }`}
                     >
                       {cat.label}
@@ -1939,8 +2100,13 @@ export const Settings: React.FC = () => {
               </div>
 
               {/* Audit Table */}
-              <div className="divide-y divide-zinc-100">
-                {filteredAuditLogs.length === 0 ? (
+              <div className="divide-y divide-zinc-100 dark:divide-white/10">
+                {isLoadingAuditLogs && auditLogs.length === 0 ? (
+                  <div className="py-12 text-center text-zinc-500 dark:text-zinc-400 text-xs flex items-center justify-center gap-2">
+                    <RefreshCw className="w-4 h-4 animate-spin text-[#E31B23]" />
+                    <span>Loading audit trail...</span>
+                  </div>
+                ) : filteredAuditLogs.length === 0 ? (
                   <div className="py-12 text-center text-zinc-400 text-xs">
                     No audit log records match your filter criteria.
                   </div>
@@ -1950,10 +2116,10 @@ export const Settings: React.FC = () => {
                       <div className="flex items-start gap-3.5">
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 border ${
                           log.status === 'warning'
-                            ? 'bg-amber-50 text-amber-600 border-amber-200'
+                            ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
                             : log.status === 'info'
-                            ? 'bg-blue-50 text-blue-600 border-blue-200'
-                            : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                            ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20'
+                            : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20'
                         }`}>
                           {log.status === 'warning' ? (
                             <AlertTriangle className="w-4 h-4" />
@@ -1988,6 +2154,44 @@ export const Settings: React.FC = () => {
                   ))
                 )}
               </div>
+
+              {/* Pagination Controls */}
+              {auditTotalPages > 1 && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-zinc-100 dark:border-white/10 text-xs">
+                  <span className="text-zinc-500 dark:text-zinc-400 font-medium">
+                    Showing page <strong className="text-zinc-900 dark:text-white font-bold">{auditPage}</strong> of{' '}
+                    <strong className="text-zinc-900 dark:text-white font-bold">{auditTotalPages}</strong> ({auditTotalCount} total records)
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={auditPage <= 1 || isLoadingAuditLogs}
+                      onClick={() => {
+                        const prev = Math.max(1, auditPage - 1);
+                        fetchLiveAuditLogs(prev, auditSearchQuery);
+                      }}
+                      className="px-3 py-1.5 text-xs cursor-pointer"
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={auditPage >= auditTotalPages || isLoadingAuditLogs}
+                      onClick={() => {
+                        const next = auditPage + 1;
+                        fetchLiveAuditLogs(next, auditSearchQuery);
+                      }}
+                      className="px-3 py-1.5 text-xs cursor-pointer"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
             )}
           </div>
@@ -2023,20 +2227,48 @@ export const Settings: React.FC = () => {
                   onChange={(e) => setDefaultCurrency(e.target.value)}
                 />
 
-                <Select
-                  label="Default Event Timezone"
-                  options={[
-                    { value: 'Africa/Lagos', label: 'Africa/Lagos (GMT+1) - West Africa' },
-                    { value: 'Africa/Accra', label: 'Africa/Accra (GMT+0) - Ghana' },
-                    { value: 'Africa/Nairobi', label: 'Africa/Nairobi (GMT+3) - East Africa' },
-                    { value: 'Africa/Johannesburg', label: 'Africa/Johannesburg (GMT+2) - South Africa' },
-                    { value: 'Europe/London', label: 'Europe/London (GMT+1) - UK' },
-                    { value: 'America/New_York', label: 'America/New_York (GMT-4) - US Eastern' },
-                    { value: 'UTC', label: 'UTC - Universal Coordinated Time' }
-                  ]}
-                  value={normalizeTimezone(timezone) || timezone}
-                  onChange={(e) => setTimezone(normalizeTimezone(e.target.value) || e.target.value)}
-                />
+                <div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                      Preferred Timezone
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-mono font-semibold text-zinc-500 dark:text-zinc-400">
+                        Local: {getTimezonePreview(profileTimezone)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                          if (detected) {
+                            setProfileTimezone(detected);
+                            showNotification(`Detected timezone: ${detected}`, 'info');
+                          }
+                        }}
+                        className="text-[11px] font-bold text-[#E31B23] hover:underline cursor-pointer"
+                      >
+                        Auto-Detect
+                      </button>
+                    </div>
+                  </div>
+                  <select
+                    value={normalizeTimezone(profileTimezone) || profileTimezone}
+                    onChange={(e) => setProfileTimezone(normalizeTimezone(e.target.value) || e.target.value)}
+                    className="w-full bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23] text-sm rounded-xl px-4 py-2.5 outline-none transition-all font-medium text-zinc-900 dark:text-white"
+                  >
+                    {!SUPPORTED_TIMEZONES.some((t) => t.value === (normalizeTimezone(profileTimezone) || profileTimezone)) &&
+                      profileTimezone && (
+                        <option value={normalizeTimezone(profileTimezone) || profileTimezone}>
+                          {normalizeTimezone(profileTimezone) || profileTimezone}
+                        </option>
+                      )}
+                    {SUPPORTED_TIMEZONES.map((tz) => (
+                      <option key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <Select
                   label="Time Presentation Format"
@@ -2367,97 +2599,6 @@ export const Settings: React.FC = () => {
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Feature Flags & Runtime Control Switches */}
-            <div className="bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-white/10 pb-4">
-                <div>
-                  <h3 className="text-base font-black text-zinc-950 dark:text-white tracking-tight flex items-center gap-2">
-                    <Flag className="w-4 h-4 text-[#E31B23]" />
-                    <span>Platform Feature Flags & Runtime Switches</span>
-                  </h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-                    Toggle dynamic feature availability (guest checkout, instant settlements, scanner engines) across your organization and platform sessions.
-                  </p>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    resetFlagOverrides();
-                    showNotification('Feature flags reset to platform defaults.', 'info');
-                  }}
-                  className="text-xs"
-                >
-                  <RefreshCw className="w-3.5 h-3.5 mr-1" />
-                  Reset to Defaults
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(flags).map(([flagKey, isActive]) => {
-                  const meta = FEATURE_FLAG_METADATA[flagKey] || {
-                    key: flagKey,
-                    label: flagKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    description: 'Custom feature toggle switch.',
-                    group: 'experimental',
-                  };
-
-                  return (
-                    <div
-                      key={flagKey}
-                      className="p-5 rounded-2xl bg-zinc-50/70 dark:bg-white/[0.02] border border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 transition-all flex flex-col justify-between space-y-3"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-zinc-200 dark:bg-white/10 text-zinc-700 dark:text-zinc-300">
-                              {meta.group}
-                            </span>
-                            <span className="text-[10px] font-mono text-zinc-400 font-bold">
-                              {flagKey}
-                            </span>
-                          </div>
-                          <h4 className="text-sm font-bold text-zinc-950 dark:text-white">{meta.label}</h4>
-                        </div>
-
-                        {/* Switch */}
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            const next = !isActive;
-                            await setFlagOverride(flagKey, next);
-                            showNotification(`${meta.label} is now ${next ? 'enabled' : 'disabled'}.`, 'success');
-                          }}
-                          className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer flex-shrink-0 ${
-                            isActive ? 'bg-[#E31B23]' : 'bg-zinc-300 dark:bg-zinc-700'
-                          }`}
-                        >
-                          <span
-                            className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${
-                              isActive ? 'left-5.5' : 'left-0.5'
-                            }`}
-                          />
-                        </button>
-                      </div>
-
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
-                        {meta.description}
-                      </p>
-
-                      <div className="flex items-center justify-between text-[11px] font-mono border-t border-zinc-200/60 dark:border-white/10 pt-2.5">
-                        <span className={isActive ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-zinc-400'}>
-                          STATUS: {isActive ? 'ACTIVE' : 'DISABLED'}
-                        </span>
-                        <span className="text-zinc-400 text-[10px]">Client + API Guarded</span>
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
             </div>
           </div>

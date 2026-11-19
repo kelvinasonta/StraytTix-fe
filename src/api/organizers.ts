@@ -35,7 +35,7 @@ export const organizerApi = {
     return data;
   },
 
-  async createOrganization(payload: { name: string; type: 'individual' | 'organization' }): Promise<ApiResponse<Organizer>> {
+  async createOrganization(payload: { name: string; description?: string; bio?: string; email?: string; phone?: string; website?: string; logo?: string; cover_photo?: string }): Promise<ApiResponse<Organizer>> {
     const { data } = await apiClient.post<ApiResponse<Organizer>>('/organizers', payload);
     return data;
   },
@@ -50,7 +50,7 @@ export const organizerApi = {
     return data;
   },
 
-  async updateOrganization(uuid: string, payload: { name: string; type: 'individual' | 'organization'; bio?: string; website?: string; email?: string; phone?: string; logo?: string; logo_url?: string; bannerUrl?: string; banner_url?: string; cover_image?: string; cover_photo?: string; [key: string]: any }): Promise<ApiResponse<Organizer>> {
+  async updateOrganization(uuid: string, payload: { name?: string; bio?: string; website?: string; email?: string; phone?: string; logo?: string; logo_url?: string; bannerUrl?: string; banner_url?: string; cover_image?: string; cover_photo?: string; [key: string]: any }): Promise<ApiResponse<Organizer>> {
     const { data } = await apiClient.put<ApiResponse<Organizer>>(`/organizers/${uuid}`, payload);
     return data;
   },
@@ -146,6 +146,48 @@ export const organizerApi = {
   async saveBankAccount(organizerUuid: string, payload: { bank_name: string; bank_code: string; account_number: string; account_name: string }): Promise<ApiResponse<{ bank_name: string; bank_code: string; account_number: string; account_name: string; is_default: boolean }>> {
     const { data } = await apiClient.post<ApiResponse<{ bank_name: string; bank_code: string; account_number: string; account_name: string; is_default: boolean }>>(`/organizers/${organizerUuid}/bank-account`, payload);
     return data;
-  }
+  },
+
+  // Workspace Audit Logs
+  async getAuditLogs(
+    organizerUuid: string,
+    params?: {
+      page?: number;
+      perPage?: number;
+      search?: string;
+      action?: string;
+      startDate?: string;
+      endDate?: string;
+    }
+  ): Promise<ApiResponse<any>> {
+    const { data } = await apiClient.get<ApiResponse<any>>(`/organizers/${organizerUuid}/audit-logs`, {
+      params,
+    });
+    return data;
+  },
+
+  // Subscription Plan & Fee Tier Management
+  async getSubscription(organizerUuid: string): Promise<ApiResponse<any>> {
+    const { data } = await apiClient.get<ApiResponse<any>>(`/organizers/${organizerUuid}/subscription`);
+    return data;
+  },
+
+  async upgradeSubscription(
+    organizerUuid: string,
+    payload: { plan_tier: 'pro' | 'enterprise'; months?: number; billing_cycle?: 'monthly' | 'annual' }
+  ): Promise<ApiResponse<any>> {
+    const { data } = await apiClient.post<ApiResponse<any>>(`/organizers/${organizerUuid}/subscription/upgrade`, payload);
+    return data;
+  },
+
+  async cancelSubscription(organizerUuid: string): Promise<ApiResponse<any>> {
+    const { data } = await apiClient.post<ApiResponse<any>>(`/organizers/${organizerUuid}/subscription/cancel`);
+    return data;
+  },
+
+  async resumeSubscription(organizerUuid: string): Promise<ApiResponse<any>> {
+    const { data } = await apiClient.post<ApiResponse<any>>(`/organizers/${organizerUuid}/subscription/resume`);
+    return data;
+  },
 };
 

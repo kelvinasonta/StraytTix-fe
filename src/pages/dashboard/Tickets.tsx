@@ -53,18 +53,20 @@ export const Tickets: React.FC = () => {
 
   // Helper to categorize tickets
   const isTicketUpcoming = (ticket: TicketInstance): boolean => {
-    if (ticket.status === 'Upcoming') return true;
-    if (ticket.status === 'Used' || ticket.status === 'Expired' || ticket.status === 'Cancelled') {
+    const status = (ticket.status || '').toLowerCase();
+    if (status === 'used' || status === 'expired' || status === 'cancelled' || status === 'canceled') {
       return false;
     }
-    try {
-      const eventDate = new Date(ticket.eventDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      return eventDate >= today;
-    } catch {
+    if (!ticket.eventDate) {
       return true;
     }
+    const eventDate = new Date(ticket.eventDate);
+    if (isNaN(eventDate.getTime())) {
+      return true;
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return eventDate >= today;
   };
 
   // Split into Upcoming and Past

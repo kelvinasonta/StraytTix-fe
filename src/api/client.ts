@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { tokenStorage } from '../utils/storage';
+import { getUserTimezone } from '../utils/format';
 import type { ApiErrorResponse } from '../types/auth';
 import type { ApiResponse, AuthPayload } from '../types/api';
 
@@ -28,6 +29,10 @@ const isPublicAuthRoute = (url?: string): boolean => {
     '/invitations/accept',
     '/auth/invitations/verify',
     '/invitations/verify',
+    '/auth/google/redirect',
+    '/auth/google/callback',
+    '/auth/callback/google',
+    '/admin/feature-flags',
     '/explore/events',
     '/events',
     '/payments/verify',
@@ -48,6 +53,7 @@ apiClient.interceptors.request.use(
     if (organizerUuid) {
       config.headers['X-Organizer-UUID'] = organizerUuid;
     }
+    config.headers['X-Timezone'] = getUserTimezone();
     return config;
   },
   (error) => Promise.reject(error)
@@ -89,22 +95,14 @@ apiClient.interceptors.response.use(
           }
         } catch (refreshErr) {
           tokenStorage.clearAll();
-          // Never force redirect to login if the user is in public guest flows (checkout, event discovery, etc.)
+          // Only redirect to login with expired=true if the user is currently on an authenticated protected route
           const pathname = window.location.pathname;
-          const isGuestFlow =
-            pathname.startsWith('/login') ||
-            pathname.startsWith('/register') ||
-            pathname.startsWith('/forgot-password') ||
-            pathname.startsWith('/reset-password') ||
-            pathname.startsWith('/verify-email') ||
-            pathname.startsWith('/invitations') ||
-            pathname.startsWith('/checkout') ||
-            pathname.includes('/checkout') ||
-            pathname.startsWith('/events') ||
-            pathname.startsWith('/discover') ||
-            pathname === '/';
+          const isProtectedRoute =
+            pathname.startsWith('/dashboard') ||
+            pathname.startsWith('/organizer') ||
+            (pathname.startsWith('/admin') && pathname !== '/admin/login');
 
-          if (!isGuestFlow) {
+          if (isProtectedRoute) {
             window.location.href = `/login?expired=true`;
           }
           return Promise.reject(refreshErr);
@@ -113,9 +111,13 @@ apiClient.interceptors.response.use(
 
       // Handle 403 EMAIL_VERIFICATION_REQUIRED
       if (status === 403 && response.data && response.data.code === 'EMAIL_VERIFICATION_REQUIRED') {
+        const pathname = window.location.pathname;
         if (
-          !window.location.pathname.startsWith('/verify-email') &&
-          !window.location.pathname.startsWith('/invitations')
+          !pathname.startsWith('/verify-email') &&
+          !pathname.startsWith('/invitations') &&
+          !pathname.startsWith('/login') &&
+          !pathname.startsWith('/register') &&
+          !pathname.startsWith('/reset-password')
         ) {
           window.location.href = '/verify-email/pending';
         }
@@ -290,6 +292,8 @@ export const extractThrottleSeconds = (responseOrError: unknown): number | null 
     data?.cooldown_seconds ?? 
     data?.seconds ?? 
     data?.throttle_seconds ??
+    data?.meta?.retry_after ??
+    data?.meta?.cooldown ??
     data?.data?.retry_after ??
     data?.data?.cooldown;
   if (typeof candidateNumber === 'number' && candidateNumber > 0) {
@@ -300,10 +304,10 @@ export const extractThrottleSeconds = (responseOrError: unknown): number | null 
     if (!isNaN(parsed) && parsed > 0) return parsed;
   }
 
-  // 3. Check message string for numbers e.g. "try again in 718 seconds" or "please wait 60 seconds"
+  // 3. Check message string for numbers e.g. "try again in 718 seconds" or "every 15 minutes"
   const message = data?.message || anyObj?.message || '';
   if (typeof message === 'string') {
-    const match = message.match(/(?:try again in|wait|throttle|available in|cooldown[^\d]*)(\d+)\s*(?:seconds?|s|mins?|minutes?)?/i);
+    const match = message.match(/(?:try again in|wait|throttle|available in|every|cooldown[^\d]*)(\d+)\s*(?:seconds?|s|mins?|minutes?)?/i);
     if (match && match[1]) {
       const num = parseInt(match[1], 10);
       if (!isNaN(num) && num > 0) {

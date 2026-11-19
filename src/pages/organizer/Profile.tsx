@@ -43,7 +43,6 @@ export const Profile: React.FC = () => {
   // Brand Information States
   const [name, setName] = useState(organizer?.name || '');
   const [slug, setSlug] = useState(organizer?.slug || '');
-  const type = organizer?.type || 'organization';
   const [tagline, setTagline] = useState('');
   const [bio, setBio] = useState(organizer?.bio || '');
   const [logo, setLogo] = useState(getOrganizerLogo(organizer));
@@ -188,7 +187,6 @@ export const Profile: React.FC = () => {
       if (organizer?.id) {
         const res = await organizerApi.updateOrganization(organizer.id, {
           name,
-          type: type as 'individual' | 'organization',
           bio,
           logo: resolvedLogo,
           logo_url: resolvedLogo,
@@ -209,7 +207,6 @@ export const Profile: React.FC = () => {
         ...(backendOrg || {}),
         name,
         slug,
-        type,
         bio,
         logo: finalLogo,
         bannerUrl: finalBanner,
@@ -365,7 +362,7 @@ export const Profile: React.FC = () => {
                   <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400">
                     <span className="font-mono text-zinc-800 dark:text-zinc-200 font-bold bg-zinc-100 dark:bg-white/10 px-2 py-0.5 rounded-md">@{slug}</span>
                     <span>•</span>
-                    <span>{type === 'organization' ? 'Company / Agency' : 'Independent Host'}</span>
+                    <span>Organizer Workspace</span>
                     {website && (
                       <>
                         <span>•</span>
@@ -501,24 +498,19 @@ export const Profile: React.FC = () => {
 
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-zinc-50 to-zinc-100/50 dark:from-white/5 dark:to-white/[0.02] border border-zinc-200/80 dark:border-white/10 flex items-start gap-3.5">
                   <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#0F0F14] border border-zinc-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 text-zinc-700 shadow-2xs">
-                    {type === 'organization' ? <Building2 className="w-5 h-5 text-[#E31B23]" /> : <Sparkles className="w-5 h-5 text-[#E31B23]" />}
+                    <Building2 className="w-5 h-5 text-[#E31B23]" />
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <h4 className="text-sm font-bold text-zinc-950 dark:text-white">
-                        {type === 'organization' ? 'Registered Company / Agency Workspace' : 'Independent Creator / Solo Planner'}
+                        Unified Organizer Workspace
                       </h4>
                       <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-zinc-200/80 dark:bg-white/10 text-zinc-700 dark:text-zinc-300">
-                        {type}
+                        Organizer
                       </span>
                     </div>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
-                      {type === 'organization'
-                        ? 'Configured as a Company / Agency account with team collaboration, role permissions, and multi-staff management.'
-                        : 'Configured as an Individual Planner account managed exclusively by a single event operator.'}
-                    </p>
-                    <p className="text-[11px] text-zinc-400 font-medium">
-                      Hosting profile type is permanently bound to this workspace upon account registration and cannot be switched.
+                      Unified event operations container with team collaboration, role-based staff management, tickets, and financial settlement.
                     </p>
                   </div>
                 </div>
@@ -553,7 +545,6 @@ export const Profile: React.FC = () => {
                       try {
                         const res = await organizerApi.updateOrganization(organizer.id, {
                           name: name || organizer.name,
-                          type: (type || organizer.type || 'organization') as any,
                           bio: bio || organizer.bio,
                           logo: resolved,
                           logo_url: resolved,
@@ -590,7 +581,6 @@ export const Profile: React.FC = () => {
                       try {
                         const res = await organizerApi.updateOrganization(organizer.id, {
                           name: name || organizer.name,
-                          type: (type || organizer.type || 'organization') as any,
                           bio: bio || organizer.bio,
                           bannerUrl: resolved,
                           banner_url: resolved,

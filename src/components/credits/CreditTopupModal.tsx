@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
-import { 
-  Sparkles, 
-  Coins, 
-  Check, 
-  ArrowRight, 
-  Loader2, 
-  ShieldCheck, 
+import {
+  Check,
+  ArrowRight,
+  Loader2,
+  ShieldCheck,
   Zap,
-  Info
 } from 'lucide-react';
-import { creditsApi } from '../../api/credits';
+import { creditsApi, type CreditPackageOption } from '../../api/credits';
 import { useNotification } from '../../context/NotificationContext';
 import { useSettings } from '../../context/SettingsContext';
 
@@ -31,33 +28,6 @@ interface PackOption {
   unitPriceDesc: string;
 }
 
-const PRESET_PACKS: PackOption[] = [
-  {
-    id: 'starter',
-    name: 'Starter Pack',
-    credits: 500,
-    priceNgn: 5000,
-    unitPriceDesc: '₦10.00 / credit',
-  },
-  {
-    id: 'growth',
-    name: 'Growth Pack',
-    credits: 2500,
-    priceNgn: 22500,
-    discountBadge: '10% OFF',
-    popular: true,
-    unitPriceDesc: '₦9.00 / credit',
-  },
-  {
-    id: 'pro',
-    name: 'Scale / Pro Pack',
-    credits: 10000,
-    priceNgn: 80000,
-    discountBadge: '20% OFF',
-    unitPriceDesc: '₦8.00 / credit',
-  },
-];
-
 export const CreditTopupModal: React.FC<CreditTopupModalProps> = ({
   isOpen,
   onClose,
@@ -68,19 +38,91 @@ export const CreditTopupModal: React.FC<CreditTopupModalProps> = ({
   const { settings } = useSettings();
   const sitename = settings?.sitename || 'StraytTix';
 
-  const [selectedPack, setSelectedPack] = useState<'starter' | 'growth' | 'pro' | 'custom'>('growth');
+  const [packs, setPacks] = useState<PackOption[]>([]);
+  const [selectedPack, setSelectedPack] = useState<string>('custom');
   const [customCredits, setCustomCredits] = useState<number>(1000);
+  const [ratePerCreditNgn, setRatePerCreditNgn] = useState<number>(10);
+  const [availableGateways, setAvailableGateways] = useState<string[]>([]);
+  const [selectedGateway, setSelectedGateway] = useState<string>('');
+  const [isLoadingConfig, setIsLoadingConfig] = useState<boolean>(false);
+  const [configError, setConfigError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const mapBackendPacks = (raw: CreditPackageOption[]): PackOption[] =>
+    raw.map((p: any) => {
+      const priceNgn = typeof p.price_kobo === 'number'
+        ? p.price_kobo / 100
+        : Number(p.price_ngn || 0);
+      const perCredit = p.credits > 0 ? priceNgn / p.credits : ratePerCreditNgn;
+      return {
+        id: String(p.id),
+        name: p.name,
+        credits: Number(p.credits),
+        priceNgn,
+        discountBadge: p.discount_label ?? p.discount_badge ?? undefined,
+        popular: Boolean(p.is_popular ?? p.popular),
+        unitPriceDesc: p.unit_price_desc || `₦${perCredit.toFixed(2)} / credit`,
+      };
+    });
+
+  const loadConfig = async () => {
+    setIsLoadingConfig(true);
+    setConfigError(null);
+    try {
+      const [configRes, packsRes] = await Promise.all([
+        creditsApi.getTopupConfig(organizerUuid).catch(() => null),
+        creditsApi.getPackages(organizerUuid).catch(() => null),
+      ]);
+
+      const cfg = (configRes as any)?.data?.data ?? (configRes as any)?.data ?? configRes;
+      if (cfg?.rate_per_credit_kobo) {
+        setRatePerCreditNgn(Number(cfg.rate_per_credit_kobo) / 100);
+      }
+      if (Array.isArray(cfg?.gateways) && cfg.gateways.length > 0) {
+        setAvailableGateways(cfg.gateways);
+        setSelectedGateway(cfg.default_gateway || cfg.gateways[0]);
+      }
+
+      const rawPacks =
+        (Array.isArray((packsRes as any)?.data?.data) ? (packsRes as any).data.data : null) ??
+        (Array.isArray((packsRes as any)?.data) ? (packsRes as any).data : null) ??
+        (Array.isArray(packsRes) ? packsRes : null) ??
+        (Array.isArray(cfg?.packages) ? cfg.packages : null);
+
+      if (Array.isArray(rawPacks) && rawPacks.length > 0) {
+        const mapped = mapBackendPacks(rawPacks);
+        setPacks(mapped);
+        const popular = mapped.find((m) => m.popular) || mapped[0];
+        if (popular) setSelectedPack(popular.id);
+      } else {
+        setPacks([]);
+        setSelectedPack('custom');
+        if (!cfg && !packsRes) {
+          setConfigError('Unable to load credit packages from server.');
+        }
+      }
+    } catch {
+      setPacks([]);
+      setSelectedPack('custom');
+      setConfigError('Unable to load credit packages from server.');
+    } finally {
+      setIsLoadingConfig(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    loadConfig();
+  }, [isOpen, organizerUuid]);
 
   // Price calculations
   const calculateTotal = (): { credits: number; priceNgn: number } => {
-    if (selectedPack === 'custom') {
+    if (selectedPack === 'custom' || packs.length === 0) {
       const credits = Math.max(100, customCredits || 100);
-      // Flat rate ₦10/credit for custom
-      const priceNgn = credits * 10;
+      const priceNgn = Math.round(credits * ratePerCreditNgn);
       return { credits, priceNgn };
     }
-    const pack = PRESET_PACKS.find((p) => p.id === selectedPack) || PRESET_PACKS[1];
+    const pack = packs.find((p) => p.id === selectedPack) || packs[0];
     return { credits: pack.credits, priceNgn: pack.priceNgn };
   };
 
@@ -98,6 +140,7 @@ export const CreditTopupModal: React.FC<CreditTopupModalProps> = ({
           amount_credits: currentCredits,
           callback_url: callbackUrl,
           package_id: selectedPack !== 'custom' ? selectedPack : undefined,
+          gateway: selectedGateway || undefined,
         },
         organizerUuid
       );
@@ -135,15 +178,33 @@ export const CreditTopupModal: React.FC<CreditTopupModalProps> = ({
           Credits power attendee email marketing broadcasts, instant SMS notices, custom white-label sender domains, and mobile gate scanner passes.
         </p>
 
-        {/* Preset Packages */}
+        {/* Backend Packages */}
+        {isLoadingConfig ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 animate-pulse">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-36 rounded-2xl bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10" />
+            ))}
+          </div>
+        ) : configError ? (
+          <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex items-center justify-between gap-3 text-xs">
+            <span className="text-amber-800 dark:text-amber-300 font-semibold">{configError}</span>
+            <button
+              type="button"
+              onClick={loadConfig}
+              className="px-3 py-1.5 rounded-lg bg-amber-600 text-white font-bold hover:bg-amber-700 cursor-pointer shrink-0"
+            >
+              Retry
+            </button>
+          </div>
+        ) : packs.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          {PRESET_PACKS.map((pack) => {
+          {packs.map((pack) => {
             const isSelected = selectedPack === pack.id;
             return (
               <button
                 key={pack.id}
                 type="button"
-                onClick={() => setSelectedPack(pack.id as any)}
+                onClick={() => setSelectedPack(pack.id)}
                 className={`relative p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   isSelected
                     ? 'border-[#E31B23] bg-red-500/5 ring-1 ring-[#E31B23] shadow-xs'
@@ -181,6 +242,7 @@ export const CreditTopupModal: React.FC<CreditTopupModalProps> = ({
             );
           })}
         </div>
+        ) : null}
 
         {/* Custom Input Option */}
         <div
@@ -218,17 +280,40 @@ export const CreditTopupModal: React.FC<CreditTopupModalProps> = ({
                   Credits
                 </span>
               </div>
-              <span className="text-[10px] text-zinc-400 mt-1 block">Minimum: 100 Credits (₦10/credit)</span>
+              <span className="text-[10px] text-zinc-400 mt-1 block">Minimum: 100 Credits (₦{ratePerCreditNgn}/credit)</span>
             </div>
 
             <div className="text-right sm:border-l sm:border-zinc-200 dark:sm:border-white/10 sm:pl-4">
               <span className="text-[11px] text-zinc-400 block font-medium">Payable Amount:</span>
               <span className="text-lg font-black text-zinc-950 dark:text-white">
-                ₦{((customCredits || 100) * 10).toLocaleString()} NGN
+                ₦{Math.round((customCredits || 100) * ratePerCreditNgn).toLocaleString()} NGN
               </span>
             </div>
           </div>
         </div>
+
+        {/* Gateway Selector (shown when backend exposes multiple gateways) */}
+        {availableGateways.length > 1 && (
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Payment Gateway</label>
+            <div className="flex flex-wrap gap-2">
+              {availableGateways.map((gw) => (
+                <button
+                  key={gw}
+                  type="button"
+                  onClick={() => setSelectedGateway(gw)}
+                  className={`px-3.5 py-2 rounded-xl border text-xs font-bold capitalize transition-all cursor-pointer ${
+                    selectedGateway === gw
+                      ? 'border-[#E31B23] bg-red-500/10 text-[#E31B23]'
+                      : 'border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'
+                  }`}
+                >
+                  {gw}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Security & Summary Bar */}
         <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 flex items-center justify-between gap-3 text-xs">

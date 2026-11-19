@@ -194,31 +194,43 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
   if (layout === 'cinematic') {
     return (
       <div className="relative group">
+        {/* Ambient Backlight Glow */}
         <div
-          className="absolute -inset-2 rounded-[36px] opacity-25 blur-3xl transition-opacity duration-700 pointer-events-none"
+          className="absolute -inset-3 rounded-[40px] opacity-35 blur-3xl transition-opacity duration-700 pointer-events-none"
           style={{
-            backgroundImage: `radial-gradient(circle at center, #E31B23, #4338CA, transparent 70%)`
+            backgroundImage: `radial-gradient(circle at 25% 50%, #E31B23, rgba(67, 56, 202, 0.45), transparent 72%)`
           }}
         />
 
-        <div className="relative min-h-[380px] sm:min-h-[480px] lg:min-h-[540px] w-full rounded-3xl sm:rounded-[36px] overflow-hidden shadow-2xl border border-white/10 flex flex-col justify-between p-6 sm:p-10 lg:p-12 bg-zinc-950">
+        <div className="relative min-h-[420px] sm:min-h-[500px] lg:min-h-[560px] w-full rounded-3xl sm:rounded-[36px] overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.45)] border border-zinc-200/20 dark:border-white/10 flex flex-col justify-between p-6 sm:p-10 lg:p-12 bg-[#070709]">
+          {/* Full-Bleed Background Media */}
           <img
             src={coverUrl}
             alt={event.title}
-            className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-1000 ease-out"
+            className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-1000 ease-out"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 via-black/20 to-transparent" />
 
-          {/* Top Floating Glass Badges */}
-          <div className="relative z-10 flex items-start justify-between gap-3 flex-wrap">
+          {/* Multi-layered Cinematic Vignette Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-[#070709]/70 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#070709]/90 via-[#070709]/45 to-transparent" />
+          <div
+            className="absolute inset-0 opacity-[0.07] pointer-events-none"
+            style={{
+              backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+              backgroundSize: '24px 24px'
+            }}
+          />
+
+          {/* Top Floating Glass Badges & Action Controls */}
+          <div className="relative z-10 flex items-start justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="px-3.5 py-1.5 rounded-full text-xs font-black tracking-wider uppercase bg-white/90 backdrop-blur-md text-zinc-950 border border-white/40 shadow-xs flex items-center gap-1.5">
+              <span className="px-4 py-1.5 rounded-full text-xs font-black tracking-wider uppercase bg-white/95 backdrop-blur-md text-zinc-950 border border-white/40 shadow-md flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#E31B23]" />
                 <span>{categoryLabel}</span>
               </span>
 
               {isTicketSalesActive ? (
-                <span className="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-[#E31B23] text-white shadow-xs flex items-center gap-1.5">
+                <span className="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-[#E31B23] text-white shadow-lg shadow-[#E31B23]/30 flex items-center gap-1.5">
                   <Flame className="w-3.5 h-3.5 fill-white animate-pulse" />
                   <span>Tickets Available</span>
                 </span>
@@ -228,23 +240,26 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
                 </span>
               ) : null}
 
-              <span className="hidden sm:inline-flex px-3 py-1.5 rounded-full text-xs font-bold bg-black/50 backdrop-blur-md text-zinc-200 border border-white/15">
-                {isPhysical ? (event.venue || 'Venue') : 'Virtual or Online Event'}
-              </span>
+              {event.eventFormat && (
+                <span className="hidden sm:inline-flex px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/10 backdrop-blur-md text-white border border-white/15">
+                  {event.eventFormat}
+                </span>
+              )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <button
                 onClick={onShare}
-                className="w-10 h-10 rounded-full bg-black/45 backdrop-blur-md text-white border border-white/20 hover:bg-white hover:text-zinc-950 transition-all flex items-center justify-center cursor-pointer shadow-md hover:scale-105 active:scale-95"
+                className="h-10 px-3.5 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/20 hover:bg-white hover:text-zinc-950 transition-all flex items-center gap-1.5 cursor-pointer shadow-md hover:scale-105 active:scale-95 text-xs font-bold"
                 title="Share experience"
               >
-                <Share2 className="w-4 h-4" />
+                <Share2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Share</span>
               </button>
 
               <button
                 onClick={onCalendar}
-                className="w-10 h-10 rounded-full bg-black/45 backdrop-blur-md text-white border border-white/20 hover:bg-white hover:text-zinc-950 transition-all flex items-center justify-center cursor-pointer shadow-md hover:scale-105 active:scale-95"
+                className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/20 hover:bg-white hover:text-zinc-950 transition-all flex items-center justify-center cursor-pointer shadow-md hover:scale-105 active:scale-95"
                 title="Add to Calendar"
               >
                 <Calendar className="w-4 h-4" />
@@ -252,7 +267,7 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
 
               <button
                 onClick={onToggleFavorite}
-                className="w-10 h-10 rounded-full bg-black/45 backdrop-blur-md text-white border border-white/20 hover:bg-white hover:text-[#E31B23] transition-all flex items-center justify-center cursor-pointer shadow-md hover:scale-105 active:scale-95"
+                className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/20 hover:bg-white hover:text-[#E31B23] transition-all flex items-center justify-center cursor-pointer shadow-md hover:scale-105 active:scale-95"
                 title="Save to favorites"
               >
                 <Heart className={`w-4 h-4 transition-transform ${favorited ? 'fill-[#E31B23] text-[#E31B23] scale-110' : ''}`} />
@@ -260,33 +275,84 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
             </div>
           </div>
 
-          {/* Bottom Hero Information */}
-          <div className="relative z-10 max-w-4xl space-y-4 pt-16">
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.08]">
-              {event.title}
-            </h1>
+          {/* Bottom Hero Editorial Grid */}
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pt-12">
+            {/* Left 8 Cols: Title, Metadata Pills & Actions */}
+            <div className="lg:col-span-8 space-y-5">
+              {event.organizer?.name && (
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-bold text-zinc-200">
+                  <Building className="w-3.5 h-3.5 text-[#E31B23]" />
+                  <span>Presented by <strong className="text-white">{event.organizer.name}</strong></span>
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                </div>
+              )}
 
-            <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-xs sm:text-sm font-semibold text-zinc-200">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-red-400 flex-shrink-0" />
-                <span>{formatEventDateTime(event.startDate, event.startTime)}</span>
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.05] drop-shadow-sm">
+                {event.title}
+              </h1>
+
+              {/* Glassmorphic Telemetry Chips */}
+              <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.08] backdrop-blur-md border border-white/15 text-xs sm:text-sm font-semibold text-zinc-100">
+                  <Calendar className="w-4 h-4 text-[#E31B23] shrink-0" />
+                  <span>
+                    {formatDate(event.startDate)}
+                    {event.endDate && event.endDate !== event.startDate ? ` — ${formatDate(event.endDate)}` : ''}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.08] backdrop-blur-md border border-white/15 text-xs sm:text-sm font-semibold text-zinc-100">
+                  <Clock className="w-4 h-4 text-[#E31B23] shrink-0" />
+                  <span>
+                    {event.startTime
+                      ? `${event.startTime}${event.endTime ? ` - ${event.endTime}` : ''}${event.timezone ? ` (${event.timezone})` : ''}`
+                      : formatEventDateTime(event.startDate, event.startTime)}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.08] backdrop-blur-md border border-white/15 text-xs sm:text-sm font-semibold text-zinc-100 max-w-full">
+                  <MapPin className="w-4 h-4 text-[#E31B23] shrink-0" />
+                  <span className="truncate">
+                    {isPhysical
+                      ? [event.venue, event.city].filter(Boolean).join(', ') || 'Venue'
+                      : `Online Stream${event.streamProvider ? ` (${event.streamProvider})` : ''}`}
+                  </span>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-red-400 flex-shrink-0" />
-                <span>{isPhysical ? (event.venue || event.city || 'Venue') : 'Online Stream'}</span>
+              {/* Primary CTA Bar */}
+              <div className="pt-2 flex flex-wrap items-center gap-3.5">
+                <button
+                  type="button"
+                  onClick={scrollToTickets}
+                  className="px-8 py-4 bg-gradient-to-r from-[#E31B23] via-[#DC2626] to-[#B91C1C] hover:brightness-110 text-white text-sm sm:text-base font-black rounded-2xl shadow-[0_10px_30px_rgba(227,27,35,0.4)] flex items-center gap-2.5 transition-all cursor-pointer hover:scale-102 active:scale-98"
+                >
+                  <Ticket className="w-4 h-4" />
+                  <span>Get Tickets Now</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onCalendar}
+                  className="px-5 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold text-xs sm:text-sm rounded-2xl border border-white/20 transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <Calendar className="w-4 h-4 text-[#E31B23]" />
+                  <span>Add to Calendar</span>
+                </button>
               </div>
             </div>
 
-            <div className="pt-3">
-              <button
-                type="button"
-                onClick={scrollToTickets}
-                className="px-8 py-3.5 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-sm font-black rounded-2xl shadow-xl hover:shadow-red-600/30 flex items-center gap-2 transition-all cursor-pointer hover:scale-102 active:scale-98"
-              >
-                <Ticket className="w-4 h-4" />
-                <span>Get a Ticket</span>
-              </button>
+            {/* Right 4 Cols: Floating Editorial Poster Frame (Desktop) */}
+            <div className="hidden lg:flex lg:col-span-4 justify-end">
+              <div className="relative w-52 xl:w-60 aspect-[4/5] rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_24px_60px_rgba(0,0,0,0.85)] bg-zinc-900 group-hover:-translate-y-1 transition-all duration-500">
+                <img
+                  src={flyerUrl || coverUrl}
+                  alt={`${event.title} poster`}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 ring-1 ring-inset ring-white/20 rounded-2xl pointer-events-none" />
+              </div>
             </div>
           </div>
         </div>

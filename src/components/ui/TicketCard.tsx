@@ -12,11 +12,18 @@ interface TicketCardProps {
 export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onView }) => {
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'Upcoming': return 'success';
-      case 'Used': return 'default';
-      case 'Expired': return 'warning';
-      case 'Cancelled': return 'error';
-      default: return 'default';
+      case 'Upcoming':
+      case 'Valid':
+        return 'success';
+      case 'Used':
+        return 'default';
+      case 'Expired':
+        return 'warning';
+      case 'Cancelled':
+      case 'Canceled':
+        return 'error';
+      default:
+        return 'success';
     }
   };
 

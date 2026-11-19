@@ -3,7 +3,8 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { authApi } from '../../api/auth';
 import { AuthLayout } from '../../components/layout/AuthLayout';
 import { PasswordStrengthMeter } from '../../components/auth/PasswordStrengthMeter';
-import { getApiErrorMessage } from '../../api/client';
+import { getApiErrorMessage, getValidationErrors } from '../../api/client';
+import { tokenStorage } from '../../utils/storage';
 import { AlertCircle, ArrowLeft, CheckCircle2, Eye, EyeOff, Loader2, ShieldAlert } from 'lucide-react';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
@@ -15,24 +16,37 @@ export const ResetPassword: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [isTokenInvalidOrExpired, setIsTokenInvalidOrExpired] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+    setFieldErrors({});
 
     if (!token) {
+      setIsTokenInvalidOrExpired(true);
       setFormError('Reset token is missing. Please initiate a new recovery request.');
       return;
     }
 
     if (!password || !confirmPassword) {
       setFormError('Please fill out all required fields.');
+      return;
+    }
+
+    if (password.length < 8) {
+      setFormError('Password must be at least 8 characters.');
+      return;
+    }
+
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[\W_]/.test(password)) {
+      setFormError('Password must include uppercase, lowercase, a number, and a special character.');
       return;
     }
 
@@ -45,8 +59,16 @@ export const ResetPassword: React.FC = () => {
 
     try {
       await authApi.resetPassword({ token, password, password_confirmation: confirmPassword });
+      // Clear any stale local session since backend revokes all tokens on password reset
+      tokenStorage.clearAll();
+      localStorage.removeItem('strayttix_active_organizer');
       setIsSuccess(true);
     } catch (err: any) {
+      const code = err.response?.data?.code || err.response?.data?.errorCode;
+      if (code === 'EXPIRED_RESET_TOKEN' || code === 'INVALID_RESET_TOKEN') {
+        setIsTokenInvalidOrExpired(true);
+      }
+      setFieldErrors(getValidationErrors(err));
       setFormError(getApiErrorMessage(err));
     } finally {
       setIsLoading(false);
@@ -83,7 +105,7 @@ export const ResetPassword: React.FC = () => {
     );
   }
 
-  if (!token) {
+  if (!token || isTokenInvalidOrExpired) {
     return (
       <AuthLayout
         title="Invalid recovery link"
@@ -96,7 +118,7 @@ export const ResetPassword: React.FC = () => {
             </div>
             <h3 className="text-base font-bold text-zinc-950 dark:text-white">Missing or expired token</h3>
             <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
-              For security reasons, password recovery tokens expire after 60 minutes. Please request a fresh recovery email.
+              {formError || 'For security reasons, password recovery tokens expire after 30 minutes. Please request a fresh recovery email.'}
             </p>
           </div>
 
@@ -138,7 +160,7 @@ export const ResetPassword: React.FC = () => {
 
           <div className="pt-2">
             <Link
-              to="/login"
+              to="/login?reset=true"
               className="w-full py-3.5 px-4 bg-[#E31B23] hover:bg-[#B91C1C] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs text-center"
             >
               Sign In to StraytTix
@@ -183,6 +205,9 @@ export const ResetPassword: React.FC = () => {
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
+          {fieldErrors['password']?.[0] && (
+            <span className="text-[11px] text-red-600 dark:text-red-400 block">{fieldErrors['password'][0]}</span>
+          )}
           {password && <PasswordStrengthMeter password={password} />}
         </div>
 
